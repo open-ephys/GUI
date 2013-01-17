@@ -1058,7 +1058,7 @@
 		31BDF5E09EB0A9A32E66857E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1 = x86_64;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -1080,7 +1080,7 @@
 		4E274274B609972E0988736B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1 = x86_64;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -1114,14 +1114,14 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					/usr/local/include/freetype2,
-					"$(inherited)",
-					/opt/local/include,
+					"/usr/local/include/**",
+					"/usr/local/include/freetype2/**",
+					"$(inherited)/**",
+					"/opt/local/include/**",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				LIBRARY_SEARCH_PATHS = "/opt/local/lib/**";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_LDFLAGS = (
 					"-lftdi",
@@ -1148,14 +1148,14 @@
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 				);
 				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					/usr/local/include/freetype2,
-					"$(inherited)",
-					/opt/local/include,
+					"/usr/local/include/**",
+					"/usr/local/include/freetype2/**",
+					"$(inherited)/**",
+					"/opt/local/include/**",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				LIBRARY_SEARCH_PATHS = "/opt/local/lib/**";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_64)";
 				OTHER_LDFLAGS = (

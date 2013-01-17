@@ -31,8 +31,21 @@ FileReaderThread::FileReaderThread(SourceNode* sn) : DataThread(sn)
 	//input = file.createInputStream();
     bufferSize = 1600;
 
+    
+            FileChooser chooseFileReaderFile ("Please select the file you want to load...",
+                                   File::getSpecialLocation (File::userHomeDirectory),
+                                   "*");
+    
+            if (chooseFileReaderFile.browseForFileToOpen())
+            {
+                File fileToRead (chooseFileReaderFile.getResult());
+                String fileName(fileToRead.getFullPathName());
+                input =fopen(fileName.String::toCString(), "r");
+            }
+     
+    
 #if JUCE_MAC
-    input = fopen("/Users/Josh/Programming/open-ephys/GUI/Builds/Linux/build/data_stream_16ch_2", "r");
+ //   input = fopen("/Users/Ryan/Brown/GUI/Builds/Linux/build/data_stream_16ch_2", "r");
 #else
     input = fopen("./data_stream_16ch_2","r");
 #endif
