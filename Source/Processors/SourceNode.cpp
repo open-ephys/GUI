@@ -336,9 +336,18 @@ void SourceNode::process(AudioSampleBuffer& buffer,
     //std::cout << "Source node timestamp: " << timestamp << std::endl;
 
     //std::cout << "Samples per buffer: " << nSamples << std::endl;
+	// modify the software timestamp to correspond to the first data sample acquiried...
+	juce::int64 ticksPerSec = timer.getHighResolutionTicksPerSecond();
 
-    uint8 data[8];
+	juce::int64 software_ticks = timer.getHighResolutionTicks();
+	double software_ts_seconds = double(timer.getHighResolutionTicks() ) / double(ticksPerSec);
+	double SamplingRate = getSampleRate();
+	double software_ts_seconds_adjusted = software_ts_seconds-nSamples/SamplingRate;
+	juce::int64 software_ts = software_ts_seconds_adjusted * ticksPerSec;
+	
+    uint8 data[16];
     memcpy(data, &timestamp, 8);
+	memcpy(data+8, &software_ts, 8);
 
     // generate timestamp
     addEvent(events,    // MidiBuffer
@@ -346,7 +355,7 @@ void SourceNode::process(AudioSampleBuffer& buffer,
              0,         // sampleNum
              nodeId,    // eventID
              0,		 // eventChannel
-             8,         // numBytes
+             16,         // numBytes
              data   // data
             );
 

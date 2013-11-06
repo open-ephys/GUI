@@ -91,8 +91,7 @@ private:
     int bufferSize;
 
     String filePath;
-
-    int counter;
+	Time timer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileReader);
 

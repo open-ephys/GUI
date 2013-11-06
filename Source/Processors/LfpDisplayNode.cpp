@@ -204,7 +204,7 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
         // int eventChannel = *(dataptr+3);
 
         // update the timestamp for the current buffer:
-        memcpy(&bufferTimestamp, dataptr+4, 4);
+        memcpy(&bufferTimestamp, dataptr+4, 8);
 
 
 

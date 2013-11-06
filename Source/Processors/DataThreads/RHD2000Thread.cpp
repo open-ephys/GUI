@@ -169,13 +169,14 @@ bool RHD2000Thread::uploadBitfile(String bitfilename)
 {
     
     deviceFound = true;
-    
-    if (!evalBoard->uploadFpgaBitfile(bitfilename.toStdString()))
+    string result;
+    if (!evalBoard->uploadFpgaBitfile(bitfilename.toStdString(), result))
     {
         std::cout << "Couldn't upload bitfile from " << bitfilename << std::endl;
         
         bool response = AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
-                                   "FPGA bitfile not found.",
+								    
+                                   result,
                                     "The rhd2000.bit file was not found in the directory of the executable. Would you like to browse for it?",
                                      "Yes", "No", 0, 0);
         if (response)
@@ -1026,6 +1027,10 @@ bool RHD2000Thread::updateBuffer()
     //cout << "Block size: " << blockSize << endl;
 
     bool return_code;
+
+	if (evalBoard->getNumDataStreams() == 0)
+		return false; // no head stage is connected ?
+
 
     if (evalBoard->numWordsInFifo() >= blockSize)
     {

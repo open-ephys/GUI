@@ -60,7 +60,7 @@ ProcessorList::ProcessorList()
 
     ProcessorListItem* filters = new ProcessorListItem("Filters");
     filters->addSubItem(new ProcessorListItem("Bandpass Filter"));
-    //filters->addSubItem(new ProcessorListItem("Event Detector"));
+    filters->addSubItem(new ProcessorListItem("Network Events"));
     filters->addSubItem(new ProcessorListItem("Spike Detector"));
     //filters->addSubItem(new ProcessorListItem("Resampler"));
     filters->addSubItem(new ProcessorListItem("Phase Detector"));
@@ -71,6 +71,7 @@ ProcessorList::ProcessorList()
     sinks->addSubItem(new ProcessorListItem("LFP Viewer"));
     //sinks->addSubItem(new ProcessorListItem("LFP Trig. Avg."));
     sinks->addSubItem(new ProcessorListItem("Spike Viewer"));
+	sinks->addSubItem(new ProcessorListItem("PSTH"));
     //sinks->addSubItem(new ProcessorListItem("WiFi Output"));
     //sinks->addSubItem(new ProcessorListItem("Arduino Output"));
     // sinks->addSubItem(new ProcessorListItem("FPGA Output"));
@@ -419,7 +420,7 @@ void ProcessorList::mouseDownInCanvas(const MouseEvent& e)
                 colourSelector.setColour(ColourSelector::backgroundColourId, Colours::transparentBlack);
                 colourSelector.setSize(300, 275);
 
-                Rectangle<int> rect = Rectangle<int>(0,0,10,10);
+                juce::Rectangle<int> rect = juce::Rectangle<int>(0,0,10,10);
 
                 CallOutBox callOut(colourSelector, rect, nullptr);
                 callOut.setTopLeftPosition(e.getScreenX(), e.getScreenY());

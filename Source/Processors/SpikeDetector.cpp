@@ -23,8 +23,10 @@
 
 #include <stdio.h>
 #include "SpikeDetector.h"
-
+#include "SpikeSortBoxes.h"
+#include "Visualization\SpikeDetectCanvas.h"
 #include "Channel.h"
+class spikeSorter;
 
 SpikeDetector::SpikeDetector()
     : GenericProcessor("Spike Detector"),
@@ -64,7 +66,8 @@ SpikeDetector::SpikeDetector()
     }
 
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
-
+	channelBuffers=nullptr;
+	PCAbeforeBoxes = true;
 }
 
 SpikeDetector::~SpikeDetector()
@@ -73,17 +76,41 @@ SpikeDetector::~SpikeDetector()
 }
 
 
+
 AudioProcessorEditor* SpikeDetector::createEditor()
 {
     editor = new SpikeDetectorEditor(this, true);
+	
     return editor;
 }
 
 void SpikeDetector::updateSettings()
 {
-
-    if (getNumInputs() > 0)
+	 
+	mut.enter();
+	int numChannels = getNumInputs();
+    if (numChannels > 0)
         overflowBuffer.setSize(getNumInputs(), overflowBufferSize);
+
+	if (channelBuffers != nullptr)
+		delete channelBuffers;
+
+	double SamplingRate = getSampleRate();;
+	double ContinuousBufferLengthSec = 5;
+	channelBuffers = new ContinuousCircularBuffer(numChannels,SamplingRate,1, ContinuousBufferLengthSec);
+	 
+	
+
+	// delete existing histograms
+	
+	/*
+	channelHistograms.clear();
+	// create new histograms
+	for (int k=0;k<numChannels;k++)
+	{
+		channelHistograms.add(new Histogram(-500,500,5, true));
+	}
+	*/
 
     for (int i = 0; i < electrodes.size(); i++)
     {
@@ -95,14 +122,45 @@ void SpikeDetector::updateSettings()
 
         eventChannels.add(ch);
     }
+	mut.exit();
+}
 
+/*
+Electrode::Electrode(PCAcomputingThread *pth)
+{
+	spikePlot = nullptr;
+	computingThread = pth;
+}*/
+
+Electrode::Electrode(PCAcomputingThread *pth, String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate )
+{
+		computingThread = pth;
+
+	name = _name;
+
+    numChannels = _numChannels;
+    prePeakSamples = pre;
+    postPeakSamples = post;
+
+    thresholds = new double[numChannels];
+    isActive = new bool[numChannels];
+    channels = new int[numChannels];
+
+    for (int i = 0; i < numChannels; i++)
+    {
+        channels[i] = _channels[i];
+		thresholds[i] = default_threshold;
+		isActive[i] = true;
+    }
+	spikePlot = nullptr;
+	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
 }
 
 bool SpikeDetector::addElectrode(int nChans)
 {
 
     std::cout << "Adding electrode with " << nChans << " channels." << std::endl;
-
+	mut.enter();
     int firstChan;
 
     if (electrodes.size() == 0)
@@ -117,6 +175,7 @@ bool SpikeDetector::addElectrode(int nChans)
 
     if (firstChan + nChans > getNumInputs())
     {
+		mut.exit();
         return false;
     }
 
@@ -137,46 +196,37 @@ bool SpikeDetector::addElectrode(int nChans)
     newName += electrodeName;
     newName += " ";
     newName += electrodeCounter[nChans];
+	
+	int *channels = new int[nChans];
+	for (int k=0;k<nChans;k++)
+		channels[k] = firstChan+k;
 
-    Electrode* newElectrode = new Electrode();
+	Electrode* newElectrode = new Electrode(&computingThread,newName, nChans,channels, getDefaultThreshold(), 8,32, getSampleRate());
 
-    newElectrode->name = newName;
-    newElectrode->numChannels = nChans;
-    newElectrode->prePeakSamples = 8;
-    newElectrode->postPeakSamples = 32;
-    newElectrode->thresholds = new double[nChans];
-    newElectrode->isActive = new bool[nChans];
-    newElectrode->channels = new int[nChans];
-
-    for (int i = 0; i < nChans; i++)
-    {
-        *(newElectrode->channels+i) = firstChan+i;
-        *(newElectrode->thresholds+i) = getDefaultThreshold();
-        *(newElectrode->isActive+i) = true;
-    }
 
     resetElectrode(newElectrode);
 
     electrodes.add(newElectrode);
-
+	setCurrentElectrodeIndex(electrodes.size()-1);
+	mut.exit();
     return true;
 
 }
 
 float SpikeDetector::getDefaultThreshold()
 {
-    return 50.0f;
+    return -20.0f;
 }
 
 StringArray SpikeDetector::getElectrodeNames()
 {
     StringArray names;
-
+	mut.enter();
     for (int i = 0; i < electrodes.size(); i++)
     {
         names.add(electrodes[i]->name);
     }
-
+	mut.exit();
     return names;
 }
 
@@ -187,44 +237,59 @@ void SpikeDetector::resetElectrode(Electrode* e)
 
 bool SpikeDetector::removeElectrode(int index)
 {
-
+	mut.enter();
     // std::cout << "Spike detector removing electrode" << std::endl;
 
-    if (index > electrodes.size() || index < 0)
-        return false;
-
+    if (index > electrodes.size() || index < 0) {
+        mut.exit();
+		return false;
+	}
     electrodes.remove(index);
+	if (electrodes.size() > 0)
+		currentElectrode = electrodes.size()-1;
+	else
+		currentElectrode = -1;
+	
+	mut.exit();
     return true;
 }
 
 void SpikeDetector::setElectrodeName(int index, String newName)
 {
+	mut.enter();
     electrodes[index-1]->name = newName;
+	mut.exit();
 }
 
 void SpikeDetector::setChannel(int electrodeIndex, int channelNum, int newChannel)
 {
-
+	mut.enter();
     std::cout << "Setting electrode " << electrodeIndex << " channel " << channelNum <<
               " to " << newChannel << std::endl;
 
     *(electrodes[electrodeIndex]->channels+channelNum) = newChannel;
+	mut.exit();
 }
 
 int SpikeDetector::getNumChannels(int index)
 {
-    return electrodes[index]->numChannels;
+	mut.enter();
+    int i=electrodes[index]->numChannels;
+	mut.exit();
+	return i;
 }
 
 int SpikeDetector::getChannel(int index, int i)
 {
-    return *(electrodes[index]->channels+i);
+	mut.enter();
+    int ii=*(electrodes[index]->channels+i);
+	mut.exit();
+	return ii;
 }
 
 
 void SpikeDetector::setChannelActive(int electrodeIndex, int subChannel, bool active)
 {
-
 
     currentElectrode = electrodeIndex;
     currentChannelIndex = subChannel;
@@ -235,31 +300,43 @@ void SpikeDetector::setChannelActive(int electrodeIndex, int subChannel, bool ac
         setParameter(98, 1);
     else
         setParameter(98, 0);
-
+	
+	//getEditorViewport()->makeEditorVisible(this, true, true);
 }
 
 bool SpikeDetector::isChannelActive(int electrodeIndex, int i)
 {
-    return *(electrodes[electrodeIndex]->isActive+i);
+	mut.enter();
+	bool b= *(electrodes[electrodeIndex]->isActive+i);
+	mut.exit();
+	return b;
 }
 
 
 void SpikeDetector::setChannelThreshold(int electrodeNum, int channelNum, float thresh)
 {
+	mut.enter();
     currentElectrode = electrodeNum;
     currentChannelIndex = channelNum;
+	electrodes[electrodeNum]->thresholds[channelNum] = thresh;
+	if (electrodes[electrodeNum]->spikePlot != nullptr)
+		electrodes[electrodeNum]->spikePlot->setDisplayThresholdForChannel(channelNum,thresh);
+	mut.exit();
     setParameter(99, thresh);
 }
 
 double SpikeDetector::getChannelThreshold(int electrodeNum, int channelNum)
 {
-    return *(electrodes[electrodeNum]->thresholds+channelNum);
+    mut.enter();
+	double f= *(electrodes[electrodeNum]->thresholds+channelNum);
+	mut.exit();
+	return f;
 }
 
 void SpikeDetector::setParameter(int parameterIndex, float newValue)
 {
     //editor->updateParameterButtons(parameterIndex);
-
+	mut.enter();
     if (parameterIndex == 99 && currentElectrode > -1)
     {
         *(electrodes[currentElectrode]->thresholds+currentChannelIndex) = newValue;
@@ -271,6 +348,7 @@ void SpikeDetector::setParameter(int parameterIndex, float newValue)
         else
             *(electrodes[currentElectrode]->isActive+currentChannelIndex) = true;
     }
+	mut.exit();
 }
 
 
@@ -278,17 +356,29 @@ bool SpikeDetector::enable()
 {
 
     useOverflowBuffer = false;
+	SpikeDetectorEditor* editor = (SpikeDetectorEditor*) getEditor();
+	 editor->enable();
+	
     return true;
+}
+
+Electrode* SpikeDetector::getActiveElectrode()
+{
+if (electrodes.size() == 0)
+	return nullptr;
+
+return electrodes[currentElectrode];
 }
 
 bool SpikeDetector::disable()
 {
-
+	mut.enter();
     for (int n = 0; n < electrodes.size(); n++)
     {
         resetElectrode(electrodes[n]);
     }
-
+	editor->disable();
+	mut.exit();
     return true;
 }
 
@@ -296,7 +386,7 @@ void SpikeDetector::addSpikeEvent(SpikeObject* s, MidiBuffer& eventBuffer, int p
 {
 
     // std::cout << "Adding spike event for index " << peakIndex << std::endl;
-
+	
     s->eventType = SPIKE_EVENT_CODE;
 
     int numBytes = packSpike(s,                        // SpikeObject
@@ -314,17 +404,23 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
                                              int& electrodeNumber,
                                              int& currentChannel)
 {
+	mut.enter();
     int spikeLength = electrodes[electrodeNumber]->prePeakSamples +
                       + electrodes[electrodeNumber]->postPeakSamples;
+	
+    s->timestamp = hardware_timestamp + peakIndex;
 
-    s->timestamp = timestamp + peakIndex;
-
+	// convert sample offset to software ticks
+	juce::Time timer;
+	int64 ticksPerSec = timer.getHighResolutionTicksPerSecond();
+	float samplesPerSec = 30000;
+	s->timestamp_software = software_timestamp + ticksPerSec*float(peakIndex)/samplesPerSec;
     s->nSamples = spikeLength;
 
     int chan = *(electrodes[electrodeNumber]->channels+currentChannel);
 
     s->gain[currentChannel] = (int)(1.0f / channels[chan]->bitVolts)*1000;
-    s->threshold[currentChannel] = (int) *(electrodes[electrodeNumber]->thresholds+currentChannel); // / channels[chan]->bitVolts * 1000;
+    s->threshold[currentChannel] = (int) electrodes[electrodeNumber]->thresholds[currentChannel]; // / channels[chan]->bitVolts * 1000;
 
     // cycle through buffer
 
@@ -335,7 +431,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
         { 
 
             // warning -- be careful of bitvolts conversion
-            s->data[currentIndex] = uint16(getNextSample(*(electrodes[electrodeNumber]->channels+currentChannel)) / channels[chan]->bitVolts + 32768);
+            s->data[currentIndex] = uint16(getNextSample(electrodes[electrodeNumber]->channels[currentChannel]) / channels[chan]->bitVolts + 32768);
 
             currentIndex++;
             sampleIndex++;
@@ -361,7 +457,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
 
     sampleIndex -= spikeLength; // reset sample index
-
+	mut.exit();
 
 }
 
@@ -369,10 +465,10 @@ void SpikeDetector::handleEvent(int eventType, MidiMessage& event, int sampleNum
 {
 
     if (eventType == TIMESTAMP)
-    {
+	{
         const uint8* dataptr = event.getRawData();
-
-        memcpy(&timestamp, dataptr + 4, 8); // remember to skip first four bytes
+	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
+		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
     }
 
 
@@ -382,13 +478,17 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)
 {
-
+	mut.enter();
+	uint16_t samplingFrequencyHz = 30000;//buffer.getSamplingFrequency();
     // cycle through electrodes
     Electrode* electrode;
     dataBuffer = buffer;
+	
+	//buffer.getSampleData(
 
-    checkForEvents(events); // need to find any timestamp events before extracting spikes
-
+    checkForEvents(events); // find latest's packet timestamps
+	
+	channelBuffers->update(buffer,  hardware_timestamp);
     //std::cout << dataBuffer.getMagnitude(0,nSamples) << std::endl;
 
     for (int i = 0; i < electrodes.size(); i++)
@@ -420,19 +520,37 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
                     int currentChannel = *(electrode->channels+chan);
 
-                    if (-getNextSample(currentChannel) > *(electrode->thresholds+chan)) // trigger spike
-                    {
+					bool bSpikeDetectedPositive  = electrode->thresholds[chan] > 0 &&
+						(-getNextSample(currentChannel) > electrode->thresholds[chan]); // rising edge
+					bool bSpikeDetectedNegative = electrode->thresholds[chan] < 0 &&
+						(-getNextSample(currentChannel) < electrode->thresholds[chan]); // falling edge
+
+                    if  (bSpikeDetectedPositive || bSpikeDetectedNegative)
+                    { 
 
                         //std::cout << "Spike detected on electrode " << i << std::endl;
                         // find the peak
                         int peakIndex = sampleIndex;
 
-                        while (-getCurrentSample(currentChannel) <
-                               -getNextSample(currentChannel) &&
-                               sampleIndex < peakIndex + electrode->postPeakSamples)
-                        {
-                            sampleIndex++;
-                        }
+						if (bSpikeDetectedPositive) 
+						{
+							// find localmaxima
+							while (-getCurrentSample(currentChannel) <
+								-getNextSample(currentChannel) &&
+								   sampleIndex < peakIndex + electrode->postPeakSamples)
+							 {
+							 sampleIndex++;
+							}
+						} else {
+							// find local minimum
+							
+							while (-getCurrentSample(currentChannel) >
+								-getNextSample(currentChannel) &&
+								   sampleIndex < peakIndex + electrode->postPeakSamples)
+							 {
+							 sampleIndex++;
+							}
+						}
 
                         peakIndex = sampleIndex;
                         sampleIndex -= (electrode->prePeakSamples+1);
@@ -441,7 +559,8 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                         newSpike.timestamp = peakIndex;
                         newSpike.source = i;
                         newSpike.nChannels = electrode->numChannels;
-
+						newSpike.samplingFrequencyHz = samplingFrequencyHz;
+						newSpike.color[0] = newSpike.color[1] = newSpike.color[2] = 127;
                         currentIndex = 0;
 
                         // package spikes;
@@ -467,6 +586,26 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                         }
 
                        //for (int xxx = 0; xxx < 1000; xxx++) // overload with spikes for testing purposes
+						electrode->spikeSort->projectOnPrincipalComponents(&newSpike);
+
+						// Add spike to drawing buffer....
+						electrode->spikeSort->sortSpike(&newSpike, PCAbeforeBoxes);
+
+						  // transfer buffered spikes to spike plot
+						if (electrode->spikePlot != nullptr) {
+							if (electrode->spikeSort->isPCAfinished()) 
+							{
+								electrode->spikeSort->resetJobStatus();
+								float p1min,p2min, p1max,  p2max;
+								electrode->spikeSort->getPCArange(p1min,p2min, p1max,  p2max);
+								electrode->spikePlot->setPCARange(p1min,p2min, p1max,  p2max);
+							}
+
+
+							electrode->spikePlot->processSpikeObject(newSpike);
+						}
+
+//						editor->addSpikeToBuffer(newSpike);
                             addSpikeEvent(&newSpike, events, peakIndex);
 
                         // advance the sample index
@@ -477,6 +616,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
                 } // end if channel is active
             } // end cycle through channels on electrode
+
 
         } // end cycle through samples
 
@@ -518,7 +658,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
     }
 
 
-
+	mut.exit();
 }
 
 float SpikeDetector::getNextSample(int& chan)
@@ -669,3 +809,387 @@ void SpikeDetector::loadCustomParametersFromXml()
     ed->checkSettings();
 
 }
+
+
+
+void SpikeDetector::removeSpikePlots()
+{
+	mut.enter();
+    for (int i = 0; i < getNumElectrodes(); i++)
+    {
+        Electrode *ee = electrodes[i];
+		ee->spikePlot = nullptr;
+    }
+	mut.exit();
+}
+
+int SpikeDetector::getNumElectrodes()
+{
+	mut.enter();
+    int i= electrodes.size();
+	mut.exit();
+	return i;
+
+}
+
+int SpikeDetector::getNumberOfChannelsForElectrode(int i)
+{
+	mut.enter();
+    if (i > -1 && i < electrodes.size())
+    {
+		Electrode *ee = electrodes[i];
+		int ii=ee->numChannels;
+		mut.exit();
+		return ii;
+    } else {
+		mut.exit();
+        return 0;
+    }
+}
+
+
+
+String SpikeDetector::getNameForElectrode(int i)
+{
+	mut.enter();
+    if (i > -1 && i < electrodes.size())
+    {
+		Electrode *ee = electrodes[i];
+        String s= ee->name;
+		mut.exit();
+		return s;
+    } else {
+		mut.exit();
+        return " ";
+    }
+}
+
+
+void SpikeDetector::addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i)
+{
+	mut.enter();
+    Electrode *ee = electrodes[i];
+    ee->spikePlot = sp;
+	mut.exit();
+}
+
+int SpikeDetector::getCurrentElectrodeIndex()
+{
+	return currentElectrode;
+}
+
+void SpikeDetector::setCurrentElectrodeIndex(int i)
+{
+	jassert(i >= 0 & i  < electrodes.size());
+	currentElectrode = i;
+}
+/*
+
+
+Histogram::Histogram(float _minValue, float _maxValue, float _resolution, bool _throwOutsideSamples) :  
+	minValue(_minValue), maxValue(_maxValue), resolution(_resolution), throwOutsideSamples(_throwOutsideSamples)
+{
+	numBins = 1+ abs(maxValue-minValue) / resolution;
+	binCounts = new unsigned long[numBins];
+	binCenters = new float[numBins];
+	float deno = (numBins-1)/abs(maxValue-minValue);
+	for (int k=0;k<numBins;k++) 
+	{
+		binCounts[k] = 0;
+		binCenters[k] = minValue + k/deno;
+	}
+}
+//
+//Histogram::Histogram(float _minValue, float _maxValue, int _numBins, bool _throwOutsideSamples) :  
+//	minValue(_minValue), maxValue(_maxValue), numBins(_numBins), throwOutsideSamples(_throwOutsideSamples)
+//{
+//	resolution = abs(maxValue-minValue) / numBins ;
+//	binCounts = new int[numBins];
+//	binCenters = new float[numBins];
+//	for (int k=0;k<numBins;k++) 
+//	{
+//		binCounts[k] = 0;
+//		binCenters[k] = minValue + k/(numBins-1)*resolution;
+//	}
+//
+//}
+
+void Histogram::clear()
+{
+for (int k=0;k<numBins;k++) 
+	{
+		binCounts[k] = 0;
+	}	
+}
+
+
+void Histogram::addSamples(float *Samples, int numSamples) {
+	for (int k=0;k<numSamples;k++) 
+	{
+		int indx = ceil( (Samples[k] - minValue) / (maxValue-minValue) * (numBins-1));
+		if (indx >= 0 && indx < numBins)
+			binCounts[indx]++;
+	}
+}
+
+Histogram::~Histogram() 
+{
+		delete [] binCounts;
+		delete [] binCenters;
+}
+
+	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***********************************/
+/*
+circularBuffer::circularBuffer(int NumCh, int NumSamplesToHoldPerChannel, double SamplingRate)
+{
+            numCh = NumCh;
+            samplingRate = SamplingRate;
+            Buf.resize(numCh);
+			for (int ch=0;ch<numCh;ch++) {
+				Buf[ch].resize(NumSamplesToHoldPerChannel);
+			}
+            BufTS_H.resize(NumSamplesToHoldPerChannel);
+            BufTS_S.resize(NumSamplesToHoldPerChannel);
+            bufLen = NumSamplesToHoldPerChannel;
+            numSamplesInBuf = 0;
+            ptr = 0; // points to a valid position in the buffer.
+}
+
+circularBuffer::~circularBuffer()
+{
+
+}
+
+
+std::vector<double> circularBuffer::getDataArray(int channel, int N)
+{
+	std::vector<double> LongArray;
+	LongArray.resize(N);
+	mut.enter();
+           
+            int p = ptr - 1;
+            for (int k = 0; k < N; k++)
+            {
+                if (p < 0)
+                    p = bufLen - 1;
+                LongArray[k] = Buf[channel][p];
+                p--;
+            }
+            mut.exit();
+            return LongArray;
+}
+
+void circularBuffer::addDataToBuffer(std::vector<std::vector<double>> Data, double SoftwareTS, double HardwareTS)
+{
+	mut.enter();
+	int iNumPoints = Data[0].size();
+	for (int k = 0; k < iNumPoints; k++)
+	{
+		BufTS_H[ptr] = HardwareTS + k;
+		BufTS_S[ptr] = SoftwareTS + k / samplingRate;
+		for (int ch = 0; ch < numCh; ch++)
+		{
+			Buf[ch, ptr] = Data[ch, k];
+		}
+		ptr++;
+
+		if (ptr == bufLen)
+		{
+			ptr = 0;
+		}
+		numSamplesInBuf++;
+		if (numSamplesInBuf >= bufLen)
+		{
+			numSamplesInBuf = bufLen;
+		}
+	}
+	mut.exit();
+}
+
+
+double circularBuffer::findThresholdForChannel(int channel)
+{
+	// Run median on analog input
+	double numSamplesPerSecond = 30000;
+	std::vector<double> LongArray = getDataArray(channel, numSamplesPerSecond*5);
+	
+	for (int k = 0; k < LongArray.size(); k++)
+		LongArray[k] = fabs(LongArray[k]);
+
+	std::sort (LongArray.begin(), LongArray.begin()+LongArray.size());           //(12 32 45 71)26 80 53 33
+
+
+	int Middle = LongArray.size() / 2;
+	double Median = LongArray[Middle];
+	double NewThres = -4.0F * Median / 0.675F;
+
+	return NewThres;
+}
+
+
+/**************************************/
+
+ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer)
+{
+	int NumSamplesToHoldPerChannel = (SamplingRate * NumSecInBuffer / SubSampling);
+	subSampling = SubSampling;
+	samplingRate = SamplingRate;
+	numCh =NumCh;
+	Buf.resize(numCh);
+	for (int k=0;k< numCh;k++)
+	{
+		Buf[k].resize(NumSamplesToHoldPerChannel);
+	}
+
+	TS.resize(NumSamplesToHoldPerChannel);
+	valid.resize(NumSamplesToHoldPerChannel);
+	bufLen = NumSamplesToHoldPerChannel;
+	numSamplesInBuf = 0;
+	ptr = 0; // points to a valid position in the buffer.
+}
+
+void ContinuousCircularBuffer::FindInterval(int saved_ptr, double Bef, double Aft, int &start, int &N)
+{
+	int CurrPtr = saved_ptr;
+	N = 0;
+	while (N < bufLen && N < numSamplesInBuf)
+	{
+		if ((TS[CurrPtr] < Bef) || (TS[CurrPtr] > Aft) || !valid[CurrPtr])
+			break;
+		// Add spike..
+		CurrPtr--;
+		N++;
+		if (CurrPtr < 0)
+			CurrPtr = bufLen - 1;
+	}
+	if (N > 0 && !valid[CurrPtr])
+	{
+		CurrPtr++;
+		if (CurrPtr >= bufLen)
+			CurrPtr = 0;
+	}
+	start = CurrPtr;
+	CurrPtr = saved_ptr;
+	while (N < bufLen && N < numSamplesInBuf)
+	{
+		if ((TS[CurrPtr] < Bef) || (TS[CurrPtr] > Aft) || !valid[CurrPtr])
+			break;
+		// Add spike..
+		CurrPtr++;
+		N++;
+		if (CurrPtr >= bufLen)
+			CurrPtr = 0;
+	}
+	if (N > 0 && !valid[CurrPtr])
+	{
+		CurrPtr--;
+		if (CurrPtr < 0)
+			CurrPtr = bufLen-1;
+	}
+
+}
+/*
+LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double Start_TS, double Align_TS, double End_TS, double BeforeSec, double AfterSec)
+{
+             // gurantee to return to return the first index "start" such that TS[start] < T0-SearchBeforeSec
+             // and TS[end] > T0+SearchAfterSec
+	mut.enter();
+	int N,start;
+	FindInterval(saved_ptr, Start_TS - BeforeSec, End_TS + AfterSec, start, N);
+	LFP_Trial_Data triallfp(numCh, N);
+	int p = start;
+	for (int k = 0; k < N; k++)
+	{
+		triallfp.time[k] = TS[p]-Align_TS;
+		for (int ch = 0; ch < numCh; ch++)
+		{
+			triallfp.data[ch][k] = Buf[ch][p];
+		}
+		p++;
+		if (p >= bufLen)
+			p = 0;
+	}
+	mut.exit();
+	return triallfp;
+}
+*/
+void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts)
+{
+	mut.enter();
+	int numpts = buffer.getNumSamples();
+	
+	
+	for (int k = 0; k < numpts; k+=subSampling)
+	{
+		valid[ptr] = true;
+		for (int ch = 0; ch < numCh; ch++)
+		{
+			Buf[ch][ptr] = *(buffer.getSampleData(ch,k));
+			TS[ptr] = hardware_ts + k;
+		}
+		ptr++;
+		if (ptr == bufLen)
+		{
+			ptr = 0;
+		}
+		numSamplesInBuf++;
+		if (numSamplesInBuf >= bufLen)
+		{
+			numSamplesInBuf = bufLen;
+		}
+	}
+	mut.exit();
+
+
+}
+/*
+void ContinuousCircularBuffer::AddDataToBuffer(std::vector<std::vector<double>> lfp, double soft_ts)
+{
+	mut.enter();
+	int numpts = lfp[0].size();
+	for (int k = 0; k < numpts / subSampling; k++)
+	{
+		valid[ptr] = true;
+		for (int ch = 0; ch < numCh; ch++)
+		{
+			Buf[ch][ptr] = lfp[ch][k];
+			TS[ptr] = soft_ts + (double)(k * subSampling) / samplingRate;
+		}
+		ptr++;
+		if (ptr == bufLen)
+		{
+			ptr = 0;
+		}
+		numSamplesInBuf++;
+		if (numSamplesInBuf >= bufLen)
+		{
+			numSamplesInBuf = bufLen;
+		}
+	}
+	mut.exit();
+}
+*/
+        
+int ContinuousCircularBuffer::GetPtr()
+{
+	return ptr;
+}
+
+/************************************************************/
+
+
+

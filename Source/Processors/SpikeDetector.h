@@ -28,11 +28,16 @@
 
 #include "GenericProcessor.h"
 #include "Editors/SpikeDetectorEditor.h"
-
+#include "SpikeSortBoxes.h"
 #include "Visualization/SpikeObject.h"
+#include <algorithm>    // std::sort
+#include <queue>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 class SpikeDetectorEditor;
-
+class SpikeHistogramPlot;
 /**
 
   Detects spikes in a continuous signal and outputs events containing the spike data.
@@ -41,8 +46,79 @@ class SpikeDetectorEditor;
 
 */
 
-class SpikeDetector : public GenericProcessor
 
+// Implements various spike sorting algorithms.
+// Currently, only box method is implemented.
+// PCA will be added at some point later.
+
+
+/*
+class Histogram {
+public:
+	Histogram(float _minValue, float _maxValue, float _resolution, bool _throwOutsideSamples);
+	//Histogram(float _minValue, float _maxValue, int _numBins, bool _throwOutsideSamples);
+	void addSamples(float *Samples, int numSamples);
+	~Histogram();
+	void clear();
+
+	float minValue, maxValue, resolution;
+	int numBins;
+	bool throwOutsideSamples;
+	unsigned long *binCounts;
+	float *binCenters;
+};
+*/
+
+class PCAjob;
+class PCAcomputingThread;
+
+class Electrode
+{
+	public:
+	//	Electrode(PCAcomputingThread *pth);
+		Electrode(PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
+
+        String name;
+
+        int numChannels;
+        int prePeakSamples, postPeakSamples;
+        int lastBufferIndex;
+
+        int* channels;
+        double* thresholds;
+        bool* isActive;
+		SpikeHistogramPlot* spikePlot;
+		SpikeSortBoxes* spikeSort;
+		PCAcomputingThread *computingThread;
+};
+
+
+class ContinuousCircularBuffer
+{
+public:
+	ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
+	void FindInterval(int saved_ptr, double Bef, double Aft, int &start, int &N);
+//	LFP_Trial_Data GetRelevantData(int saved_ptr, double Start_TS, double Align_TS, double End_TS, double BeforeSec, double AfterSec);
+//	void AddDataToBuffer(std::vector<std::vector<double>> lfp, double soft_ts);
+	void update(AudioSampleBuffer& buffer, int64 hardware_ts);
+	int GetPtr();
+
+	int numCh;
+	int subSampling;
+	float samplingRate;
+	CriticalSection mut;
+	int numSamplesInBuf;
+	int ptr;
+	int bufLen;
+	std::vector<std::vector<float>> Buf;
+	std::vector<bool> valid;
+	std::vector<int64> TS;
+};
+
+
+
+
+class SpikeDetector : public GenericProcessor
 {
 public:
 
@@ -75,6 +151,7 @@ public:
 
     /** Creates the SpikeDetectorEditor. */
     AudioProcessorEditor* createEditor();
+
 
 
     // INTERNAL BUFFERS //
@@ -114,6 +191,8 @@ public:
     /** */
     bool isChannelActive(int electrodeIndex, int channelNum);
 
+
+	Electrode *getActiveElectrode();
     // RETURN STRING ARRAYS //
 
     /** Returns a StringArray containing the names of all electrodes */
@@ -129,6 +208,14 @@ public:
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
 
+	int getNumElectrodes();
+	void removeSpikePlots();
+	int getNumberOfChannelsForElectrode(int i);
+	String getNameForElectrode(int i);
+	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
+	int getCurrentElectrodeIndex();
+	void setCurrentElectrodeIndex(int i);
+
 private:
     /** Reference to a continuous buffer. */
     AudioSampleBuffer& dataBuffer;
@@ -140,7 +227,6 @@ private:
     int sampleIndex;
 
     Array<int> electrodeCounter;
-
     float getNextSample(int& chan);
     float getCurrentSample(int& chan);
     bool samplesAvailable(int& nSamples);
@@ -151,25 +237,14 @@ private:
     int currentChannelIndex;
     int currentIndex;
 
-    struct Electrode
-    {
-
-        String name;
-
-        int numChannels;
-        int prePeakSamples, postPeakSamples;
-        int lastBufferIndex;
-
-        int* channels;
-        double* thresholds;
-        bool* isActive;
-
-    };
 
     uint8_t* spikeBuffer;///[256];
-    int64 timestamp;
+    //int64 timestamp;
+		  int64 hardware_timestamp;
+		  int64 software_timestamp;
 
-    Array<Electrode*> electrodes;
+	bool PCAbeforeBoxes;
+ 	ContinuousCircularBuffer* channelBuffers; // used to compute auto threshold
 
     // void createSpikeEvent(int& peakIndex,
     // 					  int& electrodeNumber,
@@ -185,10 +260,51 @@ private:
                                   int& currentChannel);
 
     void resetElectrode(Electrode*);
-
+	CriticalSection mut;
+	private:
+		   Array<Electrode*> electrodes;
+		   PCAcomputingThread computingThread;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeDetector);
 
 };
+
+
+
+
+/*
+
+class circularBuffer {
+public:
+	circularBuffer(int NumCh, int NumSamplesToHoldPerChannel, double SamplingRate);
+	~circularBuffer();
+	
+	std::vector<double> getDataArray(int channel, int N);
+	double findThresholdForChannel(int channel);
+	void update(AudioSampleBuffer& buffer);
+
+private:
+     CriticalSection mut;
+ 
+	int numCh;
+	int numSamplesInBuf;
+	int ptr;
+	double samplingRate;
+	int bufLen;
+	std::vector<std::vector<double>> Buf;
+	std::vector<double> BufTS_H;
+	std::vector<double> BufTS_S;
+};
+
+
+*/
+
+
+
+
+
+
+
+
 
 
 

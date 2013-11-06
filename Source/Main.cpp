@@ -21,6 +21,9 @@
 
 */
 #ifdef WIN32
+#include "zmq.h"
+#include "zmq_utils.h"
+
 #include <Windows.h>
 #define _MAIN
 #endif

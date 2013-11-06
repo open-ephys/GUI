@@ -22,6 +22,8 @@
 */
 
 #include "SpikeDetectorEditor.h"
+#include "SpikeDisplayEditor.h"
+#include "../Visualization/SpikeDetectCanvas.h"
 #include "../SpikeDetector.h"
 #include "ChannelSelector.h"
 #include "../../UI/EditorViewport.h"
@@ -30,9 +32,11 @@
 
 
 SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
-    : GenericEditor(parentNode, useDefaultParameterEditors), isPlural(true)
+    : VisualizerEditor(parentNode, useDefaultParameterEditors), isPlural(true),spikeDetectorCanvas(nullptr)
 
 {
+	tabText = "Spike Detector";
+	
 
     MemoryInputStream mis(BinaryData::silkscreenserialized, BinaryData::silkscreenserializedSize, false);
     Typeface::Ptr typeface = new CustomTypeface(mis);
@@ -54,7 +58,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     electrodeTypes->setJustificationType(Justification::centredLeft);
     electrodeTypes->addListener(this);
     electrodeTypes->setBounds(65,40,110,20);
-    electrodeTypes->setSelectedId(2);
+    electrodeTypes->setSelectedId(1);
     addAndMakeVisible(electrodeTypes);
 
     electrodeList = new ComboBox("Electrode List");
@@ -135,6 +139,20 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 
 }
 
+/*void SpikeDetectorEditor::addSpikeToBuffer(SpikeObject so) {
+
+
+}*/
+
+Visualizer* SpikeDetectorEditor::createNewCanvas()
+{
+
+    SpikeDetector* processor = (SpikeDetector*) getProcessor();
+    spikeDetectorCanvas = new SpikeDetectCanvas(processor);
+	return spikeDetectorCanvas;
+}
+
+
 SpikeDetectorEditor::~SpikeDetectorEditor()
 {
 
@@ -174,14 +192,14 @@ void SpikeDetectorEditor::sliderEvent(Slider* slider)
 
 void SpikeDetectorEditor::buttonEvent(Button* button)
 {
+	VisualizerEditor::buttonEvent(button);
 
-
-    if (electrodeButtons.contains((ElectrodeButton*) button))
+    if (electrodeButtons.contains((cElectrodeButton*) button))
     {
 
         if (electrodeEditorButtons[0]->getToggleState()) // EDIT is active
         {
-            ElectrodeButton* eb = (ElectrodeButton*) button;
+            cElectrodeButton* eb = (cElectrodeButton*) button;
             int electrodeNum = eb->getChannelNum()-1;
 
             std::cout << "Channel number: " << electrodeNum << std::endl;
@@ -193,14 +211,14 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 
             thresholdSlider->setActive(true);
             thresholdSlider->setValue(processor->getChannelThreshold(electrodeList->getSelectedItemIndex(),
-                                                                     electrodeButtons.indexOf((ElectrodeButton*) button)));
+                                                                     electrodeButtons.indexOf((cElectrodeButton*) button)));
         }
         else
         {
 
             SpikeDetector* processor = (SpikeDetector*) getProcessor();
 
-            ElectrodeButton* eb = (ElectrodeButton*) button;
+            cElectrodeButton* eb = (cElectrodeButton*) button;
             int electrodeNum = electrodeList->getSelectedItemIndex();
             int channelNum = electrodeButtons.indexOf(eb);
 
@@ -335,6 +353,13 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 
 }
 
+void SpikeDetectorEditor::setThresholdValue(int channel, double threshold)
+{
+	thresholdSlider->setActive(true);
+	thresholdSlider->setValue(threshold);
+	repaint();
+}
+
 void SpikeDetectorEditor::channelChanged(int chan)
 {
     //std::cout << "New channel: " << chan << std::endl;
@@ -377,6 +402,8 @@ void SpikeDetectorEditor::refreshElectrodeList()
 
         drawElectrodeButtons(electrodeList->getNumItems()-1);
     }
+	if (spikeDetectorCanvas != nullptr)
+		spikeDetectorCanvas->update();
 }
 
 bool SpikeDetectorEditor::addElectrode(int nChans)
@@ -468,9 +495,9 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
         }
         else
         {
-
+			SpikeDetector* processor = (SpikeDetector*) getProcessor();
             lastId = ID;
-
+			processor->setCurrentElectrodeIndex(ID-1);
             drawElectrodeButtons(ID-1);
 
         }
@@ -482,9 +509,6 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 void SpikeDetectorEditor::checkSettings()
 {
     electrodeList->setSelectedItemIndex(0);
-
-    getEditorViewport()->makeEditorVisible(this, true, true);
-
 }
 
 void SpikeDetectorEditor::drawElectrodeButtons(int ID)
@@ -506,7 +530,7 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
 
     for (int i = 0; i < numChannels; i++)
     {
-        ElectrodeButton* button = new ElectrodeButton(processor->getChannel(ID,i)+1);
+        cElectrodeButton* button = new cElectrodeButton(processor->getChannel(ID,i)+1);
         electrodeButtons.add(button);
 
         thresholds.add(processor->getChannelThreshold(ID,i));
@@ -541,14 +565,54 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
 
     channelSelector->setActiveChannels(activeChannels);
     thresholdSlider->setValues(thresholds);
+	if (spikeDetectorCanvas!=nullptr)
+		spikeDetectorCanvas->update();
 }
+
+
+
+
+void cElectrodeButton::paintButton(Graphics& g, bool isMouseOver, bool isButtonDown)
+{
+    if (getToggleState() == true)
+        g.setColour(Colours::orange);
+    else
+        g.setColour(Colours::darkgrey);
+
+    if (isMouseOver)
+        g.setColour(Colours::white);
+
+    g.fillRect(0,0,getWidth(),getHeight());
+
+    // g.setFont(buttonFont);
+    g.setColour(Colours::black);
+
+    g.drawRect(0,0,getWidth(),getHeight(),1.0);
+
+    if (chan >= 0)
+        g.drawText(String(chan),0,0,getWidth(),getHeight(),Justification::centred,true);
+}
+
+
+void ElectrodeEditorButton::paintButton(Graphics& g, bool isMouseOver, bool isButtonDown)
+{
+    if (getToggleState() == true)
+        g.setColour(Colours::darkgrey);
+    else
+        g.setColour(Colours::lightgrey);
+
+    g.setFont(font);
+
+    g.drawText(name,0,0,getWidth(),getHeight(),Justification::left,true);
+}
+
 
 ThresholdSlider::ThresholdSlider(Font f) : Slider("name"), font(f)
 {
 
     setSliderStyle(Slider::Rotary);
-    setRange(25.0f,400.0f,25.0f);
-    setValue(75.0f);
+    setRange(-400,400.0f,10.0f);
+    setValue(-20.0f);
     setTextBoxStyle(Slider::NoTextBox, false, 40, 20);
 
 }

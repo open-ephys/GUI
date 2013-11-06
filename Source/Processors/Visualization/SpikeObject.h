@@ -60,15 +60,29 @@ struct SpikeObject
 {
 
     uint8_t     eventType;
-    uint64_t    timestamp;
-    uint16_t    source;
+	uint64_t    timestamp;
+	uint64_t    timestamp_software;
+	uint16_t    source;
     uint16_t    nChannels;
     uint16_t    nSamples;
+	uint16_t    sortedId;
+	uint8_t		color[3];
+	float		pcProj[2];
+	uint16_t	samplingFrequencyHz;
     uint16_t    data[MAX_NUMBER_OF_SPIKE_CHANNELS* MAX_NUMBER_OF_SPIKE_CHANNEL_SAMPLES];
     uint16_t    gain[MAX_NUMBER_OF_SPIKE_CHANNELS];
     uint16_t    threshold[MAX_NUMBER_OF_SPIKE_CHANNELS];
 
 };
+
+
+
+float spikeDataIndexToMicrovolts(SpikeObject *s, int index);
+
+float spikeDataBinToMicrovolts(SpikeObject *s, int bin, int ch = 0);
+int microVoltsToSpikeDataBin(SpikeObject *s, float uV, int ch = 0);
+float spikeTimeBinToMicrosecond(SpikeObject *s, int bin, int ch=0);
+int microSecondsToSpikeTimeBin(SpikeObject *s, float t, int ch=0);
 
 /** Simple method for serializing a SpikeObject into a string of bytes, returns true is the packaged spike buffer is valid */
 int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferLength);

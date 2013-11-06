@@ -40,6 +40,8 @@
 #include "SignalGenerator.h"
 #include "SourceNode.h"
 #include "EventDetector.h"
+#include "NetworkEvents.h"
+#include "PeriStimulusTimeHistogramNode.h"
 #include "SpikeDetector.h"
 #include "PhaseDetector.h"
 #include "WiFiOutput.h"
@@ -56,6 +58,8 @@
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
 
+	zmqcontext =  zmq_ctx_new ();
+
     // The ProcessorGraph will always have 0 inputs (all content is generated within graph)
     // but it will have N outputs, where N is the number of channels for the audio monitor
     setPlayConfigDetails(0, // number of inputs
@@ -67,7 +71,11 @@ ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 
 }
 
-ProcessorGraph::~ProcessorGraph() { }
+ProcessorGraph::~ProcessorGraph() {
+	if (zmqcontext != NULL)
+		zmq_ctx_destroy (zmqcontext);
+
+}
 
 
 void ProcessorGraph::createDefaultNodes()
@@ -496,6 +504,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new event detector." << std::endl;
             processor = new EventDetector();
+        } else if (subProcessorType.equalsIgnoreCase("Network Events"))
+        {
+            std::cout << "Creating a new network events detector." << std::endl;
+			processor = new NetworkEvents(zmqcontext);
         }
         else if (subProcessorType.equalsIgnoreCase("Phase Detector"))
         {
@@ -570,6 +582,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a SpikeDisplayNode." << std::endl;
             processor = new SpikeDisplayNode();
+        } 
+        else if (subProcessorType.equalsIgnoreCase("PSTH"))
+        {
+            std::cout << "Creating a PSTH sink." << std::endl;
+            processor = new PeriStimulusTimeHistogramNode();
         }
         else if (subProcessorType.equalsIgnoreCase("WiFi Output"))
         {

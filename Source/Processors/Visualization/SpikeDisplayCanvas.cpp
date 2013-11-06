@@ -1111,7 +1111,7 @@ void ProjectionAxes::calcWaveformPeakIdx(const SpikeObject& s, int d1, int d2, i
 
 void ProjectionAxes::clear()
 {
-    projectionImage.clear(Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+    projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
                           Colours::black);
 
     repaint();

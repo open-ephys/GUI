@@ -24,6 +24,10 @@
 #ifndef __PROCESSORGRAPH_H_124F8B50__
 #define __PROCESSORGRAPH_H_124F8B50__
 
+#include "zmq.h"
+#include "zmq_utils.h"
+
+
 #include "../../JuceLibraryCode/JuceHeader.h"
 
 #include "../AccessClass.h"
@@ -84,7 +88,7 @@ public:
     void setRecordState(bool);
 
 private:
-
+	void* zmqcontext;
     int currentNodeId;
 
     enum nodeIds
@@ -98,6 +102,7 @@ private:
     void createDefaultNodes();
 
     void clearConnections();
+
 
 };
 

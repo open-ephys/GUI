@@ -27,12 +27,76 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
-#include "ElectrodeButtons.h"
+#include "../../UI/UIComponent.h"
+#include "../../UI/DataViewport.h"
+#include "../Visualization/DataWindow.h"
+#include "VisualizerEditor.h"
 
 class TriangleButton;
 class UtilityButton;
+class SpikeDetectCanvas;
+
+/**
+
+  Used to select individual electrodes within a multichannel electrode.
+
+  @see SpikeDetectorEditor.
+
+*/
+
+class cElectrodeButton : public Button
+{
+public:
+    cElectrodeButton(int chan_) : Button("Electrode"), chan(chan_)
+    {
+        setClickingTogglesState(true);
+        //setRadioGroupId(299);
+        setToggleState(true, false);
+    }
+    ~cElectrodeButton() {}
+
+    int getChannelNum()
+    {
+        return chan;
+    }
+    void setChannelNum(int i)
+    {
+        chan = i;
+    }
 
 
+private:
+    void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);
+
+    int chan;
+};
+
+/**
+
+  Utility button for the SpikeDetectorEditor.
+
+  @see SpikeDetectorEditor
+
+*/
+
+class ElectrodeEditorButton : public Button
+{
+public:
+    ElectrodeEditorButton(const String& name_, Font font_) : Button("Electrode Editor"),
+        name(name_), font(font_)
+    {
+        if (name.equalsIgnoreCase("edit") || name.equalsIgnoreCase("monitor"))
+            setClickingTogglesState(true);
+    }
+    ~ElectrodeEditorButton() {}
+private:
+    void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);
+
+    const String name;
+
+    Font font;
+
+};
 
 /**
 
@@ -78,7 +142,7 @@ private:
 
 */
 
-class SpikeDetectorEditor : public GenericEditor,
+class SpikeDetectorEditor : public VisualizerEditor,
     public Label::Listener,
     public ComboBox::Listener
 
@@ -94,8 +158,10 @@ public:
     void channelChanged(int chan);
 
     bool addElectrode(int nChans);
-
+	Visualizer* createNewCanvas();
     void checkSettings();
+	void setThresholdValue(int chan, double threshold);
+    OwnedArray<cElectrodeButton> electrodeButtons;
 
 private:
 
@@ -113,10 +179,9 @@ private:
 
     ThresholdSlider* thresholdSlider;
 
-    OwnedArray<ElectrodeButton> electrodeButtons;
     Array<ElectrodeEditorButton*> electrodeEditorButtons;
-
-
+	
+	SpikeDetectCanvas *spikeDetectorCanvas;
     void removeElectrode(int index);
     void editElectrode(int index, int chan, int newChan);
 

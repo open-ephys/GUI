@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include "time.h"
 
+#define MIN(a,b)((a)<(b)?(a):(b))
+#define MAX(a,b)((a)<(b)?(b):(a))
+
 // Simple method for serializing a SpikeObject into a string of bytes
 int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
 {
@@ -43,6 +46,9 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
 
     memcpy(buffer+idx, &(s->timestamp), 8);
     idx += 8;
+	
+	memcpy(buffer+idx, &(s->timestamp_software), 8);
+    idx += 8;
 
     memcpy(buffer+idx, &(s->source), 2);
     idx +=2;
@@ -53,6 +59,23 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
     memcpy(buffer+idx, &(s->nSamples), 2);
     idx +=2;
 
+    memcpy(buffer+idx, &(s->sortedId), 2);
+    idx +=2;
+	memcpy(buffer+idx, &(s->color[0]), 1);
+    idx +=1;
+	memcpy(buffer+idx, &(s->color[1]), 1);
+    idx +=1;
+	memcpy(buffer+idx, &(s->color[2]), 1);
+    idx +=1;
+
+	memcpy(buffer+idx, &(s->pcProj[0]), sizeof(float));
+    idx +=sizeof(float);
+
+	memcpy(buffer+idx, &(s->pcProj[1]), sizeof(float));
+    idx +=sizeof(float);
+
+	memcpy(buffer+idx, &(s->samplingFrequencyHz), 2);
+    idx +=2;
     memcpy(buffer+idx, &(s->data), s->nChannels * s->nSamples * 2);
     idx += s->nChannels * s->nSamples * 2;
 
@@ -95,6 +118,9 @@ bool unpackSpike(SpikeObject* s, const uint8_t* buffer, int bufferSize)
     memcpy(&(s->timestamp), buffer+idx, 8);
     idx += 8;
 
+    memcpy(&(s->timestamp_software), buffer+idx, 8);
+    idx += 8;
+
     memcpy(&(s->source), buffer+idx, 2);
     idx += 2;
 
@@ -122,7 +148,31 @@ bool unpackSpike(SpikeObject* s, const uint8_t* buffer, int bufferSize)
         return false;
     }
 
-    memcpy(&(s->data), buffer+idx, s->nChannels * s->nSamples * 2);
+
+	
+    memcpy(&(s->sortedId), buffer+idx, 2);
+    idx +=2;
+
+	
+  memcpy(&(s->color[0]), buffer+idx, 1);
+    idx +=1;
+  memcpy(&(s->color[1]), buffer+idx, 1);
+    idx +=1;
+  memcpy(&(s->color[2]), buffer+idx, 1);
+    idx +=1;
+
+	
+
+	 memcpy(&(s->pcProj[0]), buffer+idx, sizeof(float));
+    idx +=sizeof(float);
+	 memcpy(&(s->pcProj[1]), buffer+idx, sizeof(float));
+    idx +=sizeof(float);
+
+    memcpy(&(s->samplingFrequencyHz), buffer+idx, 2);
+    idx +=2;
+
+
+	memcpy(&(s->data), buffer+idx, s->nChannels * s->nSamples * 2);
     idx += s->nChannels * s->nSamples * 2;
 
     memcpy(&(s->gain), buffer+idx, s->nChannels * 2);
@@ -257,15 +307,21 @@ void generateEmptySpike(SpikeObject* s, int nChannels)
     s->eventType = SPIKE_EVENT_CODE;
     s->timestamp = 0;
     s->source = 0;
-    s->nChannels = 4;
-    s->nSamples = 32;
+    s->nChannels = 1;
+    s->nSamples = 40;
+
+	s->samplingFrequencyHz = 30000;
+	s->sortedId = 0;
+	s->color[0] = s->color[1] = s->color[2] = 128;
+	s->pcProj[0] = s->pcProj[1] = 0;
+
 
     int idx = 0;
-    for (int i=0; i<4; i++)
+    for (int i=0; i<s->nChannels; i++)
     {
         s->gain[i] = 0;
         s->threshold[i] = 0;
-        for (int j=0; j<32; j++)
+        for (int j=0; j<s->nSamples; j++)
         {
             s->data[idx] = 0;
             idx = idx+1;
@@ -286,3 +342,41 @@ void printSpike(SpikeObject* s)
         std::cout<<s->data+i<<" ";
     std::cout<<std::endl;
 }
+
+float spikeDataBinToMicrovolts(SpikeObject *s, int bin, int ch)
+{
+	return  float(s->data[bin+ch*s->nSamples]-32768)/float(s->gain[ch])*1000.0f;
+}
+
+
+float spikeDataIndexToMicrovolts(SpikeObject *s, int index)
+{
+	return  float(s->data[index]-32768)/float(s->gain[index / s->nSamples])*1000.0f;
+}
+
+
+
+int microVoltsToSpikeDataBin(SpikeObject *s, float uV, int ch)
+{
+    return uV/1000.0f*float(s->gain[ch])+32768;
+}
+
+
+
+
+float spikeTimeBinToMicrosecond(SpikeObject *s, int bin, int ch)
+{
+	float spikeTimeSpan = 1.0f/s->samplingFrequencyHz * s->nSamples * 1e6;
+	return float(bin)/(s->nSamples-1) * spikeTimeSpan;
+}
+
+int microSecondsToSpikeTimeBin(SpikeObject *s, float t, int ch)
+{
+	// Lets say we have 32 samples per wave form
+
+	// t = 0 corresponds to the left most index.
+	float spikeTimeSpan = (1.0f/s->samplingFrequencyHz * s->nSamples)*1e6;
+	return MIN(s->nSamples-1, MAX(0,t/spikeTimeSpan * (s->nSamples-1)));
+}
+
+
