@@ -1635,7 +1635,8 @@ void PCAjob::computeCov()
 		mean[j] = 0;
 		for (int i=0;i<spikes.size();i++) 
 		{
-			float v = spikeDataIndexToMicrovolts(&spikes[i], j) ;
+            SpikeObject spike = spikes[i];
+			float v = spikeDataIndexToMicrovolts(&spike, j) ;
 			mean[j] += v / dim;
 		}
 	}
@@ -1650,8 +1651,9 @@ void PCAjob::computeCov()
 			for (int k=0;k<spikes.size();k++) 
 			{
 
-				float vi = spikeDataIndexToMicrovolts(&spikes[k], i);
-				float vj = spikeDataIndexToMicrovolts(&spikes[k], j);
+                SpikeObject spike = spikes[k];
+				float vi = spikeDataIndexToMicrovolts(&spike, i);
+				float vj = spikeDataIndexToMicrovolts(&spike, j);
 				sum += (vi-mean[i]) * (vj-mean[j]);
 			}
 			cov[i][j] = sum / (dim-1); 
@@ -1715,8 +1717,9 @@ void PCAjob::computeSVD()
 		float sum1 = 0, sum2=0;
 		for (int k=0;k<dim;k++)
 		{
-			sum1+= spikeDataIndexToMicrovolts(&spikes[j],k) * pc1[k];
-			sum2+= spikeDataIndexToMicrovolts(&spikes[j],k) * pc2[k];
+            SpikeObject spike = spikes[j];
+			sum1 += spikeDataIndexToMicrovolts(&spike,k) * pc1[k];
+			sum2 += spikeDataIndexToMicrovolts(&spike,k) * pc2[k];
 		}
 		if (sum1 < min1)
 			min1 = sum1;

@@ -42,8 +42,8 @@ public:
 	PointD(float x, float y);
 	PointD(const PointD &P);
 	const PointD operator+(const PointD &c1) const;
-	PointD& PointD::operator+=(const PointD &rhs);
-	PointD& PointD::operator-=(const PointD &rhs);
+	PointD& operator+=(const PointD &rhs);
+	PointD& operator-=(const PointD &rhs);
 
 
 	const PointD operator-(const PointD &c1) const;
@@ -71,8 +71,8 @@ public:
 class Histogram
 {
 public:
-	Histogram::Histogram(int N, double T0, double T1);
-	Histogram::~Histogram();
+	Histogram(int N, double T0, double T1);
+	~Histogram();
 
 	std::vector<int> getCounter();
 	void reset();
@@ -88,7 +88,7 @@ public:
 class RunningStats
 {
 public:
-	RunningStats::RunningStats();
+	RunningStats();
 	void reset();
 	Histogram* getHistogram();
 	std::vector<double> getMean(int index);

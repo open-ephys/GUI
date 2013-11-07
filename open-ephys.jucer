@@ -11,7 +11,8 @@
               companyName="Open Ephys" userNotes="The Open Ephys GUI was designed to provide a fast and flexible interface for acquiring, processing, and visualizing data from extracellular electrodes. See open-ephys.org for more information.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="JuceLibraryCode" extraLinkerFlags="" objCExtraSuffix="fea2mT">
+               juceFolder="JuceLibraryCode" extraLinkerFlags="-lzmq" objCExtraSuffix="fea2mT"
+               externalLibraries="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
@@ -224,6 +225,29 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <FILE id="yQDif2" name="NetworkEventsEditor.cpp" compile="1" resource="0"
+              file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
+        <FILE id="YH6DNs" name="NetworkEventsEditor.h" compile="0" resource="0"
+              file="Source/Processors/Editors/NetworkEventsEditor.h"/>
+        <FILE id="a44Scj" name="SpikeDetectCanvas.cpp" compile="1" resource="0"
+              file="Source/Processors/Visualization/SpikeDetectCanvas.cpp"/>
+        <FILE id="z1167X" name="SpikeDetectCanvas.h" compile="0" resource="0"
+              file="Source/Processors/Visualization/SpikeDetectCanvas.h"/>
+        <FILE id="tIrGei" name="NetworkEvents.cpp" compile="1" resource="0"
+              file="Source/Processors/NetworkEvents.cpp"/>
+        <FILE id="USW3Zh" name="NetworkEvents.h" compile="0" resource="0" file="Source/Processors/NetworkEvents.h"/>
+        <FILE id="moy6rV" name="PeriStimulusTimeHistogramNode.cpp" compile="1"
+              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.cpp"/>
+        <FILE id="JND6oQ" name="PeriStimulusTimeHistogramNode.h" compile="0"
+              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.h"/>
+        <FILE id="KL8wYd" name="SpikeSortBoxes.cpp" compile="1" resource="0"
+              file="Source/Processors/SpikeSortBoxes.cpp"/>
+        <FILE id="G03Bw9" name="SpikeSortBoxes.h" compile="0" resource="0"
+              file="Source/Processors/SpikeSortBoxes.h"/>
+        <FILE id="v3DP8J" name="TrialCircularBuffer.cpp" compile="1" resource="0"
+              file="Source/Processors/TrialCircularBuffer.cpp"/>
+        <FILE id="DjK560" name="TrialCircularBuffer.h" compile="0" resource="0"
+              file="Source/Processors/TrialCircularBuffer.h"/>
         <FILE id="E7s1De" name="LfpTriggeredAverageNode.cpp" compile="1" resource="0"
               file="Source/Processors/LfpTriggeredAverageNode.cpp"/>
         <FILE id="MKL66o" name="LfpTriggeredAverageNode.h" compile="0" resource="0"

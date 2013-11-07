@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "SpikeDetector.h"
 #include "SpikeSortBoxes.h"
-#include "Visualization\SpikeDetectCanvas.h"
+#include "Visualization/SpikeDetectCanvas.h"
 #include "Channel.h"
 class spikeSorter;
 
@@ -1041,7 +1041,7 @@ double circularBuffer::findThresholdForChannel(int channel)
 }
 
 
-/**************************************/
+//**************************************/
 
 ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer)
 {

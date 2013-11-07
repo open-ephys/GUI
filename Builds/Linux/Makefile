@@ -63,6 +63,12 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/NetworkEventsEditor_fd22826.o \
+  $(OBJDIR)/SpikeDetectCanvas_a3370a31.o \
+  $(OBJDIR)/NetworkEvents_28b3b762.o \
+  $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
+  $(OBJDIR)/SpikeSortBoxes_e42a3d04.o \
+  $(OBJDIR)/TrialCircularBuffer_93e57770.o \
   $(OBJDIR)/LfpTriggeredAverageNode_ff52d7b9.o \
   $(OBJDIR)/FileReader_18023b0e.o \
   $(OBJDIR)/ChannelMappingNode_d9219b9c.o \
@@ -282,6 +288,36 @@ $(OBJDIR)/State_22979684.o: ../../Source/Dsp/State.cpp
 $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/NetworkEventsEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkEventsEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/SpikeDetectCanvas_a3370a31.o: ../../Source/Processors/Visualization/SpikeDetectCanvas.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling SpikeDetectCanvas.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkEvents_28b3b762.o: ../../Source/Processors/NetworkEvents.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkEvents.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o: ../../Source/Processors/PeriStimulusTimeHistogramNode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PeriStimulusTimeHistogramNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/SpikeSortBoxes_e42a3d04.o: ../../Source/Processors/SpikeSortBoxes.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling SpikeSortBoxes.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/TrialCircularBuffer_93e57770.o: ../../Source/Processors/TrialCircularBuffer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling TrialCircularBuffer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/LfpTriggeredAverageNode_ff52d7b9.o: ../../Source/Processors/LfpTriggeredAverageNode.cpp
