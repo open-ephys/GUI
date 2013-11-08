@@ -1451,6 +1451,7 @@ PCAProjectionAxes::PCAProjectionAxes(SpikeDetector *p) : processor(p),GenericDra
 	rangeDownButton->addListener(this);
 	addAndMakeVisible(rangeDownButton);
 
+    redrawSpikes = true;
 
 }
 
@@ -1560,7 +1561,26 @@ void PCAProjectionAxes::paint(Graphics& g)
 		g.drawLine(drawnPolygon.front().X,drawnPolygon.front().Y,drawnPolygon.back().X,drawnPolygon.back().Y);
 		}
 	}
-
+    
+    //Graphics im(projectionImage);
+    
+    if (redrawSpikes)
+    {
+	// recompute image
+	int w = getWidth();
+	int h = getHeight();
+	projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+                          Colours::black);
+    
+    bool subsample = false;
+	int dk = (subsample) ? 5 : 1;
+    
+	for (int k=0;k<bufferSize;k+=dk)
+	{
+		drawProjectedSpike(spikeBuffer[k]);
+	}
+        redrawSpikes = false;
+    }
 
 }
 
@@ -1570,8 +1590,7 @@ void PCAProjectionAxes::drawProjectedSpike(SpikeObject s)
 	if (rangeSet) 
 	{
 		Graphics g(projectionImage);
-
-	
+        
 		g.setColour(juce::Colour::Colour(s.color[0],s.color[1],s.color[2]));
 		
 		float x = (s.pcProj[0] - pcaMin[0]) / (pcaMax[0]-pcaMin[0]) * rangeX;
@@ -1583,22 +1602,23 @@ void PCAProjectionAxes::drawProjectedSpike(SpikeObject s)
 
 void PCAProjectionAxes::redraw(bool subsample)
 {
-	Graphics g(projectionImage);
-
-	// recompute image
-	int w = getWidth();
-	int h = getHeight();
-	projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
-                          Colours::black);
-
-	int dk = (subsample) ? 5 : 1;
-
-	for (int k=0;k<bufferSize;k+=dk)
-	{
-		drawProjectedSpike(spikeBuffer[k]);
-	}
+//	Graphics g(projectionImage);
+//
+//	// recompute image
+//	int w = getWidth();
+//	int h = getHeight();
+//	projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+//                          Colours::black);
+//
+//	int dk = (subsample) ? 5 : 1;
+//
+//	for (int k=0;k<bufferSize;k+=dk)
+//	{
+//		drawProjectedSpike(spikeBuffer[k]);
+//	}
 	
 }
+
 void PCAProjectionAxes::setPCARange(float p1min, float p2min, float p1max, float p2max)
 {
 	
@@ -1607,7 +1627,9 @@ void PCAProjectionAxes::setPCARange(float p1min, float p2min, float p1max, float
 	pcaMax[0] = p1max;
 	pcaMax[1] = p2max;
 	rangeSet = true;
-	redraw(false);
+    
+    redrawSpikes = true;
+
 }
 
 bool PCAProjectionAxes::updateSpikeData(const SpikeObject& s)
@@ -1624,8 +1646,8 @@ bool PCAProjectionAxes::updateSpikeData(const SpikeObject& s)
         spikeBuffer.set(spikeIndex, newSpike);
 
         spikesReceivedSinceLastRedraw++;
-        drawProjectedSpike(newSpike);
-
+        //drawProjectedSpike(newSpike);
+        redrawSpikes = true;
 		
     }
     return true;
@@ -1641,8 +1663,8 @@ void PCAProjectionAxes::clear()
     spikeBuffer.clear();
     spikeIndex = 0;
 
-
-    repaint();
+    redrawSpikes = true;
+    //repaint();
 }
 
 
@@ -1704,8 +1726,8 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 			// draw polygon
 			prevx = event.x;
 			prevy = event.y;
-
-			redraw(true);
+            
+            redrawSpikes = true;
 		}
 	
 	} else 
@@ -1727,7 +1749,8 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 
 void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 {
-	redraw(false);
+    repaint();
+	//redraw(false);
 	setMouseCursor(MouseCursor::NormalCursor);
 	if 	(updateProcessor)
 	{

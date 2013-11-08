@@ -339,6 +339,8 @@ private:
 	std::vector<PCAUnit> units;
 	int isOverUnit;
 	PCAUnit drawnUnit;
+    
+    bool redrawSpikes;
 };
 
 
