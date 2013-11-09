@@ -66,6 +66,7 @@ struct SpikeObject
     uint16_t    nChannels;
     uint16_t    nSamples;
 	uint16_t    sortedId;
+	uint16_t    electrodeID;
 	uint8_t		color[3];
 	float		pcProj[2];
 	uint16_t	samplingFrequencyHz;

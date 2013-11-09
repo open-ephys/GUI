@@ -30,20 +30,20 @@
       </CONFIGURATIONS>
     </LINUX_MAKE>
     <VS2012 targetFolder="Builds/VisualStudio2012" libraryType="1" juceFolder="JuceLibraryCode/modules"
-            extraDefs="NOMINMAX" externalLibraries="setupapi.lib&#10;opengl32.lib&#10;glu32.lib&#10;">
+            extraDefs="NOMINMAX" externalLibraries="setupapi.lib&#10;opengl32.lib&#10;glu32.lib&#10;libzmq-v110-mt-3_2_2.lib&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Debug\bin"
-                       headerPath="" libraryPath="" postbuildCommand="copy ..\..\Resources\DLLs\okFrontPanel.dll .\Debug\bin"/>
+                       isDebug="1" optimisation="1" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Debug\bin"
+                       headerPath="" libraryPath="../../Resources/ZeroMQ/lib_x86" postbuildCommand="copy ..\..\Resources\DLLs\okFrontPanel.dll .\Debug\bin"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="2" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Release\bin"
-                       headerPath="" libraryPath="" postbuildCommand="copy ..\..\Resources\DLLs\okFrontPanel.dll .\Release\bin"/>
-        <CONFIGURATION name="Debug64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Debug64\bin"
-                       headerPath="" libraryPath="" postbuildCommand="copy ..\..\Resources\DLLs\Win64\okFrontPanel.dll .\Debug64\bin"/>
-        <CONFIGURATION name="Release64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="2" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Release64\bin"
-                       headerPath="" libraryPath="" postbuildCommand="copy ..\..\Resources\DLLs\Win64\okFrontPanel.dll .\Release64\bin"/>
+                       isDebug="0" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Release\bin"
+                       headerPath="" libraryPath="../../Resources/ZeroMQ/lib_x86" postbuildCommand="copy ..\..\Resources\DLLs\okFrontPanel.dll .\Release\bin"/>
+        <CONFIGURATION name="Debug64" winWarningLevel="2" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Debug64\bin"
+                       headerPath="" libraryPath="../../Resources/ZeroMQ/lib_x64" postbuildCommand="post_build_commands_x64debug.bat"/>
+        <CONFIGURATION name="Release64" winWarningLevel="2" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2012\Release64\bin"
+                       headerPath="" libraryPath="../../Resources/ZeroMQ/lib_x64" postbuildCommand="post_build_commands_x64release.bat"/>
       </CONFIGURATIONS>
     </VS2012>
   </EXPORTFORMATS>
@@ -229,10 +229,6 @@
               file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
         <FILE id="YH6DNs" name="NetworkEventsEditor.h" compile="0" resource="0"
               file="Source/Processors/Editors/NetworkEventsEditor.h"/>
-        <FILE id="a44Scj" name="SpikeDetectCanvas.cpp" compile="1" resource="0"
-              file="Source/Processors/Visualization/SpikeDetectCanvas.cpp"/>
-        <FILE id="z1167X" name="SpikeDetectCanvas.h" compile="0" resource="0"
-              file="Source/Processors/Visualization/SpikeDetectCanvas.h"/>
         <FILE id="tIrGei" name="NetworkEvents.cpp" compile="1" resource="0"
               file="Source/Processors/NetworkEvents.cpp"/>
         <FILE id="USW3Zh" name="NetworkEvents.h" compile="0" resource="0" file="Source/Processors/NetworkEvents.h"/>
@@ -322,6 +318,10 @@
                 resource="0" file="Source/Processors/Visualization/LfpTriggeredAverageCanvas.cpp"/>
           <FILE id="OPRWvZ" name="LfpTriggeredAverageCanvas.h" compile="0" resource="0"
                 file="Source/Processors/Visualization/LfpTriggeredAverageCanvas.h"/>
+          <FILE id="twzEfE" name="SpikeDetectCanvas.cpp" compile="1" resource="0"
+                file="Source/Processors/Visualization/SpikeDetectCanvas.cpp"/>
+          <FILE id="ykdLuM" name="SpikeDetectCanvas.h" compile="0" resource="0"
+                file="Source/Processors/Visualization/SpikeDetectCanvas.h"/>
           <FILE id="ajAJi" name="SpikeObject.cpp" compile="1" resource="0" file="Source/Processors/Visualization/SpikeObject.cpp"/>
           <FILE id="xqF5zL" name="SpikeObject.h" compile="0" resource="0" file="Source/Processors/Visualization/SpikeObject.h"/>
           <FILE id="jGEqDp" name="SpikeDisplayCanvas.cpp" compile="1" resource="0"
@@ -354,6 +354,10 @@
                 file="Source/Processors/Editors/ElectrodeButtons.h"/>
           <FILE id="wyH6Hs" name="LfpTriggeredAverageEditor.cpp" compile="1"
                 resource="0" file="Source/Processors/Editors/LfpTriggeredAverageEditor.cpp"/>
+          <FILE id="bYPZSW" name="PeriStimulusTimeHistogramEditor.cpp" compile="1"
+                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp"/>
+          <FILE id="KZCAEr" name="PeriStimulusTimeHistogramEditor.h" compile="0"
+                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.h"/>
           <FILE id="GE3VJI" name="LfpTriggeredAverageEditor.h" compile="0" resource="0"
                 file="Source/Processors/Editors/LfpTriggeredAverageEditor.h"/>
           <FILE id="g1ki17" name="ChannelMappingEditor.cpp" compile="1" resource="0"
@@ -542,6 +546,8 @@
               file="Source/UI/MessageCenter.cpp"/>
         <FILE id="Gwnvgdy" name="MessageCenter.h" compile="0" resource="0"
               file="Source/UI/MessageCenter.h"/>
+        <FILE id="s4fXpP" name="LogWindow.cpp" compile="1" resource="0" file="Source/UI/LogWindow.cpp"/>
+        <FILE id="BxUkyY" name="LogWindow.h" compile="0" resource="0" file="Source/UI/LogWindow.h"/>
         <FILE id="we1JIPz" name="ControlPanel.cpp" compile="1" resource="0"
               file="Source/UI/ControlPanel.cpp"/>
         <FILE id="rCft9Ec" name="ControlPanel.h" compile="0" resource="0" file="Source/UI/ControlPanel.h"/>

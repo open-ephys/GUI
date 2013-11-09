@@ -27,20 +27,16 @@
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "Editors/SpikeDisplayEditor.h"
 #include "Editors/VisualizerEditor.h"
+#include "NetworkEvents.h"
 #include "GenericProcessor.h"
 #include "Visualization/SpikeObject.h"
+#include "TrialCircularBuffer.h"
+#include <queue>
+#include <vector>
 
 class DataViewport;
 class SpikePlot;
-
-/**
-
- Takes in MidiEvents and extracts SpikeObjects from the MidiEvent buffers.
- Those Events are then held in a queue until they are pulled by the SpikeDisplayCanvas.
-
-  @see GenericProcessor, SpikeDisplayEditor, SpikeDisplayCanvas
-
-*/
+class TrialCircularBuffer;
 
 class PeriStimulusTimeHistogramNode :  public GenericProcessor
 {
@@ -50,6 +46,10 @@ public:
     ~PeriStimulusTimeHistogramNode();
 
     AudioProcessorEditor* createEditor();
+	
+	
+
+	std::vector<String> splitString(String S, char sep);
 
     bool isSink()
     {
@@ -58,7 +58,7 @@ public:
 
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 
-    void setParameter(int, float);
+    
 
     void handleEvent(int, MidiMessage&, int);
 
@@ -77,49 +77,14 @@ public:
     void addSpikePlotForElectrode(SpikePlot* sp, int i);
     void removeSpikePlots();
 
-    bool checkThreshold(int, float, SpikeObject&);
-
+	TrialCircularBuffer *trialCircularBuffer;
+  
 private:
-
-    struct Electrode
-    {
-        String name;
-
-        int numChannels;
-
-        Array<float> displayThresholds;
-        Array<float> detectorThresholds;
-
-        Array<SpikeObject> mostRecentSpikes;
-        int currentSpikeIndex;
-
-        SpikePlot* spikePlot;
-
-        FILE* file;
-
-    };
-
-    Array<Electrode> electrodes;
+	StringTS unpackStringTS(MidiMessage &event);
 
     int displayBufferSize;
     bool redrawRequested;
 
-    // methods for recording:
-    void openFile(int index);
-    void closeFile(int index);
-    void writeSpike(const SpikeObject& s, int index);
-    String generateHeader(int index);
-
-    // members for recording
-    bool isRecording;
-    bool signalFilesShouldClose;
-    RecordNode* recordNode;
-    String baseDirectory;
-    File dataDirectory;
-    uint8_t* spikeBuffer;
-    SpikeObject currentSpike;
-    
-    CriticalSection* diskWriteLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramNode);
 

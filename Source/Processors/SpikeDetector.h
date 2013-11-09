@@ -29,6 +29,7 @@
 #include "GenericProcessor.h"
 #include "Editors/SpikeDetectorEditor.h"
 #include "SpikeSortBoxes.h"
+#include "NetworkEvents.h"
 #include "Visualization/SpikeObject.h"
 #include <algorithm>    // std::sort
 #include <queue>
@@ -75,8 +76,7 @@ class PCAcomputingThread;
 class Electrode
 {
 	public:
-	//	Electrode(PCAcomputingThread *pth);
-		Electrode(PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
+		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
 
         String name;
 
@@ -84,6 +84,10 @@ class Electrode
         int prePeakSamples, postPeakSamples;
         int lastBufferIndex;
 
+		String advancerID;
+		float *channelsDepthOffset;
+
+		int electrodeID;
         int* channels;
         double* thresholds;
         bool* isActive;
@@ -116,7 +120,7 @@ public:
 };
 
 
-
+class StringTS;
 
 class SpikeDetector : public GenericProcessor
 {
@@ -153,6 +157,10 @@ public:
     AudioProcessorEditor* createEditor();
 
 
+	
+	void addNetworkEventToQueue(StringTS S);
+
+	void postEventsInQueue(MidiBuffer& events);
 
     // INTERNAL BUFFERS //
 
@@ -215,8 +223,13 @@ public:
 	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
 	int getCurrentElectrodeIndex();
 	void setCurrentElectrodeIndex(int i);
+	StringTS createStringTS(String S);
+	uint64 getExtrapolatedHardwareTimestamp(uint64 softwareTS);
+	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 
 private:
+	int uniqueID;
+	std::queue<StringTS> eventQueue;
     /** Reference to a continuous buffer. */
     AudioSampleBuffer& dataBuffer;
 

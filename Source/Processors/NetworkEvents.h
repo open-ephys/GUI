@@ -24,8 +24,8 @@
 #ifndef __NETWORKEVENT_H_91811541__
 #define __NETWORKEVENT_H_91811541__
 
-#include "zmq.h"
-#include "zmq_utils.h"
+#include "../../Resources/ZeroMQ/include/zmq.h"
+#include "../../Resources/ZeroMQ/include/zmq_utils.h"
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "GenericProcessor.h"
@@ -44,16 +44,51 @@
 class StringTS
 {
 public:
-	StringTS(unsigned char *buf, int _len, juce::uint64 ts) : len(_len),timestamp(ts)  {
+	StringTS()
+	{
+		
+		str = nullptr;
+		len= 0;
+		timestamp = 0;
+	}
+
+	String getString()
+	{
+		
+		return String((const char*)str,len);
+	}
+	StringTS(String S)
+	{
+		Time t;
+		str = new uint8[S.length()];
+		memcpy(str,S.toRawUTF8(),S.length());
+		timestamp = t.getHighResolutionTicks();
+
+		len = S.length();
+	}
+
+	StringTS(String S, uint64 ts_software)
+	{
+		str = new uint8[S.length()];
+		memcpy(str,S.toRawUTF8(),S.length());
+		timestamp = ts_software;
+
+		len = S.length();
+	}
+
+	StringTS(const StringTS &s)
+	{
+		str = new uint8[s.len];
+		memcpy(str,s.str,s.len);
+		timestamp = s.timestamp;
+		len = s.len;
+	}
+
+
+	StringTS(unsigned char *buf, int _len, uint64 ts_software) : len(_len),timestamp(ts_software) {
 		str = new juce::uint8[len];
 		for (int k=0;k<len;k++)
 			str[k] = buf[k];
-	}
-	uint8* packWithTS() {
-		uint8* tmp = new uint8[len+8];
-		memcpy(tmp,str,len);
-		memcpy(tmp+len,&timestamp,8);
-		return tmp;
 	}
 
 	~StringTS() {
@@ -71,15 +106,21 @@ public:
     NetworkEvents(void *zmq_context);
     ~NetworkEvents();
 	AudioProcessorEditor* createEditor();
-
+	uint64 getExtrapolatedHardwareTimestamp(uint64 softwareTS);
+	void initSimulation();
+	void simulateDesignAndTrials(juce::MidiBuffer& events);
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
     void setParameter(int parameterIndex, float newValue);
 	void run();
 	void opensocket();
  
+	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 private:
 	   void handleEvent(int eventType, MidiMessage& event, int samplePos);
 
+	   int64 hardware_timestamp;
+	   int64 software_timestamp;
+	   StringTS createStringTS(String S, int64 t);
 	void *zmqcontext;
     float threshold;
     float bufferZone;
@@ -88,6 +129,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkEvents);
 	std::queue<StringTS> networkMessagesQueue;
 	bool threadRunning ;
+
+	std::queue<StringTS> simulation;
+	uint64 simulationStartTime;
+	bool firstTime ;
 };
 
 #endif  // __NETWORKEVENT_H_91811541__

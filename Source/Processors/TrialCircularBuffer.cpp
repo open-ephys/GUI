@@ -27,21 +27,729 @@
 #include "Channel.h"
 #include <string>
 
+
+
+
+/******************************/
+ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post) : conditionID(ID), preSecs(pre), 
+	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1)
+{
+	// allocate data for 1 ms resolution bins to cover trials 
+	timeSpanSecs=preSecs + postSecs + maxTrialTimeSec;
+	numBins = (timeSpanSecs) * 1000.0f / binResolutionMS; // 1 ms resolution
+	avgFiringRateHz.resize(numBins);
+	numDataPoints.resize(numBins);
+	binTime.resize(numBins);
+	
+	for (int k = 0; k < numBins; k++)
+	{
+		numDataPoints[k] = 0;
+		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
+		avgFiringRateHz[k] = 0;
+	}
+
+}
+
+ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
+{
+	conditionID = c.conditionID;
+	postSecs = c.postSecs;
+	preSecs = c.preSecs;
+	numTrials = c.numTrials;
+	maxTrialTimeSec  = c.maxTrialTimeSec;
+	binResolutionMS = c.binResolutionMS;
+	numBins = c.numBins;
+	avgFiringRateHz=c.avgFiringRateHz;
+	numDataPoints=c.numDataPoints;
+	timeSpanSecs = c.timeSpanSecs;
+}
+
+
+void ConditionPSTH::clear()
+{
+	numTrials= 0;
+}
+
+void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
+{
+	Time t;
+	float ticksPerSec =t.getHighResolutionTicksPerSecond();
+	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, preSecs, postSecs);
+	std::vector<float> instantaneousSpikesRate;
+	instantaneousSpikesRate.resize(numBins);
+	for (int k = 0; k < numBins; k++)
+	{
+		instantaneousSpikesRate[k] = 0;
+	}
+
+	for (int k=0;k<alignedSpikes.size();k++)
+	{
+		// spike times are aligned relative to trial alignment (i.e.) , onset is at "0"
+		// convert ticks back to seconds, then to bins.
+		float spikeTimeSec = float(alignedSpikes[k]) / ticksPerSec;
+		int binIndex = (spikeTimeSec + preSecs) / timeSpanSecs * numBins;
+		if (binIndex >= 0 && binIndex < numBins)
+		{
+			instantaneousSpikesRate[binIndex] += 1.0;
+		}
+	}
+
+	float lastUpdateTS = ((int64)trial->endTS-(int64)trial->alignTS) / ticksPerSec + postSecs;
+	int lastBinIndex = (lastUpdateTS + preSecs) / timeSpanSecs * numBins;
+
+	numTrials++;
+	// Update average firing rate, up to when the trial ended. 
+	for (int k = 0; k < lastBinIndex; k++)
+	{
+		numDataPoints[k]++;
+		avgFiringRateHz[k] = ((numDataPoints[k] - 1) * avgFiringRateHz[k] + instantaneousSpikesRate[k]) / numDataPoints[k];
+	}
+}
+
+/***********************/
+Condition::Condition()
+{
+	conditionID = 0;
+}
+
+Condition::Condition(const Condition &c)
+{
+       name = c.name;
+	   colorRGB[0] = c.colorRGB[0];
+	   colorRGB[1] = c.colorRGB[1];
+	   colorRGB[2] = c.colorRGB[2];
+	   trialTypes = c.trialTypes;
+	   trialOutcomes = c.trialOutcomes;
+	   postSec = c.postSec;
+	   preSec = c.preSec;
+	   visible = c.visible;
+	   conditionID = c.conditionID;
+}
+
+Condition::Condition(std::vector<String> items)
+{
+	 int k=1; // skip the addcontision in location 0
+	 name = "Unknown";
+	 colorRGB[0] = 255;
+ 	 colorRGB[1] = 255;
+     colorRGB[2] = 255;
+	 postSec = preSec = 0.5;
+	 conditionID = 0;
+
+	 visible = true;
+	 bool bTrialTypes = false;
+	 bool bOutcomes = false;
+
+	 while (k < items.size())
+	 {
+		 String lower_item = items[k].toLowerCase();
+		 if (lower_item == "") {
+			 k++;
+			 continue;
+		 }
+
+		 if (lower_item == "name")
+		 {
+			 bTrialTypes = false;
+			 bOutcomes = false;
+			 k++;
+			 name = items[k];
+			 k++;
+			 continue;
+		 }
+		 if (lower_item == "visible")
+		 {
+			 bTrialTypes = false;
+			 bOutcomes = false;
+			 k++;
+			 visible = items[k].getIntValue() > 0;
+			 k++;
+			 continue;
+		 }
+		 if (lower_item == "trialtypes")
+		 {
+			 k++;
+			 bTrialTypes = true;
+			 bOutcomes = false;
+			 continue;
+		 }
+		  if (lower_item == "outcomes")
+		 {
+			 k++;
+			 bTrialTypes = false;
+			 bOutcomes = true;
+			 continue;
+		 }
+		 if (bOutcomes)
+		 {
+			 trialOutcomes.push_back(items[k].getIntValue());
+			 k++;
+		 } else  if (bTrialTypes) {
+			 trialTypes.push_back(items[k].getIntValue());
+			 k++;
+		 } else {
+			 // unknown parameter!
+			 // skip ?
+			 k++;
+		 }
+
+	 }
+}
+
+Condition::Condition(String Name, std::vector<int> types, std::vector<int> outcomes, double _postSec, double _preSec)
+{
+       name = Name;
+       colorRGB[0] = colorRGB[1] = colorRGB[2] = 255;
+       trialTypes = types;
+       trialOutcomes = outcomes;
+	   postSec = _postSec;
+	   preSec = _preSec;
+       visible = true;
+}
+
+/**********************************************/
+UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory):  unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory)
+{
+
+}
+
+void UnitPSTHs::addTrialStartToSmartBuffer(Trial *t)
+{
+	spikeBuffer.addTrialStartToBuffer(t);
+}
+
+void UnitPSTHs::clearStatistics()
+{
+	for (int k=0;k<conditionPSTHs.size();k++)
+	{
+		conditionPSTHs[k].clear();
+	}
+}
+
+void UnitPSTHs::addSpikeToBuffer(uint64 spikeTimestampSoftware)
+{
+	spikeBuffer.addSpikeToBuffer(spikeTimestampSoftware);
+}
+
+
+void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial* trial)
+{
+	for (int k=0;k<conditionPSTHs.size();k++) {
+		for (int j=0;j<conditionsNeedUpdating.size();j++) 
+		{
+			if (conditionPSTHs[k].conditionID == conditionsNeedUpdating[j]) 
+			{
+				// this condition needs to be updated.
+				conditionPSTHs[k].updatePSTH(&spikeBuffer, trial);
+			}
+		}
+	}
+
+}
+
+/********************/
+Trial::Trial()
+{
+	outcome = type = -1;
+	trialInProgress = false;
+	trialID = startTS = alignTS = endTS = 0;
+}
+
+Trial::Trial(const Trial &t)
+{
+	outcome = t.outcome;
+	type = t.type;
+	trialID = t.trialID;
+	startTS = t.startTS;
+	alignTS = t.alignTS;
+	endTS = t.endTS;
+	trialInProgress = t.trialInProgress;
+}
 /***************************/
-class ContinuousCircularBuffer;
+ElectrodePSTH::ElectrodePSTH(int ID) : electrodeID(ID)
+{
 
-template <class T> class thread_safe_queue {
-  public:
-	 int size();
-	 T front();
-	 T pop();
-	 void push(const T& t);
-	 void lock();
-	 void release();
+}
+/*************************/
+SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, int _maxTrialsInMemory)
+{
+	int MaxFiringRateHz = 300;
+	maxTrialsInMemory = _maxTrialsInMemory;
+	bufferSize = MaxFiringRateHz * maxTrialTimeSeconds * maxTrialsInMemory;
 
-	  CriticalSection c;
-	  std::queue<T> q;
-};
+	bufferIndex = 0;
+	trialIndex = 0;
+	numSpikesStored = 0;
+	numTrialsStored = 0;
+	spikeTimesSoftware.resize(bufferSize);
+
+	for (int k=0;k<bufferSize;k++)
+		spikeTimesSoftware[k] = 0;
+
+	trialID.resize(maxTrialsInMemory);
+	pointers.resize(maxTrialsInMemory);
+	for (int k=0;k<maxTrialsInMemory;k++)
+	{
+		trialID[k] = pointers[k] = 0;
+	}
+
+}
+
+void SmartSpikeCircularBuffer::addSpikeToBuffer(uint64 spikeTimeSoftware)
+{
+	spikeTimesSoftware[bufferIndex] = spikeTimeSoftware;
+	bufferIndex = (bufferIndex+1) % bufferSize;
+	numSpikesStored++;
+	if (numSpikesStored>bufferSize)
+		numSpikesStored=numSpikesStored;
+}
+
+
+void SmartSpikeCircularBuffer::addTrialStartToBuffer(Trial *t)
+{
+	trialID[trialIndex] = t->trialID;
+	pointers[trialIndex] = bufferIndex;
+	trialIndex = (trialIndex+1) % maxTrialsInMemory;
+	numTrialsStored++;
+	if (numTrialsStored > maxTrialsInMemory)
+		numTrialsStored = numTrialsStored;
+}
+
+int SmartSpikeCircularBuffer::queryTrialStart(int ID)
+{
+	for (int k=0;k<numTrialsStored;k++) 
+	{
+		int whereToLook = trialIndex-1-k;
+		if (whereToLook < 0)
+			whereToLook += maxTrialsInMemory;
+
+		if (trialID[whereToLook] == ID)
+			return pointers[whereToLook];
+	}
+	// trial not found?!!?!?
+	return -1;
+}
+
+
+
+std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, float preSecs, float postSecs)
+{
+	// we need to update the average firing rate with the spikes that were stored in the spike buffer.
+	// first, query spike buffer where does the trial start....
+	std::vector<int64> alignedSpikes;
+	Time t;
+	uint64 numTicksPreTrial =preSecs * t.getHighResolutionTicksPerSecond(); 
+	uint64 numTicksPostTrial =postSecs * t.getHighResolutionTicksPerSecond();
+	int saved_ptr = queryTrialStart(trial->trialID);
+	if (saved_ptr < 0)
+		return alignedSpikes; // trial is not in memory??!?
+
+
+	// return all spikes within a given interval aligned to AlignTS
+	// Use ptr as a search reference in the buffer
+	// The interval is defined as Start_TS-BeforeSec .. End_TS+AfterSec
+
+	// Search Backward
+	int CurrPtr = saved_ptr;
+	int  N = 0;
+	while (N < numSpikesStored)
+	{
+		if (spikeTimesSoftware[CurrPtr] < trial->startTS-numTicksPreTrial || spikeTimesSoftware[CurrPtr] > trial->endTS+numTicksPostTrial) 
+			break;
+		// Add spike..
+		alignedSpikes.push_back((int64)spikeTimesSoftware[CurrPtr]-(int64)trial->alignTS);
+		CurrPtr--;
+		N++;
+		if (CurrPtr < 0)
+			CurrPtr = bufferSize-1;
+	}
+	// Now Search Forward
+	CurrPtr = saved_ptr + 1;
+
+	while (N < numSpikesStored)
+	{
+		if (CurrPtr >= bufferSize)
+			CurrPtr = 0;
+
+		if (spikeTimesSoftware[CurrPtr] > trial->endTS + numTicksPostTrial || CurrPtr==bufferIndex)
+			break;
+		// Add spike..
+		if (spikeTimesSoftware[CurrPtr] - trial->startTS >= -numTicksPreTrial)
+		{
+			alignedSpikes.push_back((int64)spikeTimesSoftware[CurrPtr] - (int64)trial->alignTS);
+			N++;
+		}
+		CurrPtr++;
+
+	}
+	std::sort(alignedSpikes.begin(),alignedSpikes.begin()+alignedSpikes.size());
+	return alignedSpikes;
+}
+
+/**********************/
+
+TrialCircularBuffer::~TrialCircularBuffer()
+{
+
+}
+
+TrialCircularBuffer::TrialCircularBuffer(PeriStimulusTimeHistogramNode *p) : processor(p)
+{
+	Time t;
+	maxTrialTimeSeconds = 10.0;
+	MaxTrialTimeTicks = t.getHighResolutionTicksPerSecond() * maxTrialTimeSeconds;
+	conditionCounter = 0;
+	addDefaultTTLconditions = false;
+	postSec =  preSec = 0.5;
+	trialCounter = 0;
+	maxTrialsInMemory = 200;
+	/*
+	numTrials = 0;
+	numCh = 16;
+	numTTLch = 16;
+	int SamplingRate = 30000;
+	TTL_Trial_Length_Sec = 1;
+	TTL_Trial_Inhibition_Sec = 1;
+	AfterSec = 0.5;
+	BeforeSec = 0.5;
+
+	AfterSec = 0.5;
+	BeforeSec = 0.5;
+
+	int SubSampling = 10; // 2.5 kHz is more than enough for LFP...
+
+    spikeBuffer.resize(numCh);
+//	lfpBuffer = new ContinuousCircularBuffer(numCh, SamplingRate, SubSampling, 2*MAX_TRIAL_TIME_SEC);
+
+    lastTTLtrialTS.resize(numTTLch);
+    for (int k = 0; k < numTTLch; k++)
+    {
+		lastTTLtrialTS[k] = 0;
+    }
+
+    //AddDefaultTTLConditions();
+
+//	startThread();
+*/
+}
+
+
+
+std::vector<String> TrialCircularBuffer::splitString(String S, char sep)
+{
+	std::list<String> ls;
+	String  curr;
+	for (int k=0;k < S.length();k++) {
+		if (S[k] != sep) {
+			curr+=S[k];
+		}
+		else
+		{
+			ls.push_back(curr);
+			while (S[k] == sep && k < S.length())
+				k++;
+
+			curr = "";
+			if (S[k] != sep && k < S.length())
+				curr+=S[k];
+		}
+	}
+	if (S[S.length()-1] != sep)
+		ls.push_back(curr);
+
+	 std::vector<String> Svec(ls.begin(), ls.end()); 
+	return Svec;
+
+}
+
+void TrialCircularBuffer::lockPSTH()
+{
+	psthMutex.enter();
+}
+
+void TrialCircularBuffer::unlockPSTH()
+{
+	psthMutex.exit();
+}
+
+
+void TrialCircularBuffer::lockConditions()
+{
+	conditionMutex.enter();
+}
+
+void TrialCircularBuffer::unlockConditions()
+{
+	conditionMutex.exit();
+}
+
+void TrialCircularBuffer::addDefaultTTLConditions()
+{
+
+}
+
+  void TrialCircularBuffer::parseMessage(StringTS msg)
+  {
+	  std::vector<String> input = splitString(msg.getString(),' ');
+	  String command = input[0].toLowerCase();
+	  if (command == "newelectrode")
+	  {
+		  ElectrodePSTH e(input[1].getIntValue());
+		  int numChannels = input[2].getIntValue();
+		  for (int k=0;k<numChannels;k++) {
+			  e.channels.push_back(input[k+3].getIntValue());
+		  }
+		  electrodesPSTH.push_back(e);
+		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+	  } else if (command == "newunit")
+	  {
+		  int electrodeID = input[1].getIntValue();
+		  int unitID = input[2].getIntValue();
+
+		  // build a new PSTH for all defined conditions
+		  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory);
+		  for (int k=0;k<conditions.size();k++)
+		  {
+			  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+		  }
+		  for (int k=0;k<electrodesPSTH.size();k++) {
+			  if (electrodesPSTH[k].electrodeID == electrodeID) {
+				  electrodesPSTH[k].unitsPSTHs.push_back(unitPSTHs);
+				  break;
+			  }
+		  }
+		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+		  // inform editor repaint is needed
+	  } else if (command == "removeunit")
+	  {
+		  lockPSTH();
+		    int electrodeID = input[1].getIntValue();
+	   	    int unitID = input[2].getIntValue();
+			for (int e =0;e<electrodesPSTH.size();e++)
+			{
+				if (electrodesPSTH[e].electrodeID == electrodeID)
+				{
+					for (int u=0;u<electrodesPSTH[e].unitsPSTHs.size();u++)
+					{
+						if (electrodesPSTH[e].unitsPSTHs[u].unitID == unitID)
+						{
+							electrodesPSTH[e].unitsPSTHs.erase(electrodesPSTH[e].unitsPSTHs.begin()+u);
+						}
+					}
+				}
+			}
+		  unlockPSTH();
+		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+		  // inform editor repaint is needed
+	  } else if (command == "removeelectrode")
+	  {
+			 lockPSTH();
+		    int electrodeID = input[1].getIntValue();
+			for (int e =0;e<electrodesPSTH.size();e++)
+			{
+				if (electrodesPSTH[e].electrodeID == electrodeID)
+				{
+					electrodesPSTH.erase(electrodesPSTH.begin() + e);
+				}
+			}
+		  unlockPSTH();
+		  // inform editor repaint is in order
+			((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+	  } else if (command == "trialstart")
+	  {
+		  currentTrial.trialID = ++trialCounter;
+		  currentTrial.startTS = msg.timestamp;
+  		  currentTrial.trialInProgress = true;
+
+		  for (int i=0;i<electrodesPSTH.size();i++) 
+			{
+				for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+				{
+					electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&currentTrial);
+				}
+		  }
+		  
+
+
+		  //currentTrial.SetBufferPtrAtTrialOnset(spikeBuffer,lfpBuffer);
+	  } else if (command == "trialend") 
+	  {
+		  currentTrial.endTS = msg.timestamp;
+		  currentTrial.trialInProgress = false;
+		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  currentTrial.endTS - currentTrial.startTS < MaxTrialTimeTicks)
+		  {
+			  if (currentTrial.alignTS == 0) 
+			  {
+				  currentTrial.alignTS = currentTrial.startTS;
+			  }
+
+			  aliveTrials.push(Trial(currentTrial));
+		  }
+	  } else if (command == "trialtype")
+	  {
+		  if (input.size() > 1) {
+			  currentTrial.type = input[1].getIntValue();
+		  }
+	  } else if (command == "trialoutcome")
+	  {
+		  if (input.size() > 1) {
+			  currentTrial.outcome = input[1].getIntValue();
+		  }
+	  } else if (command == "trialalign")
+	  {
+		  currentTrial.alignTS = msg.timestamp;
+	  }  else if (command == "newdesign")
+	  {
+		  designName = input[1];
+	  }
+	  else if (command == "cleardesign")
+	  {
+		  	lockConditions();
+			conditions.clear();
+			conditionCounter = 0;
+			PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
+			edt->updateCondition(conditions);
+			unlockConditions();
+			// clear conditions from all units
+			lockPSTH();
+			for (int i=0;i<electrodesPSTH.size();i++) 
+			{
+				for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+				{
+					electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.clear();
+				}
+			}
+			unlockPSTH();
+			if (addDefaultTTLconditions)
+				addDefaultTTLConditions();
+
+			// inform editor repaint is needed
+	  } else if (command == "addcondition")
+	  {
+		  Condition newcondition(input);
+		  lockConditions();
+		  newcondition.conditionID = ++conditionCounter;
+		  conditions.push_back(newcondition);
+
+		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
+		  edt->updateCondition(conditions);
+
+		  unlockConditions();
+		  // now add a new psth for this condition for all sorted units on all electrodes
+		  lockPSTH();
+		  for (int i=0;i<electrodesPSTH.size();i++) 
+		  {
+			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			  {
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec));
+			  }
+		  }
+		  unlockPSTH();
+		  // inform editor repaint is needed
+	  }
+
+  }
+
+void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
+{
+	for (int e=0;e<electrodesPSTH.size();e++)
+	{
+		if (electrodesPSTH[e].electrodeID == newSpike.electrodeID)
+		{
+			for (int u=0;u<electrodesPSTH[e].unitsPSTHs.size();u++)
+			{
+				if (electrodesPSTH[e].unitsPSTHs[u].unitID == newSpike.sortedId)
+				{
+					electrodesPSTH[e].unitsPSTHs[u].addSpikeToBuffer(newSpike.timestamp_software);
+					return;
+				}
+			}
+			
+		}
+	}
+	// get got a sorted spike event before we got the information about the new unit?!?!?!
+	
+}
+
+
+bool TrialCircularBuffer::contains(std::vector<int> v, int x)
+{
+	for (int k=0;k<v.size();k++)
+		if (v[k] == x)
+			return true;
+	return false;
+}
+
+void TrialCircularBuffer::updateUnitsWithTrial(Trial *trial)
+{
+	lockConditions();
+	lockPSTH();
+
+	// find out which conditions need to be updated
+	std::vector<int> conditionsNeedUpdating;
+	for (int c=0;c<conditions.size();c++)
+	{
+		if (contains(conditions[c].trialTypes, trial->type) &&
+			( (conditions[c].trialOutcomes.size() == 0) || 
+			(conditions[c].trialOutcomes.size() > 0 && contains(conditions[c].trialOutcomes, trial->outcome))))
+			conditionsNeedUpdating.push_back(conditions[c].conditionID);
+	}
+
+	if (conditionsNeedUpdating.size() == 0)
+	{
+		// none of the conditions match. nothing to update.
+		unlockPSTH();
+		unlockConditions();
+
+		return;
+	}
+
+	for (int i=0;i<electrodesPSTH.size();i++) 
+	{
+		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+		{
+			electrodesPSTH[i].unitsPSTHs[u].updateConditionsWithSpikes(conditionsNeedUpdating,trial);
+
+		}
+	}
+
+	unlockPSTH();
+	unlockConditions();
+}
+
+void TrialCircularBuffer::process()
+{
+	Time t;
+	if (aliveTrials.size() > 0)
+	{
+		Trial topTrial = aliveTrials.front();
+		uint64 ticksElapsed = t.getHighResolutionTicks() - topTrial.endTS;
+		float timeElapsedSec = float(ticksElapsed)/ t.getHighResolutionTicksPerSecond();
+		if (timeElapsedSec > postSec)
+		{
+			aliveTrials.pop();
+			updateUnitsWithTrial(&topTrial);
+
+			// update display
+			//updateTrialWithLFPData(TopTrial);
+			
+		}
+	}
+
+}
+
+
+
+
+
+
+
+
+/*******************************/
+
+
+/*
+
 
 template <class T> void thread_safe_queue<T>::lock() 
 {
@@ -75,385 +783,10 @@ template <class T> void thread_safe_queue<T>::push(const T& t)
 	q.push(t);
 	c.exit();
 }
+*/
 /***************/
 
-class Event
-{
-public:
-	Event(double Software_TS, double Hardware_TS, String EventDescription, bool bParse = true) ;
-	Event(String EventDescription);
-
-	bool parseEvent;
-	double soft_ts;
-	double hard_ts;
-	String event_description;
-};
-
-Event::Event(double Software_TS, double Hardware_TS, String EventDescription, bool bParse) {
-	soft_ts = Software_TS; hard_ts = Hardware_TS; event_description = EventDescription; parseEvent = bParse;
-}
-
-Event::Event(String EventDescription)
-{
-	parseEvent = true;
-
-	juce::Time timer;
-	soft_ts = double(timer.getHighResolutionTicks()) / double(timer.getHighResolutionTicksPerSecond()); 
-	hard_ts = -1; 
-	event_description = EventDescription;
-}
-
-
-/*******************************/ 
-class SpikeCircularBuffer
-{
-public:
-	SpikeCircularBuffer(int UnitID, int NumSamplesToHoldPerChannel);
-	void addSpikeToBuffer(double ts);
-	std::vector<double> GetDataArray(int N);
-	void GetAlingedSpikesInTimeFrame(int saved_ptr, double BeforeSec, double AfterSec, double Start_TS, double Align_TS, double End_TS, std::vector<double> AlignedSpikes) ;
-	int GetPtr();
-	int unitID;
-	int numSamplesInBuf;
-	int ptr;
-	int bufLen;
-	std::vector<double> Buf;
-
-};
-
-SpikeCircularBuffer::SpikeCircularBuffer(int UnitID, int NumSamplesToHoldPerChannel)
-{
-            unitID = UnitID;
-			Buf.resize(NumSamplesToHoldPerChannel);
-            bufLen = NumSamplesToHoldPerChannel;
-            numSamplesInBuf = 0;
-            ptr = 0; // points to a valid position in the buffer.
-}
-
-std::vector<double> SpikeCircularBuffer::GetDataArray(int N)
-{
-	std::vector<double> LongArray;
-	LongArray.resize(N);
-//	mut.enter();
-
-	int p = ptr - 1;
-	for (int k = 0; k < N; k++)
-	{
-		if (p < 0)
-			p = bufLen - 1;
-		LongArray[k] = Buf[p];
-		p--;
-	}
-	//mut.exit();
-	return LongArray;
-}
-
-void SpikeCircularBuffer::addSpikeToBuffer(double ts)
-{
-	//mut.enter();
-	Buf[ptr] = ts;
-	ptr++;
-
-	if (ptr == bufLen)
-	{
-		ptr = 0;
-	}
-	numSamplesInBuf++;
-	if (numSamplesInBuf >= bufLen)
-	{
-		numSamplesInBuf = bufLen;
-	}
-	//mut.exit();
-}
-
-int SpikeCircularBuffer::GetPtr()
-{
-	return ptr;
-}
-
-void SpikeCircularBuffer::GetAlingedSpikesInTimeFrame(int saved_ptr, double BeforeSec, double AfterSec, double Start_TS, double Align_TS, double End_TS, std::vector<double> AlignedSpikes) 
-{
-	// return all spikes within a given interval aligned to Align_TS
-	// Use ptr as a search reference in the buffer
-	// The interval is defined as Start_TS-BeforeSec .. End_TS+AfterSec
-//	mut.enter();
-	// count how many spikes happened after Start.
-
-	// Search Backward
-	int CurrPtr = saved_ptr;
-	int  N = 0;
-	while (N < numSamplesInBuf)
-	{
-		if (Buf[CurrPtr] < Start_TS-BeforeSec || Buf[CurrPtr] > End_TS+AfterSec) 
-			break;
-		// Add spike..
-		AlignedSpikes.push_back(Buf[CurrPtr]-Align_TS);
-		CurrPtr--;
-		N++;
-		if (CurrPtr < 0)
-			CurrPtr = bufLen-1;
-	}
-	// Now Search Forward
-	CurrPtr = saved_ptr + 1;
-
-	while (N < numSamplesInBuf)
-	{
-		if (CurrPtr >= bufLen)
-			CurrPtr = 0;
-
-		if (Buf[CurrPtr] > End_TS + AfterSec || CurrPtr==ptr)
-			break;
-		// Add spike..
-		if (Buf[CurrPtr] - Start_TS >= -BeforeSec)
-		{
-			AlignedSpikes.push_back(Buf[CurrPtr] - Align_TS);
-			N++;
-		}
-		CurrPtr++;
-
-	}
-	std::sort(AlignedSpikes.begin(),AlignedSpikes.begin()+AlignedSpikes.size());
-	//AlignedSpikes.Sort();
-//	mut.exit();
-}   
-
-/*************************************************/
-class UnitPtr
-{
-public:
-	UnitPtr();
-	UnitPtr(int Ptr, int UnitID);
-	int ptr;
-	int unitID;
-};
-UnitPtr::UnitPtr()
-{
-	ptr = -1;
-	unitID = -1;
-}
-
-UnitPtr::UnitPtr(int Ptr, int UnitID)
-{
-	ptr = Ptr;
-	unitID = UnitID;
-}
-
-
-/**************************************/
-
-
-
-/************************************/
-
-
-class UnitSpikes
-{
-public:
-	UnitSpikes(int ID);
-	int UnitID;
-	std::vector<double> spikeTimesAligned;
-};
-
-UnitSpikes::UnitSpikes(int ID)
-{
-	UnitID = ID;
-}
-
-
-class ChannelSpikes
-{
-public:
-	ChannelSpikes();
-	std::vector<UnitSpikes> unitSpikes;
-};
-
-ChannelSpikes::ChannelSpikes() 
-{
-}
-
-/**************************************/
-
-class LFP_Trial_Data
-{
-public:
-	LFP_Trial_Data();
-	LFP_Trial_Data(int numCh, int numSamples);
-
-	std::vector<std::vector<double>> data;
-	std::vector<double> time;
-};
-
-LFP_Trial_Data::LFP_Trial_Data()
-{
-
-}
-
-LFP_Trial_Data::LFP_Trial_Data(int numCh, int numSamples)
-{
-	data.resize(numCh);
-	for (int k=0;k<numCh;k++)
-		data[k].resize(numSamples);
-	time.resize(numSamples);
-}
-
-class Trial {
-public:
-	Trial();
-	Trial(const Trial &t);
-	int GetBufferPtrAtTrialOnset(int ch, int UnitID);
-	void SetBufferPtrAtTrialOnset(std::vector<std::list<SpikeCircularBuffer>> spikeBuffer, ContinuousCircularBuffer* lfp_buffer);
-
-	int Outcome;
-	int Type;
-	double Start_TS, Align_TS, End_TS;
-	bool trialInProgress; 
-	LFP_Trial_Data lfp;
-	std::vector<ChannelSpikes> channelSpikes;
-	std::vector<std::vector<UnitPtr>> spikeBufferPtrs;
-	int LFP_Buf_Ptr;
-};
-
- Trial::Trial() 
- {
-	 Outcome = -1;
-	 Type = -1;
-	Start_TS=-1;
-	Align_TS=-1;
-	End_TS=-1;
-	trialInProgress = false;
-
- }
-
-
- Trial::Trial(const Trial &t)
- {
-	 Outcome = t.Outcome;
-	 Type = t.Type;
-	 Start_TS = t.Start_TS;
-	 Align_TS = t.Align_TS;
-	 End_TS = t.End_TS;
-	 channelSpikes = t.channelSpikes;
-	 spikeBufferPtrs = t.spikeBufferPtrs;
-	 trialInProgress = t.trialInProgress;
-	 LFP_Buf_Ptr = t.LFP_Buf_Ptr;
-	 lfp = t.lfp;
- }
-
- 
-        
- int Trial::GetBufferPtrAtTrialOnset(int ch, int UnitID) {
-	 for (int k=0;k<spikeBufferPtrs[ch].size();k++)
-	 {
-		 if (spikeBufferPtrs[ch][k].unitID == UnitID)
-			 return spikeBufferPtrs[ch][k].ptr;
-	 }
-	 jassertfalse;
-	 return 0; // shouldn't occur...
- }
-
-
- void Trial::SetBufferPtrAtTrialOnset(std::vector<std::list<SpikeCircularBuffer>> spikeBuffer, ContinuousCircularBuffer* lfp_buffer)
-{
-	LFP_Buf_Ptr = lfp_buffer->GetPtr();
-	int numCh = spikeBuffer.size();
-	spikeBufferPtrs.resize(numCh);
-	for (int ch = 0; ch < numCh; ch++)
-	{
-		int numUnitsForThisChannel = spikeBuffer[ch].size();
-		spikeBufferPtrs[ch].resize(numUnitsForThisChannel);
-		for (std::list<SpikeCircularBuffer>::iterator it = spikeBuffer[ch].begin(); it != spikeBuffer[ch].end(); it++)
-		{
-			spikeBufferPtrs[ch].push_back(UnitPtr((*it).GetPtr(), (*it).unitID));
-		}
-	}
-}
-
-/***************************************/
-
-
-class UnitPSTH
-{
-public:
-		UnitPSTH();
-        UnitPSTH(int ID, double AfterSec, double BeforeSec);
-		void Update(std::vector<double> spikeTimes, double LastTS);
-		std::vector<double> GetSmoothPSTH(double fGaussianWidthMS);
-		void Clear();
-
-		bool NewData;
-		int numBins;
-		int binResolutionMS;
-		double afterSec, beforeSec;
-		int NumTrials;
-		std::vector<int> numAvgPoints;
-		std::vector<double> time;
-		std::vector<double> avg_firing_rate_Hz;
-		int UnitID;
-
-};
-
-UnitPSTH::UnitPSTH() {
-	NumTrials=-1;
-	UnitID = -1;
-	binResolutionMS = -1;
-	afterSec = 0;
-	beforeSec = 0;
-}
-
-UnitPSTH::UnitPSTH(int ID, double AfterSec, double BeforeSec)
-{
-	NumTrials=0;
-	UnitID = ID;
-	binResolutionMS = 10;
-	afterSec = AfterSec;
-	beforeSec = BeforeSec;
-	numBins = (afterSec + beforeSec) * 1000.0f / binResolutionMS; // 1 ms resolution
-	int NumBinsBefore = beforeSec * 1000.0f / binResolutionMS; // 1 ms resolution
-	avg_firing_rate_Hz.resize(numBins);
-	numAvgPoints.resize(numBins);
-	time.resize(numBins);
-	NewData = true;
-	for (int k = 0; k < numBins; k++)
-	{
-		numAvgPoints[k] = 0;
-		time[k] = (double)k / numBins * (afterSec + beforeSec) - beforeSec;
-		avg_firing_rate_Hz[k] = 0;
-	}
-}
-
-void UnitPSTH::Update(std::vector<double> spikeTimes, double LastTS)
-{
-	NewData = true;
-	std::vector<double> instantaneousSpikes;
-	instantaneousSpikes.resize(numBins);
-	for (int k = 0; k < numBins; k++)
-	{
-		instantaneousSpikes[k] = 0;
-	}
-	for (int k=0;k<spikeTimes.size();k++)
-	{
-		// spike times are aligned relative to trial alignment (i.e.) , onset is at "0"
-
-		int Bin = (spikeTimes[k] + beforeSec) / (beforeSec + afterSec) * numBins;
-		if (Bin >= 0 && Bin < numBins)
-		{
-			instantaneousSpikes[Bin] += 1.0;
-		}
-	}
-
-	int LastBin = ((LastTS + beforeSec) / (beforeSec + afterSec) * numBins);
-
-	NumTrials++;
-	// Update average firing rate
-	for (int k = 0; k < LastBin; k++)
-	{
-		numAvgPoints[k]++;
-
-		avg_firing_rate_Hz[k] = ((numAvgPoints[k] - 1) * avg_firing_rate_Hz[k] + instantaneousSpikes[k]) / numAvgPoints[k];
-	}
-
-}
-
+/*
 std::vector<double> UnitPSTH::GetSmoothPSTH(double fGaussianWidthMS)
 {
 	const double PI = 3.14159265359;
@@ -477,44 +810,18 @@ std::vector<double> UnitPSTH::GetSmoothPSTH(double fGaussianWidthMS)
 
 	std::vector<double> smoothFiringRate;
 	jassertfalse;
-	/* NEED TO IMPLEMENT THIS...
-	alglib.alglib.convr1dcircular(avg_firing_rate_Hz, avg_firing_rate_Hz.Length,
-	gaussianKernel, gaussianKernel.Length, out smoothFiringRate);
-	*/
+	//NEED TO IMPLEMENT THIS...
+	//alglib.alglib.convr1dcircular(avg_firing_rate_Hz, avg_firing_rate_Hz.Length,
+	//gaussianKernel, gaussianKernel.Length, out smoothFiringRate);
+	
 	return smoothFiringRate;
 }
-
-void UnitPSTH::Clear()
-{
-	for (int k = 0; k < numBins; k++)
-	{
-		numAvgPoints[k] = 0;
-		avg_firing_rate_Hz[k] = 0;
-		NumTrials = 0;
-	}
-}
+*/
 
 /*******************************/
 
 
-class ChannelPSTH
-{
-public:
-	ChannelPSTH(int NumCh, double AfterSec, double BeforeSec);
-	std::vector<int> histc(std::vector<double> xi, std::vector<double> x);
-	std::vector<double> diff(std::vector<double> x);
-	void interp1(std::vector<double> x, std::vector<std::vector<double>>y, std::vector<double> xi, std::vector<std::vector<double>> &yi, std::vector<bool> &valid);
-	void Update(const Trial &t);
-
-	int numCh;
-	int binResolutionMS, numBins;
-	double afterSec, beforeSec;
-	std::vector<double> time;
-	std::vector<std::vector<int>> numAvgPoints;
-	std::vector<std::vector<double>> avg_lfp;
-
-};
-
+/*
 ChannelPSTH::ChannelPSTH(int NumCh, double AfterSec, double BeforeSec)
         {
             numCh = NumCh;
@@ -637,173 +944,11 @@ void ChannelPSTH::Update(const Trial &t)
 	}
 }
 
-  
+  */
 /********************************/
 
 
-class Condition
-{
-	public:
-  	   Condition(int NumCh, String Name, std::vector<int> types, std::vector<int> outcomes, double AfterSec, double BeforeSec);
-	   void UpdatePSTHUsingTrialData(const Trial &trial);
-
-       int numCh;
-       String name;
-       float colorRGB[3]; 
-       std::vector<int> trialTypes;
-       std::vector<int> trialOutcomes;
-       double afterSec, beforeSec;
-       bool visible;
-       std::vector<std::vector<UnitPSTH>> psth; // array per channel, PSTH per unit
-       ChannelPSTH *lfp_psth;
-
-};
-
-
-Condition::Condition(int NumCh, String Name, std::vector<int> types, std::vector<int> outcomes, double AfterSec, double BeforeSec)
-{
-            name = Name;
-            trialTypes = types;
-
-            afterSec = AfterSec;
-            beforeSec = BeforeSec;
-
-            trialOutcomes = outcomes;
-            
-            numCh = NumCh;
-            psth.resize(numCh);
-            lfp_psth = new ChannelPSTH(numCh,afterSec, beforeSec);
-
-            for (int ch = 0; ch < numCh; ch++)
-            {
-                psth[ch].resize(0);
-            }
-}
-
-
-void Condition::UpdatePSTHUsingTrialData(const Trial &trial)
-{
-	// trial has all the relevant statistics aligned properly.
-	// all we need to do is to take the spikes and bin them into a psth
-	for (int ch=0;ch<numCh;ch++) {
-		int numUnits = trial.channelSpikes[ch].unitSpikes.size();
-		// Trial has spike information for some units... 
-		for (int unit_iter = 0; unit_iter < numUnits; unit_iter++)
-		{
-			int indx_in_psth = -1;
-			for (int indx = 0; indx < psth[ch].size(); indx++)
-			{
-				if (psth[ch][indx].UnitID == trial.channelSpikes[ch].unitSpikes[unit_iter].UnitID)
-				{
-					indx_in_psth = indx;
-					break;
-				}
-			}
-			if (indx_in_psth == -1)
-			{
-				// unit wasn't found in psth unit array. Add it!
-
-				psth[ch].push_back(UnitPSTH(trial.channelSpikes[ch].unitSpikes[unit_iter].UnitID, afterSec, beforeSec));
-				indx_in_psth = 0;
-			}
-
-			// Add trial spikes to psth
-			psth[ch][indx_in_psth].Update(trial.channelSpikes[ch].unitSpikes[unit_iter].spikeTimesAligned, trial.End_TS-trial.Start_TS);
-		}
-
-	}
-
-
-	lfp_psth->Update(trial);
-}
-
-
-
-
-/**************************/
-
-class TrialCircularBuffer : public Thread
-    {
-	public:
-	 TrialCircularBuffer(int NumCh, int NumTTLch, double SamplingRate);
-	 void AddDefaultTTLConditions();
-	void AddCondition(const Condition &c);
-
-	std::vector<String> SplitString(String S, char sep);
-
-	void LockConditions();
-	void UnlockConditions();
-
-	void ClearStats(int channel, int unitID);
-	void ParseMessage(Event E);
-	Condition fnParseCondition(std::vector<String> items);
-	void AddEvent(Event E);
-	void run();
-	void UpdateConditionsWithTrial(Trial trial);
-	void UpdateTrialWithLFPData(Trial t);
-	void UpdateTrialWithSpikeData(Trial trial);
-	void AddSpikeToSpikeBuffer(int channel, int UnitID, double ts) ;
-
-	bool UnitAlive(int channel, int UnitID);
-	void RemoveUnitStats(int channel, int UnitID);
-
-	bool Contains(std::vector<int> vec, int value);
-
-	//int debug;
-	double MAX_TRIAL_TIME_SEC;
-	double AfterSec, BeforeSec;
-	String DesignName;
-	Trial currentTrial;
-	Trial ttlTrial;
-	std::vector<double> lastTTLtrialTS;
-	thread_safe_queue<Event> eventQueue;
-	std::queue<Trial> AliveTrials;
-	juce::Time timer;
-	double TTL_Trial_Length_Sec;
-	double TTL_Trial_Inhibition_Sec;
-	std::vector<Condition> conditions;
-	int numCh, numTTLch;
-	//DWORD StatThread;
-	bool ProcessThreadRunning;
-	int numTrials;
-	double avgTrialLengthSec;
-	//int num_recv_trials = 0;
-	std::vector<std::list<SpikeCircularBuffer>> spikeBuffer;
-	ContinuousCircularBuffer *lfpBuffer;
-	CriticalSection conditionsMutex;
-
-};
-
-
-TrialCircularBuffer::TrialCircularBuffer(int NumCh, int NumTTLch, double SamplingRate) : Thread("TrialThread")
-{
-	numTrials = 0;
-	numCh = NumCh;
-	numTTLch = NumTTLch;
-	TTL_Trial_Length_Sec = 1;
-	TTL_Trial_Inhibition_Sec = 1;
-	AfterSec = 0.5;
-	BeforeSec = 0.5;
-
-	AfterSec = 0.5;
-	BeforeSec = 0.5;
-
-	int SubSampling = 10; // 2.5 kHz is more than enough for LFP...
-
-    spikeBuffer.resize(numCh);
-	lfpBuffer = new ContinuousCircularBuffer(numCh, SamplingRate, SubSampling, 2*MAX_TRIAL_TIME_SEC);
-
-    lastTTLtrialTS.resize(numTTLch);
-    for (int k = 0; k < numTTLch; k++)
-    {
-		lastTTLtrialTS[k] = 0;
-    }
-
-    AddDefaultTTLConditions();
-
-	startThread();
-}
-
+/*
  void TrialCircularBuffer::AddDefaultTTLConditions()
 {
 	std::vector<int> AllOutcomes;
@@ -816,281 +961,9 @@ TrialCircularBuffer::TrialCircularBuffer(int NumCh, int NumTTLch, double Samplin
         AddCondition(c);
     }
 }
+*/
+/*
 
-void TrialCircularBuffer::AddCondition(const Condition &c) 
-{
-	LockConditions();
-	conditions.push_back(c);
-    UnlockConditions();
-}
-
-void TrialCircularBuffer::LockConditions()
-{
-	conditionsMutex.enter();
-}
-
-void TrialCircularBuffer::UnlockConditions()
-{
-	conditionsMutex.exit();
-}
-
-
-
-
-bool TrialCircularBuffer::UnitAlive(int channel, int UnitID)
-{
-	for (std::list<SpikeCircularBuffer>::iterator it = spikeBuffer[channel].begin(); it != spikeBuffer[channel].end();it++)
-            {
-				
-                if ((*it).unitID == UnitID)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
-
-void TrialCircularBuffer::RemoveUnitStats(int channel, int UnitID)
-{
-	for (std::list<SpikeCircularBuffer>::iterator it = spikeBuffer[channel].begin(); it != spikeBuffer[channel].end();it++)
-	{
-		if ((*it).unitID == UnitID)
-		{
-			spikeBuffer[channel].erase(it);
-			break;
-		}
-	}
-}
-
-
-void TrialCircularBuffer::AddSpikeToSpikeBuffer(int channel, int UnitID, double ts) 
-{
-	for (std::list<SpikeCircularBuffer>::iterator it = spikeBuffer[channel].begin(); it != spikeBuffer[channel].end();it++)
-	{
-		if ((*it).unitID == UnitID)
-		{
-			(*it).addSpikeToBuffer(ts);
-		}
-	}
-}
-
-
-// Given a circular buffer (queue) of wave forms, fill the trial with 
-// spike data (per channel, per unit), aligned to trial alignment ts.
-void TrialCircularBuffer::UpdateTrialWithSpikeData(Trial trial)
-{
-	trial.channelSpikes.resize(numCh);// = new ChannelSpikes[numCh];
-	for (int ch = 0; ch < numCh; ch++)
-	{
-		// we now need to go over the entire circular buffer and search for spikes that occurred within the
-		// time frame of the trial.
-		// To speed things up, instead of searching the entire spike buffer, we hold reference pointers
-		// to where the buffer point was at the trial onset, and search from that point backward & forward.
-		//trial.channelSpikes[ch] = new ChannelSpikes();
-		//trial.channelSpikes[ch].unitSpikes = new List<UnitSpikes>();
-		//.unitSpikes = new List<UnitSpikes>();
-
-		for (std::list<SpikeCircularBuffer>::iterator it = spikeBuffer[ch].begin(); it != spikeBuffer[ch].end();it++)
-		{
-			int ptr = trial.GetBufferPtrAtTrialOnset(ch, (*it).unitID);
-			// ptr points to where the buffer was when the trial started...
-			// Search for spikes up to "BeforeSec" before and up to
-			// AfterSec + trial.End_TS-trial.Start_TS
-			UnitSpikes unitSpikesAligned((*it).unitID);
-			(*it).GetAlingedSpikesInTimeFrame(ptr, BeforeSec, AfterSec, trial.Start_TS, trial.Align_TS, trial.End_TS, unitSpikesAligned.spikeTimesAligned);
-			trial.channelSpikes[ch].unitSpikes.push_back(unitSpikesAligned);
-		}
-	}
-}
-
-
-
-void TrialCircularBuffer::UpdateTrialWithLFPData(Trial t)
-{
-//	t.lfp = lfpBuffer->GetRelevantData(t.LFP_Buf_Ptr, t.Start_TS, t.Align_TS,t.End_TS, BeforeSec, AfterSec);
-}
-
-
-bool TrialCircularBuffer::Contains(std::vector<int> vec, int value) 
-{
-	for (int k=0;k<vec.size();k++)
-	{
-		if (vec[k] == value)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-void TrialCircularBuffer::UpdateConditionsWithTrial(Trial trial) 
-{
-	numTrials++;
-	avgTrialLengthSec = ((numTrials - 1) * avgTrialLengthSec + (trial.End_TS - trial.Start_TS)) / numTrials;
-
-	for (int k=0;k<conditions.size();k++)
-	{
-		if (Contains(conditions[k].trialTypes,trial.Type) && (conditions[k].trialOutcomes.size() == 0 || (conditions[k].trialOutcomes.size()> 0 && 
-			Contains(conditions[k].trialOutcomes,trial.Outcome)))) {
-				// Add the trial to the statistics of this conditions.
-				// Update all channels and all units....
-				conditions[k].UpdatePSTHUsingTrialData(trial);
-		}
-	}
-}
-
-
-
-
-void TrialCircularBuffer::run()
-{
-	Time timer;
-	ProcessThreadRunning = true;
-	while (ProcessThreadRunning)
-	{
-		// Check for incoming messages
-		eventQueue.lock();
-		{
-			while (eventQueue.q.size() > 0)
-			{
-				Event E = eventQueue.q.front();
-				eventQueue.q.pop();
-				ParseMessage(E);
-			}
-		}
-		eventQueue.release();
-
-		if (AliveTrials.size() > 0)
-		{
-			Trial TopTrial = AliveTrials.front();
-			double timeElapsed = double(timer.getHighResolutionTicks())/double(timer.getHighResolutionTicksPerSecond());
-			if (timeElapsed > TopTrial.End_TS+AfterSec)
-			{
-				AliveTrials.pop();
-				UpdateTrialWithSpikeData(TopTrial);
-				UpdateTrialWithLFPData(TopTrial);
-				UpdateConditionsWithTrial(TopTrial);
-			}
-		}
-		// Be nice
-		sleep(5); //		Thread.Sleep(5);
-	}
-}
-
-
-
-void TrialCircularBuffer::AddEvent(Event E)
-{
-	eventQueue.push(E);
-}
-
-
- Condition TrialCircularBuffer::fnParseCondition(std::vector<String> items) 
- {
-	 int k=1;
-	 String ConditionName = "Unknown";
-	 bool Visible = true;
-	 std::list<int> trialtypes;
-	 std::list<int> outcomes;
-	 bool bTrialTypes = false;
-	 bool bOutcomes = false;
-
-	 while (k < items.size())
-	 {
-		 String lower_item = items[k].toLowerCase();
-		 if (lower_item == "") {
-			 k++;
-			 continue;
-		 }
-
-		 if (lower_item == "name")
-		 {
-			 bTrialTypes = false;
-			 bOutcomes = false;
-			 k++;
-			 ConditionName = items[k];
-			 k++;
-			 continue;
-		 }
-		 if (lower_item == "visible")
-		 {
-			 bTrialTypes = false;
-			 bOutcomes = false;
-			 k++;
-			 Visible = items[k].getIntValue() > 0;
-			 k++;
-			 continue;
-		 }
-		 if (lower_item == "trialtypes")
-		 {
-			 k++;
-			 bTrialTypes = true;
-			 bOutcomes = false;
-			 continue;
-		 }
-		 if (bOutcomes)
-		 {
-			 outcomes.push_back(items[k].getIntValue());
-			 k++;
-		 }
-
-		 if (bTrialTypes) {
-			 trialtypes.push_back(items[k].getIntValue());
-			 k++;
-		 }
-
-	 }
-
-	 std::vector<int> trialtypes_vector(trialtypes.begin(), trialtypes.end()); 
-	 std::vector<int> trialoutcomes_vector(outcomes.begin(), outcomes.end()); 
-	 return Condition(numCh, ConditionName, trialtypes_vector, trialoutcomes_vector, AfterSec + MAX_TRIAL_TIME_SEC, BeforeSec);   
- }
-
- 
-std::vector<String> TrialCircularBuffer::SplitString(String S, char sep)
-{
-	std::list<String> ls;
-	String  curr;
-	for (int k=0;k < S.length();k++) {
-		if (S[k] != sep) {
-			curr+=S[k];
-		}
-		else
-		{
-			ls.push_back(curr);
-			while (S[k] == sep && k < S.length())
-				k++;
-		}
-	}
-
-	 std::vector<String> Svec(ls.begin(), ls.end()); 
-	return Svec;
-
-}
-
-
-void TrialCircularBuffer::ParseMessage(Event E)
-{
-	String Message = E.event_description;
-
-	std::vector<String> split = SplitString(Message,' ');
-	String Command = split[0];
-	String cmd = Command.toLowerCase();
-	if (cmd == "cleardesign")
-	{
-		LockConditions();
-		conditions.clear();
-		UnlockConditions();
-		AddDefaultTTLConditions();
-	} else if (cmd == "newdesign")
-	{
-		DesignName = split[1];
-	} else if (cmd == "addcondition")
-	{
-		Condition c = fnParseCondition(split);
-		AddCondition(c);
 	} else if (cmd ==  "ttl")
 	{
 		// inject a fake trial...
@@ -1113,56 +986,4 @@ void TrialCircularBuffer::ParseMessage(Event E)
 			AliveTrials.push(Trial(ttlTrial));
 			lastTTLtrialTS[ch] = double(timer.getHighResolutionTicks()) / double(timer.getHighResolutionTicksPerSecond());
 		}
-	} else if (cmd ==  "trialtype")
-	{
-		currentTrial.Type = split[1].getIntValue();
-	} else if (cmd == "trialalign")
-	{
-		currentTrial.Align_TS = E.soft_ts;
-	}  else if (cmd == "trialoutcome")
-	{
-		currentTrial.Outcome = split[1].getIntValue();
-	}  else if (cmd == "trialstart")
-	{
-		currentTrial.Start_TS = E.soft_ts;
-		currentTrial.trialInProgress = true;
-		currentTrial.SetBufferPtrAtTrialOnset(spikeBuffer,lfpBuffer);
-	} else if (cmd == "trialend")
-	{
-		currentTrial.End_TS = E.soft_ts;
-		currentTrial.trialInProgress = false;
-		if (currentTrial.Type >= 0 && currentTrial.Outcome >= 0 &&
-			currentTrial.Start_TS >= 0 && 
-			currentTrial.End_TS - currentTrial.Start_TS < MAX_TRIAL_TIME_SEC)
-		{
-			// no alignment? use trial start.
-			if (currentTrial.Align_TS < 0)
-				currentTrial.Align_TS = currentTrial.Start_TS;
-
-			AliveTrials.push(Trial(currentTrial));
-		}
-	}
-
-
-}
-
-void TrialCircularBuffer::ClearStats(int channel, int unitID) {
-	LockConditions();
-	for (int k=0;k<conditions.size();k++)
-	{
-		// zero out spikes
-		for (int j=0;j<conditions[k].psth[channel].size();j++)
-		{
-			if (conditions[k].psth[channel][j].UnitID == unitID)
-			{
-				conditions[k].psth[channel][j].Clear();
-			}
-		}
-		// zero out lfp
-		for (int m=0;m<conditions[k].lfp_psth->time.size();m++) {
-			conditions[k].lfp_psth->avg_lfp[channel][ m] = 0;
-			conditions[k].lfp_psth->numAvgPoints[channel][m] = 0;
-		}
-	}
-	UnlockConditions();
-}
+		*/

@@ -23,20 +23,18 @@
 
 #include "PeriStimulusTimeHistogramNode.h"
 #include "RecordNode.h"
-#include "Visualization/SpikeDisplayCanvas.h"
+#include "Editors/PeriStimulusTimeHistogramEditor.h"
 #include "Channel.h"
 
 #include <stdio.h>
 
 
 PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
-    : GenericProcessor("PSTH"), displayBufferSize(5),  redrawRequested(false), isRecording(false),
-	  signalFilesShouldClose(false)
+    : GenericProcessor("PSTH"), displayBufferSize(5),  redrawRequested(false)
 {
  
 
-    spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
-
+	trialCircularBuffer = new TrialCircularBuffer(this);
 }
 
 PeriStimulusTimeHistogramNode::~PeriStimulusTimeHistogramNode()
@@ -46,9 +44,7 @@ PeriStimulusTimeHistogramNode::~PeriStimulusTimeHistogramNode()
 
 AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 {
-    std::cout<<"Creating SpikeDisplayCanvas."<<std::endl;
-
-    editor = new SpikeDisplayEditor(this);
+    editor = new PeriStimulusTimeHistogramEditor(this,true);
     return editor;
 
 }
@@ -57,31 +53,6 @@ void PeriStimulusTimeHistogramNode::updateSettings()
 {
     //std::cout << "Setting num inputs on PeriStimulusTimeHistogramNode to " << getNumInputs() << std::endl;
 
-    electrodes.clear();
-
-    for (int i = 0; i < eventChannels.size(); i++)
-    {
-        if ((eventChannels[i]->eventType < 999) && (eventChannels[i]->eventType > SPIKE_BASE_CODE))
-        {
-
-            Electrode elec;
-            elec.numChannels = eventChannels[i]->eventType - 100;
-            elec.name = eventChannels[i]->name;
-            elec.currentSpikeIndex = 0;
-            elec.mostRecentSpikes.ensureStorageAllocated(displayBufferSize);
-
-            for (int j = 0; j < elec.numChannels; j++)
-            {
-                elec.displayThresholds.add(0);
-                elec.detectorThresholds.add(0);
-            }
-            
-            electrodes.add(elec);
-        }
-    }
-
-    recordNode = getProcessorGraph()->getRecordNode();
-    diskWriteLock = recordNode->getLock();
 
 }
 
@@ -89,77 +60,31 @@ void PeriStimulusTimeHistogramNode::updateSettings()
 
 bool PeriStimulusTimeHistogramNode::enable()
 {
+	/*
     std::cout << "PeriStimulusTimeHistogramNode::enable()" << std::endl;
     SpikeDisplayEditor* editor = (SpikeDisplayEditor*) getEditor();
     editor->enable();
+		*/
     return true;
 
 }
 
 bool PeriStimulusTimeHistogramNode::disable()
 {
+	/*
     std::cout << "PeriStimulusTimeHistogramNode disabled!" << std::endl;
     SpikeDisplayEditor* editor = (SpikeDisplayEditor*) getEditor();
     editor->disable();
+	*/
     return true;
-}
-
-int PeriStimulusTimeHistogramNode::getNumberOfChannelsForElectrode(int i)
-{
-    if (i > -1 && i < electrodes.size())
-    {
-        return electrodes[i].numChannels;
-    } else {
-        return 0;
-    }
-}
-
-String PeriStimulusTimeHistogramNode::getNameForElectrode(int i)
-{
-
-    if (i > -1 && i < electrodes.size())
-    {
-        return electrodes[i].name;
-    } else {
-        return " ";
-    }
-}
-
-
-int PeriStimulusTimeHistogramNode::getNumElectrodes()
-{
-    return electrodes.size();
-
 }
 
 void PeriStimulusTimeHistogramNode::startRecording()
 {
-    
-    setParameter(1, 0.0f); // need to use the 'setParameter' method to interact with 'process'
 }
 
 void PeriStimulusTimeHistogramNode::stopRecording()
 {
-    setParameter(0, 0.0f); // need to use the 'setParameter' method to interact with 'process'
-}
-
-
-void PeriStimulusTimeHistogramNode::setParameter(int param, float val)
-{
-    //std::cout<<"PeriStimulusTimeHistogramNode got Param:"<< param<< " with value:"<<val<<std::endl;
-
-    if (param == 0) // stop recording
-    {
-        isRecording = false;
-
-    } else if (param == 1) // start recording
-    {
-        isRecording = true;
-    } else if (param == 2) // redraw
-    {
-        redrawRequested = true;
-    }
-
 }
 
 
@@ -168,7 +93,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 {
 	// Update internal statistics 
     checkForEvents(events); // automatically calls 'handleEvent
-	
+	trialCircularBuffer->process();
 	// draw the PSTH
     if (redrawRequested)
     {
@@ -177,38 +102,40 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 
 }
 
+StringTS PeriStimulusTimeHistogramNode::unpackStringTS(MidiMessage &event) 
+{
+      const uint8* dataptr = event.getRawData();
+		int bufferSize = event.getRawDataSize();
+		int string_length = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
+		uint64 timestamp;
+		memcpy(&timestamp, dataptr + 4+string_length, 8); // remember to skip first four bytes
+		return StringTS((unsigned char *)dataptr+4,string_length,timestamp);
+}
+
+
 void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
 
     //std::cout << "Received event of type " << eventType << std::endl;
+	if (eventType == NETWORK)
+	{
+		StringTS s = unpackStringTS(event);
+  		trialCircularBuffer->parseMessage(s);
+	}
 
     if (eventType == SPIKE)
     {
-
         const uint8_t* dataptr = event.getRawData();
         int bufferSize = event.getRawDataSize();
-            
         if (bufferSize > 0)
         {
-
             SpikeObject newSpike;
-
-            bool isValid = unpackSpike(&newSpike, dataptr, bufferSize);
-
-            if (isValid)
-            {
-                int electrodeNum = newSpike.source;
-
-                Electrode& e = electrodes.getReference(electrodeNum);
-               // std::cout << electrodeNum << std::endl;
-
-             
-               
-
-            }
-        
+            unpackSpike(&newSpike, dataptr, bufferSize);
+			if (newSpike.sortedId > 0) { // drop unsorted spikes
+				trialCircularBuffer->addSpikeToSpikeBuffer(newSpike);
+			}
         }
-
     }
-
 }
+
+

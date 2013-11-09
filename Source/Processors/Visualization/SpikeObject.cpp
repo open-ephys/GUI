@@ -61,6 +61,12 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
 
     memcpy(buffer+idx, &(s->sortedId), 2);
     idx +=2;
+
+    memcpy(buffer+idx, &(s->electrodeID), 2);
+    idx +=2;
+
+	
+
 	memcpy(buffer+idx, &(s->color[0]), 1);
     idx +=1;
 	memcpy(buffer+idx, &(s->color[1]), 1);
@@ -153,7 +159,10 @@ bool unpackSpike(SpikeObject* s, const uint8_t* buffer, int bufferSize)
     memcpy(&(s->sortedId), buffer+idx, 2);
     idx +=2;
 
-	
+	    memcpy(&(s->electrodeID), buffer+idx, 2);
+    idx +=2;
+
+
   memcpy(&(s->color[0]), buffer+idx, 1);
     idx +=1;
   memcpy(&(s->color[1]), buffer+idx, 1);
@@ -275,6 +284,7 @@ void generateSimulatedSpike(SpikeObject* s, uint64_t timestamp, int noise)
     s->source = 0;
     s->nChannels = 4;
     s->nSamples = 32;
+	s->electrodeID = 0;
     int idx=0;
 
     int waveType = rand()%2; // Pick one of the three predefined waveshapes to generate
@@ -309,7 +319,7 @@ void generateEmptySpike(SpikeObject* s, int nChannels)
     s->source = 0;
     s->nChannels = 1;
     s->nSamples = 40;
-
+	s->electrodeID = 0;
 	s->samplingFrequencyHz = 30000;
 	s->sortedId = 0;
 	s->color[0] = s->color[1] = s->color[2] = 128;

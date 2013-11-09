@@ -542,6 +542,11 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	 selectedUnit = -1;
 	 selectedBox = -1;
 	 bRePCA = false;
+	 pc1min = -1;
+	 pc2min = -1;
+	 pc1max = 1;
+	 pc2max = 1;
+
 	 pc1 = new float[numch * WaveFormLength];
 	 pc2 = new float[numch * WaveFormLength];
     for (int n = 0; n < bufferSize; n++)

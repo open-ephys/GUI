@@ -24,8 +24,8 @@
 #ifndef __PROCESSORGRAPH_H_124F8B50__
 #define __PROCESSORGRAPH_H_124F8B50__
 
-#include "zmq.h"
-#include "zmq_utils.h"
+#include "../../Resources/ZeroMQ/include/zmq.h"
+#include "../../Resources/ZeroMQ/include/zmq_utils.h"
 
 
 #include "../../JuceLibraryCode/JuceHeader.h"

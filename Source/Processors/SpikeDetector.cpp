@@ -37,7 +37,7 @@ SpikeDetector::SpikeDetector()
     electrodeTypes.add("single electrode");
     electrodeTypes.add("stereotrode");
     electrodeTypes.add("tetrode");
-
+	uniqueID = 0;
     //// the technically correct form (Greek cardinal prefixes):
     // electrodeTypes.add("hentrode");
     // electrodeTypes.add("duotrode");
@@ -132,8 +132,9 @@ Electrode::Electrode(PCAcomputingThread *pth)
 	computingThread = pth;
 }*/
 
-Electrode::Electrode(PCAcomputingThread *pth, String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate )
+Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate )
 {
+	electrodeID = ID;
 		computingThread = pth;
 
 	name = _name;
@@ -145,9 +146,13 @@ Electrode::Electrode(PCAcomputingThread *pth, String _name, int _numChannels, in
     thresholds = new double[numChannels];
     isActive = new bool[numChannels];
     channels = new int[numChannels];
+	channelsDepthOffset = new float[numChannels];
+
+	advancerID = "Unassigned";
 
     for (int i = 0; i < numChannels; i++)
     {
+		channelsDepthOffset[i] = 0;
         channels[i] = _channels[i];
 		thresholds[i] = default_threshold;
 		isActive[i] = true;
@@ -159,7 +164,6 @@ Electrode::Electrode(PCAcomputingThread *pth, String _name, int _numChannels, in
 bool SpikeDetector::addElectrode(int nChans)
 {
 
-    std::cout << "Adding electrode with " << nChans << " channels." << std::endl;
 	mut.enter();
     int firstChan;
 
@@ -201,8 +205,15 @@ bool SpikeDetector::addElectrode(int nChans)
 	for (int k=0;k<nChans;k++)
 		channels[k] = firstChan+k;
 
-	Electrode* newElectrode = new Electrode(&computingThread,newName, nChans,channels, getDefaultThreshold(), 8,32, getSampleRate());
+	Electrode* newElectrode = new Electrode(++uniqueID,&computingThread,newName, nChans,channels, getDefaultThreshold(), 8,32, getSampleRate());
 
+	String log = "Added electrode (ID "+String(uniqueID)+") with " + String(nChans) + " channels." ;
+    std::cout <<log << std::endl;
+	String eventlog = "NewElectrode "+String(uniqueID) + " "+String(nChans)+" ";
+	for (int k=0;k<nChans;k++)
+		eventlog += String(channels[k])+ " ";
+
+	addNetworkEventToQueue(StringTS(eventlog));
 
     resetElectrode(newElectrode);
 
@@ -244,6 +255,15 @@ bool SpikeDetector::removeElectrode(int index)
         mut.exit();
 		return false;
 	}
+
+	
+	String log = "Removing electrode (ID " + String(electrodes[index]->electrodeID)+")";
+	std::cout << log <<std::endl;
+
+	String eventlog = "RemovingElectrode " + String(electrodes[index]->electrodeID);
+	addNetworkEventToQueue(StringTS(eventlog));
+	//getUIComponent()->getLogWindow()->addLineToLog(log);
+
     electrodes.remove(index);
 	if (electrodes.size() > 0)
 		currentElectrode = electrodes.size()-1;
@@ -264,8 +284,9 @@ void SpikeDetector::setElectrodeName(int index, String newName)
 void SpikeDetector::setChannel(int electrodeIndex, int channelNum, int newChannel)
 {
 	mut.enter();
-    std::cout << "Setting electrode " << electrodeIndex << " channel " << channelNum <<
-              " to " << newChannel << std::endl;
+	String log = "Setting electrode " + String(electrodeIndex) + " channel " + String( channelNum )+
+              " to " + String( newChannel );
+    std::cout << log<< std::endl;
 
     *(electrodes[electrodeIndex]->channels+channelNum) = newChannel;
 	mut.exit();
@@ -293,8 +314,6 @@ void SpikeDetector::setChannelActive(int electrodeIndex, int subChannel, bool ac
 
     currentElectrode = electrodeIndex;
     currentChannelIndex = subChannel;
-
-    std::cout << "Setting parameter 98 to " << active << std::endl;
 
     if (active)
         setParameter(98, 1);
@@ -413,7 +432,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 	// convert sample offset to software ticks
 	juce::Time timer;
 	int64 ticksPerSec = timer.getHighResolutionTicksPerSecond();
-	float samplesPerSec = 30000;
+	float samplesPerSec = getSampleRate();
 	s->timestamp_software = software_timestamp + ticksPerSec*float(peakIndex)/samplesPerSec;
     s->nSamples = spikeLength;
 
@@ -461,6 +480,34 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
 }
 
+
+uint64 SpikeDetector::getExtrapolatedHardwareTimestamp(uint64 softwareTS)
+{
+	Time timer;
+	// this is the case in which messages arrived before the data stream started....
+	if (hardware_timestamp == 0) 
+		return 0;
+
+	// compute how many ticks passed since the last known software-hardware pair
+	int64 ticksPassed = software_timestamp-softwareTS;
+	float secondPassed = (float)ticksPassed / timer.getHighResolutionTicksPerSecond();
+	// adjust hardware stamp accordingly
+	return hardware_timestamp + secondPassed*getSampleRate();
+}
+
+
+
+
+void SpikeDetector::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events)
+{
+	uint8* msg_with_ts = new uint8[s.len+8]; // for the two timestamps
+	memcpy(msg_with_ts, s.str, s.len);	
+	memcpy(msg_with_ts+s.len, &s.timestamp, 8);
+
+	addEvent(events, NETWORK,0,0,GENERIC_EVENT,s.len+8,msg_with_ts);
+	delete msg_with_ts;
+}
+
 void SpikeDetector::handleEvent(int eventType, MidiMessage& event, int sampleNum)
 {
 
@@ -470,8 +517,24 @@ void SpikeDetector::handleEvent(int eventType, MidiMessage& event, int sampleNum
 	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
 		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
     }
+}
+
+void SpikeDetector::addNetworkEventToQueue(StringTS S)
+{
+	StringTS copy(S);
+	getUIComponent()->getLogWindow()->addLineToLog(S.getString());
+	eventQueue.push(S);
+}
 
 
+void SpikeDetector::postEventsInQueue(MidiBuffer& events)
+{
+	while (eventQueue.size() > 0)
+	{
+		StringTS msg = eventQueue.front();
+		postTimestamppedStringToMidiBuffer(msg,events);
+		eventQueue.pop();
+	}
 }
 
 void SpikeDetector::process(AudioSampleBuffer& buffer,
@@ -484,10 +547,11 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
     Electrode* electrode;
     dataBuffer = buffer;
 	
-	//buffer.getSampleData(
-
+	
     checkForEvents(events); // find latest's packet timestamps
 	
+	postEventsInQueue(events);
+
 	channelBuffers->update(buffer,  hardware_timestamp);
     //std::cout << dataBuffer.getMagnitude(0,nSamples) << std::endl;
 
@@ -518,7 +582,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                 if (*(electrode->isActive+chan))
                 {
 
-                    int currentChannel = *(electrode->channels+chan);
+                    int currentChannel = electrode->channels[chan];
 
 					bool bSpikeDetectedPositive  = electrode->thresholds[chan] > 0 &&
 						(-getNextSample(currentChannel) > electrode->thresholds[chan]); // rising edge
@@ -557,6 +621,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
                         SpikeObject newSpike;
                         newSpike.timestamp = peakIndex;
+						newSpike.electrodeID = electrode->electrodeID;
                         newSpike.source = i;
                         newSpike.nChannels = electrode->numChannels;
 						newSpike.samplingFrequencyHz = samplingFrequencyHz;
@@ -1041,7 +1106,7 @@ double circularBuffer::findThresholdForChannel(int channel)
 }
 
 
-//**************************************/
+/**************************************/
 
 ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer)
 {

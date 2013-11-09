@@ -81,7 +81,7 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
     setWantsKeyboardFocus(true);
 
     update();
-
+	 
 }
 
 SpikeDetectCanvas::~SpikeDetectCanvas()
@@ -206,23 +206,36 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 		int channel = 0;
 		int unitID = -1;
 		int boxID = -1;
-
+		Time t;
     if (button == addPolygonUnitButton)
     {
         inDrawingPolygonMode = true;
 		electrode->spikePlot->setPolygonDrawingMode(true);
 	} else if (button == addUnitButton)
 	{
-		int newUnitID = processor->getActiveElectrode()->spikeSort->addBoxUnit(0);
-		electrode->spikePlot->updateUnitsFromProcessor();
-		electrode->spikePlot->setSelectedUnitAndbox(newUnitID,0);
+		Electrode *e = processor->getActiveElectrode();
+		if (e != nullptr) {
+			int electrodeID = processor->getActiveElectrode()->electrodeID;
+			int newUnitID = processor->getActiveElectrode()->spikeSort->addBoxUnit(0);
+			electrode->spikePlot->updateUnitsFromProcessor();
+			electrode->spikePlot->setSelectedUnitAndbox(newUnitID,0);
+			String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID);
+			processor->addNetworkEventToQueue(StringTS(eventlog));
+		}
+
 	}else if (button == delUnitButton)
 	{
+		int electrodeID = processor->getActiveElectrode()->electrodeID;
+		
 		processor->getActiveElectrode()->spikePlot->getSelectedUnitAndbox(unitID, boxID);
 		if (unitID > 0)
 		{
 			processor->getActiveElectrode()->spikeSort->removeUnit(unitID);
 			electrode->spikePlot->updateUnitsFromProcessor();
+
+			String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
+			processor->addNetworkEventToQueue(StringTS(eventlog));
+
 			// set new selected unit to be the last existing unit
 			std::vector<BoxUnit> u = processor->getActiveElectrode()->spikeSort->getBoxUnits();
 			if (u.size() > 0)
@@ -255,7 +268,7 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 	{
 		processor->getActiveElectrode()->spikeSort->RePCA();
 	}
-
+	repaint();
 
 }
 
@@ -1563,24 +1576,24 @@ void PCAProjectionAxes::paint(Graphics& g)
 	}
     
     //Graphics im(projectionImage);
-    
-    if (redrawSpikes)
-    {
-	// recompute image
-	int w = getWidth();
-	int h = getHeight();
-	projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
-                          Colours::black);
-    
-    bool subsample = false;
-	int dk = (subsample) ? 5 : 1;
-    
-	for (int k=0;k<bufferSize;k+=dk)
+
+	if (redrawSpikes)
 	{
-		drawProjectedSpike(spikeBuffer[k]);
+		// recompute image
+		int w = getWidth();
+		int h = getHeight();
+		projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+			Colours::black);
+
+		bool subsample = false;
+		int dk = (subsample) ? 5 : 1;
+
+		for (int k=0;k<bufferSize;k+=dk)
+		{
+			drawProjectedSpike(spikeBuffer[k]);
+		}
+		redrawSpikes = false;
 	}
-        redrawSpikes = false;
-    }
 
 }
 
@@ -1782,6 +1795,9 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 		// add a new PCA unit
 		Electrode *e = processor->getActiveElectrode();
 		e->spikeSort->addPCAunit(drawnUnit);
+
+		String eventlog = "NewUnit "+String(e->electrodeID) + " "+String(drawnUnit.getUnitID());
+		processor->addNetworkEventToQueue(StringTS(eventlog));
 
 		drawnPolygon.clear();
 	}

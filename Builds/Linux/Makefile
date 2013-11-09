@@ -64,7 +64,6 @@ OBJECTS := \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
   $(OBJDIR)/NetworkEventsEditor_fd22826.o \
-  $(OBJDIR)/SpikeDetectCanvas_a3370a31.o \
   $(OBJDIR)/NetworkEvents_28b3b762.o \
   $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
   $(OBJDIR)/SpikeSortBoxes_e42a3d04.o \
@@ -91,6 +90,7 @@ OBJECTS := \
   $(OBJDIR)/Merger_2f90542e.o \
   $(OBJDIR)/Splitter_6e27a57b.o \
   $(OBJDIR)/LfpTriggeredAverageCanvas_50148944.o \
+  $(OBJDIR)/SpikeDetectCanvas_a3370a31.o \
   $(OBJDIR)/SpikeObject_24e8c655.o \
   $(OBJDIR)/SpikeDisplayCanvas_b208ff6e.o \
   $(OBJDIR)/DataWindow_83ce6754.o \
@@ -101,6 +101,7 @@ OBJECTS := \
   $(OBJDIR)/EventNode_95c842b7.o \
   $(OBJDIR)/ElectrodeButtons_a6064cc.o \
   $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o \
+  $(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o \
   $(OBJDIR)/ChannelMappingEditor_dd803b0.o \
   $(OBJDIR)/FileReaderEditor_16fd7744.o \
   $(OBJDIR)/PhaseDetectorEditor_f53aa520.o \
@@ -151,6 +152,7 @@ OBJECTS := \
   $(OBJDIR)/InfoLabel_a2051bf4.o \
   $(OBJDIR)/DataViewport_2cf95d2c.o \
   $(OBJDIR)/MessageCenter_748a1cca.o \
+  $(OBJDIR)/LogWindow_b0e9b662.o \
   $(OBJDIR)/ControlPanel_a895ede3.o \
   $(OBJDIR)/UIComponent_d667ba37.o \
   $(OBJDIR)/MainWindow_499ac812.o \
@@ -295,11 +297,6 @@ $(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/Network
 	@echo "Compiling NetworkEventsEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/SpikeDetectCanvas_a3370a31.o: ../../Source/Processors/Visualization/SpikeDetectCanvas.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling SpikeDetectCanvas.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/NetworkEvents_28b3b762.o: ../../Source/Processors/NetworkEvents.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling NetworkEvents.cpp"
@@ -430,6 +427,11 @@ $(OBJDIR)/LfpTriggeredAverageCanvas_50148944.o: ../../Source/Processors/Visualiz
 	@echo "Compiling LfpTriggeredAverageCanvas.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/SpikeDetectCanvas_a3370a31.o: ../../Source/Processors/Visualization/SpikeDetectCanvas.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling SpikeDetectCanvas.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/SpikeObject_24e8c655.o: ../../Source/Processors/Visualization/SpikeObject.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SpikeObject.cpp"
@@ -478,6 +480,11 @@ $(OBJDIR)/ElectrodeButtons_a6064cc.o: ../../Source/Processors/Editors/ElectrodeB
 $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o: ../../Source/Processors/Editors/LfpTriggeredAverageEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LfpTriggeredAverageEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o: ../../Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PeriStimulusTimeHistogramEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ChannelMappingEditor_dd803b0.o: ../../Source/Processors/Editors/ChannelMappingEditor.cpp
@@ -728,6 +735,11 @@ $(OBJDIR)/DataViewport_2cf95d2c.o: ../../Source/UI/DataViewport.cpp
 $(OBJDIR)/MessageCenter_748a1cca.o: ../../Source/UI/MessageCenter.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling MessageCenter.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LogWindow_b0e9b662.o: ../../Source/UI/LogWindow.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LogWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ControlPanel_a895ede3.o: ../../Source/UI/ControlPanel.cpp
