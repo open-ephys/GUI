@@ -39,6 +39,7 @@
 
 class SpikeDetectorEditor;
 class SpikeHistogramPlot;
+class Trial;
 /**
 
   Detects spikes in a continuous signal and outputs events containing the spike data.
@@ -101,22 +102,22 @@ class ContinuousCircularBuffer
 {
 public:
 	ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
-	void FindInterval(int saved_ptr, double Bef, double Aft, int &start, int &N);
-//	LFP_Trial_Data GetRelevantData(int saved_ptr, double Start_TS, double Align_TS, double End_TS, double BeforeSec, double AfterSec);
-//	void AddDataToBuffer(std::vector<std::vector<double>> lfp, double soft_ts);
-	void update(AudioSampleBuffer& buffer, int64 hardware_ts);
+	void reallocate(int N);
+	void update(AudioSampleBuffer& buffer, uint64 hardware_ts, uint64 software_ts);
 	int GetPtr();
-
+	void addTrialStartToSmartBuffer(int trialID);
 	int numCh;
 	int subSampling;
 	float samplingRate;
 	CriticalSection mut;
 	int numSamplesInBuf;
+	float numTicksPerSecond;
 	int ptr;
 	int bufLen;
+	int leftover_k;
 	std::vector<std::vector<float>> Buf;
 	std::vector<bool> valid;
-	std::vector<int64> TS;
+	std::vector<int64> hardwareTS,softwareTS;
 };
 
 

@@ -247,6 +247,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 		// nothing to be drawn...
 		return;		
 	}
+    resized();
 
 	heightPerElectrodePix = 300;
 	widthPerUnit = 300;
@@ -265,6 +266,8 @@ void PeriStimulusTimeHistogramCanvas::resized()
 	int totalHeight = numElectrodes * heightPerElectrodePix;
 	int totalWidth = maxUnitsPerElectrode * widthPerUnit;
     psthDisplay->setBounds(0,0,totalWidth-scrollBarThickness, totalHeight);
+
+	
 }
 
 void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
@@ -279,6 +282,7 @@ void PeriStimulusTimeHistogramCanvas::refresh()
 {
 	// this is called every 10 hz?
 	repaint();
+	psthDisplay->refresh();
 }
 
 /***********************************************/
@@ -289,6 +293,16 @@ PeriStimulusTimeHistogramDisplay::PeriStimulusTimeHistogramDisplay(PeriStimulusT
 
 	font = Font("Default", 15, Font::plain);
 }
+
+void PeriStimulusTimeHistogramDisplay::refresh()
+{
+	for (int k=0;k<psthPlots.size();k++)
+	{
+		psthPlots[k]->repaint();
+	}
+
+}
+
 
 void PeriStimulusTimeHistogramDisplay::paint(Graphics &g)
 {
@@ -536,6 +550,6 @@ void XYPlot::paint(Graphics &g)
 		if (valid[k] && valid[k+1])
 			g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
 	}
-
+	repaint();
 	
 }

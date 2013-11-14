@@ -552,7 +552,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 	
 	postEventsInQueue(events);
 
-	channelBuffers->update(buffer,  hardware_timestamp);
+	channelBuffers->update(buffer,  hardware_timestamp,software_timestamp);
     //std::cout << dataBuffer.getMagnitude(0,nSamples) << std::endl;
 
     for (int i = 0; i < electrodes.size(); i++)
@@ -1108,25 +1108,48 @@ double circularBuffer::findThresholdForChannel(int channel)
 
 /**************************************/
 
-ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer)
+void ContinuousCircularBuffer::reallocate(int NumCh)
 {
-	int NumSamplesToHoldPerChannel = (SamplingRate * NumSecInBuffer / SubSampling);
-	subSampling = SubSampling;
-	samplingRate = SamplingRate;
 	numCh =NumCh;
 	Buf.resize(numCh);
 	for (int k=0;k< numCh;k++)
 	{
-		Buf[k].resize(NumSamplesToHoldPerChannel);
+		Buf[k].resize(bufLen);
+	}
+	numSamplesInBuf = 0;
+	ptr = 0; // points to a valid position in the buffer.
+
+}
+
+
+ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer)
+{
+		Time t;
+	
+	numTicksPerSecond = t.getHighResolutionTicksPerSecond();
+
+	int numSamplesToHoldPerChannel = (SamplingRate * NumSecInBuffer / SubSampling);
+	subSampling = SubSampling;
+	samplingRate = SamplingRate;
+	numCh =NumCh;
+	leftover_k = 0;
+	Buf.resize(numCh);
+
+
+	for (int k=0;k< numCh;k++)
+	{
+		Buf[k].resize(numSamplesToHoldPerChannel);
 	}
 
-	TS.resize(NumSamplesToHoldPerChannel);
-	valid.resize(NumSamplesToHoldPerChannel);
-	bufLen = NumSamplesToHoldPerChannel;
+	hardwareTS.resize(numSamplesToHoldPerChannel);
+	softwareTS.resize(numSamplesToHoldPerChannel);
+	valid.resize(numSamplesToHoldPerChannel);
+	bufLen = numSamplesToHoldPerChannel;
 	numSamplesInBuf = 0;
 	ptr = 0; // points to a valid position in the buffer.
 }
 
+/*
 void ContinuousCircularBuffer::FindInterval(int saved_ptr, double Bef, double Aft, int &start, int &N)
 {
 	int CurrPtr = saved_ptr;
@@ -1167,6 +1190,8 @@ void ContinuousCircularBuffer::FindInterval(int saved_ptr, double Bef, double Af
 	}
 
 }
+*/
+
 /*
 LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double Start_TS, double Align_TS, double End_TS, double BeforeSec, double AfterSec)
 {
@@ -1192,19 +1217,22 @@ LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double S
 	return triallfp;
 }
 */
-void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts)
+void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, uint64 hardware_ts, uint64 software_ts)
 {
 	mut.enter();
 	int numpts = buffer.getNumSamples();
 	
-	
-	for (int k = 0; k < numpts; k+=subSampling)
+	// we don't start from zero because of subsampling issues.
+	// previous packet may not have ended exactly at the last given sample.
+	int k = leftover_k;
+	for (; k < numpts; k+=subSampling)
 	{
 		valid[ptr] = true;
 		for (int ch = 0; ch < numCh; ch++)
 		{
 			Buf[ch][ptr] = *(buffer.getSampleData(ch,k));
-			TS[ptr] = hardware_ts + k;
+			hardwareTS[ptr] = hardware_ts + k;
+			softwareTS[ptr] = software_ts + float(k) / samplingRate * numTicksPerSecond;
 		}
 		ptr++;
 		if (ptr == bufLen)
@@ -1217,8 +1245,8 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_
 			numSamplesInBuf = bufLen;
 		}
 	}
+	leftover_k =subSampling-( numpts-k);
 	mut.exit();
-
 
 }
 /*

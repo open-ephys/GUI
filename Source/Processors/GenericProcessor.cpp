@@ -29,6 +29,7 @@ GenericProcessor::GenericProcessor(const String& name_) : AccessClass(),
     nextAvailableChannel(0), saveOrder(-1), loadOrder(-1), currentChannel(-1),
      parametersAsXml(nullptr),  name(name_), paramsWereLoaded(false)
 {
+	  settings.numInputs = settings.numOutputs = settings.sampleRate = 0;
 }
 
 GenericProcessor::~GenericProcessor()

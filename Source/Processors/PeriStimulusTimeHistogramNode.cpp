@@ -32,9 +32,7 @@
 PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
     : GenericProcessor("PSTH"), displayBufferSize(5),  redrawRequested(false)
 {
- 
-
-	trialCircularBuffer = new TrialCircularBuffer(this);
+	trialCircularBuffer  = nullptr;
 }
 
 PeriStimulusTimeHistogramNode::~PeriStimulusTimeHistogramNode()
@@ -51,9 +49,6 @@ AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 
 void PeriStimulusTimeHistogramNode::updateSettings()
 {
-    //std::cout << "Setting num inputs on PeriStimulusTimeHistogramNode to " << getNumInputs() << std::endl;
-
-
 }
 
 
@@ -79,21 +74,20 @@ bool PeriStimulusTimeHistogramNode::disable()
     return true;
 }
 
-void PeriStimulusTimeHistogramNode::startRecording()
-{
-}
-
-void PeriStimulusTimeHistogramNode::stopRecording()
-{
-}
-
 
 
 void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
+	if (trialCircularBuffer  == nullptr)
+	{
+		trialCircularBuffer = new TrialCircularBuffer(getNumInputChannels(),getSampleRate(),this);//
+	}
+	//trialCircularBuffer->reallocate(getNumInputChannels());
+
 	// Update internal statistics 
     checkForEvents(events); // automatically calls 'handleEvent
-	trialCircularBuffer->process();
+	
+	trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
 	// draw the PSTH
     if (redrawRequested)
     {
@@ -122,6 +116,13 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		StringTS s = unpackStringTS(event);
   		trialCircularBuffer->parseMessage(s);
 	}
+	if (eventType == TIMESTAMP)
+    {
+          const uint8* dataptr = event.getRawData();
+	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
+		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
+    } 
+
 
     if (eventType == SPIKE)
     {

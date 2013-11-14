@@ -92,6 +92,26 @@ private:
 	int numSpikesStored;
 };
 
+
+
+class SmartContinuousCircularBuffer : public ContinuousCircularBuffer 
+{
+public:
+	SmartContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
+	void getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+									float preSec, float postSec,
+									std::vector<std::vector<float>> &output,
+									std::vector<float> &valid);
+
+	void addTrialStartToSmartBuffer(int trialID);
+	int trialptr;
+	int numTrials;
+	std::vector<int> smartPointerIndex;
+	std::vector<int> smartPointerTrialID;
+
+};
+
+
 class ConditionPSTH
 {
 public:
@@ -99,7 +119,7 @@ public:
 	ConditionPSTH(const ConditionPSTH& c);
 	void clear();
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
-	
+	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
 
 	float preSecs, postSecs, maxTrialTimeSec;
 	int conditionID;
@@ -110,7 +130,7 @@ public:
 	float timeSpanSecs;
 	std::vector<int> numDataPoints;
 	std::vector<float> binTime;
-	std::vector<float> avgFiringRateHz;
+	std::vector<float> avgResponse; // either firing rate or lfp
 	
 private:
 	std::vector<uint64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
@@ -131,29 +151,47 @@ public:
 	SmartSpikeCircularBuffer spikeBuffer;
 };
 
+class ChannelPSTHs 
+{
+public:
+	ChannelPSTHs(int channelID, float maxTrialTimeSeconds, int maxTrialsInMemory, float preSecs, float postSecs, int binResolutionMS);
+	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid);
+	void clearStatistics();
+
+	int channelID;
+	std::vector<ConditionPSTH> conditionPSTHs;
+	std::vector<float> binTime;
+	float preSecs, postSecs;
+};
+
+
 class ElectrodePSTH
 {
 public:
 	ElectrodePSTH(int ID);
 
+	void updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer);
+
+
+
 	int electrodeID;
 	std::vector<int> channels;
 	std::vector<UnitPSTHs> unitsPSTHs;
+	std::vector<ChannelPSTHs> channelsPSTHs;
 };
 
 class TrialCircularBuffer 
 {
 public:
 	TrialCircularBuffer();
-	TrialCircularBuffer(PeriStimulusTimeHistogramNode *p);
+	TrialCircularBuffer(int numCh, float samplingRate, PeriStimulusTimeHistogramNode *p);
 	~TrialCircularBuffer();
-	void updateUnitsWithTrial(Trial *trial);
-  
+    void updatePSTHwithTrial(Trial *trial);
 	bool contains(std::vector<int> v, int x);
 	
 	void parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
-	void process();
+	void process(AudioSampleBuffer& buffer,int nSamples,uint64 hardware_timestamp,uint64 software_timestamp);
 	
 	void addDefaultTTLConditions();
 	void addCondition(std::vector<String> input);
@@ -161,9 +199,11 @@ public:
 	void unlockConditions();
 	void lockPSTH();
 	void unlockPSTH();
+	void reallocate(int numChannels);
 
 	 double postSec, preSec;
      
+	 float binResolutionMS;
 	 float maxTrialTimeSeconds;
 	 int  maxTrialsInMemory;
 	 int trialCounter;
@@ -176,6 +216,7 @@ public:
 	std::queue<Trial> aliveTrials;
 	std::vector<Condition> conditions;
 	std::vector<ElectrodePSTH> electrodesPSTH;
+	SmartContinuousCircularBuffer *lfpBuffer;
   
 	/*
 	void AddDefaultTTLConditions();

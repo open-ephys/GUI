@@ -66,7 +66,7 @@ public:
 	void resized();
 	std::vector<XYPlot*> psthPlots;
 	void paint(Graphics &g);
-
+	void refresh();
 
 	PeriStimulusTimeHistogramNode* processor;
 	Viewport *viewport;

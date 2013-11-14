@@ -66,9 +66,6 @@ public:
 
     bool enable();
     bool disable();
-    
-    void startRecording();
-    void stopRecording();
 
     String getNameForElectrode(int i);
     int getNumberOfChannelsForElectrode(int i);
@@ -76,7 +73,7 @@ public:
 
     void addSpikePlotForElectrode(SpikePlot* sp, int i);
     void removeSpikePlots();
-
+	void reallocate(int numChannels);
 	TrialCircularBuffer *trialCircularBuffer;
   
 private:
@@ -84,7 +81,7 @@ private:
 
     int displayBufferSize;
     bool redrawRequested;
-
+	uint64 hardware_timestamp,software_timestamp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramNode);
 
