@@ -425,7 +425,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	int search_back_ptr = p;
 	for (int q=0;q<numSamplesInBuf;q++) 
 	{
-		if (softwareTS[search_back_ptr] < trial->alignTS - preSec*numTicksPerSecond)
+		if (softwareTS[search_back_ptr] < trial->alignTS - int64(preSec*numTicksPerSecond))
 		{
 			// we found the first sample prior to required trial alignment
 			break;
@@ -440,7 +440,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	int search_forward_ptr = p;
 	for (int q=0;q<numSamplesInBuf;q++) 
 	{
-		if (softwareTS[search_forward_ptr] > trial->endTS + postSec*numTicksPerSecond)
+		if (softwareTS[search_forward_ptr] > trial->endTS + int64(postSec*numTicksPerSecond))
 		{
 			// we found the first sample prior to required trial alignment
 			break;

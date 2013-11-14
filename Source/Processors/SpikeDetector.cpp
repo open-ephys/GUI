@@ -1228,11 +1228,12 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, uint64 hardware
 	for (; k < numpts; k+=subSampling)
 	{
 		valid[ptr] = true;
+		hardwareTS[ptr] = hardware_ts + k;
+		softwareTS[ptr] = software_ts + uint64(float(k) / samplingRate * numTicksPerSecond);
+
 		for (int ch = 0; ch < numCh; ch++)
 		{
 			Buf[ch][ptr] = *(buffer.getSampleData(ch,k));
-			hardwareTS[ptr] = hardware_ts + k;
-			softwareTS[ptr] = software_ts + float(k) / samplingRate * numTicksPerSecond;
 		}
 		ptr++;
 		if (ptr == bufLen)
