@@ -283,7 +283,7 @@ void UnitPSTHs::clearStatistics()
 	}
 }
 
-void UnitPSTHs::addSpikeToBuffer(uint64 spikeTimestampSoftware)
+void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware)
 {
 	spikeBuffer.addSpikeToBuffer(spikeTimestampSoftware);
 }
@@ -357,7 +357,7 @@ void SmartContinuousCircularBuffer::addTrialStartToSmartBuffer(int trialID)
 	smartPointerIndex[trialptr] = ptr;
 	smartPointerTrialID[trialptr] = trialID;
 	trialptr++;
-	if (trialptr>numTrials)
+	if (trialptr>=numTrials)
 		trialptr = 0;
 }
 
@@ -464,9 +464,9 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	if (index_next > bufLen)
 		index_next = 0;
 
-	float tA = ((float)softwareTS[index]-(float)trial->alignTS)/numTicksPerSecond;
-	float tB = ((float)softwareTS[index_next]-(float)trial->alignTS)/numTicksPerSecond;
-	float trial_length_sec = ((float)trial->endTS-(float)trial->alignTS)/numTicksPerSecond;
+	float tA = float(softwareTS[index]-trial->alignTS)/numTicksPerSecond;
+	float tB = float(softwareTS[index_next]-trial->alignTS)/numTicksPerSecond;
+	float trial_length_sec = float(trial->endTS-trial->alignTS)/numTicksPerSecond;
 	for (int i = 0;i < numTimeBins; i++)
 	{
 		float tSamlple = (*timeBins)[i];
@@ -502,8 +502,8 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 					if (index_next >= bufLen)
 						index_next = 0;
 
-					tA = ((float)softwareTS[index]-(float)trial->alignTS)/numTicksPerSecond;
-					tB = ((float)softwareTS[index_next]-(float)trial->alignTS)/numTicksPerSecond;
+					tA = float(softwareTS[index]-trial->alignTS)/numTicksPerSecond;
+					tB = float(softwareTS[index_next]-trial->alignTS)/numTicksPerSecond;
 				}
 				cnt++;
 			}
@@ -543,7 +543,7 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 
 }
 
-void SmartSpikeCircularBuffer::addSpikeToBuffer(uint64 spikeTimeSoftware)
+void SmartSpikeCircularBuffer::addSpikeToBuffer(int64 spikeTimeSoftware)
 {
 	spikeTimesSoftware[bufferIndex] = spikeTimeSoftware;
 	bufferIndex = (bufferIndex+1) % bufferSize;
@@ -586,8 +586,8 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 	// first, query spike buffer where does the trial start....
 	std::vector<int64> alignedSpikes;
 	Time t;
-	uint64 numTicksPreTrial =preSecs * t.getHighResolutionTicksPerSecond(); 
-	uint64 numTicksPostTrial =postSecs * t.getHighResolutionTicksPerSecond();
+	int64 numTicksPreTrial =preSecs * t.getHighResolutionTicksPerSecond(); 
+	int64 numTicksPostTrial =postSecs * t.getHighResolutionTicksPerSecond();
 	int saved_ptr = queryTrialStart(trial->trialID);
 	if (saved_ptr < 0)
 		return alignedSpikes; // trial is not in memory??!?
@@ -605,7 +605,7 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 		if (spikeTimesSoftware[CurrPtr] < trial->startTS-numTicksPreTrial || spikeTimesSoftware[CurrPtr] > trial->endTS+numTicksPostTrial) 
 			break;
 		// Add spike..
-		alignedSpikes.push_back((int64)spikeTimesSoftware[CurrPtr]-(int64)trial->alignTS);
+		alignedSpikes.push_back(spikeTimesSoftware[CurrPtr]-trial->alignTS);
 		CurrPtr--;
 		N++;
 		if (CurrPtr < 0)
@@ -624,7 +624,7 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 		// Add spike..
 		if (spikeTimesSoftware[CurrPtr] - trial->startTS >= -numTicksPreTrial)
 		{
-			alignedSpikes.push_back((int64)spikeTimesSoftware[CurrPtr] - (int64)trial->alignTS);
+			alignedSpikes.push_back(spikeTimesSoftware[CurrPtr] - trial->alignTS);
 			N++;
 		}
 		CurrPtr++;
@@ -976,7 +976,7 @@ void TrialCircularBuffer::reallocate(int numChannels)
 
 }
 
-void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,uint64 hardware_timestamp,uint64 software_timestamp)
+void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
 	Time t;
 	// first, update LFP circular buffers
@@ -986,7 +986,7 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,uint64 
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
 		Trial topTrial = aliveTrials.front();
-		uint64 ticksElapsed = t.getHighResolutionTicks() - topTrial.endTS;
+		int64 ticksElapsed = software_timestamp - topTrial.endTS;
 		float timeElapsedSec = float(ticksElapsed)/ t.getHighResolutionTicksPerSecond();
 		if (timeElapsedSec > postSec)
 		{

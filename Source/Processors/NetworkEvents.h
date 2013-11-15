@@ -67,7 +67,7 @@ public:
 		len = S.length();
 	}
 
-	StringTS(String S, uint64 ts_software)
+	StringTS(String S, int64 ts_software)
 	{
 		str = new uint8[S.length()];
 		memcpy(str,S.toRawUTF8(),S.length());
@@ -85,7 +85,7 @@ public:
 	}
 
 
-	StringTS(unsigned char *buf, int _len, uint64 ts_software) : len(_len),timestamp(ts_software) {
+	StringTS(unsigned char *buf, int _len, int64 ts_software) : len(_len),timestamp(ts_software) {
 		str = new juce::uint8[len];
 		for (int k=0;k<len;k++)
 			str[k] = buf[k];
@@ -97,7 +97,7 @@ public:
 
 	juce::uint8 *str;
 	int len;
-	juce::uint64 timestamp;
+	juce::int64 timestamp;
 };
 
 class NetworkEvents : public GenericProcessor,  public Thread
@@ -106,7 +106,7 @@ public:
     NetworkEvents(void *zmq_context);
     ~NetworkEvents();
 	AudioProcessorEditor* createEditor();
-	uint64 getExtrapolatedHardwareTimestamp(uint64 softwareTS);
+	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void initSimulation();
 	void simulateDesignAndTrials(juce::MidiBuffer& events);
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
@@ -131,7 +131,7 @@ private:
 	bool threadRunning ;
 
 	std::queue<StringTS> simulation;
-	uint64 simulationStartTime;
+	int64 simulationStartTime;
 	bool firstTime ;
 };
 

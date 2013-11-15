@@ -81,7 +81,7 @@ private:
 
     int displayBufferSize;
     bool redrawRequested;
-	uint64 hardware_timestamp,software_timestamp;
+	int64 hardware_timestamp,software_timestamp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramNode);
 

@@ -60,8 +60,8 @@ struct SpikeObject
 {
 
     uint8_t     eventType;
-	uint64_t    timestamp;
-	uint64_t    timestamp_software;
+	int64_t    timestamp;
+	int64_t    timestamp_software;
 	uint16_t    source;
     uint16_t    nChannels;
     uint16_t    nSamples;

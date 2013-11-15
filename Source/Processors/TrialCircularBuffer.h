@@ -64,7 +64,7 @@ public:
 	int trialID;
 	int outcome;
 	int type;
-	uint64 startTS, alignTS, endTS;
+	int64 startTS, alignTS, endTS;
 	bool trialInProgress; 
 };
 
@@ -74,13 +74,13 @@ public:
 	SmartSpikeCircularBuffer(float maxTrialTimeSeconds, int maxTrialsInMemory);
 	// contains spike times, but also pointers for trial onsets so we don't need to search
 	// the entire array 
-	void addSpikeToBuffer(uint64 spikeTimeSoftware);
+	void addSpikeToBuffer(int64 spikeTimeSoftware);
 	std::vector<int64> getAlignedSpikes(Trial *trial, float preSecs, float postSecs);
 	void addTrialStartToBuffer(Trial *t);
 
 	int queryTrialStart(int trialID);
 private:
-	std::vector<uint64> spikeTimesSoftware;
+	std::vector<int64> spikeTimesSoftware;
 	std::vector<int> trialID;
 	std::vector<int> pointers;
 	int maxTrialsInMemory;
@@ -133,7 +133,7 @@ public:
 	std::vector<float> avgResponse; // either firing rate or lfp
 	
 private:
-	std::vector<uint64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
+	std::vector<int64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
 };
 
 class UnitPSTHs 
@@ -141,7 +141,7 @@ class UnitPSTHs
 public:
 	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory);
 	void updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial *trial);
-	void addSpikeToBuffer(uint64 spikeTimestampSoftware);
+	void addSpikeToBuffer(int64 spikeTimestampSoftware);
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
 
@@ -191,7 +191,7 @@ public:
 	
 	void parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
-	void process(AudioSampleBuffer& buffer,int nSamples,uint64 hardware_timestamp,uint64 software_timestamp);
+	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
 	
 	void addDefaultTTLConditions();
 	void addCondition(std::vector<String> input);
@@ -210,7 +210,7 @@ public:
 	int conditionCounter;
 	CriticalSection conditionMutex, psthMutex;
 	Trial currentTrial;
-	uint64 MaxTrialTimeTicks;
+	int64 MaxTrialTimeTicks;
 	String designName;
 	bool addDefaultTTLconditions;
 	std::queue<Trial> aliveTrials;

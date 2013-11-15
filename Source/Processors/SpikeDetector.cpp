@@ -481,7 +481,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 }
 
 
-uint64 SpikeDetector::getExtrapolatedHardwareTimestamp(uint64 softwareTS)
+int64 SpikeDetector::getExtrapolatedHardwareTimestamp(int64 softwareTS)
 {
 	Time timer;
 	// this is the case in which messages arrived before the data stream started....
@@ -542,7 +542,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                             int& nSamples)
 {
 	mut.enter();
-	uint16_t samplingFrequencyHz = 30000;//buffer.getSamplingFrequency();
+	uint16_t samplingFrequencyHz = getSampleRate();//buffer.getSamplingFrequency();
     // cycle through electrodes
     Electrode* electrode;
     dataBuffer = buffer;
@@ -1217,7 +1217,7 @@ LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double S
 	return triallfp;
 }
 */
-void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, uint64 hardware_ts, uint64 software_ts)
+void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts)
 {
 	mut.enter();
 	int numpts = buffer.getNumSamples();
@@ -1229,7 +1229,7 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, uint64 hardware
 	{
 		valid[ptr] = true;
 		hardwareTS[ptr] = hardware_ts + k;
-		softwareTS[ptr] = software_ts + uint64(float(k) / samplingRate * numTicksPerSecond);
+		softwareTS[ptr] = software_ts + int64(float(k) / samplingRate * numTicksPerSecond);
 
 		for (int ch = 0; ch < numCh; ch++)
 		{

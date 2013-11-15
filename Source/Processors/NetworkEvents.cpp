@@ -106,9 +106,9 @@ void NetworkEvents::initSimulation()
 void NetworkEvents::simulateDesignAndTrials(juce::MidiBuffer& events)
 {
 	Time t;
-	while (true) 
+	while (simulation.size() > 0) 
 	{
-		uint64 currenttime = t.getHighResolutionTicks();
+		int64 currenttime = t.getHighResolutionTicks();
 		StringTS S = simulation.front();
 		if (currenttime > S.timestamp) {
 			 postTimestamppedStringToMidiBuffer(S,events);
