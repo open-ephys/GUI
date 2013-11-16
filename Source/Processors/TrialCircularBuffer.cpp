@@ -807,14 +807,18 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 					electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&currentTrial);
 				}
 		  }
-		  
-
-
+		  if (input.size() > 1) {
+			  currentTrial.type = input[1].getIntValue();
+		  }
 		  //currentTrial.SetBufferPtrAtTrialOnset(spikeBuffer,lfpBuffer);
 	  } else if (command == "trialend") 
 	  {
 		  currentTrial.endTS = msg.timestamp;
 		  currentTrial.trialInProgress = false;
+		  if (input.size() > 1) {
+			  currentTrial.outcome = input[1].getIntValue();
+		  }
+
 		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  currentTrial.endTS - currentTrial.startTS < MaxTrialTimeTicks)
 		  {
 			  if (currentTrial.alignTS == 0) 
