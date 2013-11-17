@@ -2,13 +2,13 @@
 
 <SETTINGS>
   <INFO>
-    <DATE>15 Nov 2013 10:51:55</DATE>
-    <OS>Windows 7</OS>
-    <MACHINE>ALPHA</MACHINE>
+    <DATE>15 Nov 2013 20:56:09</DATE>
+    <OS>Windows 8</OS>
+    <MACHINE>SHAYO-LAPTOP</MACHINE>
   </INFO>
   <SIGNALCHAIN>
     <PROCESSOR name="Sources/File Reader" insertionPoint="1" NodeId="100">
-      <FILENAME path="C:\Users\shayo\Documents\GitHub\GUI\Resources\DataFiles\data_stream_16ch_hippocampus"/>
+      <FILENAME path="C:\Users\Shay\Documents\GitHub\GUI\Resources\DataFiles\data_stream_16ch_hippocampus"/>
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>

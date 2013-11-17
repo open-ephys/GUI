@@ -38,18 +38,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class PeriStimulusTimeHistogramNode;
 
+#ifndef MAX
+#define MAX(a,b)((a)<(b)?(b):(a))
+#endif
 
+#ifndef MIN
+#define MIN(a,b)((a)<(b)?(a):(b))
+#endif
 class Condition
 {
 	public:
 		Condition();
-		Condition(std::vector<String> items);
+		Condition(std::vector<String> items, int ID);
 		Condition(const Condition &c);
   	   Condition(String Name, std::vector<int> types, std::vector<int> outcomes, double _postSec, double _preSec);
        String name;
-       float colorRGB[3]; 
+       uint8 colorRGB[3]; 
        std::vector<int> trialTypes;
        std::vector<int> trialOutcomes;
+	   //void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID);
+
        double postSec, preSec;
        bool visible;
 	   int conditionID;
@@ -121,8 +129,11 @@ public:
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
 	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
 
+	void getRange(float &xMin, float &xMax, float &yMax);
 	float preSecs, postSecs, maxTrialTimeSec;
 	int conditionID;
+
+	float xmin, xmax, ymax,ymin;
 
 	int numBins;
 	int binResolutionMS;
@@ -131,7 +142,7 @@ public:
 	std::vector<int> numDataPoints;
 	std::vector<float> binTime;
 	std::vector<float> avgResponse; // either firing rate or lfp
-	
+	uint8 colorRGB[3];
 private:
 	std::vector<int64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
 };
@@ -144,11 +155,11 @@ public:
 	void addSpikeToBuffer(int64 spikeTimestampSoftware);
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
+	void getRange(float &xmin, float &xmax, float &ymax);
 
-	int unitID;
 	std::vector<ConditionPSTH> conditionPSTHs;
-	
 	SmartSpikeCircularBuffer spikeBuffer;
+	int unitID;
 };
 
 class ChannelPSTHs 

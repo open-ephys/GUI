@@ -218,6 +218,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 	// delete all existing plots.
 	updateNeeded = false;
 	psthDisplay->psthPlots.clear();
+	if (processor->trialCircularBuffer == nullptr)
+		return;
 
 	numElectrodes = processor->trialCircularBuffer->electrodesPSTH.size();
 	int maxUnitsPerElectrode = 0;
@@ -454,8 +456,37 @@ void XYPlot::paint(Graphics &g)
 	g.setColour(Colours::white);
 	g.drawRect(x0,y0, plotWidth,plotHeight);
 
+	float xmin=0, xmax=0, ymax=0;
+	bool found = false;
+	int electrodeIndex;
+	int unitIndex;
+	tcb->lockPSTH();
+	for (electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
+	{
+		if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
+			{
+				if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
+				{
+					found = true;
+					tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].getRange(xmin, xmax, ymax);
+					break;
+				}
+			}
+		}
+		if (found)
+			break;
+	}
+	tcb->unlockPSTH();
+	if (!found || xmin == xmax || ymax == 0)
+		return; // nothing to draw.
+
 	// determine tick position
-	float axesRange[4] = {0,0, 20, 200}; // xmin,ymin, xmax, ymax
+	
+
+
+	float axesRange[4] = {xmin,0, xmax, ymax}; // xmin,ymin, xmax, ymax
 	float rangeX = (axesRange[2]-axesRange[0]);
 	float rangeY = (axesRange[3]-axesRange[1]);
 	int numXTicks = 5;
@@ -484,7 +515,8 @@ void XYPlot::paint(Graphics &g)
 	
 
 		g.setFont(font);
-	String axesName = "Electrode 1:4";
+		String axesName = String("Electrode ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+			String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID);
 	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
 	
 	float ticklabelWidth = float(plotWidth)/numXTicks;
@@ -527,29 +559,38 @@ void XYPlot::paint(Graphics &g)
 	}
 
 	std::vector<float> f_xi;
-	std::vector<bool> valid;
-	std::vector<float> x;
-	std::vector<float> y;
-	x.resize(500);
-	y.resize(500);
-	for (int k=0;k<500;k++) 
-	{
-		x[k] = float(k)/500 * 20;
-		y[k] = 100;//200+sin(0.5*x[k] ) * 100;
-	}
-	interp1(x, y, samplePositions,  f_xi,  valid);
 
-	// and finally.... plot!
-	g.setColour(Colours::yellow);
 
-	for (int k=0;k<numSamplePoints-1;k++) 
+	tcb->lockPSTH();
+
+	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs.size();cond++)
 	{
-		// remap f_xi to pixels!
-		float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
-		float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
-		if (valid[k] && valid[k+1])
-			g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+
+		std::vector<bool> valid;
+		interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].binTime, 
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].avgResponse,
+			samplePositions,  f_xi,  valid);
+
+		// and finally.... plot!
+		g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[0],
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[1],
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[2]));
+
+		for (int k=0;k<numSamplePoints-1;k++) 
+		{
+			// remap f_xi to pixels!
+			float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
+			float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
+			if (valid[k] && valid[k+1])
+				g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+		}
+
 	}
+
+
+	tcb->unlockPSTH();
+
+
 	repaint();
 	
 }

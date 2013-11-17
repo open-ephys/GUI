@@ -29,18 +29,40 @@
 
 
 
+void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
+{
+	int IDmodule = (ID-1) % 6; // ID can't be zero
+	const int colors[6][3] = {
+   {      0,         0,    255},
+   {      0,    128,         0},
+   { 255,         0,         0},
+   {      0,    192,    192},
+   { 192,         0,    192},
+   { 192,    192,         0}};
+
+	R = colors[IDmodule][0];
+	G = colors[IDmodule][1];
+	B = colors[IDmodule][2];
+
+}
+
 
 /******************************/
 ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post) : conditionID(ID), preSecs(pre), 
 	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1)
 {
 	// allocate data for 1 ms resolution bins to cover trials 
+	xmin = -pre;
+	xmax = post;
+	ymax = 0;
+	ymin = 0;
+	setDefaultColors(colorRGB[0],colorRGB[1],colorRGB[2], ID);
+
 	timeSpanSecs=preSecs + postSecs + maxTrialTimeSec;
 	numBins = (timeSpanSecs) * 1000.0f / binResolutionMS; // 1 ms resolution
 	avgResponse.resize(numBins);
 	numDataPoints.resize(numBins);
 	binTime.resize(numBins);
-	
 	for (int k = 0; k < numBins; k++)
 	{
 		numDataPoints[k] = 0;
@@ -62,6 +84,14 @@ ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
 	avgResponse=c.avgResponse;
 	numDataPoints=c.numDataPoints;
 	timeSpanSecs = c.timeSpanSecs;
+	binTime = c.binTime;
+	xmin = c.xmin;
+	xmax = c.xmax;
+	ymax = c.ymax;
+	ymin = c.ymin;
+	colorRGB[0] = c.colorRGB[0];
+	colorRGB[1] = c.colorRGB[1];
+	colorRGB[2] = c.colorRGB[2];
 }
 
 
@@ -73,6 +103,8 @@ void ConditionPSTH::clear()
 void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
 	Time t;
+	ymax = 0;
+
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
 	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, preSecs, postSecs);
 	std::vector<float> instantaneousSpikesRate;
@@ -94,30 +126,47 @@ void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *tri
 		}
 	}
 
-	float lastUpdateTS = ((int64)trial->endTS-(int64)trial->alignTS) / ticksPerSec + postSecs;
+	float lastUpdateTS = float(trial->endTS-trial->alignTS) / ticksPerSec + postSecs;
 	int lastBinIndex = (lastUpdateTS + preSecs) / timeSpanSecs * numBins;
+
+
+	xmax = MAX(xmax,lastUpdateTS);
+
 
 	numTrials++;
 	// Update average firing rate, up to when the trial ended. 
 	for (int k = 0; k < lastBinIndex; k++)
 	{
 		numDataPoints[k]++;
-		avgResponse[k] = ((numDataPoints[k] - 1) * avgResponse[k] + instantaneousSpikesRate[k]) / numDataPoints[k];
+		avgResponse[k] = ((numDataPoints[k] - 1) * avgResponse[k] + 1e3*instantaneousSpikesRate[k]) / numDataPoints[k];
+		ymax = MAX(ymax,avgResponse[k]);
 	}
+}
+
+void ConditionPSTH::getRange(float &xMin, float &xMax, float &yMax)
+{
+	xMin = xmin;
+	yMax = ymax;
+	xMax = xmax;
 }
 
 void ConditionPSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
 {
 	numTrials++;
 
+	ymax = -1e10;
+	ymin = 1e10;
 	// Update average firing rate, up to when the trial ended. 
 	for (int k = 0; k < valid.size(); k++)
 	{
-		if (!valid[k])
+		if (!valid[k]) {
+			xmax = MAX(xmax, binTime[k]);
 			break;
-
+		}
 		numDataPoints[k]++;
 		avgResponse[k] = ((numDataPoints[k] - 1) * avgResponse[k] + alignedLFP[k]) / numDataPoints[k];
+		ymax = MAX(ymax, avgResponse[k]);
+		ymin = MIN(ymin, avgResponse[k]);
 	}			
 
 }
@@ -143,20 +192,17 @@ Condition::Condition(const Condition &c)
 	   conditionID = c.conditionID;
 }
 
-Condition::Condition(std::vector<String> items)
+Condition::Condition(std::vector<String> items, int ID)
 {
 	 int k=1; // skip the addcontision in location 0
 	 name = "Unknown";
-	 colorRGB[0] = 255;
- 	 colorRGB[1] = 255;
-     colorRGB[2] = 255;
+	 setDefaultColors(colorRGB[0],colorRGB[1],colorRGB[2], ID);
 	 postSec = preSec = 0.5;
-	 conditionID = 0;
+	 conditionID = ID;
 
 	 visible = true;
 	 bool bTrialTypes = false;
 	 bool bOutcomes = false;
-
 	 while (k < items.size())
 	 {
 		 String lower_item = items[k].toLowerCase();
@@ -171,6 +217,20 @@ Condition::Condition(std::vector<String> items)
 			 bOutcomes = false;
 			 k++;
 			 name = items[k];
+			 k++;
+			 continue;
+		 }
+		 
+		 if (lower_item == "color")
+		 {
+			 bTrialTypes = false;
+			 bOutcomes = false;
+			 k++;
+			 colorRGB[0] = items[k].getIntValue();
+			 k++;
+			 colorRGB[1] = items[k].getIntValue();
+			 k++;
+			 colorRGB[2] = items[k].getIntValue();
 			 k++;
 			 continue;
 		 }
@@ -288,6 +348,20 @@ void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware)
 	spikeBuffer.addSpikeToBuffer(spikeTimestampSoftware);
 }
 
+void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymax)
+{
+	xmin = 0;
+	xmax = 0;
+	ymax = 0;
+	float minX, maxX, maxY;
+	for (int k=0;k<conditionPSTHs.size();k++) {
+		conditionPSTHs[k].getRange(minX, maxX, maxY);
+		xmin = MIN(xmin, minX);
+		xmax = MAX(xmax, maxX);
+		ymax = MAX(ymax, maxY);
+	}
+}
+
 
 void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial* trial)
 {
@@ -337,6 +411,10 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 	lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
 		channelsPSTHs[0].preSecs,channelsPSTHs[0].postSecs, alignedLFP,valid);
 	// now we can average data
+	if (!valid[0])
+	{
+		int dbg = 1;
+	}
 
 	for (int ch=0;ch<channelsPSTHs.size();ch++)
 	{
@@ -403,15 +481,18 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 
 	// 1. instead of searching the entire buffer, query when did the trial started....
 	int k = 0;
+	bool found = false;
 	for (;k<numTrials;k++)
 	{
 		if (smartPointerTrialID[k] == trial->trialID)
 		{
+			found = true;
 			break;
 		}
 	}
-	if (k == 0) 
+	if (!found) 
 	{
+		jassertfalse;
 		// couldn't find the trial !?!?!? buffer overrun?
 		return;
 	}
@@ -874,7 +955,8 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 			// inform editor repaint is needed
 	  } else if (command == "addcondition")
 	  {
-		  Condition newcondition(input);
+		  int numExistingConditions = conditions.size();
+		  Condition newcondition(input,numExistingConditions+1);
 		  lockConditions();
 		  newcondition.conditionID = ++conditionCounter;
 		  conditions.push_back(newcondition);

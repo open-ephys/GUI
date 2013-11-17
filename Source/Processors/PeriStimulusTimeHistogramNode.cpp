@@ -55,22 +55,22 @@ void PeriStimulusTimeHistogramNode::updateSettings()
 
 bool PeriStimulusTimeHistogramNode::enable()
 {
-	/*
+	
     std::cout << "PeriStimulusTimeHistogramNode::enable()" << std::endl;
-    SpikeDisplayEditor* editor = (SpikeDisplayEditor*) getEditor();
+	PeriStimulusTimeHistogramEditor* editor = (PeriStimulusTimeHistogramEditor*) getEditor();
     editor->enable();
-		*/
+		
     return true;
 
 }
 
 bool PeriStimulusTimeHistogramNode::disable()
 {
-	/*
+	
     std::cout << "PeriStimulusTimeHistogramNode disabled!" << std::endl;
-    SpikeDisplayEditor* editor = (SpikeDisplayEditor*) getEditor();
+    PeriStimulusTimeHistogramEditor* editor = (PeriStimulusTimeHistogramEditor*) getEditor();
     editor->disable();
-	*/
+	
     return true;
 }
 
