@@ -367,12 +367,12 @@ void SourceNode::process(AudioSampleBuffer& buffer,
     //                 (int) *(data + 2) << " " <<
     //                 (int) *(data + 1) << " " <<
     //                 (int) *(data + 0) << std::endl;
-
+	uint8 ttl_ts[8+8]; // channel + softwaretimestamp + hardware timestamp
 
     // fill event buffer
     for (int i = 0; i < nSamples; i++)
     {
-        for (int c = 0; c < numEventChannels; c++)
+        for (uint8 c = 0; c < numEventChannels; c++)
         {
             int state = eventCodeBuffer[i] & (1 << c);
 
@@ -380,7 +380,11 @@ void SourceNode::process(AudioSampleBuffer& buffer,
             {
                 if (state == 0)
                 {
-
+					int64 ttl_timestamp_software = software_ts + float(i)/SamplingRate *ticksPerSec;
+					int64 ttl_timestamp_hardware = timestamp + i;
+					memcpy(ttl_ts, &ttl_timestamp_software, 8);
+					memcpy(ttl_ts+8, &ttl_timestamp_hardware, 8);
+	
                     //std::cout << "OFF" << std::endl;
                     //std::cout << c << std::endl;
                     // signal channel state is OFF
@@ -388,7 +392,9 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                              TTL,    // eventType
                              i,      // sampleNum
                              0,	     // eventID
-                             c		 // eventChannel
+                             c,		 // eventChannel
+							 16,
+							 ttl_ts
                             );
                 }
                 else
@@ -397,12 +403,17 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                     // std::cout << "ON" << std::endl;
                     // std::cout << c << std::endl;
 
+					int64 ttl_timestamp_software = software_ts + float(i)/SamplingRate *ticksPerSec;
+					int64 ttl_timestamp_hardware = timestamp + i;
+					memcpy(ttl_ts, &ttl_timestamp_software, 8);
+					memcpy(ttl_ts+8, &ttl_timestamp_hardware, 8);
                     // signal channel state is ON
                     addEvent(events, // MidiBuffer
                              TTL,    // eventType
                              i,      // sampleNum
                              1,		 // eventID
-                             c		 // eventChannel
+                             c,		 // eventChannel
+							 16, ttl_ts
                             );
 
 

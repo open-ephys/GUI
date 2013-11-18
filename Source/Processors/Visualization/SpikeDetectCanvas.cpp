@@ -210,6 +210,7 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
     if (button == addPolygonUnitButton)
     {
         inDrawingPolygonMode = true;
+		addPolygonUnitButton->setToggleState(true,false);
 		electrode->spikePlot->setPolygonDrawingMode(true);
 	} else if (button == addUnitButton)
 	{
@@ -1775,6 +1776,9 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 	if (inPolygonDrawingMode)
 	{
 		inPolygonDrawingMode = false;
+		SpikeDetectorEditor* edt = (SpikeDetectorEditor*)processor->getEditor();
+		edt->spikeDetectorCanvas->addPolygonUnitButton->setToggleState(false,false);
+
 		// convert pixel coordinates to pca space coordinates and update unit
 		cPolygon poly;
 		poly.pts.resize(drawnPolygon.size());

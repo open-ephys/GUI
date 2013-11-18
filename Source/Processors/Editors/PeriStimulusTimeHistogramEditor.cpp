@@ -38,10 +38,57 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
     visibleConditions->setEditableText(false);
     visibleConditions->setJustificationType(Justification::centredLeft);
     visibleConditions->addListener(this);
-    visibleConditions->setBounds(65,40,110,20);
+    visibleConditions->setBounds(100,30,110,20);
     addAndMakeVisible(visibleConditions);
 
-   
+	condlabel = new Label("Conditions", "Conditions");
+    condlabel->setBounds(10,30,100,20);
+    condlabel->setFont(Font("Default", 15, Font::plain));
+    condlabel->setColour(Label::textColourId, Colours::white);
+    //condlabel->setColour(Label::backgroundColourId, Colours::grey);
+    condlabel->setEditable(false);
+    addAndMakeVisible(condlabel);
+	
+	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
+    autoRescale->setBounds(35, 95, 130, 18);
+    autoRescale->addListener(this);
+	autoRescale->setToggleState(true,false);
+    autoRescale->setClickingTogglesState(true);
+    addAndMakeVisible(autoRescale);
+
+	smoothPSTH = new ToggleButton("Smooth PSTH");//, Font("Small Text", 13, Font::plain));
+    smoothPSTH->setBounds(135, 95, 130, 18);
+    smoothPSTH->addListener(this);
+	smoothPSTH->setToggleState(true,false);
+    smoothPSTH->setClickingTogglesState(true);
+    addAndMakeVisible(smoothPSTH);
+
+
+	lfp = new ToggleButton("LFP");//, Font("Small Text", 13, Font::plain));
+    lfp->setBounds(35, 55, 130, 18);
+    lfp->addListener(this);
+	lfp->setToggleState(true,false);
+    lfp->setClickingTogglesState(true);
+    addAndMakeVisible(lfp);
+
+	spikes = new ToggleButton("Units");//, Font("Small Text", 13, Font::plain));
+    spikes->setBounds(135, 55, 130, 18);
+    spikes->addListener(this);
+	spikes->setToggleState(true,false);
+    spikes->setClickingTogglesState(true);
+    addAndMakeVisible(spikes);
+
+
+
+	smoothMS = new Label("Smooth MS", "10");
+    smoothMS->setBounds(245,95,40,18);
+    smoothMS->setFont(Font("Default", 15, Font::plain));
+    smoothMS->setColour(Label::textColourId, Colours::white);
+    smoothMS->setColour(Label::backgroundColourId, Colours::grey);
+    smoothMS->setEditable(true);
+    smoothMS->addListener(this);
+    addAndMakeVisible(smoothMS);
+
 	//ConditionsList *model = new ConditionList();
 /*	ConditionsList *model = new ConditionsList;
 	    model->setBounds(65,40,110,60);
@@ -225,34 +272,50 @@ void PeriStimulusTimeHistogramCanvas::update()
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
 	
+	bool LFP = true;
+
 	for (int e=0;e<numElectrodes;e++) 
 	{
+		int offset = 0;
+		if (LFP) {
+			offset = processor->trialCircularBuffer->electrodesPSTH[e].channels.size();
+			for (int u=0;u<processor->trialCircularBuffer->electrodesPSTH[e].channels.size();u++)
+			{
+				XYPlot *newplot = new XYPlot(false,processor->trialCircularBuffer,
+					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
+					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
+					u,row);
+				psthDisplay->psthPlots.push_back(newplot);
+				addAndMakeVisible(newplot);
+			}
+			
+		}
+		
 		int numUnits = processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs.size();
 		maxUnitsPerElectrode = MAX(maxUnitsPerElectrode,numUnits );
 		if (numUnits > 0) 
 		{
 			for (int u=0;u<numUnits;u++)
 			{
-				
-
-				XYPlot *newplot = new XYPlot(processor->trialCircularBuffer,
+				XYPlot *newplot = new XYPlot(true,processor->trialCircularBuffer,
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
-					u,row);
+					offset+u,row);
 				psthDisplay->psthPlots.push_back(newplot);
 				addAndMakeVisible(newplot);
 			}
-			row++;			
+			
 		}
+		row++;			
 	}
-	if (maxUnitsPerElectrode == 0) {
+	if (maxUnitsPerElectrode == 0 && !LFP) {
 		// nothing to be drawn...
 		return;		
 	}
     resized();
 
-	heightPerElectrodePix = 300;
-	widthPerUnit = 300;
+	heightPerElectrodePix = 200;
+	widthPerUnit = 200;
 
 	psthDisplay->resized();
 	psthDisplay->repaint();
@@ -337,10 +400,48 @@ void PeriStimulusTimeHistogramDisplay::resized()
 
 
 /******************************************/
-XYPlot::XYPlot(TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col) :
-	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col)
+XYPlot::XYPlot(bool _spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col) :
+	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col),spikePlot(_spikePlot)
 {
 	font = Font("Default", 15, Font::plain);
+}
+
+void XYPlot::mouseDown(const juce::MouseEvent& event)
+{
+	if (event.mods.isRightButtonDown())
+	{
+
+		tcb->lockPSTH();
+		for (int electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
+		{
+			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+			{
+				if (spikePlot)
+				{
+					for (int unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
+					{
+						if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
+						{
+							tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].clearStatistics();
+							break;
+						}
+					}
+				} else 
+				{
+					for (int Index = 0; Index < tcb->electrodesPSTH[electrodeIndex].channels.size();Index++)
+					{
+						if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].channelID  == unitID)
+						{
+							tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].clearStatistics();
+							break;
+						}
+					}
+
+				}
+			}
+		}
+		tcb->unlockPSTH();
+	}
 }
 
 void XYPlot::resized()
@@ -456,22 +557,37 @@ void XYPlot::paint(Graphics &g)
 	g.setColour(Colours::white);
 	g.drawRect(x0,y0, plotWidth,plotHeight);
 
-	float xmin=0, xmax=0, ymax=0;
+	float xmin=0, xmax=0, ymax=0, ymin = 0;
 	bool found = false;
 	int electrodeIndex;
-	int unitIndex;
+	int entryindex;
 	tcb->lockPSTH();
 	for (electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
 	{
 		if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
 		{
-			for (unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
+			if (spikePlot)
 			{
-				if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
+				for (entryindex = 0; entryindex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
 				{
-					found = true;
-					tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].getRange(xmin, xmax, ymax);
-					break;
+					if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+					{
+						found = true;
+						tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
+						break;
+					}
+				}
+			} else 
+			{
+				// lfp plot
+				for (entryindex = 0; entryindex < tcb->electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+				{
+					if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == unitID)
+					{
+						found = true;
+						tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax,ymin, ymax);
+						break;
+					}
 				}
 			}
 		}
@@ -486,7 +602,7 @@ void XYPlot::paint(Graphics &g)
 	
 
 
-	float axesRange[4] = {xmin,0, xmax, ymax}; // xmin,ymin, xmax, ymax
+	float axesRange[4] = {xmin,ymin, xmax, ymax}; // xmin,ymin, xmax, ymax
 	float rangeX = (axesRange[2]-axesRange[0]);
 	float rangeY = (axesRange[3]-axesRange[1]);
 	int numXTicks = 5;
@@ -515,8 +631,15 @@ void XYPlot::paint(Graphics &g)
 	
 
 		g.setFont(font);
-		String axesName = String("Electrode ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
-			String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID);
+
+	String axesName;
+	if (spikePlot)
+		axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+			String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
+	else
+		axesName = String("LFP ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+		String(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID);
+
 	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
 	
 	float ticklabelWidth = float(plotWidth)/numXTicks;
@@ -562,31 +685,59 @@ void XYPlot::paint(Graphics &g)
 
 
 	tcb->lockPSTH();
-
-	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs.size();cond++)
+	if (spikePlot)
 	{
-
-		std::vector<bool> valid;
-		interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].binTime, 
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].avgResponse,
-			samplePositions,  f_xi,  valid);
-
-		// and finally.... plot!
-		g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[0],
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[1],
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].conditionPSTHs[cond].colorRGB[2]));
-
-		for (int k=0;k<numSamplePoints-1;k++) 
+		for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
 		{
-			// remap f_xi to pixels!
-			float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
-			float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
-			if (valid[k] && valid[k+1])
-				g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+
+			std::vector<bool> valid;
+			interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
+				samplePositions,  f_xi,  valid);
+
+			// and finally.... plot!
+			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]));
+
+			for (int k=0;k<numSamplePoints-1;k++) 
+			{
+				// remap f_xi to pixels!
+				float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
+				float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
+				if (valid[k] && valid[k+1])
+					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+			}
+
 		}
 
-	}
+	} else
+	{
+		// lfp plot
+		for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
+		{
 
+			std::vector<bool> valid;
+			interp1(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
+				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
+				samplePositions,  f_xi,  valid);
+
+			// and finally.... plot!
+			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
+				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
+				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]));
+
+			for (int k=0;k<numSamplePoints-1;k++) 
+			{
+				// remap f_xi to pixels!
+				float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
+				float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
+				if (valid[k] && valid[k+1])
+					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+			}
+
+		}
+	}
 
 	tcb->unlockPSTH();
 

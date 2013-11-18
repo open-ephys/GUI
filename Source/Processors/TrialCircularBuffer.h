@@ -38,6 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class PeriStimulusTimeHistogramNode;
 
+#define TTL_TRIAL_OFFSET 30000
+
 #ifndef MAX
 #define MAX(a,b)((a)<(b)?(b):(a))
 #endif
@@ -129,7 +131,7 @@ public:
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
 	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
 
-	void getRange(float &xMin, float &xMax, float &yMax);
+	void getRange(float &xMin, float &xMax, float &yMin, float &yMax);
 	float preSecs, postSecs, maxTrialTimeSec;
 	int conditionID;
 
@@ -155,7 +157,7 @@ public:
 	void addSpikeToBuffer(int64 spikeTimestampSoftware);
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
-	void getRange(float &xmin, float &xmax, float &ymax);
+	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 
 	std::vector<ConditionPSTH> conditionPSTHs;
 	SmartSpikeCircularBuffer spikeBuffer;
@@ -168,6 +170,7 @@ public:
 	ChannelPSTHs(int channelID, float maxTrialTimeSeconds, int maxTrialsInMemory, float preSecs, float postSecs, int binResolutionMS);
 	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid);
 	void clearStatistics();
+	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 
 	int channelID;
 	std::vector<ConditionPSTH> conditionPSTHs;
@@ -204,6 +207,7 @@ public:
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
 	
+	void addTTLevent(int channel,int64 ttl_timestamp_software);
 	void addDefaultTTLConditions();
 	void addCondition(std::vector<String> input);
 	void lockConditions();
@@ -211,9 +215,12 @@ public:
 	void lockPSTH();
 	void unlockPSTH();
 	void reallocate(int numChannels);
-
+	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
+	void clearDesign();
+	bool firstTime;
 	 double postSec, preSec;
-     
+     int numTTLchannels ;
+	 float numTicksPerSecond;
 	 float binResolutionMS;
 	 float maxTrialTimeSeconds;
 	 int  maxTrialsInMemory;
@@ -224,6 +231,11 @@ public:
 	int64 MaxTrialTimeTicks;
 	String designName;
 	bool addDefaultTTLconditions;
+
+	float ttlSupressionTimeSec;
+	float ttlTrialLengthSec;
+
+	std::vector<int64> lastTTLts;
 	std::queue<Trial> aliveTrials;
 	std::vector<Condition> conditions;
 	std::vector<ElectrodePSTH> electrodesPSTH;

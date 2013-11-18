@@ -102,15 +102,15 @@ public:
     void stopRecording() { } // unused
     
     SpikeDetector* processor;
+	 ScopedPointer<UtilityButton> clearButton,addPolygonUnitButton,
+		addUnitButton,delUnitButton,addBoxButton, delBoxButton,rePCAButton;
 
 private:
 
     ScopedPointer<SpikeThresholdDisplay> spikeDisplay;
     ScopedPointer<Viewport> viewport;
 
-    ScopedPointer<UtilityButton> clearButton,addPolygonUnitButton,
-		addUnitButton,delUnitButton,addBoxButton, delBoxButton,rePCAButton;
-
+   
 	bool inDrawingPolygonMode;
     bool newSpike;
     SpikeObject spike;

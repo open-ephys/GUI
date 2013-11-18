@@ -329,6 +329,12 @@ public:
     /** Load settings. */
     void loadStateFromXml(XmlElement*);
 
+    /** Informs the Control Panel that recording has begun.*/
+    void startRecording();
+    
+    /** Informs the Control Panel that recording has stopped.*/
+    void stopRecording();
+
 private:
     ScopedPointer<PlayButton> playButton;
     ScopedPointer<RecordButton> recordButton;
@@ -353,11 +359,6 @@ private:
 
     void buttonClicked(Button* button);
     
-    /** Informs the Control Panel that recording has begun.*/
-    void startRecording();
-    
-    /** Informs the Control Panel that recording has stopped.*/
-    void stopRecording();
 
     bool initialize;
 

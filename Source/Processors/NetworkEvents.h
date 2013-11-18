@@ -111,6 +111,8 @@ public:
 	void simulateDesignAndTrials(juce::MidiBuffer& events);
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
     void setParameter(int parameterIndex, float newValue);
+	void handleSpecialMessages(StringTS msg);
+
 	void run();
 	void opensocket();
  

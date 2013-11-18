@@ -162,6 +162,7 @@ public:
     void checkSettings();
 	void setThresholdValue(int chan, double threshold);
     OwnedArray<cElectrodeButton> electrodeButtons;
+	SpikeDetectCanvas *spikeDetectorCanvas;
 
 private:
 
@@ -181,7 +182,7 @@ private:
 
     Array<ElectrodeEditorButton*> electrodeEditorButtons;
 	
-	SpikeDetectCanvas *spikeDetectorCanvas;
+
     void removeElectrode(int index);
     void editElectrode(int index, int chan, int newChan);
 

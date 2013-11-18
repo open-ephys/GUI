@@ -41,16 +41,18 @@ class PeriStimulusTimeHistogramNode;
 class XYPlot : public Component
 {
 public:
-	XYPlot(TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
+	XYPlot(bool spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
 	void resized();
 	void paint(Graphics &g);
+
+	void mouseDown(const juce::MouseEvent& event);
 
 	juce::Font font;
 	int row, col;
 	int electrodeID, unitID;
 	TrialCircularBuffer *tcb;
 private:
-	
+	bool spikePlot;
 	std::vector<int> histc(std::vector<float> xi, std::vector<float> x);
 	std::vector<float> diff(std::vector<float> x);
 	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid);
@@ -139,6 +141,10 @@ private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
 	ComboBox* visibleConditions;
+	ToggleButton *smoothPSTH;
+	ToggleButton *autoRescale;
+	ToggleButton *lfp, *spikes;
+	Label *smoothMS, *condlabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 

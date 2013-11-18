@@ -123,12 +123,12 @@ void NetworkEvents::simulateDesignAndTrials(juce::MidiBuffer& events)
 
 void NetworkEvents::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
-    /*if (eventType == TIMESTAMP)
+    if (eventType == TIMESTAMP)
     {
           const uint8* dataptr = event.getRawData();
 	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
 		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
-    } */
+    } 
 }
 
 void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events)
@@ -140,7 +140,21 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 	delete msg_with_ts;
 }
 
+void NetworkEvents::handleSpecialMessages(StringTS msg)
+{
+	if (msg.getString() == "StartRecord")
+	{
+		getControlPanel()->startRecording();
 
+		getProcessorGraph()->setRecordState(true);
+
+	} else if (msg.getString() == "StopRecord")
+	{
+		getControlPanel()->stopRecording();
+		getProcessorGraph()->setRecordState(false);
+	}
+
+}
 
 void NetworkEvents::process(AudioSampleBuffer& buffer,
 							MidiBuffer& events,
@@ -159,6 +173,10 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 	
 	 while (!networkMessagesQueue.empty()) {
 			 StringTS msg = networkMessagesQueue.front();
+
+			 // handle special messages
+			 handleSpecialMessages(msg);
+
 			 postTimestamppedStringToMidiBuffer(msg, events);
 			 getUIComponent()->getLogWindow()->addLineToLog(msg);
 		     networkMessagesQueue.pop();
