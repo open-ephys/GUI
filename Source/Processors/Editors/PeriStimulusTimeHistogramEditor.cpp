@@ -89,10 +89,7 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
     smoothMS->addListener(this);
     addAndMakeVisible(smoothMS);
 
-	//ConditionsList *model = new ConditionList();
-/*	ConditionsList *model = new ConditionsList;
-	    model->setBounds(65,40,110,60);
-	addAndMakeVisible(model);*/
+
 
    
 }
@@ -109,6 +106,29 @@ void PeriStimulusTimeHistogramEditor::updateCondition(std::vector<Condition> con
 void PeriStimulusTimeHistogramEditor::comboBoxChanged (ComboBox* comboBoxThatHasChanged) 
 {
 	
+}
+
+
+void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
+{
+	VisualizerEditor::buttonEvent(button);
+	if (periStimulusTimeHistogramCanvas == nullptr)
+		return;
+
+	if (button == lfp)
+	{
+		periStimulusTimeHistogramCanvas->setLFPvisibility(lfp->getToggleState());
+	} else if (button == spikes)
+	{
+		periStimulusTimeHistogramCanvas->setSpikesVisibility(spikes->getToggleState());
+	} else if (button == smoothPSTH)
+	{
+		periStimulusTimeHistogramCanvas->setSmoothPSTH(smoothPSTH->getToggleState());
+	} else if (button == autoRescale)
+	{
+		periStimulusTimeHistogramCanvas->setAutoRescale(autoRescale->getToggleState());
+	}
+
 }
 
 
@@ -219,6 +239,11 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	processor(n)
 {
 
+
+	showLFP = true;
+	showSpikes = true;
+	smoothPlots = true;
+	autoRescale = true;
 	viewport = new Viewport();
 	psthDisplay = new PeriStimulusTimeHistogramDisplay(n, viewport, this);
 	viewport->setViewedComponent(psthDisplay, false);
@@ -253,6 +278,32 @@ void PeriStimulusTimeHistogramCanvas::endAnimation()
 	stopCallbacks();
 }
 
+
+void PeriStimulusTimeHistogramCanvas::setLFPvisibility(bool visible)
+{
+	 showLFP = visible;
+	 update();
+}
+
+void PeriStimulusTimeHistogramCanvas::setSpikesVisibility(bool visible)
+{
+	showSpikes = visible;
+	update();
+}
+
+void PeriStimulusTimeHistogramCanvas::setSmoothPSTH(bool smooth)
+{
+	smoothPlots = smooth;
+	update();
+}
+
+void PeriStimulusTimeHistogramCanvas::setAutoRescale(bool state)
+{
+	autoRescale = state;
+	update();
+}
+
+
 void PeriStimulusTimeHistogramCanvas::refreshState()
 {
 	resized();
@@ -263,21 +314,26 @@ void PeriStimulusTimeHistogramCanvas::update()
 	//std::cout << "Updating SpikeDisplayCanvas" << std::endl;
 // clear all XY plots and create new ones...
 	// delete all existing plots.
+	// lock psth
 	updateNeeded = false;
+	for (int k=0; k < psthDisplay->psthPlots.size();k++)
+	{
+		delete psthDisplay->psthPlots[k];
+	}
 	psthDisplay->psthPlots.clear();
 	if (processor->trialCircularBuffer == nullptr)
 		return;
 
+	processor->trialCircularBuffer->lockPSTH();
 	numElectrodes = processor->trialCircularBuffer->electrodesPSTH.size();
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
-	
-	bool LFP = true;
 
 	for (int e=0;e<numElectrodes;e++) 
 	{
 		int offset = 0;
-		if (LFP) {
+		bool plottedSomething = false;
+		if (showLFP) {
 			offset = processor->trialCircularBuffer->electrodesPSTH[e].channels.size();
 			for (int u=0;u<processor->trialCircularBuffer->electrodesPSTH[e].channels.size();u++)
 			{
@@ -287,29 +343,35 @@ void PeriStimulusTimeHistogramCanvas::update()
 					u,row);
 				psthDisplay->psthPlots.push_back(newplot);
 				addAndMakeVisible(newplot);
+				plottedSomething = true;
 			}
 			
 		}
 		
-		int numUnits = processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs.size();
-		maxUnitsPerElectrode = MAX(maxUnitsPerElectrode,numUnits );
-		if (numUnits > 0) 
+		if (showSpikes)
 		{
-			for (int u=0;u<numUnits;u++)
+			int numUnits = processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs.size();
+			maxUnitsPerElectrode = MAX(maxUnitsPerElectrode,numUnits );
+			if (numUnits > 0) 
 			{
-				XYPlot *newplot = new XYPlot(true,processor->trialCircularBuffer,
-					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
-					processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
-					offset+u,row);
-				psthDisplay->psthPlots.push_back(newplot);
-				addAndMakeVisible(newplot);
+				for (int u=0;u<numUnits;u++)
+				{
+					XYPlot *newplot = new XYPlot(true,processor->trialCircularBuffer,
+						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
+						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
+						offset+u,row);
+					psthDisplay->psthPlots.push_back(newplot);
+					addAndMakeVisible(newplot);
+				}
+				plottedSomething = true;
 			}
-			
 		}
-		row++;			
+		if (plottedSomething)
+			row++;			
 	}
-	if (maxUnitsPerElectrode == 0 && !LFP) {
+	if (maxUnitsPerElectrode == 0 && !showLFP) {
 		// nothing to be drawn...
+		processor->trialCircularBuffer->unlockPSTH();
 		return;		
 	}
     resized();
@@ -319,6 +381,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 
 	psthDisplay->resized();
 	psthDisplay->repaint();
+	processor->trialCircularBuffer->unlockPSTH();
 }
 
 
@@ -345,7 +408,6 @@ void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
 
 void PeriStimulusTimeHistogramCanvas::refresh()
 {
-	// this is called every 10 hz?
 	repaint();
 	psthDisplay->refresh();
 }
@@ -404,6 +466,8 @@ XYPlot::XYPlot(bool _spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int
 	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col),spikePlot(_spikePlot)
 {
 	font = Font("Default", 15, Font::plain);
+	guassianStandardDeviationMS = 5; // default smoothing
+	buildSmoothKernel(guassianStandardDeviationMS); 
 }
 
 void XYPlot::mouseDown(const juce::MouseEvent& event)
@@ -522,6 +586,48 @@ void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<floa
 
 }
 
+std::vector<float> XYPlot::smooth(std::vector<float> x)
+{
+	std::vector<float> smoothx;
+	smoothx.resize(x.size());
+
+	int numKernelBins = smoothKernel.size();
+	int zeroIndex = (numKernelBins-1)/2;
+	int numXbins = x.size();
+	for (int k=0;k<numXbins;k++)
+	{
+		float response = 0;
+		for (int j=-zeroIndex;j<zeroIndex;j++)
+		{
+			if (k+j >=0 && k+j < numXbins)
+				response+=x[k+j] * smoothKernel[j+zeroIndex];
+		}
+		smoothx[k] = response;
+	}
+	return smoothx;
+}
+
+void XYPlot::buildSmoothKernel(float guassianStandardDeviationMS)
+{
+	// assume each bin correponds to one millisecond.
+	// build the gaussian kernel
+	int numKernelBins = 2*(int)(guassianStandardDeviationMS*3.5)+1; // +- 3.5 standard deviations.
+	int zeroIndex = (numKernelBins-1)/2;
+	smoothKernel.resize(numKernelBins); 
+	float sumZ = 0;
+	for (int k=0;k<numKernelBins;k++) 
+	{
+		float z = float(k-zeroIndex);
+		smoothKernel[k] = exp(- (z*z)/(2*guassianStandardDeviationMS*guassianStandardDeviationMS));
+		sumZ+=smoothKernel[k];
+	}
+	// normalize kernel
+	for (int k=0;k<numKernelBins;k++) 
+	{
+		smoothKernel[k] /= sumZ;
+	}
+}
+
 
 void XYPlot::paint(Graphics &g)
 {
@@ -543,9 +649,6 @@ void XYPlot::paint(Graphics &g)
 		 x0 = 30;
 	}
 
-	// keep a fixed amount of pixels for axes labels
-	g.setColour(Colours::whitesmoke);
-	g.drawRect(0,0,w,h);
 
 	int y0 = 30;
 
@@ -573,6 +676,13 @@ void XYPlot::paint(Graphics &g)
 					if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 					{
 						found = true;
+					// keep a fixed amount of pixels for axes labels
+						g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
+												 tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
+												  tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]));
+
+						g.drawRect(0,0,w,h,2);
+
 						tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
 						break;
 					}
@@ -585,6 +695,9 @@ void XYPlot::paint(Graphics &g)
 					if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == unitID)
 					{
 						found = true;
+					g.setColour(Colours::whitesmoke);
+					g.drawRect(0,0,w,h);
+
 						tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax,ymin, ymax);
 						break;
 					}
@@ -681,7 +794,7 @@ void XYPlot::paint(Graphics &g)
 		// which corresponds to pixel location subsample*k
 	}
 
-	std::vector<float> f_xi;
+	std::vector<float> f_xi,smooth_f_xi;
 
 
 	tcb->lockPSTH();
@@ -695,6 +808,7 @@ void XYPlot::paint(Graphics &g)
 				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
 				samplePositions,  f_xi,  valid);
 
+			smooth_f_xi = smooth(f_xi);
 			// and finally.... plot!
 			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
 				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
@@ -703,8 +817,8 @@ void XYPlot::paint(Graphics &g)
 			for (int k=0;k<numSamplePoints-1;k++) 
 			{
 				// remap f_xi to pixels!
-				float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
-				float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
+				float fx_pix = MIN(plotHeight, MAX(0,(smooth_f_xi[k]-axesRange[1])/rangeY * plotHeight));
+				float fxp1_pix = MIN(plotHeight,MAX(0,(smooth_f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
 				if (valid[k] && valid[k+1])
 					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
 			}

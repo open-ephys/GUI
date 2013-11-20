@@ -152,7 +152,7 @@ private:
 class UnitPSTHs 
 {
 public:
-	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory);
+	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, uint8 R, uint8 G, uint8 B);
 	void updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial *trial);
 	void addSpikeToBuffer(int64 spikeTimestampSoftware);
 	void addTrialStartToSmartBuffer(Trial *t);
@@ -161,6 +161,7 @@ public:
 
 	std::vector<ConditionPSTH> conditionPSTHs;
 	SmartSpikeCircularBuffer spikeBuffer;
+	uint8 colorRGB[3];
 	int unitID;
 };
 

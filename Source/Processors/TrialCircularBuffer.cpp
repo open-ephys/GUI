@@ -352,9 +352,11 @@ void ChannelPSTHs::clearStatistics()
 }
 
 /***********************************************/
-UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory):  unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory)
+UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, uint8 R, uint8 G, uint8 B): unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory)
 {
-
+	colorRGB[0] = R;
+	colorRGB[1] = G;
+	colorRGB[2] = B;
 }
 
 void UnitPSTHs::addTrialStartToSmartBuffer(Trial *t)
@@ -468,7 +470,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 		ContinuousCircularBuffer(NumCh, SamplingRate, SubSampling, NumSecInBuffer)
 {
 	trialptr = 0;
-	numTrials = 50;
+	numTrials = 100;
 	smartPointerIndex.resize(numTrials); // Number of trials to keep in memory
 	smartPointerTrialID.resize(numTrials);
 	for (int k=0;k<numTrials;k++)
@@ -517,7 +519,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	}
 	if (!found) 
 	{
-		jassertfalse;
+		//jassertfalse;
 		// couldn't find the trial !?!?!? buffer overrun?
 		return;
 	}
@@ -899,6 +901,7 @@ void TrialCircularBuffer::clearDesign()
 	  
 	  if (command == "newelectrode")
 	  {
+		  lockPSTH();
 		  ElectrodePSTH e(input[1].getIntValue());
 		  int numChannels = input[2].getIntValue();
 		  
@@ -914,14 +917,17 @@ void TrialCircularBuffer::clearDesign()
 			  e.channelsPSTHs.push_back(channelPSTH);
 		  }
 		  electrodesPSTH.push_back(e);
+		  unlockPSTH();
 		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
 	  } else if (command == "newunit")
 	  {
 		  int electrodeID = input[1].getIntValue();
 		  int unitID = input[2].getIntValue();
-
+		  int R = input[3].getIntValue();
+		  int G = input[4].getIntValue();
+		  int B = input[5].getIntValue();
 		  // build a new PSTH for all defined conditions
-		  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory);
+		  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,R,G,B);
 		  for (int k=0;k<conditions.size();k++)
 		  {
 			  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
@@ -964,6 +970,7 @@ void TrialCircularBuffer::clearDesign()
 				if (electrodesPSTH[e].electrodeID == electrodeID)
 				{
 					electrodesPSTH.erase(electrodesPSTH.begin() + e);
+					break;
 				}
 			}
 		  unlockPSTH();

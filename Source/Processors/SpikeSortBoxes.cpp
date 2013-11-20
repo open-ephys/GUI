@@ -684,6 +684,31 @@ void  SpikeSortBoxes::EndCriticalSection()
 	  return unusedID;
   }
 
+  void SpikeSortBoxes::getUnitColor(int UnitID, uint8 &R, uint8 &G, uint8 &B)
+  {
+		for (int k=0;k<boxUnits.size();k++)
+		{
+			if (boxUnits[k].getUnitID() == UnitID)
+			{
+				R = boxUnits[k].ColorRGB[0];
+				G = boxUnits[k].ColorRGB[1];
+				B = boxUnits[k].ColorRGB[2];
+				break;
+			}
+		}
+		for (int k=0;k<pcaUnits.size();k++)
+		{
+			if (pcaUnits[k].getUnitID() == UnitID)
+			{
+				R = pcaUnits[k].ColorRGB[0];
+				G = pcaUnits[k].ColorRGB[1];
+				B = pcaUnits[k].ColorRGB[2];
+				break;
+			}
+		}
+  }
+
+
   int SpikeSortBoxes::generateUnitID()
   {
 	  // finds the first unused ID and return it

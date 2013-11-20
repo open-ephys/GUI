@@ -46,17 +46,23 @@ public:
 	void paint(Graphics &g);
 
 	void mouseDown(const juce::MouseEvent& event);
+	
 
 	juce::Font font;
 	int row, col;
 	int electrodeID, unitID;
 	TrialCircularBuffer *tcb;
 private:
-	bool spikePlot;
+	
 	std::vector<int> histc(std::vector<float> xi, std::vector<float> x);
 	std::vector<float> diff(std::vector<float> x);
 	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid);
+	std::vector<float> smooth(std::vector<float> x);
+	void buildSmoothKernel(float guassianKernelSizeMS);
 
+	bool spikePlot;
+	std::vector<float> smoothKernel; 
+	float guassianStandardDeviationMS;
 };
 class PeriStimulusTimeHistogramCanvas;
 
@@ -99,6 +105,10 @@ public:
 	void buttonClicked(Button* button);
 
 
+	void setLFPvisibility(bool visible);
+	void setSpikesVisibility(bool visible);
+	void setSmoothPSTH(bool smooth);
+	void setAutoRescale(bool state);
 	
 	void setParameter(int, float) {}
 	void setParameter(int, int, int, float) {}
@@ -113,6 +123,7 @@ public:
 	bool updateNeeded;
 
    private:
+    bool showLFP, showSpikes, smoothPlots, autoRescale;
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport;
 	PeriStimulusTimeHistogramDisplay *psthDisplay;
@@ -137,6 +148,7 @@ public:
 	void updateCondition(std::vector<Condition> conditions);
 	void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
 	void updateCanvas();
+	void buttonEvent(Button* button);
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;

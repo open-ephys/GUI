@@ -218,9 +218,11 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 		if (e != nullptr) {
 			int electrodeID = processor->getActiveElectrode()->electrodeID;
 			int newUnitID = processor->getActiveElectrode()->spikeSort->addBoxUnit(0);
+			uint8 r,g,b;
+			processor->getActiveElectrode()->spikeSort->getUnitColor(newUnitID, r,g,b);
 			electrode->spikePlot->updateUnitsFromProcessor();
 			electrode->spikePlot->setSelectedUnitAndbox(newUnitID,0);
-			String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID);
+			String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID)+" "+String(r)+" "+String(g)+" "+String(b);
 			processor->addNetworkEventToQueue(StringTS(eventlog));
 		}
 
@@ -1800,7 +1802,11 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 		Electrode *e = processor->getActiveElectrode();
 		e->spikeSort->addPCAunit(drawnUnit);
 
-		String eventlog = "NewUnit "+String(e->electrodeID) + " "+String(drawnUnit.getUnitID());
+
+		uint8 r,g,b;
+		e->spikeSort->getUnitColor(drawnUnit.getUnitID(), r,g,b);
+		
+		String eventlog = "NewUnit "+String(e->electrodeID) + " "+String(drawnUnit.getUnitID()) +" "+String(r)+" "+String(g)+" "+String(b);
 		processor->addNetworkEventToQueue(StringTS(eventlog));
 
 		drawnPolygon.clear();

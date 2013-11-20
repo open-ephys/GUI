@@ -260,7 +260,7 @@ bool SpikeDetector::removeElectrode(int index)
 	String log = "Removing electrode (ID " + String(electrodes[index]->electrodeID)+")";
 	std::cout << log <<std::endl;
 
-	String eventlog = "RemovingElectrode " + String(electrodes[index]->electrodeID);
+	String eventlog = "RemoveElectrode " + String(electrodes[index]->electrodeID);
 	addNetworkEventToQueue(StringTS(eventlog));
 	//getUIComponent()->getLogWindow()->addLineToLog(log);
 

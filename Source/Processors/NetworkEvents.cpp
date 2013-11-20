@@ -86,18 +86,20 @@ void NetworkEvents::initSimulation()
 	simulation.push(StringTS("AddCondition Name GoLeft TrialTypes 4 5 6",simulationStartTime+0.6*secondsToTicks));
 
 
-	int numTrials = 100;
+	int numTrials = 5000;
+	float ITI = 0.7;
+	float TrialLength = 0.4;
 	// trial every 5 seconds
 	for (int k=0;k<numTrials;k++) {
-		simulation.push(StringTS("TrialStart",simulationStartTime+5*k*secondsToTicks));
+		simulation.push(StringTS("TrialStart",simulationStartTime+ITI*k*secondsToTicks));
 		if (k%2 == 0) 
-			simulation.push(StringTS("TrialType 2",simulationStartTime+(5*k+0.1)*secondsToTicks)); // 100 ms after trial start
+			simulation.push(StringTS("TrialType 2",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
 		else
-			simulation.push(StringTS("TrialType 4",simulationStartTime+(5*k+0.1)*secondsToTicks)); // 100 ms after trial start
+			simulation.push(StringTS("TrialType 4",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
 
-		simulation.push(StringTS("TrialAlign",simulationStartTime+(5*k+0.1)*secondsToTicks)); // 100 ms after trial start
-		simulation.push(StringTS("TrialOutcome 1",simulationStartTime+(5*k+0.3)*secondsToTicks)); // 300 ms after trial start
-		simulation.push(StringTS("TrialEnd",simulationStartTime+(5*k+0.4)*secondsToTicks)); // 400 ms after trial start
+		simulation.push(StringTS("TrialAlign",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
+		simulation.push(StringTS("TrialOutcome 1",simulationStartTime+(ITI*k+0.3)*secondsToTicks)); // 300 ms after trial start
+		simulation.push(StringTS("TrialEnd",simulationStartTime+(ITI*k+TrialLength)*secondsToTicks)); // 400 ms after trial start
 
 	}
 	

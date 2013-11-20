@@ -239,6 +239,7 @@ public:
 	std::vector<BoxUnit> getBoxUnits();
 	std::vector<PCAUnit> getPCAUnits();
 
+	void getUnitColor(int UnitID, uint8 &R, uint8 &G, uint8 &B);
 	void updateBoxUnits(std::vector<BoxUnit> _units);
 	void updatePCAUnits(std::vector<PCAUnit> _units);
 	int generateUnitID();
