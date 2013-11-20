@@ -41,7 +41,7 @@ public:
 	~Rhd2000EvalBoard();
 
     int open(const char* libname);
-    bool uploadFpgaBitfile(string filename, string &result);
+    bool uploadFpgaBitfile(string filename);
     void initialize();
 
     enum AmplifierSampleRate
@@ -155,8 +155,6 @@ public:
     int queueToFile(queue<Rhd2000DataBlock> &dataQueue, std::ofstream& saveOut);
 
 	void resetFpga();
-
-	int getNumDataStreams(); 
 
 private:
     okCFrontPanel* dev;

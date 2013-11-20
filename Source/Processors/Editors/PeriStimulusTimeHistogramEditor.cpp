@@ -94,6 +94,22 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
    
 }
 
+
+void PeriStimulusTimeHistogramEditor::labelTextChanged(Label* label)
+{
+    Value val = label->getTextValue();
+    double requestedValue = MAX(1, double(val.getValue())); // minimum 1 ms smoothing
+	if (periStimulusTimeHistogramCanvas == nullptr)
+		return;
+
+    if (label == smoothMS)
+    {
+		periStimulusTimeHistogramCanvas->setSmoothing(	requestedValue);
+	}
+          
+
+}
+
 void PeriStimulusTimeHistogramEditor::updateCondition(std::vector<Condition> conditions)
 {
 	visibleConditions->clear();
@@ -127,7 +143,7 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 	} else if (button == autoRescale)
 	{
 		periStimulusTimeHistogramCanvas->setAutoRescale(autoRescale->getToggleState());
-	}
+	}  
 
 }
 
@@ -244,6 +260,7 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	showSpikes = true;
 	smoothPlots = true;
 	autoRescale = true;
+	gaussianStandardDeviationMS = 10;
 	viewport = new Viewport();
 	psthDisplay = new PeriStimulusTimeHistogramDisplay(n, viewport, this);
 	viewport->setViewedComponent(psthDisplay, false);
@@ -288,6 +305,12 @@ void PeriStimulusTimeHistogramCanvas::setLFPvisibility(bool visible)
 void PeriStimulusTimeHistogramCanvas::setSpikesVisibility(bool visible)
 {
 	showSpikes = visible;
+	update();
+}
+
+void PeriStimulusTimeHistogramCanvas::setSmoothing(float _gaussianStandardDeviationMS)
+{
+	gaussianStandardDeviationMS=_gaussianStandardDeviationMS;
 	update();
 }
 
@@ -341,6 +364,9 @@ void PeriStimulusTimeHistogramCanvas::update()
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
 					u,row);
+				newplot->setSmoothState(smoothPlots);
+				newplot->setAutoRescale(autoRescale);
+				newplot->buildSmoothKernel(gaussianStandardDeviationMS);
 				psthDisplay->psthPlots.push_back(newplot);
 				addAndMakeVisible(newplot);
 				plottedSomething = true;
@@ -360,6 +386,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
 						offset+u,row);
+					newplot->setSmoothState(smoothPlots);
+					newplot->setAutoRescale(autoRescale);
+					newplot->buildSmoothKernel(gaussianStandardDeviationMS);
+
 					psthDisplay->psthPlots.push_back(newplot);
 					addAndMakeVisible(newplot);
 				}
@@ -468,6 +498,9 @@ XYPlot::XYPlot(bool _spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int
 	font = Font("Default", 15, Font::plain);
 	guassianStandardDeviationMS = 5; // default smoothing
 	buildSmoothKernel(guassianStandardDeviationMS); 
+	smoothPlot = spikePlot; // don't smooth LFPs
+	autoRescale = true;
+	firstTime = true;
 }
 
 void XYPlot::mouseDown(const juce::MouseEvent& event)
@@ -586,6 +619,16 @@ void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<floa
 
 }
 
+void XYPlot::setSmoothState(bool enable)
+{
+	smoothPlot = enable;
+}
+
+void XYPlot::setAutoRescale(bool enable)
+{
+	autoRescale = enable;
+}
+
 std::vector<float> XYPlot::smooth(std::vector<float> x)
 {
 	std::vector<float> smoothx;
@@ -607,8 +650,9 @@ std::vector<float> XYPlot::smooth(std::vector<float> x)
 	return smoothx;
 }
 
-void XYPlot::buildSmoothKernel(float guassianStandardDeviationMS)
+void XYPlot::buildSmoothKernel(float _guassianStandardDeviationMS)
 {
+	guassianStandardDeviationMS = _guassianStandardDeviationMS;
 	// assume each bin correponds to one millisecond.
 	// build the gaussian kernel
 	int numKernelBins = 2*(int)(guassianStandardDeviationMS*3.5)+1; // +- 3.5 standard deviations.
@@ -712,10 +756,18 @@ void XYPlot::paint(Graphics &g)
 		return; // nothing to draw.
 
 	// determine tick position
-	
-
-
-	float axesRange[4] = {xmin,ymin, xmax, ymax}; // xmin,ymin, xmax, ymax
+	if (firstTime || autoRescale)
+	{
+		firstTime = false;
+		axesRange[0] = xmin;
+		axesRange[1] = ymin;
+		axesRange[2] = xmax;
+		axesRange[3] = ymax;
+		if (smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
+			axesRange[0] += 7*guassianStandardDeviationMS/1e3;
+			axesRange[2] -= 7*guassianStandardDeviationMS/1e3;
+		}
+	}
 	float rangeX = (axesRange[2]-axesRange[0]);
 	float rangeY = (axesRange[3]-axesRange[1]);
 	int numXTicks = 5;
@@ -764,6 +816,7 @@ void XYPlot::paint(Graphics &g)
 		float tickloc = x0+(tickX[k]- axesRange[0]) / rangeX * plotWidth;
 		g.drawLine(tickloc,h-y0,tickloc,h-(y0+tickHeight),tickThickness);
 		String tickLabel(tickX[k],1);;
+
 		if (k > 0)
 			g.drawText(tickLabel,tickloc-ticklabelWidth/2,h-(y0),ticklabelWidth,tickLabelHeight,Justification::centred,false);
 		else
@@ -794,7 +847,7 @@ void XYPlot::paint(Graphics &g)
 		// which corresponds to pixel location subsample*k
 	}
 
-	std::vector<float> f_xi,smooth_f_xi;
+	std::vector<float> f_xi,smooth_res;
 
 
 	tcb->lockPSTH();
@@ -803,12 +856,23 @@ void XYPlot::paint(Graphics &g)
 		for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
 		{
 
+
 			std::vector<bool> valid;
+			if (smoothPlot) {
+			smooth_res = smooth(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse);
+
+			interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
+				smooth_res,
+				samplePositions,  f_xi,  valid);
+			}
+			else 
+			{
 			interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
 				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
 				samplePositions,  f_xi,  valid);
 
-			smooth_f_xi = smooth(f_xi);
+			}
+			
 			// and finally.... plot!
 			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
 				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
@@ -817,8 +881,8 @@ void XYPlot::paint(Graphics &g)
 			for (int k=0;k<numSamplePoints-1;k++) 
 			{
 				// remap f_xi to pixels!
-				float fx_pix = MIN(plotHeight, MAX(0,(smooth_f_xi[k]-axesRange[1])/rangeY * plotHeight));
-				float fxp1_pix = MIN(plotHeight,MAX(0,(smooth_f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
+				float fx_pix = MIN(plotHeight, MAX(0,(f_xi[k]-axesRange[1])/rangeY * plotHeight));
+				float fxp1_pix = MIN(plotHeight,MAX(0,(f_xi[k+1]-axesRange[1])/rangeY * plotHeight));
 				if (valid[k] && valid[k+1])
 					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
 			}

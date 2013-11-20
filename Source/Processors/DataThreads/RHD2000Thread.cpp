@@ -86,6 +86,13 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
 
         // automatically find connected headstages
         scanPorts(); // things would appear to run more smoothly if this were done after the editor has been created
+    
+        if (0)
+        {
+            evalBoard->setContinuousRunMode(true);
+            evalBoard->run();
+        }
+
     }
 
 }
@@ -169,14 +176,13 @@ bool RHD2000Thread::uploadBitfile(String bitfilename)
 {
     
     deviceFound = true;
-    string result;
-    if (!evalBoard->uploadFpgaBitfile(bitfilename.toStdString(), result))
+    
+    if (!evalBoard->uploadFpgaBitfile(bitfilename.toStdString()))
     {
         std::cout << "Couldn't upload bitfile from " << bitfilename << std::endl;
         
         bool response = AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
-								    
-                                   result,
+                                   "FPGA bitfile not found.",
                                     "The rhd2000.bit file was not found in the directory of the executable. Would you like to browse for it?",
                                      "Yes", "No", 0, 0);
         if (response)
@@ -294,6 +300,10 @@ void RHD2000Thread::initializeBoard()
 
 void RHD2000Thread::scanPorts()
 {
+	if (!deviceFound) //Safety to avoid crashes if board not present
+	{
+		return;
+	}
     // Scan SPI ports
 
     int delay, stream, id;
@@ -851,6 +861,11 @@ void RHD2000Thread::setSampleRate(int sampleRateIndex, bool isTemporary)
 
 void RHD2000Thread::updateRegisters()
 {
+
+	if (!deviceFound) //Safety to avoid crashes loading a chain with Rythm node withouth a board
+	{
+		return;
+	}
     // Set up an RHD2000 register object using this sample rate to
     // optimize MUX-related register settings.
     chipRegisters.defineSampleRate(boardSampleRate);
@@ -966,10 +981,18 @@ bool RHD2000Thread::startAcquisition()
 
     //std::cout << "Setting max timestep." << std::endl;
     //evalBoard->setMaxTimeStep(100);
-    evalBoard->setContinuousRunMode(true);
+    
 
     std::cout << "Starting acquisition." << std::endl;
-    evalBoard->run();
+    if (1)
+    {
+       // evalBoard->setContinuousRunMode(false);
+      //  evalBoard->setMaxTimeStep(0);
+        std::cout << "Flushing FIFO." << std::endl;
+        evalBoard->flush();
+        evalBoard->setContinuousRunMode(true);
+        evalBoard->run();
+    }
 
     blockSize = dataBlock->calculateDataBlockSizeInWords(evalBoard->getNumEnabledDataStreams());
 
@@ -1002,14 +1025,22 @@ bool RHD2000Thread::stopAcquisition()
         std::cout << "Thread failed to exit, continuing anyway..." << std::endl;
     }
 
-    evalBoard->setContinuousRunMode(false);
-    evalBoard->setMaxTimeStep(0);
-    std::cout << "Flushing FIFO." << std::endl;
-    evalBoard->flush();
+    if (1)
+    {
+        evalBoard->setContinuousRunMode(false);
+        evalBoard->setMaxTimeStep(0);
+        std::cout << "Flushing FIFO." << std::endl;
+        evalBoard->flush();
+     //   evalBoard->setContinuousRunMode(true);
+     //   evalBoard->run();
+
+    }
+
+    dataBuffer->clear();
 
     cout << "Number of 16-bit words in FIFO: " << evalBoard->numWordsInFifo() << endl;
 
-    std::cout << "Stopped eval board." << std::endl;
+   // std::cout << "Stopped eval board." << std::endl;
 
 
     int ledArray[8] = {1, 0, 0, 0, 0, 0, 0, 0};
@@ -1027,10 +1058,6 @@ bool RHD2000Thread::updateBuffer()
     //cout << "Block size: " << blockSize << endl;
 
     bool return_code;
-
-	if (evalBoard->getNumDataStreams() == 0)
-		return false; // no head stage is connected ?
-
 
     if (evalBoard->numWordsInFifo() >= blockSize)
     {
@@ -1133,7 +1160,7 @@ bool RHD2000Thread::updateBuffer()
             // std::cout << channel << std::endl;
 
             timestamp = dataBlock->timeStamp[samp];
-            timestamp = timestamp;
+            //timestamp = timestamp;
             eventCode = dataBlock->ttlIn[samp];
 
             dataBuffer->addToBuffer(thisSample, &timestamp, &eventCode, 1);

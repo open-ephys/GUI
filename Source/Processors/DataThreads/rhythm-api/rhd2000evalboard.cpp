@@ -122,7 +122,7 @@ int Rhd2000EvalBoard::open(const char* libname)
 }
 
 // Uploads the configuration file (bitfile) to the FPGA.  Returns true if successful.
-bool Rhd2000EvalBoard::uploadFpgaBitfile(string filename, string &result)
+bool Rhd2000EvalBoard::uploadFpgaBitfile(string filename)
 {
     okCFrontPanel::ErrorCode errorCode = dev->ConfigureFPGA(filename);
 
@@ -131,44 +131,35 @@ bool Rhd2000EvalBoard::uploadFpgaBitfile(string filename, string &result)
         case okCFrontPanel::NoError:
             break;
         case okCFrontPanel::DeviceNotOpen:
-			result = "FPGA configuration failed: Device not open.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Device not open." << endl;
             return(false);
         case okCFrontPanel::FileError:
-			result = "FPGA configuration failed: Cannot find configuration file.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Cannot find configuration file." << endl;
             return(false);
         case okCFrontPanel::InvalidBitstream:
-			result = "FPGA configuration failed: Bitstream is not properly formatted." ;
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Bitstream is not properly formatted." << endl;
             return(false);
         case okCFrontPanel::DoneNotHigh:
-			result = "FPGA configuration failed: FPGA DONE signal did not assert after configuration.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: FPGA DONE signal did not assert after configuration." << endl;
             return(false);
         case okCFrontPanel::TransferError:
-			result = "FPGA configuration failed: USB error occurred during download.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: USB error occurred during download." << endl;
             return(false);
         case okCFrontPanel::CommunicationError:
-			result = "FPGA configuration failed: Communication error with firmware.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Communication error with firmware." << endl;
             return(false);
         case okCFrontPanel::UnsupportedFeature:
-			result = "FPGA configuration failed: Unsupported feature.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Unsupported feature." << endl;
             return(false);
         default:
-			result = "FPGA configuration failed: Unknown error.";
-            cerr << result << endl;
+            cerr << "FPGA configuration failed: Unknown error." << endl;
             return(false);
     }
 
     // Check for Opal Kelly FrontPanel support in the FPGA configuration.
     if (dev->IsFrontPanelEnabled() == false)
     {
-		result = "Opal Kelly FrontPanel support is not enabled in this FPGA configuration.";
-        cerr << result << endl;
+        cerr << "Opal Kelly FrontPanel support is not enabled in this FPGA configuration." << endl;
         delete dev;
 		dev = 0; //nullptr;
         return(false);
@@ -181,23 +172,16 @@ bool Rhd2000EvalBoard::uploadFpgaBitfile(string filename, string &result)
 
     if (boardId != RHYTHM_BOARD_ID)
     {
-		result = "FPGA configuration does not support Rhythm.  Incorrect board ID: ";
-        cerr << result << boardId << endl;
+        cerr << "FPGA configuration does not support Rhythm.  Incorrect board ID: " << boardId << endl;
         return(false);
     }
     else
     {
-		result = "Rhythm configuration file successfully loaded.  Rhythm version number: ";
-        cout << result <<
+        cout << "Rhythm configuration file successfully loaded.  Rhythm version number: " <<
              boardVersion << endl << endl;
     }
-	result = "OK";
-    return(true);
-}
 
-int  Rhd2000EvalBoard::getNumDataStreams()
-{
-	return numDataStreams;
+    return(true);
 }
 
 // Uses the Opal Kelly library to reset the FPGA
@@ -1238,7 +1222,7 @@ bool Rhd2000EvalBoard::readDataBlock(Rhd2000DataBlock* dataBlock)
         return false;
     }
 
-    long len = dev->ReadFromPipeOut(PipeOutData, numBytesToRead, usbBuffer);
+    dev->ReadFromPipeOut(PipeOutData, numBytesToRead, usbBuffer);
 
     dataBlock->fillFromUsbBuffer(usbBuffer, 0, numDataStreams);
 

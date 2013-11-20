@@ -44,8 +44,10 @@ public:
 	XYPlot(bool spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
 	void resized();
 	void paint(Graphics &g);
-
+	void setSmoothState(bool enable);
+	void setAutoRescale(bool enable);
 	void mouseDown(const juce::MouseEvent& event);
+	void buildSmoothKernel(float guassianKernelSizeMS);
 	
 
 	juce::Font font;
@@ -58,9 +60,10 @@ private:
 	std::vector<float> diff(std::vector<float> x);
 	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid);
 	std::vector<float> smooth(std::vector<float> x);
-	void buildSmoothKernel(float guassianKernelSizeMS);
+	
+	bool spikePlot, smoothPlot,autoRescale,firstTime;
+	float axesRange[4];
 
-	bool spikePlot;
 	std::vector<float> smoothKernel; 
 	float guassianStandardDeviationMS;
 };
@@ -108,6 +111,7 @@ public:
 	void setLFPvisibility(bool visible);
 	void setSpikesVisibility(bool visible);
 	void setSmoothPSTH(bool smooth);
+	void setSmoothing(float _gaussianStandardDeviationMS);
 	void setAutoRescale(bool state);
 	
 	void setParameter(int, float) {}
@@ -127,7 +131,7 @@ public:
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport;
 	PeriStimulusTimeHistogramDisplay *psthDisplay;
-
+	float gaussianStandardDeviationMS;
 
 
 
@@ -144,7 +148,7 @@ public:
     PeriStimulusTimeHistogramEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~PeriStimulusTimeHistogramEditor();
     Visualizer* createNewCanvas();
-	void labelTextChanged(juce::Label *) {}
+	void labelTextChanged(juce::Label *);
 	void updateCondition(std::vector<Condition> conditions);
 	void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
 	void updateCanvas();
