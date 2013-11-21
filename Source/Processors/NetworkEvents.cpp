@@ -44,11 +44,17 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 
 NetworkEvents::~NetworkEvents()
 {
-	zmq_close(responder);
-
+	
+	
 
 }
 
+bool NetworkEvents::disable()
+{
+	zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
+	getProcessorGraph()->zmqcontext = nullptr; // and this will take care that processor graph doesn't attempt to delete the context again
+	return true;
+}
 
 AudioProcessorEditor* NetworkEvents::createEditor()
 {
@@ -202,19 +208,23 @@ void NetworkEvents::run() {
   }
   threadRunning = true;
 	 unsigned char *buffer = new unsigned char[MAX_MESSAGE_LENGTH];
+	 int result=-1;
 
 	while (threadRunning) {
-         int result = zmq_recv (responder, buffer, MAX_MESSAGE_LENGTH-1, 0); // blocking
+		
+         result = zmq_recv (responder, buffer, MAX_MESSAGE_LENGTH-1, 0); // blocking
+		
          juce::int64 timestamp_software = timer.getHighResolutionTicks();
 		
 		 if (result < 0) // will only happen when responder dies.
-			return;
+			break;
 
 		StringTS Msg(buffer, result, timestamp_software);
 		networkMessagesQueue.push(Msg);
 	     
         zmq_send (responder, "OK", 2, 0);
     }
+	zmq_close(responder);
 	delete buffer;
 	threadRunning = false;
     return;

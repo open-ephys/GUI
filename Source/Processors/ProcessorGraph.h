@@ -86,9 +86,9 @@ public:
     void updatePointers();
     
     void setRecordState(bool);
-
-private:
 	void* zmqcontext;
+private:
+	
     int currentNodeId;
 
     enum nodeIds
