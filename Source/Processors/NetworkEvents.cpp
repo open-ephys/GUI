@@ -35,15 +35,16 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 {
 	zmqcontext = zmq_context;
 	firstTime = true;
-
+	responder = nullptr;
 	opensocket();
+	
+	
 	//parameters.add(Parameter("thresh", 0.0, 500.0, 200.0, 0));
 }
 
 NetworkEvents::~NetworkEvents()
 {
-	//			sd->thread_running = false;
-	//		Sleep(1000);
+	zmq_close(responder);
 
 
 }
@@ -193,7 +194,7 @@ void NetworkEvents::opensocket()
 }
 
 void NetworkEvents::run() {
-  void *responder = zmq_socket (zmqcontext, ZMQ_REP);
+  responder = zmq_socket (zmqcontext, ZMQ_REP);
   int rc = zmq_bind (responder, "tcp://*:5556");
   if (rc != 0) {
 	  // failed to open socket?

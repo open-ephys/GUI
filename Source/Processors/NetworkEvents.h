@@ -124,6 +124,7 @@ private:
 	   int64 software_timestamp;
 	   StringTS createStringTS(String S, int64 t);
 	void *zmqcontext;
+	void *responder;
     float threshold;
     float bufferZone;
     bool state;
