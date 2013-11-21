@@ -44,7 +44,7 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 
 NetworkEvents::~NetworkEvents()
 {
-	
+	disable();
 	
 
 }
@@ -52,7 +52,8 @@ NetworkEvents::~NetworkEvents()
 bool NetworkEvents::disable()
 {
 	zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
-	getProcessorGraph()->zmqcontext = nullptr; // and this will take care that processor graph doesn't attempt to delete the context again
+	getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
+	zmqcontext = nullptr;
 	return true;
 }
 

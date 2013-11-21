@@ -55,11 +55,11 @@
 #include "../UI/UIComponent.h"
 #include "../UI/EditorViewport.h"
 
+
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
 
-	zmqcontext =  zmq_ctx_new ();
-
+	createZmqContext();
     // The ProcessorGraph will always have 0 inputs (all content is generated within graph)
     // but it will have N outputs, where N is the number of channels for the audio monitor
     setPlayConfigDetails(0, // number of inputs
@@ -77,6 +77,10 @@ ProcessorGraph::~ProcessorGraph() {
 
 }
 
+void ProcessorGraph::createZmqContext()
+{
+	zmqcontext =  zmq_ctx_new ();
+}
 
 void ProcessorGraph::createDefaultNodes()
 {
