@@ -65,7 +65,7 @@ public:
     GenericProcessor* createProcessorFromDescription(String& description);
 
     void removeProcessor(GenericProcessor* processor);
-
+	Array<GenericProcessor*> getListOfProcessors();
     void clearSignalChain();
 
     bool enableProcessors();

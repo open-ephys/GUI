@@ -34,6 +34,7 @@ FileReader::FileReader()
 
     enabledState(false);
 
+    counter = 0;
 }
 
 FileReader::~FileReader()
@@ -129,7 +130,7 @@ void FileReader::updateSettings()
 
 void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
-
+	Time timer;
     uint8 data[16];
 	int64 software_timestamp = timer.getHighResolutionTicks();
     memcpy(data, &timestamp, 8);

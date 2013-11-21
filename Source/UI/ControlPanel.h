@@ -328,7 +328,7 @@ public:
 
     /** Load settings. */
     void loadStateFromXml(XmlElement*);
-
+    
     /** Informs the Control Panel that recording has begun.*/
     void startRecording();
     
@@ -358,7 +358,6 @@ private:
     void resized();
 
     void buttonClicked(Button* button);
-    
 
     bool initialize;
 
