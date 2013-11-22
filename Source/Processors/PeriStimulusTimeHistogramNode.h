@@ -74,14 +74,27 @@ public:
     void addSpikePlotForElectrode(SpikePlot* sp, int i);
     void removeSpikePlots();
 	void reallocate(int numChannels);
-	TrialCircularBuffer *trialCircularBuffer;
-  
-private:
-	StringTS unpackStringTS(MidiMessage &event);
+	void stopRecording();
+	void startRecording();
 
+	TrialCircularBuffer *trialCircularBuffer;
+	bool saveTTLs, saveNetworkEvents ;
+	int spikeSavingMode;
+	
+private:
+	void dumpEventToDisk(MidiMessage& event);
+	void dumpSpikeEventToDisk(SpikeObject *s,  bool dumpWave);
+
+	StringTS unpackStringTS(MidiMessage &event);
+	bool isRecording;
     int displayBufferSize;
     bool redrawRequested;
 	int64 hardware_timestamp,software_timestamp;
+
+
+    RecordNode* recordNode;
+    uint16 recordingNumber;
+    CriticalSection* diskWriteLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramNode);
 

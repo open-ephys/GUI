@@ -33,6 +33,9 @@ PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
     : GenericProcessor("PSTH"), displayBufferSize(5),  redrawRequested(false)
 {
 	trialCircularBuffer  = nullptr;
+	
+	saveTTLs = saveNetworkEvents = true;
+	spikeSavingMode = 2;
 }
 
 PeriStimulusTimeHistogramNode::~PeriStimulusTimeHistogramNode()
@@ -49,6 +52,8 @@ AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 
 void PeriStimulusTimeHistogramNode::updateSettings()
 {
+	recordNode = getProcessorGraph()->getRecordNode();
+    diskWriteLock = recordNode->getLock();
 }
 
 
@@ -91,7 +96,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 	//trialCircularBuffer->reallocate(getNumInputChannels());
 
 	// Update internal statistics 
-    checkForEvents(events); // automatically calls 'handleEvent
+    checkForEvents(events); 
 	
 	trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
 	// draw the PSTH
@@ -113,14 +118,30 @@ StringTS PeriStimulusTimeHistogramNode::unpackStringTS(MidiMessage &event)
 }
 
 
+void PeriStimulusTimeHistogramNode::dumpEventToDisk(MidiMessage& event)
+{
+	diskWriteLock->enter();
+	diskWriteLock->exit();
+}
+
+void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool dumpWave)
+{
+	diskWriteLock->enter();
+	diskWriteLock->exit();
+}
+
 void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
-
     //std::cout << "Received event of type " << eventType << std::endl;
 	if (eventType == NETWORK)
 	{
 		StringTS s = unpackStringTS(event);
   		trialCircularBuffer->parseMessage(s);
+		if (isRecording && saveNetworkEvents)
+		{
+			   dumpEventToDisk(event);
+		}
+
 	}
 	if (eventType == TIMESTAMP)
     {
@@ -137,8 +158,9 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		   memcpy(&ttl_timestamp_software, dataptr+4, 8);
 		   memcpy(&ttl_timestamp_hardware, dataptr+4, 8);
 		   if (ttl_raise)
-			trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software);
-
+				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software);
+		   if (isRecording && saveTTLs)
+			   dumpEventToDisk(event);
 	}
 
     if (eventType == SPIKE)
@@ -152,8 +174,47 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			if (newSpike.sortedId > 0) { // drop unsorted spikes
 				trialCircularBuffer->addSpikeToSpikeBuffer(newSpike);
 			}
+			if (isRecording)
+			{
+				if  (spikeSavingMode == 1 && newSpike.sortedId > 0)
+					dumpSpikeEventToDisk(&newSpike, false);
+				else if (spikeSavingMode == 2 && newSpike.sortedId > 0)
+					dumpSpikeEventToDisk(&newSpike, true);
+				else if (spikeSavingMode == 3)
+					dumpSpikeEventToDisk(&newSpike, true);
+			}
         }
     }
 }
 
 
+void PeriStimulusTimeHistogramNode::startRecording()
+{
+	if (!isRecording)
+	{
+		isRecording = true;
+        File dataDirectory = recordNode->getDataDirectory();
+
+        if (dataDirectory.getFullPathName().length() == 0)
+        {
+            // temporary fix in case nothing is returned by the record node.
+            dataDirectory = File::getSpecialLocation(File::userHomeDirectory); 
+        }
+
+        String baseDirectory = dataDirectory.getFullPathName();
+
+/*        for (int i = 0; i < getNumElectrodes(); i++)
+        {
+            openFile(i);
+        }*/
+	}
+}
+
+void PeriStimulusTimeHistogramNode::stopRecording()
+{
+	if (isRecording)
+	{
+		// close files, etc.
+		isRecording = false;
+	}
+}

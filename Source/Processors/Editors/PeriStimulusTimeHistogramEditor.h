@@ -162,7 +162,6 @@ private:
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;
 	Label *smoothMS;
-	bool saveTTLs, saveNetworkEvents, saveSpikeTSonly, saveSpikeWaves;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 
 };

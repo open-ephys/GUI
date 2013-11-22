@@ -39,8 +39,6 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	visibleConditions->setBounds(10,30,110,20);
 	addAndMakeVisible(visibleConditions);
 
-	saveTTLs = saveNetworkEvents = saveSpikeWaves = true;
-	saveSpikeTSonly = false;
 
 	saveOptions = new UtilityButton("Save Options",Font("Default", 15, Font::plain));
 	saveOptions->addListener(this);
@@ -115,6 +113,9 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 	if (periStimulusTimeHistogramCanvas == nullptr)
 		return;
 
+	PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+
+
 	if (button == lfp)
 	{
 		periStimulusTimeHistogramCanvas->setLFPvisibility(lfp->getToggleState());
@@ -133,34 +134,44 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			PopupMenu m;
 			
 			
-			m.addItem(1,"TTL",true, saveTTLs);
-			m.addItem(2,"Network Events",true, saveNetworkEvents);
-			m.addItem(3,"Spikes: TS only ",true, saveSpikeTSonly);
-			m.addItem(4,"Spikes: TS+waveform",true, saveSpikeWaves);
+			m.addItem(1,"TTL",true, processor->saveTTLs);
+			m.addItem(2,"Network Events",true, processor->saveNetworkEvents);
+			m.addItem(3,"Sorted Spikes: TS only ",true, processor->spikeSavingMode == 1);
+			m.addItem(4,"Sorted Spikes: TS+waveform",true, processor->spikeSavingMode == 2);
+			m.addItem(5,"All Spikes: TS+waveform",true, processor->spikeSavingMode == 3);
 			
 			const int result = m.show();
 
 			if (result == 1)
 			{
-				saveTTLs = !saveTTLs;
+				processor->saveTTLs = !processor->saveTTLs;
 			} else if (result == 2)
 			{
-				saveNetworkEvents = !saveNetworkEvents;
+				processor->saveNetworkEvents = !processor->saveNetworkEvents;
 			} else if (result == 3)
 			{
-				saveSpikeTSonly = true;
-				saveSpikeWaves = false;
+				if (processor->spikeSavingMode == 1)
+					processor->spikeSavingMode = 0;
+				else
+					processor->spikeSavingMode = 1;
 			} else if (result == 4)
 			{
-				saveSpikeTSonly = false;
-				saveSpikeWaves = true;
+				if (processor->spikeSavingMode == 2)
+					processor->spikeSavingMode = 0;
+				else
+					processor->spikeSavingMode = 2;
+			} else if (result == 5)
+			{
+				if (processor->spikeSavingMode == 3)
+					processor->spikeSavingMode = 0;
+				else
+					processor->spikeSavingMode = 3;
 			}
 			
 		} else if (button == visibleConditions)
 	{
 
-		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
-
+	
 		if ( processor->trialCircularBuffer != nullptr)
 		{
 			processor->trialCircularBuffer ->lockConditions();
