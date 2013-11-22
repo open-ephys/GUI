@@ -112,7 +112,12 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
     void setParameter(int parameterIndex, float newValue);
 	void handleSpecialMessages(StringTS msg);
+	std::vector<String> splitString(String S, char sep);
+
 	void simulateSingleTrial();
+	
+	void simulateStartRecord();
+	void simulateStopRecord();
 	bool disable();
 	void run();
 	void opensocket();

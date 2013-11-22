@@ -69,7 +69,7 @@ ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float po
 		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
 		avgResponse[k] = 0;
 	}
-
+	visible = true;
 }
 
 ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
@@ -92,6 +92,8 @@ ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
 	colorRGB[0] = c.colorRGB[0];
 	colorRGB[1] = c.colorRGB[1];
 	colorRGB[2] = c.colorRGB[2];
+	visible = c.visible;
+	
 }
 
 
@@ -307,7 +309,7 @@ ChannelPSTHs::ChannelPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMem
 	{
 		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
 	}
-
+	redrawNeeded = true;
 }
 
 void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid)
@@ -315,6 +317,7 @@ void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdati
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
 
+	redrawNeeded = true;
 	for (int k=0;k<conditionPSTHs.size();k++) {
 		for (int j=0;j<conditionsNeedUpdating.size();j++) 
 		{
@@ -326,6 +329,16 @@ void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdati
 		}
 	}
 
+}
+
+bool ChannelPSTHs::isNewDataAvailable()
+{
+	return redrawNeeded;
+}
+
+void ChannelPSTHs::informPainted()
+{
+	redrawNeeded = false;
 }
 
 void ChannelPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
@@ -361,6 +374,12 @@ UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, u
 	colorRGB[0] = R;
 	colorRGB[1] = G;
 	colorRGB[2] = B;
+	redrawNeeded = true;
+}
+
+void UnitPSTHs::informPainted()
+{
+	redrawNeeded = false;
 }
 
 void UnitPSTHs::addTrialStartToSmartBuffer(Trial *t)
@@ -379,6 +398,11 @@ void UnitPSTHs::clearStatistics()
 void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware)
 {
 	spikeBuffer.addSpikeToBuffer(spikeTimestampSoftware);
+}
+
+bool UnitPSTHs::isNewDataAvailable()
+{
+	return redrawNeeded;
 }
 
 void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
@@ -400,6 +424,10 @@ void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 
 void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial* trial)
 {
+	redrawNeeded = true;
+	if (conditionsNeedUpdating.size() == 0)
+		return ;
+
 	for (int k=0;k<conditionPSTHs.size();k++) {
 		for (int j=0;j<conditionsNeedUpdating.size();j++) 
 		{
@@ -786,6 +814,7 @@ TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, Pe
 
 
 
+
 std::vector<String> TrialCircularBuffer::splitString(String S, char sep)
 {
 	std::list<String> ls;
@@ -847,7 +876,7 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 		  conditions.push_back(newcondition);
 
 		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-		  edt->updateCondition(conditions);
+//		  edt->updateCondition(conditions);
 
 		  unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes
@@ -876,7 +905,7 @@ void TrialCircularBuffer::clearDesign()
 	conditions.clear();
 	conditionCounter = 0;
 	PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-	edt->updateCondition(conditions);
+//	edt->updateCondition(conditions);
 	unlockConditions();
 	// clear conditions from all units
 	lockPSTH();
@@ -898,6 +927,30 @@ void TrialCircularBuffer::clearDesign()
 }
 
 
+
+void TrialCircularBuffer::toggleConditionVisibility(int cond)
+{
+	// now add a new psth for this condition for all sorted units on all electrodes
+	lockPSTH();
+	conditions[cond].visible = !conditions[cond].visible;
+	for (int i=0;i<electrodesPSTH.size();i++) 
+	{
+		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
+		{
+			electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs[cond].visible = !electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs[cond].visible;
+			electrodesPSTH[i].channelsPSTHs[ch].redrawNeeded = true;
+		}
+
+		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+		{
+			electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs[cond].visible = !electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs[cond].visible;
+			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
+		}
+	}
+	unlockPSTH();
+	// inform editor repaint is needed
+
+}
   void TrialCircularBuffer::parseMessage(StringTS msg)
   {
 	  std::vector<String> input = splitString(msg.getString(),' ');
@@ -1045,7 +1098,7 @@ void TrialCircularBuffer::clearDesign()
 		  conditions.push_back(newcondition);
 
 		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-		  edt->updateCondition(conditions);
+//		  edt->updateCondition(conditions);
 
 		  unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes

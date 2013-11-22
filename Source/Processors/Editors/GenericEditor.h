@@ -357,6 +357,7 @@ public:
     }
 
     void setLabel(String label);
+	String getLabel();
 
 private:
     void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);

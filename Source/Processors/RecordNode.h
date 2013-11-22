@@ -128,6 +128,7 @@ public:
     
     CriticalSection* getLock() {return &diskWriteLock;}
 
+	void setDirectoryName(String S);
 
 private:
 
@@ -220,6 +221,9 @@ private:
     
     bool appendTrialNum;
     int trialNum;
+
+	/** used to set the directory name remotely using the network events module **/
+	String directoryName;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RecordNode);
 

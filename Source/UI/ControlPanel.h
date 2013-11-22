@@ -33,7 +33,7 @@
 #include "../AccessClass.h"
 #include "../Processors/Editors/GenericEditor.h" // for UtilityButton
 #include "../Processors/Visualization/OpenGLCanvas.h"
-
+#include <queue>
 
 /**
 
@@ -303,7 +303,7 @@ public:
 
     /** Used to manually turn recording on and off.*/
     void setRecordState(bool isRecording);
-
+	void placeMessageInQueue(String S);
     /** Returns a boolean that indicates whether or not the FilenameComponet
         is visible. */
     bool isOpen()
@@ -329,11 +329,8 @@ public:
     /** Load settings. */
     void loadStateFromXml(XmlElement*);
     
-    /** Informs the Control Panel that recording has begun.*/
-    void startRecording();
-    
-    /** Informs the Control Panel that recording has stopped.*/
-    void stopRecording();
+	void handleIncomdingMessages();
+
 
 private:
     ScopedPointer<PlayButton> playButton;
@@ -348,6 +345,8 @@ private:
     ScopedPointer<Label> prependText;
     ScopedPointer<Label> dateText;
     ScopedPointer<Label> appendText;
+
+	std::queue<String> messageQueue;
 
     ProcessorGraph* graph;
     AudioComponent* audio;
@@ -371,6 +370,12 @@ private:
     void refreshMeters();
 
     bool keyPressed(const KeyPress& key);
+
+	/** Informs the Control Panel that recording has begun.*/
+    void startRecording();
+    
+    /** Informs the Control Panel that recording has stopped.*/
+    void stopRecording();
 
     Font font;
 

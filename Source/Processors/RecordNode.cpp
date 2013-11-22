@@ -38,6 +38,7 @@ RecordNode::RecordNode()
     isRecording = false;
     blockIndex = 0;
     signalFilesShouldClose = false;
+	directoryName = "";
 
     continuousDataIntegerBuffer = new int16[10000];
     continuousDataFloatBuffer = new float[10000];
@@ -233,6 +234,11 @@ void RecordNode::appendTrialNumber(bool t)
     appendTrialNum = t;
 }
 
+void RecordNode::setDirectoryName(String S)
+{
+	directoryName = S;
+}
+
 void RecordNode::createNewDirectory()
 {
     std::cout << "Creating new directory." << std::endl;
@@ -263,6 +269,9 @@ void RecordNode::createNewFiles()
 
 String RecordNode::generateDirectoryName()
 {
+	if (directoryName != "")
+		return directoryName;
+
     Time calendar = Time::getCurrentTime();
 
     Array<int> t;

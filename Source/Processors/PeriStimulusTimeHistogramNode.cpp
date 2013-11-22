@@ -74,7 +74,13 @@ bool PeriStimulusTimeHistogramNode::disable()
     return true;
 }
 
-
+void PeriStimulusTimeHistogramNode::toggleConditionVisibility(int cond)
+{
+	if (trialCircularBuffer  != nullptr)
+	{
+		trialCircularBuffer->toggleConditionVisibility(cond);
+	}
+}
 
 void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {

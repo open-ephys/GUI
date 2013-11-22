@@ -47,7 +47,7 @@ public:
 
     AudioProcessorEditor* createEditor();
 	
-	
+	void toggleConditionVisibility(int cond);
 
 	std::vector<String> splitString(String S, char sep);
 

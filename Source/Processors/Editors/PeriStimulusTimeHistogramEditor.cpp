@@ -33,21 +33,11 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	tabText = "PSTH";
 	desiredWidth = 300;
 
-	visibleConditions = new ComboBox("Conditions");
-
-	visibleConditions->setEditableText(false);
-	visibleConditions->setJustificationType(Justification::centredLeft);
+	visibleConditions = new UtilityButton("Conditions",Font("Default", 15, Font::plain));
 	visibleConditions->addListener(this);
-	visibleConditions->setBounds(100,30,110,20);
+	visibleConditions->setColour(Label::textColourId, Colours::white);
+	visibleConditions->setBounds(10,30,110,20);
 	addAndMakeVisible(visibleConditions);
-
-	condlabel = new Label("Conditions", "Conditions");
-	condlabel->setBounds(10,30,100,20);
-	condlabel->setFont(Font("Default", 15, Font::plain));
-	condlabel->setColour(Label::textColourId, Colours::white);
-	//condlabel->setColour(Label::backgroundColourId, Colours::grey);
-	condlabel->setEditable(false);
-	addAndMakeVisible(condlabel);
 
 	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
 	autoRescale->setBounds(35, 95, 130, 18);
@@ -109,7 +99,7 @@ void PeriStimulusTimeHistogramEditor::labelTextChanged(Label* label)
 
 
 }
-
+/*
 void PeriStimulusTimeHistogramEditor::updateCondition(std::vector<Condition> conditions)
 {
 	visibleConditions->clear();
@@ -119,10 +109,19 @@ void PeriStimulusTimeHistogramEditor::updateCondition(std::vector<Condition> con
 		visibleConditions->addItem(conditions[i].name, i+1);
 	}
 }
+
 void PeriStimulusTimeHistogramEditor::comboBoxChanged (ComboBox* comboBoxThatHasChanged) 
 {
-
-}
+	  if (comboBoxThatHasChanged == visibleConditions)
+    {
+        int cond = comboBoxThatHasChanged->getSelectedId()-1;
+		// update the visibility for all channels and units.
+		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+		processor->toggleConditionVisibility(cond);
+		repaint();
+	  }
+    
+}*/
 
 
 void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
@@ -143,7 +142,39 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 	} else if (button == autoRescale)
 	{
 		periStimulusTimeHistogramCanvas->setAutoRescale(autoRescale->getToggleState());
-	}  
+	}  else if (button == visibleConditions)
+	{
+
+		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+		
+		if ( processor->trialCircularBuffer != nullptr)
+		{
+			processor->trialCircularBuffer ->lockConditions();
+        PopupMenu m;
+
+        for (int i = 0; i < processor->trialCircularBuffer->conditions.size(); i++)
+        {          
+            {
+
+				String name = processor->trialCircularBuffer->conditions[i].name;
+				m.addItem(i+1, name,true,processor->trialCircularBuffer->conditions[i].visible);
+            }
+        }
+
+        const int result = m.show();
+
+        if (result > 0)
+        {
+		// update the visibility for all channels and units.
+			PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+			processor->toggleConditionVisibility(result-1);
+
+        }
+		}
+		processor->trialCircularBuffer ->unlockConditions();
+    }
+
+
 
 }
 
@@ -698,14 +729,9 @@ void XYPlot::paint(Graphics &g)
 
 	int plotWidth  = getWidth()-1.5*x0;
 	int plotHeight = getHeight()-2*y0;
-	g.setColour(Colours::black);
-	g.fillRect(x0,y0, plotWidth,plotHeight);
-
-	g.setColour(Colours::white);
-	g.drawRect(x0,y0, plotWidth,plotHeight);
-
 	float xmin=0, xmax=0, ymax=-1e10, ymin = 1e10;
 	bool found = false;
+	bool newdata = false;
 	int electrodeIndex;
 	int entryindex;
 	tcb->lockPSTH();
@@ -728,6 +754,7 @@ void XYPlot::paint(Graphics &g)
 						g.drawRect(0,0,w,h,2);
 
 						tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
+						newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
 						break;
 					}
 				}
@@ -743,6 +770,7 @@ void XYPlot::paint(Graphics &g)
 						g.drawRect(0,0,w,h);
 
 						tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax,ymin, ymax);
+						newdata = tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].isNewDataAvailable();
 						break;
 					}
 				}
@@ -752,8 +780,16 @@ void XYPlot::paint(Graphics &g)
 			break;
 	}
 	tcb->unlockPSTH();
+
 	if (!found || xmin == xmax || ymin == ymax)
 		return; // nothing to draw.
+
+	g.setColour(Colours::black);
+	g.fillRect(x0,y0, plotWidth,plotHeight);
+
+	g.setColour(Colours::white);
+	g.drawRect(x0,y0, plotWidth,plotHeight);
+
 
 	// determine tick position
 	if (firstTime || autoRescale)
@@ -856,7 +892,8 @@ void XYPlot::paint(Graphics &g)
 		for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
 		{
 
-			if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0)
+			if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0 &&
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			{
 				std::vector<bool> valid;
 				if (smoothPlot) {
@@ -895,7 +932,8 @@ void XYPlot::paint(Graphics &g)
 		// lfp plot
 		for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
 		{
-			if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0)
+			if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0 &&
+				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			{
 				std::vector<bool> valid;
 				interp1(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime, 

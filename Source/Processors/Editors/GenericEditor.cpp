@@ -758,6 +758,11 @@ void UtilityButton::resized()
 
 }
 
+String UtilityButton::getLabel()
+{
+	return label;
+}
+
 void UtilityButton::setLabel(String label_)
 {
     label = label_;

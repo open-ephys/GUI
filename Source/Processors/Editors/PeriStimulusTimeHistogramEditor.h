@@ -142,25 +142,25 @@ public:
 
 
 class PeriStimulusTimeHistogramEditor : public VisualizerEditor,
-	public Label::Listener, public ComboBox::Listener
+	public Label::Listener
 {
 public:
     PeriStimulusTimeHistogramEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~PeriStimulusTimeHistogramEditor();
     Visualizer* createNewCanvas();
 	void labelTextChanged(juce::Label *);
-	void updateCondition(std::vector<Condition> conditions);
+	//void updateCondition(std::vector<Condition> conditions);
 	void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
 	void updateCanvas();
 	void buttonEvent(Button* button);
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
-	ComboBox* visibleConditions;
+	UtilityButton* visibleConditions;
 	ToggleButton *smoothPSTH;
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;
-	Label *smoothMS, *condlabel;
+	Label *smoothMS;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 

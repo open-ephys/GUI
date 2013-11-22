@@ -113,6 +113,10 @@ void NetworkEvents::simulateDesignAndTrials(juce::MidiBuffer& events)
 		int64 currenttime = t.getHighResolutionTicks();
 		StringTS S = simulation.front();
 		if (currenttime > S.timestamp) {
+			
+			 // handle special messages
+			 handleSpecialMessages(S);
+
 			 postTimestamppedStringToMidiBuffer(S,events);
 			 getUIComponent()->getLogWindow()->addLineToLog(S.getString());
 			simulation.pop();
@@ -142,6 +146,20 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 	delete msg_with_ts;
 }
 
+void NetworkEvents::simulateStopRecord()
+{
+Time t;
+	simulation.push(StringTS("StopRecord",t.getHighResolutionTicks()));
+
+}
+
+void NetworkEvents::simulateStartRecord()
+{
+Time t;
+	simulation.push(StringTS("StartRecord",t.getHighResolutionTicks()));
+
+}
+
 void NetworkEvents::simulateSingleTrial()
 {
 	int numTrials = 1;
@@ -166,18 +184,54 @@ void NetworkEvents::simulateSingleTrial()
 
 	}
 }
+
+
+
+std::vector<String> NetworkEvents::splitString(String S, char sep)
+{
+	std::list<String> ls;
+	String  curr;
+	for (int k=0;k < S.length();k++) {
+		if (S[k] != sep) {
+			curr+=S[k];
+		}
+		else
+		{
+			ls.push_back(curr);
+			while (S[k] == sep && k < S.length())
+				k++;
+
+			curr = "";
+			if (S[k] != sep && k < S.length())
+				curr+=S[k];
+		}
+	}
+	if (S[S.length()-1] != sep)
+		ls.push_back(curr);
+
+	 std::vector<String> Svec(ls.begin(), ls.end()); 
+	return Svec;
+
+}
+
 void NetworkEvents::handleSpecialMessages(StringTS msg)
 {
-	if (msg.getString() == "StartRecord")
+	std::vector<String> input = splitString(msg.getString(),' ');
+	if (input[0] == "StartRecord")
 	{
-		getControlPanel()->startRecording();
+		 getUIComponent()->getLogWindow()->addLineToLog("Remote triggered start recording");
+		
+		if (input.size() > 1)
+		{
+			getUIComponent()->getLogWindow()->addLineToLog("Remote setting session name to "+input[1]);
+			// session name was also given.
+			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
+		}
 
-		getProcessorGraph()->setRecordState(true);
-
-	} else if (msg.getString() == "StopRecord")
+		getControlPanel()->placeMessageInQueue("StartRecord");
+	} else if (input[0] == "StopRecord")
 	{
-		getControlPanel()->stopRecording();
-		getProcessorGraph()->setRecordState(false);
+		getControlPanel()->placeMessageInQueue("StopRecord");
 	}
 
 }

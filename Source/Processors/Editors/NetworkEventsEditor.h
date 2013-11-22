@@ -51,6 +51,7 @@ public:
 private:
 
 	UtilityButton* trialSimulation;
+	UtilityButton* startRecord;
     ScopedPointer<Label> urlLabel;
 	ScopedPointer<Label> labelPort;
 

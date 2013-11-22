@@ -45,6 +45,12 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     trialSimulation->addListener(this);
     addAndMakeVisible(trialSimulation);
 
+	
+	startRecord = new UtilityButton("Start Record",Font("Default", 15, Font::plain));
+    startRecord->setBounds(20,55,100,18);
+    startRecord->addListener(this);
+    addAndMakeVisible(startRecord);
+
 
 	labelPort = new Label("Smooth MS", String(p->urlport));
     labelPort->setBounds(70,85,80,18);
@@ -63,10 +69,23 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
 
 void NetworkEventsEditor::buttonEvent(Button* button)
 {
-    if (button == trialSimulation)
+			NetworkEvents *processor  = (NetworkEvents*) getProcessor();
+
+	if (button == trialSimulation)
 	{
-		NetworkEvents *processor  = (NetworkEvents*) getProcessor();
 		processor->simulateSingleTrial();
+
+	} else if (button == startRecord)
+	{
+		if (startRecord->getLabel() == "Start Record") 
+		{
+			processor->simulateStartRecord();
+			startRecord->setLabel("Stop Record");
+		} else if (startRecord->getLabel() == "Stop Record") 
+		{
+			processor->simulateStopRecord();
+			startRecord->setLabel("Start Record");
+		}
 	}
     
 

@@ -136,7 +136,7 @@ public:
 	int conditionID;
 
 	float xmin, xmax, ymax,ymin;
-
+	bool visible;
 	int numBins;
 	int binResolutionMS;
 	int numTrials;
@@ -158,11 +158,14 @@ public:
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
+	bool isNewDataAvailable();
+	void informPainted();
 
 	std::vector<ConditionPSTH> conditionPSTHs;
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
+	bool redrawNeeded;
 };
 
 class ChannelPSTHs 
@@ -172,11 +175,13 @@ public:
 	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
-
+	bool isNewDataAvailable();
+	void informPainted();
 	int channelID;
 	std::vector<ConditionPSTH> conditionPSTHs;
 	std::vector<float> binTime;
 	float preSecs, postSecs;
+	bool redrawNeeded;
 };
 
 
@@ -203,7 +208,7 @@ public:
 	~TrialCircularBuffer();
     void updatePSTHwithTrial(Trial *trial);
 	bool contains(std::vector<int> v, int x);
-	
+	void toggleConditionVisibility(int cond);
 	void parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
