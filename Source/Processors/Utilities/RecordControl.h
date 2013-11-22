@@ -57,7 +57,7 @@ public:
 
 private:
     int triggerChannel;
-    
+    bool eventsSavedBySink;
     
     RecordNode* recordNode;
 

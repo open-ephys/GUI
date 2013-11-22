@@ -74,6 +74,7 @@ class PeriStimulusTimeHistogramDisplay : public Component
 {
 public:
 	PeriStimulusTimeHistogramDisplay(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c);
+	~PeriStimulusTimeHistogramDisplay();
 	void resized();
 	std::vector<XYPlot*> psthPlots;
 	void paint(Graphics &g);
@@ -156,12 +157,12 @@ public:
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
-	UtilityButton* visibleConditions;
+	UtilityButton *visibleConditions, *saveOptions;
 	ToggleButton *smoothPSTH;
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;
 	Label *smoothMS;
-
+	bool saveTTLs, saveNetworkEvents, saveSpikeTSonly, saveSpikeWaves;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 
 };

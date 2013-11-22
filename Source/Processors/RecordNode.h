@@ -130,6 +130,9 @@ public:
 
 	void setDirectoryName(String S);
 
+	/** used to disable the event saving by record node. Events will be saved
+	by one of the sinks **/
+	void setEventSavingState(bool savedBySink);
 private:
 
     /** Keep the RecordNode informed of acquisition and record states.
@@ -224,7 +227,7 @@ private:
 
 	/** used to set the directory name remotely using the network events module **/
 	String directoryName;
-
+	bool eventsSavedBySink;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RecordNode);
 
 };

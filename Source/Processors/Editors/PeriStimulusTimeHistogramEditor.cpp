@@ -39,6 +39,15 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	visibleConditions->setBounds(10,30,110,20);
 	addAndMakeVisible(visibleConditions);
 
+	saveTTLs = saveNetworkEvents = saveSpikeWaves = true;
+	saveSpikeTSonly = false;
+
+	saveOptions = new UtilityButton("Save Options",Font("Default", 15, Font::plain));
+	saveOptions->addListener(this);
+	saveOptions->setColour(Label::textColourId, Colours::white);
+	saveOptions->setBounds(160,30,110,20);
+	addAndMakeVisible(saveOptions);
+
 	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
 	autoRescale->setBounds(35, 95, 130, 18);
 	autoRescale->addListener(this);
@@ -55,14 +64,14 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 
 	lfp = new ToggleButton("LFP");//, Font("Small Text", 13, Font::plain));
-	lfp->setBounds(35, 55, 130, 18);
+	lfp->setBounds(10, 55, 70, 18);
 	lfp->addListener(this);
 	lfp->setToggleState(true,false);
 	lfp->setClickingTogglesState(true);
 	addAndMakeVisible(lfp);
 
 	spikes = new ToggleButton("Units");//, Font("Small Text", 13, Font::plain));
-	spikes->setBounds(135, 55, 130, 18);
+	spikes->setBounds(80, 55, 130, 18);
 	spikes->addListener(this);
 	spikes->setToggleState(true,false);
 	spikes->setClickingTogglesState(true);
@@ -99,30 +108,6 @@ void PeriStimulusTimeHistogramEditor::labelTextChanged(Label* label)
 
 
 }
-/*
-void PeriStimulusTimeHistogramEditor::updateCondition(std::vector<Condition> conditions)
-{
-	visibleConditions->clear();
-
-	for (int i = 0; i < conditions.size(); i++)
-	{
-		visibleConditions->addItem(conditions[i].name, i+1);
-	}
-}
-
-void PeriStimulusTimeHistogramEditor::comboBoxChanged (ComboBox* comboBoxThatHasChanged) 
-{
-	  if (comboBoxThatHasChanged == visibleConditions)
-    {
-        int cond = comboBoxThatHasChanged->getSelectedId()-1;
-		// update the visibility for all channels and units.
-		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
-		processor->toggleConditionVisibility(cond);
-		repaint();
-	  }
-    
-}*/
-
 
 void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 {
@@ -142,37 +127,67 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 	} else if (button == autoRescale)
 	{
 		periStimulusTimeHistogramCanvas->setAutoRescale(autoRescale->getToggleState());
-	}  else if (button == visibleConditions)
+	}  else if (button == saveOptions)
+	{
+
+			PopupMenu m;
+			
+			
+			m.addItem(1,"TTL",true, saveTTLs);
+			m.addItem(2,"Network Events",true, saveNetworkEvents);
+			m.addItem(3,"Spikes: TS only ",true, saveSpikeTSonly);
+			m.addItem(4,"Spikes: TS+waveform",true, saveSpikeWaves);
+			
+			const int result = m.show();
+
+			if (result == 1)
+			{
+				saveTTLs = !saveTTLs;
+			} else if (result == 2)
+			{
+				saveNetworkEvents = !saveNetworkEvents;
+			} else if (result == 3)
+			{
+				saveSpikeTSonly = true;
+				saveSpikeWaves = false;
+			} else if (result == 4)
+			{
+				saveSpikeTSonly = false;
+				saveSpikeWaves = true;
+			}
+			
+		} else if (button == visibleConditions)
 	{
 
 		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
-		
+
 		if ( processor->trialCircularBuffer != nullptr)
 		{
 			processor->trialCircularBuffer ->lockConditions();
-        PopupMenu m;
+			PopupMenu m;
 
-        for (int i = 0; i < processor->trialCircularBuffer->conditions.size(); i++)
-        {          
-            {
+			for (int i = 0; i < processor->trialCircularBuffer->conditions.size(); i++)
+			{          
+				{
 
-				String name = processor->trialCircularBuffer->conditions[i].name;
-				m.addItem(i+1, name,true,processor->trialCircularBuffer->conditions[i].visible);
-            }
-        }
+					String name = processor->trialCircularBuffer->conditions[i].name;
+					m.addItem(i+1, name,true,processor->trialCircularBuffer->conditions[i].visible);
+				}
+			}
 
-        const int result = m.show();
+			const int result = m.show();
 
-        if (result > 0)
-        {
-		// update the visibility for all channels and units.
-			PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
-			processor->toggleConditionVisibility(result-1);
+			if (result > 0)
+			{
+				// update the visibility for all channels and units.
+				PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+				processor->toggleConditionVisibility(result-1);
 
-        }
+			}
+			processor->trialCircularBuffer ->unlockConditions();
 		}
-		processor->trialCircularBuffer ->unlockConditions();
-    }
+
+	}
 
 
 
@@ -203,73 +218,6 @@ PeriStimulusTimeHistogramEditor::~PeriStimulusTimeHistogramEditor()
 
 
 
-
-
-
-/*
-class ConditionsList : public ListBoxModel, public Component
-{
-public:
-ConditionsList();
-int getNumRows ();
-void paintListBoxItem (int rowNumber, Graphics &g, int width, int height, bool rowIsSelected);
-void paint(Graphics &g);
-void changed();
-
-ListBox listbox;
-};
-
-void ConditionsList::paint(Graphics &g)
-{
-listbox.paint(g);
-}
-
-juce::ComboBox
-void ConditionsList::changed()
-{
-listbox.repaint();
-
-}
-
-int ConditionsList::getNumRows()
-{
-return 5;
-}
-//	FileSearchPathListComponent::paintListBoxItem	
-
-void ConditionsList::paintListBoxItem (int rowNumber, Graphics &g, int width, int height, bool rowIsSelected)
-{
-//if (rowIsSelected)
-//    g.fillAll (TextEditor::highlightColourId);
-
-g.setColour (juce::Colour(128,0,0));
-Font f (height * 0.7f);
-f.setHorizontalScale (0.9f);
-g.setFont (f);
-
-g.drawText ("Hello" + String(rowNumber),
-4, 0, width - 6, height,
-Justification::centredLeft, true);
-
-
-}
-
-ConditionsList::ConditionsList()
-{
-listbox.setModel(this);
-
-listbox.setColour (ListBox::backgroundColourId, Colours::black.withAlpha (0.02f));
-listbox.setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.1f));
-listbox.setOutlineThickness (1);
-
-listbox.setBounds(65,40,110,60);
-addAndMakeVisible (&listbox);
-
-//electrodeTypes->setSelectedId(1);
-//visibleConditions->set
-
-}
-*/
 
 
 /********************************/
@@ -480,6 +428,15 @@ PeriStimulusTimeHistogramDisplay::PeriStimulusTimeHistogramDisplay(PeriStimulusT
 {
 
 	font = Font("Default", 15, Font::plain);
+}
+
+PeriStimulusTimeHistogramDisplay::~PeriStimulusTimeHistogramDisplay()
+{
+	for (int k=0;k<psthPlots.size();k++)
+	{
+		delete(psthPlots[k]);
+	}
+	psthPlots.clear();
 }
 
 void PeriStimulusTimeHistogramDisplay::refresh()

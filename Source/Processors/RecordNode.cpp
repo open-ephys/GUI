@@ -39,6 +39,7 @@ RecordNode::RecordNode()
     blockIndex = 0;
     signalFilesShouldClose = false;
 	directoryName = "";
+	eventsSavedBySink = false;
 
     continuousDataIntegerBuffer = new int16[10000];
     continuousDataFloatBuffer = new float[10000];
@@ -191,6 +192,15 @@ void RecordNode::addInputChannel(GenericProcessor* sourceNode, int chan)
 
 }
 
+void RecordNode::setEventSavingState(bool b)
+{
+	eventsSavedBySink = b;
+	if (isRecording)
+	{
+		if (!eventsSavedBySink)
+			openFile(eventChannel);
+	}
+}
 void RecordNode::updateFileName(Channel* ch)
 {
     String filename = rootFolder.getFullPathName();
@@ -376,7 +386,8 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
 
         createNewFiles();
         
-        openFile(eventChannel);
+		if (!eventsSavedBySink)
+			openFile(eventChannel);
 
         blockIndex = 0; // reset index
 
@@ -589,7 +600,8 @@ void RecordNode::closeAllFiles()
         }
     }
 
-    closeFile(eventChannel);
+	if (!eventsSavedBySink)
+		closeFile(eventChannel);
 
     blockIndex = 0; // back to the beginning of the block
 }
@@ -737,7 +749,7 @@ void RecordNode::writeEventBuffer(MidiMessage& event, int samplePosition) //, in
 
 void RecordNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
-    if (eventType == TTL)
+    if (eventType == TTL && !eventsSavedBySink)
     {
         writeEventBuffer(event, samplePosition);
     }

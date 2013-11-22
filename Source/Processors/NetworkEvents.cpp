@@ -228,10 +228,19 @@ void NetworkEvents::handleSpecialMessages(StringTS msg)
 			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
 		}
 
-		getControlPanel()->placeMessageInQueue("StartRecord");
+
+
+		      const MessageManagerLock mmLock;
+
+            getControlPanel()->setRecordState(true);
+          
+      
+	//	getControlPanel()->placeMessageInQueue("StartRecord");
 	} else if (input[0] == "StopRecord")
 	{
-		getControlPanel()->placeMessageInQueue("StopRecord");
+		const MessageManagerLock mmLock;
+		//getControlPanel()->placeMessageInQueue("StopRecord");
+		  getControlPanel()->setRecordState(false);
 	}
 
 }

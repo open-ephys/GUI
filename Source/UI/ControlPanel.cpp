@@ -759,31 +759,7 @@ void ControlPanel::disableCallbacks()
 void ControlPanel::timerCallback()
 {
     //std::cout << "Message Received." << std::endl;
-	handleIncomdingMessages();
-    refreshMeters();
-
-}
-
-void ControlPanel::placeMessageInQueue(String S)
-{
-	messageQueue.push(S);
-}
-
-void ControlPanel::handleIncomdingMessages()
-{
-	while (messageQueue.size() > 0)
-	{
-		String S = messageQueue.front();
-		messageQueue.pop();
-		if (S == "StartRecord")
-		{
-			    startRecording();
-		} else if (S == "StopRecord")
-		{
-			stopRecording();
-		}
-
-	}
+   refreshMeters();
 
 }
 

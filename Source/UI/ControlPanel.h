@@ -303,7 +303,6 @@ public:
 
     /** Used to manually turn recording on and off.*/
     void setRecordState(bool isRecording);
-	void placeMessageInQueue(String S);
     /** Returns a boolean that indicates whether or not the FilenameComponet
         is visible. */
     bool isOpen()
@@ -345,8 +344,6 @@ private:
     ScopedPointer<Label> prependText;
     ScopedPointer<Label> dateText;
     ScopedPointer<Label> appendText;
-
-	std::queue<String> messageQueue;
 
     ProcessorGraph* graph;
     AudioComponent* audio;
