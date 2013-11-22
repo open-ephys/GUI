@@ -22,7 +22,7 @@
 */
 
 #include "NetworkEventsEditor.h"
-
+#include "../NetworkEvents.h"
 
 #include <stdio.h>
 
@@ -30,21 +30,40 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     : GenericEditor(parentNode, useDefaultParameterEditors)
 
 {
+	desiredWidth = 180;
 
-    urlButton = new UtilityButton("Select port",Font("Small Text", 13, Font::plain));
-    urlButton->addListener(this);
-    urlButton->setBounds(30,50,120,25);
-    addAndMakeVisible(urlButton);
-
-    urlLabel = new Label("FileNameLabel", "No port defined.");
+    urlLabel = new Label("Port", "Port:");
     urlLabel->setBounds(20,80,140,25);
     addAndMakeVisible(urlLabel);
 
-    desiredWidth = 180;
+
+	NetworkEvents *p= (NetworkEvents *)getProcessor();
+	
+	labelPort = new Label("Smooth MS", String(p->urlport));
+    labelPort->setBounds(70,85,80,18);
+    labelPort->setFont(Font("Default", 15, Font::plain));
+    labelPort->setColour(Label::textColourId, Colours::white);
+    labelPort->setColour(Label::backgroundColourId, Colours::grey);
+    labelPort->setEditable(true);
+    labelPort->addListener(this);
+    addAndMakeVisible(labelPort);
 
     setEnabledState(false);
 
 }
+
+
+void NetworkEventsEditor::labelTextChanged(juce::Label *label)
+{
+	if (label == labelPort)
+	{
+	   Value val = label->getTextValue();
+
+		NetworkEvents *p= (NetworkEvents *)getProcessor();
+		p->setNewListeningPort(val.getValue());
+	}
+}
+
 
 NetworkEventsEditor::~NetworkEventsEditor()
 {
@@ -55,21 +74,5 @@ NetworkEventsEditor::~NetworkEventsEditor()
 void NetworkEventsEditor::buttonEvent(Button* button)
 {
 
-    if (!acquisitionIsActive)
-    {
-
-        if (button == urlButton)
-        {
-            //std::cout << "Button clicked." << std::endl;
-			/*
-            FileChooser chooseFileReaderFile("Please select the file you want to load...",
-                                             lastFilePath,
-                                             "*");
-											 */
-           
-                // fileNameLabel->setText(fileToRead.getFileName(),false);
-           
-        }
-
-    }
+   
 }

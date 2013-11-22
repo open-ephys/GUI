@@ -39,20 +39,20 @@ class NetworkEvents;
 
 */
 
-class NetworkEventsEditor : public GenericEditor
-
+class NetworkEventsEditor : public GenericEditor,public Label::Listener
 {
 public:
     NetworkEventsEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~NetworkEventsEditor();
 
     void buttonEvent(Button* button);
-
+	void labelTextChanged(juce::Label *);
 
 private:
 
-    ScopedPointer<UtilityButton> urlButton;
+    
     ScopedPointer<Label> urlLabel;
+	ScopedPointer<Label> labelPort;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkEventsEditor);

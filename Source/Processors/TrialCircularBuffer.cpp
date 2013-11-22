@@ -109,9 +109,6 @@ void ConditionPSTH::clear()
 void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
 	Time t;
-	ymax = -1e10;
-	ymin = 1e10;
-
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
 	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, preSecs, postSecs);
 	std::vector<float> instantaneousSpikesRate;
@@ -142,6 +139,10 @@ void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *tri
 
 	numTrials++;
 	// Update average firing rate, up to when the trial ended. 
+	ymax = -1e10;
+	ymin = 1e10;
+
+
 	for (int k = 0; k < lastBinIndex; k++)
 	{
 		numDataPoints[k]++;
@@ -335,11 +336,14 @@ void ChannelPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 	float yMax = -1e10;
 	for (int k=0;k<conditionPSTHs.size();k++) 
 	{
-		conditionPSTHs[k].getRange(xMin,xMax,yMin,yMax);
-		xmin = MIN(xmin, xMin);
-		ymin = MIN(ymin, yMin);
-		xmax = MAX(xmax, xMax);
-		ymax = MAX(ymax, yMax);
+		if (conditionPSTHs[k].numTrials > 0)
+		{
+			conditionPSTHs[k].getRange(xMin,xMax,yMin,yMax);
+			xmin = MIN(xmin, xMin);
+			ymin = MIN(ymin, yMin);
+			xmax = MAX(xmax, xMax);
+			ymax = MAX(ymax, yMax);
+		}
 
 	}
 }
@@ -379,10 +383,10 @@ void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware)
 
 void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 {
-	xmin = 0;
-	xmax = 0;
-	ymax = 0;
-	ymin = 0;
+	xmin = 1e10;
+	xmax = -1e10;
+	ymax = -1e10;
+	ymin = 1e10;
 	float minX, maxX, maxY, minY;
 	for (int k=0;k<conditionPSTHs.size();k++) {
 		conditionPSTHs[k].getRange(minX, maxX, minY, maxY);
@@ -668,7 +672,7 @@ void SmartSpikeCircularBuffer::addTrialStartToBuffer(Trial *t)
 	trialIndex = (trialIndex+1) % maxTrialsInMemory;
 	numTrialsStored++;
 	if (numTrialsStored > maxTrialsInMemory)
-		numTrialsStored = numTrialsStored;
+		numTrialsStored = maxTrialsInMemory;
 }
 
 int SmartSpikeCircularBuffer::queryTrialStart(int ID)

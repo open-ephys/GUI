@@ -118,12 +118,16 @@ public:
 	void opensocket();
  
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
+	void setNewListeningPort(int port);
+	int urlport;
+	 String socketStatus;
 private:
 	   void handleEvent(int eventType, MidiMessage& event, int samplePos);
 
 	   int64 hardware_timestamp;
 	   int64 software_timestamp;
 	   StringTS createStringTS(String S, int64 t);
+	  
 	void *zmqcontext;
 	void *responder;
     float threshold;

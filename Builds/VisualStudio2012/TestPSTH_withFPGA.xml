@@ -2,7 +2,7 @@
 
 <SETTINGS>
   <INFO>
-    <DATE>14 Nov 2013 10:00:34</DATE>
+    <DATE>21 Nov 2013 16:05:21</DATE>
     <OS>Windows 7</OS>
     <MACHINE>ALPHA</MACHINE>
   </INFO>
@@ -131,7 +131,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR SampleRate="17" LowCut="1" HighCut="7500" ADCsOn="0"/>
     </PROCESSOR>
-    <PROCESSOR name="Filters/Network Events" insertionPoint="1" NodeId="103">
+    <PROCESSOR name="Filters/Network Events" insertionPoint="1" NodeId="101">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
@@ -255,7 +255,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR/>
     </PROCESSOR>
-    <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="101">
+    <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="102">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
         <PARAMETERS highcut="6000" lowcut="300"/>
@@ -416,7 +416,7 @@
         <VALUES HighCut="6000" LowCut="300"/>
       </EDITOR>
     </PROCESSOR>
-    <PROCESSOR name="Filters/Spike Detector" insertionPoint="1" NodeId="102">
+    <PROCESSOR name="Filters/Spike Detector" insertionPoint="1" NodeId="103">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>

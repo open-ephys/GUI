@@ -229,6 +229,7 @@ public:
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 
 private:
+	float ticksPerSec;
 	int uniqueID;
 	std::queue<StringTS> eventQueue;
     /** Reference to a continuous buffer. */

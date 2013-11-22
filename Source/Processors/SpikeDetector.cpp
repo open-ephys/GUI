@@ -59,6 +59,8 @@ SpikeDetector::SpikeDetector()
     // electrodeTypes.add("octakaidecatrode");
     // electrodeTypes.add("enneakaidecatrode");
     // electrodeTypes.add("icosatrode");
+	juce::Time timer;
+	ticksPerSec = timer.getHighResolutionTicksPerSecond();
 
     for (int i = 0; i < electrodeTypes.size()+1; i++)
     {
@@ -430,10 +432,8 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
     s->timestamp = hardware_timestamp + peakIndex;
 
 	// convert sample offset to software ticks
-	juce::Time timer;
-	int64 ticksPerSec = timer.getHighResolutionTicksPerSecond();
 	float samplesPerSec = getSampleRate();
-	s->timestamp_software = software_timestamp + ticksPerSec*float(peakIndex)/samplesPerSec;
+	s->timestamp_software = software_timestamp + int64( ticksPerSec*float(peakIndex)/samplesPerSec);
     s->nSamples = spikeLength;
 
     int chan = *(electrodes[electrodeNumber]->channels+currentChannel);
@@ -522,8 +522,8 @@ void SpikeDetector::handleEvent(int eventType, MidiMessage& event, int sampleNum
 void SpikeDetector::addNetworkEventToQueue(StringTS S)
 {
 	StringTS copy(S);
-	getUIComponent()->getLogWindow()->addLineToLog(S.getString());
-	eventQueue.push(S);
+	getUIComponent()->getLogWindow()->addLineToLog(copy.getString());
+	eventQueue.push(copy);
 }
 
 

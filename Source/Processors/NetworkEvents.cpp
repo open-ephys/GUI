@@ -36,24 +36,32 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 	zmqcontext = zmq_context;
 	firstTime = true;
 	responder = nullptr;
+	urlport = 5556;
 	opensocket();
 	
 	
 	//parameters.add(Parameter("thresh", 0.0, 500.0, 200.0, 0));
 }
 
+void NetworkEvents::setNewListeningPort(int port)
+{
+	// first, close existing thread.
+	disable();
+	// allow some time for thread to quit
+	sleep(300);
+	urlport = port;
+	opensocket();
+}
+
 NetworkEvents::~NetworkEvents()
 {
 	disable();
-	
-
 }
 
 bool NetworkEvents::disable()
 {
 	zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
-	getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
-	zmqcontext = nullptr;
+	zmqcontext = getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
 	return true;
 }
 
@@ -171,8 +179,6 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 							int& nSamples)
 {
 	checkForEvents(events);
-	
-
 	if (firstTime) {
 		firstTime = false;
 		initSimulation();
@@ -201,12 +207,16 @@ void NetworkEvents::opensocket()
 }
 
 void NetworkEvents::run() {
+
   responder = zmq_socket (zmqcontext, ZMQ_REP);
-  int rc = zmq_bind (responder, "tcp://*:5556");
+  String url= String("tcp://*:")+String(urlport);
+  int rc = zmq_bind (responder, url.toRawUTF8());
+  
   if (rc != 0) {
 	  // failed to open socket?
 	  return;
   }
+
   threadRunning = true;
 	 unsigned char *buffer = new unsigned char[MAX_MESSAGE_LENGTH];
 	 int result=-1;
@@ -225,6 +235,7 @@ void NetworkEvents::run() {
 	     
         zmq_send (responder, "OK", 2, 0);
     }
+
 	zmq_close(responder);
 	delete buffer;
 	threadRunning = false;

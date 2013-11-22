@@ -86,7 +86,7 @@ public:
     void updatePointers();
     
     void setRecordState(bool);
-	void createZmqContext();
+	void* createZmqContext();
 	
 private:
 	void* zmqcontext;
