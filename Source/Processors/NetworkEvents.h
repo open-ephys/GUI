@@ -112,7 +112,7 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
     void setParameter(int parameterIndex, float newValue);
 	void handleSpecialMessages(StringTS msg);
-	
+	void simulateSingleTrial();
 	bool disable();
 	void run();
 	void opensocket();

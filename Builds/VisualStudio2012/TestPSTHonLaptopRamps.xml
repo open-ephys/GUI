@@ -2,7 +2,7 @@
 
 <SETTINGS>
   <INFO>
-    <DATE>21 Nov 2013 18:55:47</DATE>
+    <DATE>21 Nov 2013 19:09:01</DATE>
     <OS>Windows 8</OS>
     <MACHINE>SHAYO-LAPTOP</MACHINE>
   </INFO>
@@ -58,75 +58,6 @@
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <EDITOR/>
-    </PROCESSOR>
-    <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="101">
-      <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-        <PARAMETERS highcut="40" lowcut="1"/>
-      </CHANNEL>
-      <EDITOR Type="FilterEditor">
-        <VALUES HighCut="6000" LowCut="300"/>
-      </EDITOR>
     </PROCESSOR>
     <PROCESSOR name="Filters/Network Events" insertionPoint="1" NodeId="102">
       <CHANNEL name="0" number="0">
@@ -201,7 +132,7 @@
         <SUBCHANNEL ch="4" thresh="-20" isActive="1"/>
       </ELECTRODE>
       <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="1" number="1">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
@@ -210,7 +141,7 @@
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="4" number="4">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
@@ -363,17 +294,12 @@
       <CHANNEL name="15" number="15">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
-      <EVENTCHANNEL name="0" number="0"/>
-      <EVENTCHANNEL name="1" number="1"/>
-      <EVENTCHANNEL name="2" number="2"/>
-      <EVENTCHANNEL name="3" number="3"/>
-      <EVENTCHANNEL name="4" number="4"/>
       <EDITOR Type="Visualizer">
         <TAB Active="1"/>
         <WINDOW Active="0"/>
       </EDITOR>
     </PROCESSOR>
-    <SWITCH number="4"/>
+    <SWITCH number="3"/>
     <PROCESSOR name="Sinks/LFP Viewer" insertionPoint="1" NodeId="106">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
@@ -426,6 +352,8 @@
       <EVENTCHANNEL name="0" number="0"/>
       <EVENTCHANNEL name="1" number="1"/>
       <EVENTCHANNEL name="2" number="2"/>
+      <EVENTCHANNEL name="3" number="3"/>
+      <EVENTCHANNEL name="4" number="4"/>
       <EDITOR Type="Visualizer">
         <TAB Active="1"/>
         <WINDOW Active="0"/>

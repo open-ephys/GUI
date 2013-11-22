@@ -103,7 +103,7 @@ class ContinuousCircularBuffer
 public:
 	ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
 	void reallocate(int N);
-	void update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts);
+	void update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts, int numpts);
 	int GetPtr();
 	void addTrialStartToSmartBuffer(int trialID);
 	int numCh;

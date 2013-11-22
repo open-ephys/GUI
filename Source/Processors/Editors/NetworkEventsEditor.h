@@ -50,7 +50,7 @@ public:
 
 private:
 
-    
+	UtilityButton* trialSimulation;
     ScopedPointer<Label> urlLabel;
 	ScopedPointer<Label> labelPort;
 

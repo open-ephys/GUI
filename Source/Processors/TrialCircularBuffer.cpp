@@ -54,8 +54,8 @@ ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float po
 	// allocate data for 1 ms resolution bins to cover trials 
 	xmin = -pre;
 	xmax = post;
-	ymax = 0;
-	ymin = 0;
+	ymax = -1e10;
+	ymin = 1e10;
 	setDefaultColors(colorRGB[0],colorRGB[1],colorRGB[2], ID);
 
 	timeSpanSecs=preSecs + postSecs + maxTrialTimeSec;
@@ -1192,7 +1192,7 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		firstTime = false;
 	}
 	// first, update LFP circular buffers
-	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp);
+	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
@@ -1208,129 +1208,3 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 	}
 
 }
-
-
-
-
-
-
-
-
-/*******************************/
-
-
-/*
-
-
-template <class T> void thread_safe_queue<T>::lock() 
-{
-	c.enter();
-}
-
- template <class T> void thread_safe_queue<T>::release() 
- {
-	 c.exit();
- }
-
-template <class T> T thread_safe_queue<T>::front()
-{
-	c.enter();
-	T t = q.front();
-	c.exit();
-	return t;
-}
-
-template <class T> T thread_safe_queue<T>::pop()
-{
-	c.enter();
-	T t = q.pop();
-	c.exit();
-	return t;
-}
-
-template <class T> void thread_safe_queue<T>::push(const T& t)
-{
-	c.enter();
-	q.push(t);
-	c.exit();
-}
-*/
-/***************/
-
-/*
-std::vector<double> UnitPSTH::GetSmoothPSTH(double fGaussianWidthMS)
-{
-	const double PI = 3.14159265359;
-	fGaussianWidthMS /= binResolutionMS;
-	int gaussianSupportMS = (ceil(fGaussianWidthMS)*7);
-	std::vector<double> gaussianKernel;
-	gaussianKernel.resize(1 + gaussianSupportMS);
-
-	double sum = 0;
-	for (int k = 0; k < 1 + gaussianSupportMS; k++)
-	{
-		double x = k - gaussianSupportMS / 2;
-
-		gaussianKernel[k] = exp(-0.5 * ((x / (fGaussianWidthMS * fGaussianWidthMS)))) / (sqrt(2 * PI) * fGaussianWidthMS);
-		sum += gaussianKernel[k];
-	}
-	for (int k = 0; k < 1 + gaussianSupportMS; k++)
-	{
-		gaussianKernel[k] /= sum;
-	}
-
-	std::vector<double> smoothFiringRate;
-	jassertfalse;
-	//NEED TO IMPLEMENT THIS...
-	//alglib.alglib.convr1dcircular(avg_firing_rate_Hz, avg_firing_rate_Hz.Length,
-	//gaussianKernel, gaussianKernel.Length, out smoothFiringRate);
-	
-	return smoothFiringRate;
-}
-*/
-
-/*******************************/
-
-
-/********************************/
-
-
-/*
- void TrialCircularBuffer::AddDefaultTTLConditions()
-{
-	std::vector<int> AllOutcomes;
-
-    for (int ch = 0; ch < numTTLch; ch++)
-    {
-		std::vector<int> TrialTypes(1);
-        TrialTypes[0] = 30000 + ch;
-        Condition c(numCh, String("TTL ")+ String(ch+1), TrialTypes, AllOutcomes, AfterSec + MAX_TRIAL_TIME_SEC, BeforeSec);
-        AddCondition(c);
-    }
-}
-*/
-/*
-
-	} else if (cmd ==  "ttl")
-	{
-		// inject a fake trial...
-		int ch = split[1].getIntValue();
-		int value = split[2].getIntValue();
-
-		juce::Time timer;
-		double curr_time = double(timer.getHighResolutionTicks()) / double(timer.getHighResolutionTicksPerSecond()); 
-	
-
-		if (value > 0 && ((curr_time - lastTTLtrialTS[ch]) > TTL_Trial_Inhibition_Sec)) 
-		{
-			ttlTrial.Type = 30000+ch;
-			ttlTrial.Start_TS = E.soft_ts;
-			ttlTrial.Align_TS = E.soft_ts;
-			ttlTrial.End_TS = E.soft_ts + TTL_Trial_Length_Sec;
-			ttlTrial.Outcome = -1; // will be ignored anyway...
-			ttlTrial.SetBufferPtrAtTrialOnset(spikeBuffer, lfpBuffer);
-
-			AliveTrials.push(Trial(ttlTrial));
-			lastTTLtrialTS[ch] = double(timer.getHighResolutionTicks()) / double(timer.getHighResolutionTicksPerSecond());
-		}
-		*/

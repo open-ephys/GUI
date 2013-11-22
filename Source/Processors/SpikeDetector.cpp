@@ -552,7 +552,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 	
 	postEventsInQueue(events);
 
-	channelBuffers->update(buffer,  hardware_timestamp,software_timestamp);
+	channelBuffers->update(buffer,  hardware_timestamp,software_timestamp,nSamples);
     //std::cout << dataBuffer.getMagnitude(0,nSamples) << std::endl;
 
     for (int i = 0; i < electrodes.size(); i++)
@@ -1217,10 +1217,9 @@ LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double S
 	return triallfp;
 }
 */
-void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts)
+void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts, int numpts)
 {
 	mut.enter();
-	int numpts = buffer.getNumSamples();
 	
 	// we don't start from zero because of subsampling issues.
 	// previous packet may not have ended exactly at the last given sample.
@@ -1246,7 +1245,9 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_
 			numSamplesInBuf = bufLen;
 		}
 	}
-	leftover_k =subSampling-( numpts-k);
+	int lastUsedSample = floor(numpts/subSampling) * subSampling;
+	int numMissedSamples = numpts-lastUsedSample;
+	leftover_k =subSampling-numMissedSamples;
 	mut.exit();
 
 }

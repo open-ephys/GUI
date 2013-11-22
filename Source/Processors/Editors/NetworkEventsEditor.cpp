@@ -39,6 +39,13 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
 
 	NetworkEvents *p= (NetworkEvents *)getProcessor();
 	
+
+	trialSimulation = new UtilityButton("Trial",Font("Default", 15, Font::plain));
+    trialSimulation->setBounds(20,25,80,18);
+    trialSimulation->addListener(this);
+    addAndMakeVisible(trialSimulation);
+
+
 	labelPort = new Label("Smooth MS", String(p->urlport));
     labelPort->setBounds(70,85,80,18);
     labelPort->setFont(Font("Default", 15, Font::plain));
@@ -53,6 +60,17 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
 }
 
 
+
+void NetworkEventsEditor::buttonEvent(Button* button)
+{
+    if (button == trialSimulation)
+	{
+		NetworkEvents *processor  = (NetworkEvents*) getProcessor();
+		processor->simulateSingleTrial();
+	}
+    
+
+}
 void NetworkEventsEditor::labelTextChanged(juce::Label *label)
 {
 	if (label == labelPort)
@@ -71,8 +89,3 @@ NetworkEventsEditor::~NetworkEventsEditor()
 }
 
 
-void NetworkEventsEditor::buttonEvent(Button* button)
-{
-
-   
-}
