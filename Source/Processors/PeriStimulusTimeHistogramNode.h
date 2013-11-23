@@ -82,13 +82,22 @@ public:
 	int spikeSavingMode;
 	
 private:
-	void dumpEventToDisk(MidiMessage& event);
+
+	FILE* eventFile;
+	String generateHeader();
+	void openFile(String filename);
+
+	void dumpNetworkEventToDisk(String S, int64 ts);
 	void dumpSpikeEventToDisk(SpikeObject *s,  bool dumpWave);
+	void dumpTimestampEventToDisk(int64 softwareTS,int64 hardwareTS);
+	void dumpTTLeventToDisk(int channel,bool risingEdge, int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, int samplePosition );
+	void dumpStartStopRecordEventToDisk(int64 ts, bool startRecord);
 
 	StringTS unpackStringTS(MidiMessage &event);
 	bool isRecording;
     int displayBufferSize;
     bool redrawRequested;
+	int syncCounter;
 	int64 hardware_timestamp,software_timestamp;
 
 

@@ -285,6 +285,8 @@
     <ClCompile Include="..\..\Source\Dsp\RootFinder.cpp" />
     <ClCompile Include="..\..\Source\Dsp\State.cpp" />
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp" />
+    <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp" />
+    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp" />
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp" />
     <ClCompile Include="..\..\Source\Processors\NetworkEvents.cpp" />
     <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp" />
@@ -1490,6 +1492,8 @@
     <ClInclude Include="..\..\Source\Dsp\Types.h" />
     <ClInclude Include="..\..\Source\Dsp\Utilities.h" />
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h" />
+    <ClInclude Include="..\..\Source\Processors\AdvancerNode.h" />
+    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h" />
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h" />
     <ClInclude Include="..\..\Source\Processors\NetworkEvents.h" />
     <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h" />

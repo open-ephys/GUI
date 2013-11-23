@@ -747,6 +747,12 @@ void RecordNode::writeEventBuffer(MidiMessage& event, int samplePosition) //, in
 
 }
 
+uint16 RecordNode::getRecordingNumber()
+{
+	return recordingNumber;
+}
+
+
 void RecordNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
     if (eventType == TTL && !eventsSavedBySink)

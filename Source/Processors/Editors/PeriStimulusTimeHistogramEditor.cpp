@@ -46,6 +46,15 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	saveOptions->setBounds(160,30,110,20);
 	addAndMakeVisible(saveOptions);
 
+
+	clearDisplay = new UtilityButton("Clear all",Font("Default", 15, Font::plain));
+	clearDisplay->addListener(this);
+	clearDisplay->setColour(Label::textColourId, Colours::white);
+	clearDisplay->setBounds(160,60,110,20);
+	addAndMakeVisible(clearDisplay);
+
+
+
 	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
 	autoRescale->setBounds(35, 95, 130, 18);
 	autoRescale->addListener(this);
@@ -115,7 +124,13 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 
 	PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
 
-
+	if (button == clearDisplay)
+	{
+		if (processor->trialCircularBuffer != nullptr) {
+			processor->trialCircularBuffer->clearAll();
+			repaint();
+		}
+	} else 
 	if (button == lfp)
 	{
 		periStimulusTimeHistogramCanvas->setLFPvisibility(lfp->getToggleState());
@@ -767,7 +782,7 @@ void XYPlot::paint(Graphics &g)
 		axesRange[1] = ymin;
 		axesRange[2] = xmax;
 		axesRange[3] = ymax;
-		if (smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
+		if (spikePlot && smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
 			axesRange[0] += 7*guassianStandardDeviationMS/1e3;
 			axesRange[2] -= 7*guassianStandardDeviationMS/1e3;
 		}

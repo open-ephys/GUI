@@ -223,6 +223,7 @@ public:
 	void reallocate(int numChannels);
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
+	void clearAll();
 	bool firstTime;
 	 double postSec, preSec;
      int numTTLchannels ;

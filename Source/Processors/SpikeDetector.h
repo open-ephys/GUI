@@ -154,6 +154,8 @@ public:
     /** Called after acquisition is finished. */
     bool disable();
 
+	
+	bool isReady();
     /** Creates the SpikeDetectorEditor. */
     AudioProcessorEditor* createEditor();
 

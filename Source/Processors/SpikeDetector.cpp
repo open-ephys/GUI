@@ -383,13 +383,12 @@ bool SpikeDetector::enable()
     return true;
 }
 
-Electrode* SpikeDetector::getActiveElectrode()
-{
-if (electrodes.size() == 0)
-	return nullptr;
 
-return electrodes[currentElectrode];
+bool SpikeDetector::isReady()
+{
+    return true;
 }
+
 
 bool SpikeDetector::disable()
 {
@@ -402,6 +401,15 @@ bool SpikeDetector::disable()
 	mut.exit();
     return true;
 }
+
+Electrode* SpikeDetector::getActiveElectrode()
+{
+if (electrodes.size() == 0)
+	return nullptr;
+
+return electrodes[currentElectrode];
+}
+
 
 void SpikeDetector::addSpikeEvent(SpikeObject* s, MidiBuffer& eventBuffer, int peakIndex)
 {

@@ -104,8 +104,8 @@ void ConditionPSTH::clear()
 	{
 		numDataPoints[k] = 0;
 		avgResponse[k] = 0;
-
 	}
+	
 }
 
 void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
@@ -600,8 +600,9 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	// and that softwareTS[search_back_ptr+1]-trialAlign > preSec.
 
 	int index=search_back_ptr;
+
 	int index_next=index+1;
-	if (index_next > bufLen)
+	if (index_next >= bufLen)
 		index_next = 0;
 
 	float tA = float(softwareTS[index]-trial->alignTS)/numTicksPerSecond;
@@ -896,6 +897,34 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 		  unlockPSTH();
 		  
 	  }
+
+}
+
+void TrialCircularBuffer::clearAll()
+{
+
+	lockPSTH();
+	for (int i=0;i<electrodesPSTH.size();i++) 
+	{
+		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
+		{
+			electrodesPSTH[i].channelsPSTHs[ch].redrawNeeded = true;
+			for (int psth=0;psth<electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.size();psth++)
+			{
+				electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs[psth].clear();
+			}
+		}
+
+		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+		{
+			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
+			for (int psth=0;psth<electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.size();psth++)
+			{
+				electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs[psth].clear();
+			}
+		}
+	}
+	unlockPSTH();
 
 }
 

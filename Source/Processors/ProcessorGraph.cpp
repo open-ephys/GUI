@@ -30,6 +30,7 @@
 #include "LfpTriggeredAverageNode.h"
 #include "SpikeDisplayNode.h"
 #include "EventNode.h"
+#include "AdvancerNode.h"
 #include "FilterNode.h"
 #include "GenericProcessor.h"
 #include "RecordNode.h"
@@ -536,6 +537,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new network events detector." << std::endl;
 			processor = new NetworkEvents(zmqcontext);
+        } else if (subProcessorType.equalsIgnoreCase("Electrode Advancers"))
+        {
+            std::cout << "Creating a new advancers node." << std::endl;
+			processor = new AdvancerNode();
         }
         else if (subProcessorType.equalsIgnoreCase("Phase Detector"))
         {

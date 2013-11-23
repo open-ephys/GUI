@@ -1809,6 +1809,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\AccessClass.h">
@@ -3466,6 +3472,12 @@
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>Juce Library Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\AdvancerNode.h">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -157,7 +157,7 @@ public:
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
-	UtilityButton *visibleConditions, *saveOptions;
+	UtilityButton *visibleConditions, *saveOptions, *clearDisplay;
 	ToggleButton *smoothPSTH;
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;

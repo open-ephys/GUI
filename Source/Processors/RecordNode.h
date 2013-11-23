@@ -133,6 +133,8 @@ public:
 	/** used to disable the event saving by record node. Events will be saved
 	by one of the sinks **/
 	void setEventSavingState(bool savedBySink);
+
+	uint16 getRecordingNumber();
 private:
 
     /** Keep the RecordNode informed of acquisition and record states.
