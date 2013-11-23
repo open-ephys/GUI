@@ -121,7 +121,16 @@ public:
 	bool disable();
 	void run();
 	void opensocket();
- 
+
+
+	bool isReady();
+	float getDefaultSampleRate();
+	int getDefaultNumOutputs();
+	float getDefaultBitVolts();
+	void enabledState(bool t);
+
+
+
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void setNewListeningPort(int port);
 	int urlport;
@@ -129,8 +138,6 @@ public:
 private:
 	   void handleEvent(int eventType, MidiMessage& event, int samplePos);
 
-	   int64 hardware_timestamp;
-	   int64 software_timestamp;
 	   StringTS createStringTS(String S, int64 t);
 	  
 	void *zmqcontext;

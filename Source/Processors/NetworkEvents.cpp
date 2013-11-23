@@ -129,12 +129,7 @@ void NetworkEvents::simulateDesignAndTrials(juce::MidiBuffer& events)
 
 void NetworkEvents::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
-    if (eventType == TIMESTAMP)
-    {
-          const uint8* dataptr = event.getRawData();
-	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
-		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
-    } 
+
 }
 
 void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events)
@@ -314,3 +309,36 @@ void NetworkEvents::run() {
 }
 
 
+
+
+
+
+bool NetworkEvents::isReady()
+{
+   
+        return true;
+    
+}
+
+
+float NetworkEvents::getDefaultSampleRate()
+{
+    return 30000.0f;
+}
+
+int NetworkEvents::getDefaultNumOutputs()
+{
+    return 0;
+}
+
+float NetworkEvents::getDefaultBitVolts()
+{
+    return 0.05f;
+}
+
+void NetworkEvents::enabledState(bool t)
+{
+
+    isEnabled = t;
+
+}

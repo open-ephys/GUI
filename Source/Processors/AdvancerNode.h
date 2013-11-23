@@ -29,6 +29,55 @@
 
 #include <list>
 
+class Advancer
+{
+public:
+	Advancer() {}
+	String name; // official name of the advancer
+	String description; // what is this advancer targeting?
+	String manipulator;  // screw/narashige drive/...
+	float depthMM;
+	int locationIndex; // location in advancerLocations
+};
+
+
+class Circle
+{
+public:
+	Circle(float _x, float _y, float _rad) : x(_x),y(_y),rad(_rad) {}
+
+	float x,y,rad;
+};
+
+class Point2D
+{
+public:
+	float x,y;
+};
+
+class Polygon2D
+{
+public:
+	Polygon2D();
+	Polygon2D(int N);
+	std::vector<Point2D> points;
+	uint8 color[3];
+};
+
+class AdvancerContainer
+{
+public:
+	AdvancerContainer() {}
+	String name; 
+	String type; // hyperdrive / grid / cannule / ...?
+	std::vector<Advancer> advancers;
+
+	std::vector<Polygon2D> model;
+	std::vector<Circle> advancerLocations;
+	Point2D center; // anterior-posterior and medial-lateral coordinates and radius
+};
+
+
 class AdvancerNode : public GenericProcessor
 {
 public:
@@ -38,12 +87,19 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 	std::vector<String> splitString(String S, char sep);
 	bool disable();
+	int addContainer(String type);
+	int addAdvancerToContainer(int containerIndex);
+	void updateAdvancerPosition(int container, int advancer, float value);
+	std::vector<AdvancerContainer> advancerContainers;
 private:
-	   void handleEvent(int eventType, MidiMessage& event, int samplePos);
-
+	void handleEvent(int eventType, MidiMessage& event, int samplePos);
+	int getAdvancerCount();
+	AdvancerContainer createStandardGridContainer();
+	Polygon2D createCircle(float diameterMM);
+	int getGridCount();
 	Time timer;
 	std::list<float> advancerDepth;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerNode);
 };
 
-#endif  // __NETWORKEVENT_H_91811541__
+#endif  

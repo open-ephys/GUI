@@ -501,7 +501,12 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             processor = new FileReader();
             std::cout << "Creating a new file reader." << std::endl;
-        }
+        }   
+		else if (subProcessorType.equalsIgnoreCase("Network Events"))
+        {
+            std::cout << "Creating a new network events source." << std::endl;
+			processor = new NetworkEvents(zmqcontext);
+        } 
 
 
         sendActionMessage("New source node created.");
@@ -533,14 +538,6 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new event detector." << std::endl;
             processor = new EventDetector();
-        } else if (subProcessorType.equalsIgnoreCase("Network Events"))
-        {
-            std::cout << "Creating a new network events detector." << std::endl;
-			processor = new NetworkEvents(zmqcontext);
-        } else if (subProcessorType.equalsIgnoreCase("Electrode Advancers"))
-        {
-            std::cout << "Creating a new advancers node." << std::endl;
-			processor = new AdvancerNode();
         }
         else if (subProcessorType.equalsIgnoreCase("Phase Detector"))
         {
@@ -590,6 +587,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
 
             sendActionMessage("New record controller created.");
 
+        }else if (subProcessorType.equalsIgnoreCase("Advancers"))
+        {
+            std::cout << "Creating a new advancers node." << std::endl;
+			processor = new AdvancerNode();
         }
 
     }

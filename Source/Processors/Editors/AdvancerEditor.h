@@ -27,6 +27,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
+#include "VisualizerEditor.h"
 
 class AdvancerNode;
 
@@ -39,7 +40,68 @@ class AdvancerNode;
 
 */
 
-class AdvancerEditor : public GenericEditor,public Label::Listener
+class AdvancerCanvas;
+
+class AdvancerDisplay : public Component
+{
+public:
+    AdvancerDisplay(AdvancerNode *, AdvancerCanvas*, Viewport*);
+
+    ~AdvancerDisplay();
+    void paint(Graphics& g);
+
+    void resized();
+
+private:
+   	AdvancerNode* processor;
+    AdvancerCanvas* canvas;
+    Viewport* viewport;
+};
+
+class AdvancerCanvas : public Visualizer
+
+{
+public:
+    AdvancerCanvas(AdvancerNode* n);
+    ~AdvancerCanvas();
+
+    void paint(Graphics& g);
+
+  //  void refresh();
+
+	void beginAnimation() {}
+	void endAnimation() {}
+	
+    void setParameter(int, float) {}
+    void setParameter(int, int, int, float) {}
+	
+	void update() {}
+	void refreshState() {}
+	void refresh() {}
+
+	void resized() {}
+
+    void startRecording() { } // unused
+    void stopRecording() { } // unused
+    
+    AdvancerNode* processor;
+
+private:
+
+    ScopedPointer<AdvancerDisplay> advancerDisplay;
+    ScopedPointer<Viewport> viewport;
+
+   
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerCanvas);
+
+};
+
+
+
+
+class AdvancerEditor : public VisualizerEditor,public Label::Listener,  public ComboBox::Listener
+
 {
 public:
     AdvancerEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
@@ -47,11 +109,22 @@ public:
 
     void buttonEvent(Button* button);
 	void labelTextChanged(juce::Label *);
+	void comboBoxChanged(ComboBox* comboBox);
+	Visualizer* createNewCanvas() ;
+	void updateFromProcessor();
 
 private:
+	void setActiveContainer(int index);
+	void setActiveAdvancer(int newAdvancerIndex) ;
 
-
-
+	int selectedContainer;
+	ComboBox* advancerCombobox;
+	ComboBox* containerCombobox;
+	Label *containerLabel, *advancerLabel, *depthLabel, *depthEditLabel;
+	UtilityButton *addContainer, *removeContainer;
+	UtilityButton *addAdvancer, *removeAdvancer;
+	
+	AdvancerCanvas* advancerCanvas;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerEditor);
 
 };
