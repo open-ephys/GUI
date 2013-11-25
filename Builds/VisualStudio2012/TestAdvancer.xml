@@ -2,269 +2,661 @@
 
 <SETTINGS>
   <INFO>
-    <DATE>22 Nov 2013 22:05:02</DATE>
+    <DATE>23 Nov 2013 20:47:40</DATE>
     <OS>Windows 8</OS>
     <MACHINE>SHAYO-LAPTOP</MACHINE>
   </INFO>
   <SIGNALCHAIN>
-    <PROCESSOR name="Sources/File Reader" insertionPoint="1" NodeId="104">
-      <FILENAME path="C:\Users\Shay\Documents\GitHub\GUI\Resources\DataFiles\data_stream_16ch_hippocampus"/>
+    <PROCESSOR name="Utilities/Advancers" insertionPoint="1" NodeId="100">
+      <ADVANCER_CONTAINER type="Grid" name="Grid 1" numAdvancerLocations="293" numAdvancers="2"
+                          centerX="0" centerY="0" numModelPolygons="1">
+        <POLYGON colorR="56" colorG="56" colorB="56" numPoints="21">
+          <POLYGON_POINT x="19" y="0"/>
+          <POLYGON_POINT x="17.9705887" y="6.16911459"/>
+          <POLYGON_POINT x="14.9938974" y="11.6697493"/>
+          <POLYGON_POINT x="10.3924809" y="15.905859"/>
+          <POLYGON_POINT x="4.66494274" y="18.4184227"/>
+          <POLYGON_POINT x="-1.56808531" y="18.9351826"/>
+          <POLYGON_POINT x="-7.63119364" y="17.4001408"/>
+          <POLYGON_POINT x="-12.8673954" y="13.9796333"/>
+          <POLYGON_POINT x="-16.7092953" y="9.04430389"/>
+          <POLYGON_POINT x="-18.740591" y="3.12894082"/>
+          <POLYGON_POINT x="-18.741169" y="-3.12547159"/>
+          <POLYGON_POINT x="-16.7109718" y="-9.04120731"/>
+          <POLYGON_POINT x="-12.8699884" y="-13.9772463"/>
+          <POLYGON_POINT x="-7.63441753" y="-17.3987255"/>
+          <POLYGON_POINT x="-1.57159412" y="-18.9348907"/>
+          <POLYGON_POINT x="4.66153288" y="-18.4192867"/>
+          <POLYGON_POINT x="10.389533" y="-15.9077845"/>
+          <POLYGON_POINT x="14.9917336" y="-11.6725292"/>
+          <POLYGON_POINT x="17.9694443" y="-6.17244196"/>
+          <POLYGON_POINT x="19" y="-0.00352083636"/>
+          <POLYGON_POINT x="19" y="0"/>
+        </POLYGON>
+        <ADVANCER_LOCATION x="-9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="3" rad="0.349999994"/>
+        <ADVANCER name="Advancer 1" probeType="unknown" locationIndex="0" ID="1"
+                  description="Advancer 1" depthMM="0"/>
+        <ADVANCER name="Advancer 2" probeType="unknown" locationIndex="-1" ID="2"
+                  description="Advancer 2" depthMM="2"/>
+      </ADVANCER_CONTAINER>
+      <ADVANCER_CONTAINER type="Grid" name="Grid 2" numAdvancerLocations="293" numAdvancers="1"
+                          centerX="0" centerY="0" numModelPolygons="1">
+        <POLYGON colorR="56" colorG="56" colorB="56" numPoints="21">
+          <POLYGON_POINT x="19" y="0"/>
+          <POLYGON_POINT x="17.9705887" y="6.16911459"/>
+          <POLYGON_POINT x="14.9938974" y="11.6697493"/>
+          <POLYGON_POINT x="10.3924809" y="15.905859"/>
+          <POLYGON_POINT x="4.66494274" y="18.4184227"/>
+          <POLYGON_POINT x="-1.56808531" y="18.9351826"/>
+          <POLYGON_POINT x="-7.63119364" y="17.4001408"/>
+          <POLYGON_POINT x="-12.8673954" y="13.9796333"/>
+          <POLYGON_POINT x="-16.7092953" y="9.04430389"/>
+          <POLYGON_POINT x="-18.740591" y="3.12894082"/>
+          <POLYGON_POINT x="-18.741169" y="-3.12547159"/>
+          <POLYGON_POINT x="-16.7109718" y="-9.04120731"/>
+          <POLYGON_POINT x="-12.8699884" y="-13.9772463"/>
+          <POLYGON_POINT x="-7.63441753" y="-17.3987255"/>
+          <POLYGON_POINT x="-1.57159412" y="-18.9348907"/>
+          <POLYGON_POINT x="4.66153288" y="-18.4192867"/>
+          <POLYGON_POINT x="10.389533" y="-15.9077845"/>
+          <POLYGON_POINT x="14.9917336" y="-11.6725292"/>
+          <POLYGON_POINT x="17.9694443" y="-6.17244196"/>
+          <POLYGON_POINT x="19" y="-0.00352083636"/>
+          <POLYGON_POINT x="19" y="0"/>
+        </POLYGON>
+        <ADVANCER_LOCATION x="-9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="3" rad="0.349999994"/>
+        <ADVANCER name="Advancer 3" probeType="unknown" locationIndex="0" ID="3"
+                  description="Advancer 3" depthMM="3.4000001"/>
+      </ADVANCER_CONTAINER>
       <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
       <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <EDITOR/>
-    </PROCESSOR>
-    <PROCESSOR name="Filters/Network Events" insertionPoint="1" NodeId="103">
-      <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <EDITOR/>
-    </PROCESSOR>
-    <PROCESSOR name="Filters/Advancer Node" insertionPoint="1" NodeId="100">
-      <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <EDITOR Type="Visualizer">
-        <TAB Active="0"/>
-        <WINDOW Active="0"/>
-      </EDITOR>
-    </PROCESSOR>
-    <PROCESSOR name="Utilities/Record Control" insertionPoint="1" NodeId="101">
-      <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="0" record="0" audio="0"/>
-      </CHANNEL>
-      <EDITOR>
-        <PARAMETERS Type="RecordControlEditor" Channel="0" FileSaveOption="0" EventSaveOption="0"/>
-      </EDITOR>
-    </PROCESSOR>
-    <PROCESSOR name="Sinks/LFP Viewer" insertionPoint="1" NodeId="105">
-      <CHANNEL name="0" number="0">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="1" number="1">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="2" number="2">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="3" number="3">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="4" number="4">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="5" number="5">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="6" number="6">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="7" number="7">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="8" number="8">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="9" number="9">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="10" number="10">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="11" number="11">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="12" number="12">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="13" number="13">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="14" number="14">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
-      </CHANNEL>
-      <CHANNEL name="15" number="15">
-        <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
       <EDITOR Type="Visualizer">
         <TAB Active="0"/>

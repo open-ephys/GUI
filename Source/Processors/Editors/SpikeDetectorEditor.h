@@ -156,14 +156,14 @@ public:
     void sliderEvent(Slider* slider);
 
     void channelChanged(int chan);
-
+	
     bool addElectrode(int nChans);
 	Visualizer* createNewCanvas();
     void checkSettings();
 	void setThresholdValue(int chan, double threshold);
     OwnedArray<cElectrodeButton> electrodeButtons;
 	SpikeDetectCanvas *spikeDetectorCanvas;
-
+	void updateAdvancerList();
 private:
 
     void drawElectrodeButtons(int);
@@ -172,17 +172,17 @@ private:
 
     ComboBox* electrodeTypes;
     ComboBox* electrodeList;
+	ComboBox* advancerList;
     Label* numElectrodes;
     Label* thresholdLabel;
     TriangleButton* upButton;
     TriangleButton* downButton;
     UtilityButton* plusButton;
+	UtilityButton* removeElectrodeButton;
 
     ThresholdSlider* thresholdSlider;
 
-    Array<ElectrodeEditorButton*> electrodeEditorButtons;
-	
-
+   Array<String> advancerNames ;
     void removeElectrode(int index);
     void editElectrode(int index, int chan, int newChan);
 

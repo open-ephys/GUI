@@ -23,6 +23,8 @@
 
 #include "AdvancerEditor.h"
 #include "../AdvancerNode.h"
+#include "SpikeDetectorEditor.h"
+#include "../SpikeDetector.h"
 #include <stdio.h>
 
 
@@ -181,11 +183,13 @@ AdvancerEditor::AdvancerEditor(GenericProcessor* parentNode, bool useDefaultPara
 void AdvancerEditor::setActiveContainer(int index)
 {
 	containerCombobox->setSelectedId(index);
+	updateFromProcessor();
 }
 
 void AdvancerEditor::setActiveAdvancer(int newAdvancerIndex) 
 {
 		advancerCombobox->setSelectedId(newAdvancerIndex);
+		updateFromProcessor();
 }
 
 void AdvancerEditor::updateFromProcessor()
@@ -214,6 +218,10 @@ void AdvancerEditor::updateFromProcessor()
 	if (selectedContainer  > 0)
 	{
 		numAdvancersInContainer = processor->advancerContainers[selectedContainer-1].advancers.size();
+		if (numAdvancersInContainer == 0)
+		{
+			advancerCombobox->setSelectedId(0);
+		}
 		for (int i=0;i<	numAdvancersInContainer;i++)
 		{
 			advancerCombobox->addItem(processor->advancerContainers[selectedContainer-1].advancers[i].name,i+1);
@@ -228,7 +236,7 @@ void AdvancerEditor::updateFromProcessor()
 		int selectedAdvancer = advancerCombobox->getSelectedId();
 		if (selectedAdvancer > 0)
 		{
-			depthEditLabel->setText(String(processor->advancerContainers[selectedContainer-1].advancers[selectedAdvancer-1].depthMM),dontSendNotification);
+			depthEditLabel->setText(String(processor->advancerContainers[selectedContainer-1].advancers[selectedAdvancer-1].depthMM,4),dontSendNotification);
 			depthEditLabel->setEnabled(true);
 		}
 
@@ -238,6 +246,20 @@ void AdvancerEditor::updateFromProcessor()
 		depthEditLabel->setEnabled(false);
 	}
 	repaint();
+
+
+	
+	ProcessorGraph *g = getProcessor()->getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Spike Detector")
+		{
+			SpikeDetector *node = (SpikeDetector*)p[k];
+			SpikeDetectorEditor *ed = (SpikeDetectorEditor *)node->getEditor();
+			ed->updateAdvancerList();
+		}
+	}
 }
 
 void AdvancerEditor::comboBoxChanged(ComboBox* comboBox)
@@ -246,6 +268,8 @@ void AdvancerEditor::comboBoxChanged(ComboBox* comboBox)
 	{
 		// set active container.
 		updateFromProcessor();
+		if (advancerCombobox->getNumItems() > 0)
+			advancerCombobox->setSelectedId(1);
 	} else if (comboBox == advancerCombobox)
 	{
 		// set active advancer.
@@ -312,7 +336,8 @@ void AdvancerEditor::labelTextChanged(juce::Label *label)
 		
 		int selectedContainer = containerCombobox->getSelectedId();
 		int selectedAdvancer = advancerCombobox->getSelectedId();
-		processor->updateAdvancerPosition(selectedContainer-1,selectedAdvancer-1,v.getValue());
+		float value = v.getValue();
+		processor->updateAdvancerPosition(selectedContainer-1,selectedAdvancer-1,value);
 	
 	}
 }
@@ -328,5 +353,13 @@ Visualizer* AdvancerEditor::createNewCanvas()
    AdvancerNode* processor = (AdvancerNode*) getProcessor();
     advancerCanvas = new AdvancerCanvas(processor);
 	return advancerCanvas;
+}
+
+void AdvancerEditor::saveCustomParametersToXml(XmlElement* parentElement)
+{
+}
+
+void AdvancerEditor::loadCustomParametersFromXml()
+{
 }
 

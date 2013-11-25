@@ -115,7 +115,8 @@ public:
 	std::vector<String> splitString(String S, char sep);
 
 	void simulateSingleTrial();
-	
+	bool isSource();
+
 	void simulateStartRecord();
 	void simulateStopRecord();
 	bool disable();

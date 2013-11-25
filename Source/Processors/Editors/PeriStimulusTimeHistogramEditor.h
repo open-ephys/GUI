@@ -114,6 +114,7 @@ public:
 	void setSmoothPSTH(bool smooth);
 	void setSmoothing(float _gaussianStandardDeviationMS);
 	void setAutoRescale(bool state);
+	void setCompactView(bool compact);
 	
 	void setParameter(int, float) {}
 	void setParameter(int, int, int, float) {}
@@ -128,7 +129,7 @@ public:
 	bool updateNeeded;
 
    private:
-    bool showLFP, showSpikes, smoothPlots, autoRescale;
+    bool showLFP, showSpikes, smoothPlots, autoRescale,compactView;
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport;
 	PeriStimulusTimeHistogramDisplay *psthDisplay;
@@ -161,6 +162,7 @@ private:
 	ToggleButton *smoothPSTH;
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;
+	ToggleButton *compactView;
 	Label *smoothMS;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 

@@ -54,7 +54,7 @@ class AccessClass : public ActionBroadcaster
 {
 public:
 
-    AccessClass() { }
+    AccessClass() {     ui = nullptr;ev = nullptr;pl = nullptr;dv = nullptr;pg = nullptr;cp = nullptr;mc = nullptr;ac = nullptr;	}
     ~AccessClass() { }
 
     /** Sets the object's UIComponent and copies all the necessary pointers

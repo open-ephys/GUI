@@ -56,14 +56,14 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 
 	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
-	autoRescale->setBounds(35, 95, 130, 18);
+	autoRescale->setBounds(10, 105, 110, 18);
 	autoRescale->addListener(this);
 	autoRescale->setToggleState(true,false);
 	autoRescale->setClickingTogglesState(true);
 	addAndMakeVisible(autoRescale);
 
 	smoothPSTH = new ToggleButton("Smooth PSTH");//, Font("Small Text", 13, Font::plain));
-	smoothPSTH->setBounds(135, 95, 130, 18);
+	smoothPSTH->setBounds(135, 105, 130, 18);
 	smoothPSTH->addListener(this);
 	smoothPSTH->setToggleState(true,false);
 	smoothPSTH->setClickingTogglesState(true);
@@ -71,14 +71,22 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 
 	lfp = new ToggleButton("LFP");//, Font("Small Text", 13, Font::plain));
-	lfp->setBounds(10, 55, 70, 18);
+	lfp->setBounds(10, 55, 60, 18);
 	lfp->addListener(this);
 	lfp->setToggleState(true,false);
 	lfp->setClickingTogglesState(true);
 	addAndMakeVisible(lfp);
 
+	compactView = new ToggleButton("CompactView");//, Font("Small Text", 13, Font::plain));
+	compactView->setBounds(10, 80, 120, 18);
+	compactView->addListener(this);
+	compactView->setToggleState(false,false);
+	compactView->setClickingTogglesState(true);
+	addAndMakeVisible(compactView);
+	
+
 	spikes = new ToggleButton("Units");//, Font("Small Text", 13, Font::plain));
-	spikes->setBounds(80, 55, 130, 18);
+	spikes->setBounds(70, 55, 60, 18);
 	spikes->addListener(this);
 	spikes->setToggleState(true,false);
 	spikes->setClickingTogglesState(true);
@@ -87,7 +95,7 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 
 	smoothMS = new Label("Smooth MS", "10");
-	smoothMS->setBounds(245,95,40,18);
+	smoothMS->setBounds(245,105,40,18);
 	smoothMS->setFont(Font("Default", 15, Font::plain));
 	smoothMS->setColour(Label::textColourId, Colours::white);
 	smoothMS->setColour(Label::backgroundColourId, Colours::grey);
@@ -130,7 +138,10 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			processor->trialCircularBuffer->clearAll();
 			repaint();
 		}
-	} else 
+	} else if (button == compactView)
+	{
+		periStimulusTimeHistogramCanvas->setCompactView(compactView->getToggleState());
+	}
 	if (button == lfp)
 	{
 		periStimulusTimeHistogramCanvas->setLFPvisibility(lfp->getToggleState());
@@ -265,6 +276,7 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	showSpikes = true;
 	smoothPlots = true;
 	autoRescale = true;
+	compactView = false;
 	gaussianStandardDeviationMS = 10;
 	viewport = new Viewport();
 	psthDisplay = new PeriStimulusTimeHistogramDisplay(n, viewport, this);
@@ -325,6 +337,12 @@ void PeriStimulusTimeHistogramCanvas::setSmoothPSTH(bool smooth)
 	update();
 }
 
+void PeriStimulusTimeHistogramCanvas::setCompactView(bool compact)
+{
+	compactView = compact;
+	update();
+}
+
 void PeriStimulusTimeHistogramCanvas::setAutoRescale(bool state)
 {
 	autoRescale = state;
@@ -343,6 +361,11 @@ void PeriStimulusTimeHistogramCanvas::update()
 	// clear all XY plots and create new ones...
 	// delete all existing plots.
 	// lock psth
+
+	heightPerElectrodePix = 200;
+	widthPerUnit = 200;
+
+	int maxUnitsPerRow = getWidth() / widthPerUnit;
 	updateNeeded = false;
 	for (int k=0; k < psthDisplay->psthPlots.size();k++)
 	{
@@ -356,7 +379,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	numElectrodes = processor->trialCircularBuffer->electrodesPSTH.size();
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
-
+	int plotCounter = 0;
 	for (int e=0;e<numElectrodes;e++) 
 	{
 		int offset = 0;
@@ -365,10 +388,28 @@ void PeriStimulusTimeHistogramCanvas::update()
 			offset = processor->trialCircularBuffer->electrodesPSTH[e].channels.size();
 			for (int u=0;u<processor->trialCircularBuffer->electrodesPSTH[e].channels.size();u++)
 			{
-				XYPlot *newplot = new XYPlot(false,processor->trialCircularBuffer,
+				XYPlot *newplot;
+				if (compactView)
+				{
+					newplot = new XYPlot(false,processor->trialCircularBuffer,
+					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
+					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
+					plotCounter,row);
+
+					plotCounter++;
+					if (plotCounter >= maxUnitsPerRow )
+					{
+						plotCounter = 0;
+						row++;
+					}
+				} else 
+				{
+					newplot = new XYPlot(false,processor->trialCircularBuffer,
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
 					u,row);
+
+				}
 				newplot->setSmoothState(smoothPlots);
 				newplot->setAutoRescale(autoRescale);
 				newplot->buildSmoothKernel(gaussianStandardDeviationMS);
@@ -387,10 +428,26 @@ void PeriStimulusTimeHistogramCanvas::update()
 			{
 				for (int u=0;u<numUnits;u++)
 				{
-					XYPlot *newplot = new XYPlot(true,processor->trialCircularBuffer,
+					XYPlot *newplot;
+					if (compactView)
+					{
+					    newplot = new XYPlot(true,processor->trialCircularBuffer,
+						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
+						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
+						plotCounter,row);
+						plotCounter++;
+						if (plotCounter >= maxUnitsPerRow )
+						{
+							plotCounter = 0;
+							row++;
+						}
+					} else
+					{
+					newplot = new XYPlot(true,processor->trialCircularBuffer,
 						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
 						offset+u,row);
+					}
 					newplot->setSmoothState(smoothPlots);
 					newplot->setAutoRescale(autoRescale);
 					newplot->buildSmoothKernel(gaussianStandardDeviationMS);
@@ -401,7 +458,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 				plottedSomething = true;
 			}
 		}
-		if (plottedSomething)
+		if (!compactView &&  plottedSomething) 
 			row++;			
 	}
 	if (maxUnitsPerElectrode == 0 && !showLFP) {
@@ -411,8 +468,6 @@ void PeriStimulusTimeHistogramCanvas::update()
 	}
 	resized();
 
-	heightPerElectrodePix = 200;
-	widthPerUnit = 200;
 
 	psthDisplay->resized();
 	psthDisplay->repaint();

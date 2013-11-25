@@ -113,6 +113,10 @@ public:
 	Visualizer* createNewCanvas() ;
 	void updateFromProcessor();
 
+	void saveCustomParametersToXml(XmlElement* parentElement);
+	void loadCustomParametersFromXml();
+	
+
 private:
 	void setActiveContainer(int index);
 	void setActiveAdvancer(int newAdvancerIndex) ;

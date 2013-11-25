@@ -162,6 +162,15 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
 	spikePlot = nullptr;
 	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
 }
+void SpikeDetector::setElectrodeAdvancer(int i, String S)
+{
+	mut.enter();
+	if (i >= 0) 
+	{
+		electrodes[i]->advancerID = S;
+	}
+	mut.exit();
+}
 
 bool SpikeDetector::addElectrode(int nChans)
 {
@@ -518,7 +527,6 @@ void SpikeDetector::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 
 void SpikeDetector::handleEvent(int eventType, MidiMessage& event, int sampleNum)
 {
-
     if (eventType == TIMESTAMP)
 	{
         const uint8* dataptr = event.getRawData();

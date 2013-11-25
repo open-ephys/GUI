@@ -26,7 +26,7 @@
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "GenericProcessor.h"
-
+#include "NetworkEvents.h"
 #include <list>
 
 class Advancer
@@ -35,8 +35,9 @@ public:
 	Advancer() {}
 	String name; // official name of the advancer
 	String description; // what is this advancer targeting?
-	String manipulator;  // screw/narashige drive/...
+	String probeType;  // screw/narashige drive/...
 	float depthMM;
+	int ID;
 	int locationIndex; // location in advancerLocations
 };
 
@@ -44,6 +45,7 @@ public:
 class Circle
 {
 public:
+	Circle() {}
 	Circle(float _x, float _y, float _rad) : x(_x),y(_y),rad(_rad) {}
 
 	float x,y,rad;
@@ -52,6 +54,7 @@ public:
 class Point2D
 {
 public:
+	Point2D() {}
 	float x,y;
 };
 
@@ -88,15 +91,28 @@ public:
 	std::vector<String> splitString(String S, char sep);
 	bool disable();
 	int addContainer(String type);
+	int addContainer(AdvancerContainer c);
+	bool isUtility();
 	int addAdvancerToContainer(int containerIndex);
 	void updateAdvancerPosition(int container, int advancer, float value);
 	std::vector<AdvancerContainer> advancerContainers;
+	Array<String> getAdvancerNames();
+	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
+	void addMessageToMidiQueue(StringTS S);
+
+	void saveCustomParametersToXml(XmlElement* parentElement);
+
+	void loadCustomParametersFromXml();
+
 private:
+	StringTS unpackStringTS(MidiMessage &event) ;
+
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);
 	int getAdvancerCount();
 	AdvancerContainer createStandardGridContainer();
 	Polygon2D createCircle(float diameterMM);
 	int getGridCount();
+	std::queue<StringTS> messageQueue;
 	Time timer;
 	std::list<float> advancerDepth;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerNode);

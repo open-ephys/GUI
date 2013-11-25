@@ -229,7 +229,7 @@ public:
 	StringTS createStringTS(String S);
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
-
+	void setElectrodeAdvancer(int i,String S);
 private:
 	float ticksPerSec;
 	int uniqueID;

@@ -342,3 +342,9 @@ void NetworkEvents::enabledState(bool t)
     isEnabled = t;
 
 }
+
+bool NetworkEvents::isSource()
+{
+	return true;
+}
+
