@@ -173,8 +173,9 @@ private:
     ComboBox* electrodeTypes;
     ComboBox* electrodeList;
 	ComboBox* advancerList;
-    Label* numElectrodes;
-    Label* thresholdLabel;
+	Label *advancerLabel, *depthOffsetLabel, *depthOffsetEdit;
+    Label *numElectrodes;
+    Label *thresholdLabel;
     TriangleButton* upButton;
     TriangleButton* downButton;
     UtilityButton* plusButton;
@@ -183,6 +184,7 @@ private:
     ThresholdSlider* thresholdSlider;
 
    Array<String> advancerNames ;
+   Array<int> advancerIDs;
     void removeElectrode(int index);
     void editElectrode(int index, int chan, int newChan);
 

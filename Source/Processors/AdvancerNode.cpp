@@ -57,26 +57,77 @@ Polygon2D AdvancerNode::createCircle(float diameterMM)
 	return p;
 }
 
+int AdvancerNode::removeContainer(int containerIndex)
+{
+	lock.enter();
+	advancerContainers.erase(advancerContainers.begin()+containerIndex);
+	int k = advancerContainers.size();
+	lock.exit();
+	return k;
+}
+
+int AdvancerNode::removeAdvancer(int containerIndex, int advancerIndex)
+{
+	lock.enter();
+	advancerContainers[containerIndex].advancers.erase(advancerContainers[containerIndex].advancers.begin()+advancerIndex);
+	int k = advancerContainers[containerIndex].advancers.size();
+	lock.exit();
+	return k;
+}
+
 int AdvancerNode::getAdvancerCount()
 {
 	int counter = 1;
+	Array<int> a;
+	lock.enter();
 	for (int k=0;k<advancerContainers.size();k++)
 	{
-		counter+=advancerContainers[k].advancers.size();
+		for (int i=0;i<advancerContainers[k].advancers.size();i++)
+		{
+			a.add(advancerContainers[k].advancers[i].ID);
+		}
 	}
-	return counter;
+	lock.exit();
+
+	if (a.size() == 0)
+		return 1;
+
+	std::sort(a.begin(),a.end());
+	for (int k=0;k<a.size();k++)
+	{
+		if (a[k] != k+1)
+			return k+1;
+	}
+	return a.size()+1;
 }
 
-int AdvancerNode::getGridCount()
+
+
+
+int AdvancerNode::getContainerCount(String containerType)
 {
 	int counter = 1;
+	Array<int> a;
+	lock.enter();
 	for (int k=0;k<advancerContainers.size();k++)
 	{
-		if (advancerContainers[k].type == "Grid")
-			counter++;
+		if (advancerContainers[k].type == containerType)
+			a.add(advancerContainers[k].ID);
 	}
-	return counter;
+	lock.exit();
+
+	if (a.size() == 0)
+		return 1;
+
+	std::sort(a.begin(),a.end());
+	for (int k=0;k<a.size();k++)
+	{
+		if (a[k] != k+1)
+			return k+1;
+	}
+	return a.size()+1;
 }
+
 
 
 void AdvancerNode::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events)
@@ -93,8 +144,9 @@ AdvancerContainer AdvancerNode::createStandardGridContainer()
 	AdvancerContainer c;
 	c.type = "Grid";
 
-	c.name = "Grid "+String(getGridCount());
-
+	int ID = getContainerCount("Grid");
+	c.name = "Grid "+String(ID);
+	c.ID = ID;
 	float gridDiameterMM = 19;
 	float interHoleDistanceMM = 1;
 	float holeDiameterMM = 0.7;
@@ -119,14 +171,77 @@ AdvancerContainer AdvancerNode::createStandardGridContainer()
 	return c;
 }
 
-
-int AdvancerNode::addContainer(String type)
+AdvancerContainer AdvancerNode::createStandardHyperDriveContainer(int numTetrodes)
 {
+	AdvancerContainer c;
+	c.type = "Hyperdrive";
+
+	int ID = getContainerCount("Hyperdrive");
+	c.name = "Hyperdrive "+String(ID);
+	c.ID = ID;
+	float hyperDriveOuterDiameterMM = 30; // ?? someone needs to plug in real numbers here....
+	// place tetrodes evenly on a circle. I think this is the standard configuration...
+	float screwAdvancerDiameterMM = 2;
+	c.model.resize(1);
+	c.model[0] = createCircle(hyperDriveOuterDiameterMM);
+
+	float PI = 3.1415;
+	for (int k=0;k<numTetrodes;k++)
+	{
+		float x = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*cos(float(k)/(numTetrodes) * PI + PI/2) ;
+		float y = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*sin((float)k/(numTetrodes) * PI + PI/2);
+		c.advancerLocations.push_back(Circle(x,y,screwAdvancerDiameterMM/2));
+	}
+
+	c.center.x = c.center.y = 0;
+	return c;
+}
+
+
+
+AdvancerContainer AdvancerNode::createStandardCannulaContainer()
+{
+	AdvancerContainer c;
+	c.type = "Cannula";
+	c.ID = getContainerCount("Cannula");
+	c.name = "Cannula "+String(c.ID);
+
+	float cannulaDiameterMM = 0.5; // ??
+	float holeDiameterMM = 0.25; // ??
+	c.model.resize(1);
+	c.model[0] = createCircle(cannulaDiameterMM);
+
+	c.advancerLocations.push_back(Circle(0,0,holeDiameterMM/2));
+	c.center.x = c.center.y = 0;
+	return c;
+}
+
+
+
+int AdvancerNode::addContainer(String type, String parameters)
+{
+	lock.enter();
 	if (type == "StandardGrid") {
 		AdvancerContainer c = createStandardGridContainer();
-		return addContainer(c);
+		int i=addContainer(c);
+		lock.exit();
+		return i;
+	} else if (type == "Cannula") {
+		AdvancerContainer c = createStandardCannulaContainer();
+		int i=addContainer(c);
+		lock.exit();
+		return i;
+	} else if (type == "Hyperdrive")
+	{
+		AdvancerContainer c = createStandardHyperDriveContainer(parameters.getIntValue());
+		int i=addContainer(c);
+		lock.exit();
+		return i;
+
 	}
-	return advancerContainers.size();
+	int i = advancerContainers.size();
+	lock.exit();
+	return i;
 }
 
 bool AdvancerNode::isUtility()
@@ -139,24 +254,50 @@ void AdvancerNode::addMessageToMidiQueue(StringTS S)
 	messageQueue.push(S);
 }
 
+
+double AdvancerNode::getAdvancerPosition(String advancerName)
+{
+	lock.enter();
+	for (int c = 0; c < advancerContainers.size();c++)
+	{
+		for (int i=0;i< advancerContainers[c].advancers.size();i++)
+		{
+			if (advancerContainers[c].advancers[i].name == advancerName)
+			{
+				int d=advancerContainers[c].advancers[i].depthMM;
+				lock.exit();
+				return d;
+			}
+		}
+	}
+	return 0;
+}
+
 int AdvancerNode::addContainer(AdvancerContainer c)
 {
+	lock.enter();
 	advancerContainers.push_back(c);
 	addMessageToMidiQueue(StringTS("NewAdvancerContainer "+c.name));
-	return advancerContainers.size();
+	int i = advancerContainers.size();
+	lock.exit();
+	return i;
 }
 
 void AdvancerNode::updateAdvancerPosition(int container, int advancer, float value)
 {
+	lock.enter();
 	advancerContainers[container].advancers[advancer].depthMM = value;
+	lock.exit();
 }
 
 int AdvancerNode::addAdvancerToContainer(int idx)
 {
+	lock.enter();
 	// cannot add more advancers than the container can hold
-	if (advancerContainers[idx].advancers.size() == advancerContainers[idx].advancerLocations.size())
+	if (advancerContainers[idx].advancers.size() == advancerContainers[idx].advancerLocations.size()) {
+		lock.exit();
 		return -1;
-
+	}
 
 	Advancer advancer;
 	advancer.ID = getAdvancerCount();
@@ -195,7 +336,9 @@ int AdvancerNode::addAdvancerToContainer(int idx)
 	advancer.locationIndex = unusedLocation;
 
 	advancerContainers[idx].advancers.push_back(advancer);
-	return advancerContainers[idx].advancers.size();
+	int i= advancerContainers[idx].advancers.size();
+	lock.exit();
+	return i;
 }
 
 AdvancerNode::~AdvancerNode()
@@ -240,6 +383,7 @@ void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samp
 			int advancerID = input[1].getIntValue();
 			float newPosition = input[2].getFloatValue();
 			// search for this advancer....
+			lock.enter();
 			for (int c=0;c<advancerContainers.size();c++)
 			{
 				for (int a=0;a<advancerContainers[c].advancers.size();a++)
@@ -250,7 +394,7 @@ void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samp
 					}					
 				}
 			}
-
+			lock.exit();
 		}
 	}
 }
@@ -309,6 +453,7 @@ void AdvancerNode::saveCustomParametersToXml(XmlElement* parentElement)
 
 		advancerContainerXML->setAttribute("type", advancerContainers[i].type);
 		advancerContainerXML->setAttribute("name", advancerContainers[i].name);
+		advancerContainerXML->setAttribute("ID", advancerContainers[i].ID);
 		advancerContainerXML->setAttribute("numAdvancerLocations", (int)advancerContainers[i].advancerLocations.size());
 		advancerContainerXML->setAttribute("numAdvancers", (int)advancerContainers[i].advancers.size());
 		advancerContainerXML->setAttribute("centerX", advancerContainers[i].center.x);
@@ -362,6 +507,7 @@ void AdvancerNode::saveCustomParametersToXml(XmlElement* parentElement)
 Array<String> AdvancerNode::getAdvancerNames()
 {
 	Array<String> names;
+	lock.enter();
 	for (int k=0;k<advancerContainers.size();k++)
 	{
 		for (int i=0;i<advancerContainers[k].advancers.size();i++)
@@ -369,8 +515,25 @@ Array<String> AdvancerNode::getAdvancerNames()
 			names.add(advancerContainers[k].name+"/"+advancerContainers[k].advancers[i].name);
 		}
 	}
+	lock.exit();
 	return names;
 }
+
+Array<int> AdvancerNode::getAdvancerIDs()
+{
+	Array<int> IDs;
+	lock.enter();
+	for (int k=0;k<advancerContainers.size();k++)
+	{
+		for (int i=0;i<advancerContainers[k].advancers.size();i++)
+		{
+			IDs.add(advancerContainers[k].advancers[i].ID);
+		}
+	}
+	lock.exit();
+	return IDs;
+}
+
 void AdvancerNode::loadCustomParametersFromXml()
 {
 
@@ -389,6 +552,7 @@ void AdvancerNode::loadCustomParametersFromXml()
 
 				container.type = xmlNode->getStringAttribute("type");
 				container.name = xmlNode->getStringAttribute("name");
+				container.ID = xmlNode->getIntAttribute("name");
 				container.center.x = xmlNode->getDoubleAttribute("centerX");
 				container.center.y = xmlNode->getDoubleAttribute("centerY");
 
@@ -456,5 +620,6 @@ void AdvancerNode::loadCustomParametersFromXml()
 	}
 	AdvancerEditor *ed = (AdvancerEditor*) getEditor();
 	ed->updateFromProcessor();
-	
+	if (advancerContainers.size() > 0)
+		ed->setActiveContainer(1);
 }

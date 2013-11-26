@@ -557,6 +557,65 @@ void BoxUnit::updateWaveform(SpikeObject *so)
         spikeBuffer.add(so);
     }
   }
+
+  void SpikeSortBoxes::saveCustomParametersToXml(XmlElement *electrodeNode)
+  {
+
+	  XmlElement* spikesortNode = electrodeNode->createNewChildElement("SPIKESORTING");
+	  spikesortNode->setAttribute("numBoxUnits", (int)boxUnits.size());
+	  spikesortNode->setAttribute("numPCAUnits", (int)pcaUnits.size());
+
+
+	  spikesortNode->setAttribute("pc1min", pc1min);
+	  spikesortNode->setAttribute("pc2min", pc2min);
+	  spikesortNode->setAttribute("pc1max", pc1max);
+	  spikesortNode->setAttribute("pc2max", pc2max);
+
+	  for (int boxUnitIter=0;boxUnitIter<boxUnits.size();boxUnitIter++)
+	  {
+		  XmlElement* BoxUnitNode = spikesortNode->createNewChildElement("BOXUNIT");
+
+		  BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].UnitID);
+		  BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].ColorRGB[0]);
+		  BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].ColorRGB[1]);
+		  BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].ColorRGB[2]);
+		  BoxUnitNode->setAttribute("NumBoxes", (int)boxUnits[boxUnitIter].lstBoxes.size());
+		  for (int boxIter=0;boxIter<boxUnits[boxUnitIter].lstBoxes.size();boxIter++)
+		  {
+			  XmlElement* BoxNode = BoxUnitNode->createNewChildElement("BOX");
+			  BoxNode->setAttribute("ch", (int)boxUnits[boxUnitIter].lstBoxes[boxUnitIter].channel);
+			  BoxNode->setAttribute("x", (int)boxUnits[boxUnitIter].lstBoxes[boxUnitIter].x);
+			  BoxNode->setAttribute("y", (int)boxUnits[boxUnitIter].lstBoxes[boxUnitIter].y);
+			  BoxNode->setAttribute("w", (int)boxUnits[boxUnitIter].lstBoxes[boxUnitIter].w);
+			  BoxNode->setAttribute("h", (int)boxUnits[boxUnitIter].lstBoxes[boxUnitIter].h);
+		  }
+	  }
+
+	  for (int pcaUnitIter=0;pcaUnitIter<pcaUnits.size();pcaUnitIter++)
+	  {
+		  XmlElement* PcaUnitNode = spikesortNode->createNewChildElement("PCAUNIT");
+
+		  PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].UnitID);
+		  PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].ColorRGB[0]);
+		  PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].ColorRGB[1]);
+		  PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].ColorRGB[2]);
+		  PcaUnitNode->setAttribute("PolygonNumPoints",(int)pcaUnits[pcaUnitIter].poly.pts.size());
+		  PcaUnitNode->setAttribute("PolygonOffsetX",(int)pcaUnits[pcaUnitIter].poly.offset.X);
+		  PcaUnitNode->setAttribute("PolygonOffsetY",(int)pcaUnits[pcaUnitIter].poly.offset.Y);
+
+		  for (int p=0;p<pcaUnits[pcaUnitIter].poly.pts.size();p++)
+		  {
+			  XmlElement* PolygonNode = PcaUnitNode->createNewChildElement("POLYGON_POINT");
+			  PolygonNode->setAttribute("pointX", pcaUnits[pcaUnitIter].poly.pts[p].X);
+			  PolygonNode->setAttribute("pointY", pcaUnits[pcaUnitIter].poly.pts[p].Y);
+		  }
+	  }
+    
+
+	//float *pc1, *pc2;
+	
+
+  }
   
   SpikeSortBoxes::~SpikeSortBoxes()
   {

@@ -71,6 +71,7 @@ class AdvancerContainer
 {
 public:
 	AdvancerContainer() {}
+	int ID;
 	String name; 
 	String type; // hyperdrive / grid / cannule / ...?
 	std::vector<Advancer> advancers;
@@ -90,31 +91,41 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 	std::vector<String> splitString(String S, char sep);
 	bool disable();
-	int addContainer(String type);
+	int addContainer(String type, String parameters);
 	int addContainer(AdvancerContainer c);
 	bool isUtility();
 	int addAdvancerToContainer(int containerIndex);
 	void updateAdvancerPosition(int container, int advancer, float value);
-	std::vector<AdvancerContainer> advancerContainers;
 	Array<String> getAdvancerNames();
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void addMessageToMidiQueue(StringTS S);
 
 	void saveCustomParametersToXml(XmlElement* parentElement);
+	double getAdvancerPosition(String advancerName);
 
 	void loadCustomParametersFromXml();
+	Array<int> getAdvancerIDs();
+	int removeContainer(int containerIndex);
+	int removeAdvancer(int containerIndex, int advancerIndex);
+
+	std::vector<AdvancerContainer> advancerContainers;
 
 private:
 	StringTS unpackStringTS(MidiMessage &event) ;
-
+	
+	
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);
 	int getAdvancerCount();
 	AdvancerContainer createStandardGridContainer();
+	AdvancerContainer createStandardCannulaContainer();
+	AdvancerContainer createStandardHyperDriveContainer(int numTetrodes);
 	Polygon2D createCircle(float diameterMM);
-	int getGridCount();
+	
+	int getContainerCount(String containerType);
 	std::queue<StringTS> messageQueue;
 	Time timer;
 	std::list<float> advancerDepth;
+	CriticalSection lock;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerNode);
 };
 

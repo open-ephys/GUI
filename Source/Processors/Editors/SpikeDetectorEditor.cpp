@@ -57,9 +57,42 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 
 	 advancerList = new ComboBox("Advancers");
     advancerList->addListener(this);
-    advancerList->setBounds(10,100,150,20);
+    advancerList->setBounds(10,95,130,20);
     addAndMakeVisible(advancerList);
 	 updateAdvancerList();
+
+
+	 
+    depthOffsetLabel = new Label("Depth Offset","Depth Offset");
+	depthOffsetLabel->setFont(Font("Default", 10, Font::plain));
+    depthOffsetLabel->setEditable(false);
+    depthOffsetLabel->setBounds(140,115,80,20);
+	depthOffsetLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(depthOffsetLabel);
+    
+ 	 
+    advancerLabel = new Label("Depth Offset","ADVANCER:");
+	advancerLabel->setFont(Font("Default", 10, Font::plain));
+    advancerLabel->setEditable(false);
+    advancerLabel->setBounds(10,80,80,20);
+	advancerLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(advancerLabel);
+    
+
+	
+	
+    depthOffsetEdit = new Label("Depth Offset","0.0");
+	depthOffsetEdit->setFont(Font("Default", 10, Font::plain));
+    depthOffsetEdit->setEditable(true);
+    depthOffsetEdit->setBounds(145,95,40,20);
+
+	depthOffsetEdit->setColour(Label::textColourId, Colours::white);
+	depthOffsetEdit->setColour(Label::backgroundColourId, Colours::grey);
+
+    addAndMakeVisible(depthOffsetEdit);
+
+	
+
 
     electrodeTypes->setEditableText(false);
     electrodeTypes->setJustificationType(Justification::centredLeft);
@@ -180,7 +213,7 @@ void SpikeDetectorEditor::sliderEvent(Slider* slider)
                                        electrodeNum,
                                        slider->getValue());
     }
-
+	repaint();
 }
 
 
@@ -492,7 +525,7 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 		// attach advancer to electrode.
 		int electrodeIndex = electrodeList->getSelectedId()-1;
 		SpikeDetector* processor = (SpikeDetector*) getProcessor();
-		processor->setElectrodeAdvancer(electrodeIndex,advancerNames[advancerList->getSelectedId()-1]);
+		processor->setElectrodeAdvancer(electrodeIndex,advancerIDs[advancerList->getSelectedId()-1]);
 	}
 	
 }
@@ -691,7 +724,10 @@ void SpikeDetectorEditor::updateAdvancerList()
 		if (p[k]->getName() == "Advancers")
 		{
 			AdvancerNode *node = (AdvancerNode *)p[k];
+
 			advancerNames = node->getAdvancerNames();
+			advancerIDs =  node->getAdvancerIDs();
+
 			advancerList->clear();
 			for (int i=0;i<advancerNames.size();i++)
 			{

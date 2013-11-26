@@ -148,13 +148,12 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
     thresholds = new double[numChannels];
     isActive = new bool[numChannels];
     channels = new int[numChannels];
-	channelsDepthOffset = new float[numChannels];
+	depthOffsetMM = 0.0;
 
-	advancerID = "Unassigned";
+	advancerID = -1;
 
     for (int i = 0; i < numChannels; i++)
     {
-		channelsDepthOffset[i] = 0;
         channels[i] = _channels[i];
 		thresholds[i] = default_threshold;
 		isActive[i] = true;
@@ -162,13 +161,21 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
 	spikePlot = nullptr;
 	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
 }
-void SpikeDetector::setElectrodeAdvancer(int i, String S)
+void SpikeDetector::setElectrodeAdvancer(int i, int ID)
 {
 	mut.enter();
 	if (i >= 0) 
 	{
-		electrodes[i]->advancerID = S;
+		electrodes[i]->advancerID = ID;
 	}
+	mut.exit();
+}
+
+void SpikeDetector::addElectrode(Electrode* newElectrode)
+{
+	mut.enter();
+    resetElectrode(newElectrode);
+    electrodes.add(newElectrode);
 	mut.exit();
 }
 
@@ -828,6 +835,9 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
         electrodeNode->setAttribute("numChannels", electrodes[i]->numChannels);
         electrodeNode->setAttribute("prePeakSamples", electrodes[i]->prePeakSamples);
         electrodeNode->setAttribute("postPeakSamples", electrodes[i]->postPeakSamples);
+		electrodeNode->setAttribute("advancerID", electrodes[i]->advancerID);
+		electrodeNode->setAttribute("depthOffsetMM", electrodes[i]->depthOffsetMM);
+		electrodeNode->setAttribute("electrodeID", electrodes[i]->electrodeID);
 
         for (int j = 0; j < electrodes[i]->numChannels; j++)
         {
@@ -837,6 +847,10 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
             channelNode->setAttribute("isActive",*(electrodes[i]->isActive+j));
 
         }
+
+		// save spike sorting data.
+		electrodes[i]->spikeSort->saveCustomParametersToXml(electrodeNode);
+
     }
 
 
@@ -860,27 +874,36 @@ void SpikeDetector::loadCustomParametersFromXml()
 
                 int channelsPerElectrode = xmlNode->getIntAttribute("numChannels");
 
-                SpikeDetectorEditor* sde = (SpikeDetectorEditor*) getEditor();
-                sde->addElectrode(channelsPerElectrode);
+				int advancerID = xmlNode->getIntAttribute("advancerID");
+				float depthOffsetMM = xmlNode->getIntAttribute("depthOffsetMM");
+				int electrodeID = xmlNode->getIntAttribute("electrodeID");
+				String electrodeName=xmlNode->getStringAttribute("name");
 
-                setElectrodeName(electrodeIndex+1, xmlNode->getStringAttribute("name"));
-
+			
                 int channelIndex = -1;
 
+				int *channels = new int[channelsPerElectrode];
+				float *thres = new float[channelsPerElectrode];
+				bool *isActive = new bool[channelsPerElectrode];
+	
                 forEachXmlChildElement(*xmlNode, channelNode)
                 {
                     if (channelNode->hasTagName("SUBCHANNEL"))
                     {
                         channelIndex++;
-
-                        std::cout << "Subchannel " << channelIndex << std::endl;
-
-                        setChannel(electrodeIndex, channelIndex, channelNode->getIntAttribute("ch"));
-                        setChannelThreshold(electrodeIndex, channelIndex, channelNode->getDoubleAttribute("thresh"));
-                        setChannelActive(electrodeIndex, channelIndex, channelNode->getBoolAttribute("isActive"));
+						channels[channelIndex] = channelNode->getIntAttribute("ch");
+						thres[channelIndex] = channelNode->getDoubleAttribute("thresh");
+                        isActive[channelIndex] = channelNode->getBoolAttribute("isActive");
                     }
                }
+				Electrode* newElectrode = new Electrode(electrodeID, &computingThread, electrodeName, channelsPerElectrode, channels,getDefaultThreshold(), 8,32, getSampleRate());
+				for (int k=0;k<channelsPerElectrode;k++)
+				{
+					newElectrode->thresholds[k] = thres[k];
+					newElectrode->isActive[k] = isActive[k];
+				}
 
+				addElectrode(newElectrode);
 
             }
         }

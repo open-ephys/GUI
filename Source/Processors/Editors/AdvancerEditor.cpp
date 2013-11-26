@@ -300,17 +300,42 @@ void AdvancerEditor::buttonEvent(Button* button)
 		containerMenu.addItem(4,"Other [Load from file]");
 		const int result = containerMenu.show();
 
-		//  TODO... implement the rest of these things....
+		if (result == 1)
+		{
+			// build a new circular grid container.
+			int newContainer = processor->addContainer("Cannula","");
+			updateFromProcessor();
+			setActiveContainer(newContainer);
+		} else if (result == 2 || result == 3|| result == 4)
+		{
+			// build a new circular grid container.
+			int numTetrodes = 4;
+			if (result == 3) 
+				numTetrodes = 8;
+			if (result == 4) 
+				numTetrodes = 16;
+			int newContainer = processor->addContainer("Hyperdrive", String(numTetrodes));
+			updateFromProcessor();
+			setActiveContainer(newContainer);
+		} else 
 		if (result == 5)
 		{
 			// build a new circular grid container.
-			int newContainer = processor->addContainer("StandardGrid");
+			int newContainer = processor->addContainer("StandardGrid","");
 			updateFromProcessor();
 			setActiveContainer(newContainer);
 		}
 
 	} else if (button == removeContainer)
 	{
+		int sel = containerCombobox->getSelectedId();
+		if (sel > 0) {
+			int remaining = processor->removeContainer(sel-1);
+			updateFromProcessor();
+			containerCombobox->setSelectedId(remaining);
+
+		}
+
 	} else if (button == addAdvancer)
 	{
 		int sel = containerCombobox->getSelectedId();
@@ -323,7 +348,19 @@ void AdvancerEditor::buttonEvent(Button* button)
 
 		}
 	} else if (button == removeAdvancer)
+
 	{
+
+	    int selcon = containerCombobox->getSelectedId();
+		int sel = advancerCombobox->getSelectedId();
+		if (sel > 0 & selcon > 0)
+		{
+			int remaininAdvancers = processor->removeAdvancer(selcon-1,sel-1);
+			updateFromProcessor();
+			advancerCombobox->setSelectedId(remaininAdvancers);
+
+		}
+
 	}
 }
 void AdvancerEditor::labelTextChanged(juce::Label *label)

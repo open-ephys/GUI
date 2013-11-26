@@ -78,15 +78,14 @@ class Electrode
 {
 	public:
 		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
-
         String name;
 
         int numChannels;
         int prePeakSamples, postPeakSamples;
         int lastBufferIndex;
 
-		String advancerID;
-		float *channelsDepthOffset;
+		int advancerID;
+		float depthOffsetMM;
 
 		int electrodeID;
         int* channels;
@@ -229,8 +228,10 @@ public:
 	StringTS createStringTS(String S);
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
-	void setElectrodeAdvancer(int i,String S);
+	void setElectrodeAdvancer(int i,int ID);
 private:
+	void addElectrode(Electrode* newElectrode);
+
 	float ticksPerSec;
 	int uniqueID;
 	std::queue<StringTS> eventQueue;

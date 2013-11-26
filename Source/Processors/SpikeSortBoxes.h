@@ -246,7 +246,7 @@ public:
 
     void setSelectedUnitAndbox(int unitID, int boxID);
 	void getSelectedUnitAndbox(int &unitID, int &boxid);
-		
+	void saveCustomParametersToXml(XmlElement *electrodeNode);
 private:
 	int selectedUnit, selectedBox;
 	void  StartCriticalSection();

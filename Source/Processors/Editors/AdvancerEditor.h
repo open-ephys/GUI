@@ -116,9 +116,8 @@ public:
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	void loadCustomParametersFromXml();
 	
-
-private:
 	void setActiveContainer(int index);
+private:
 	void setActiveAdvancer(int newAdvancerIndex) ;
 
 	int selectedContainer;
