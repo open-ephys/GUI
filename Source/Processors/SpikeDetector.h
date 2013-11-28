@@ -224,7 +224,7 @@ public:
 	String getNameForElectrode(int i);
 	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
 	int getCurrentElectrodeIndex();
-	void setCurrentElectrodeIndex(int i);
+	Electrode* setCurrentElectrodeIndex(int i);
 	StringTS createStringTS(String S);
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);

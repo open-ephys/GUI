@@ -827,10 +827,13 @@ bool SpikeDetector::samplesAvailable(int& nSamples)
 
 void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 {
-
+    XmlElement* mainNode = parentElement->createNewChildElement("SPIKEDETECTOR");
+    mainNode->setAttribute("numElectrodes", electrodes.size());
+	mainNode->setAttribute("activeElectrode", currentElectrode);
+    
     for (int i = 0; i < electrodes.size(); i++)
     {
-        XmlElement* electrodeNode = parentElement->createNewChildElement("ELECTRODE");
+        XmlElement* electrodeNode = mainNode->createNewChildElement("ELECTRODE");
         electrodeNode->setAttribute("name", electrodes[i]->name);
         electrodeNode->setAttribute("numChannels", electrodes[i]->numChannels);
         electrodeNode->setAttribute("prePeakSamples", electrodes[i]->prePeakSamples);
@@ -859,56 +862,66 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 void SpikeDetector::loadCustomParametersFromXml()
 {
 
-    if (parametersAsXml != nullptr)
-    {
-        // use parametersAsXml to restore state
+	if (parametersAsXml != nullptr)
+	{
 
-        int electrodeIndex = -1;
+		int electrodeIndex = -1;
 
-        forEachXmlChildElement(*parametersAsXml, xmlNode)
-        {
-            if (xmlNode->hasTagName("ELECTRODE"))
-            {
+		forEachXmlChildElement(*parametersAsXml, mainNode)
+		{
 
-                electrodeIndex++;
+			// use parametersAsXml to restore state
 
-                int channelsPerElectrode = xmlNode->getIntAttribute("numChannels");
+			if (mainNode->hasTagName("SPIKEDETECTOR"))
+			{
+				int numElectrodes = mainNode->getIntAttribute("numElectrodes");
+				currentElectrode = mainNode->getIntAttribute("activeElectrode");
 
-				int advancerID = xmlNode->getIntAttribute("advancerID");
-				float depthOffsetMM = xmlNode->getIntAttribute("depthOffsetMM");
-				int electrodeID = xmlNode->getIntAttribute("electrodeID");
-				String electrodeName=xmlNode->getStringAttribute("name");
+				forEachXmlChildElement(*mainNode, xmlNode)
+					if (xmlNode->hasTagName("ELECTRODE"))
+					{
 
-			
-                int channelIndex = -1;
+						electrodeIndex++;
 
-				int *channels = new int[channelsPerElectrode];
-				float *thres = new float[channelsPerElectrode];
-				bool *isActive = new bool[channelsPerElectrode];
-	
-                forEachXmlChildElement(*xmlNode, channelNode)
-                {
-                    if (channelNode->hasTagName("SUBCHANNEL"))
-                    {
-                        channelIndex++;
-						channels[channelIndex] = channelNode->getIntAttribute("ch");
-						thres[channelIndex] = channelNode->getDoubleAttribute("thresh");
-                        isActive[channelIndex] = channelNode->getBoolAttribute("isActive");
-                    }
-               }
-				Electrode* newElectrode = new Electrode(electrodeID, &computingThread, electrodeName, channelsPerElectrode, channels,getDefaultThreshold(), 8,32, getSampleRate());
-				for (int k=0;k<channelsPerElectrode;k++)
-				{
-					newElectrode->thresholds[k] = thres[k];
-					newElectrode->isActive[k] = isActive[k];
-				}
+						int channelsPerElectrode = xmlNode->getIntAttribute("numChannels");
 
-				addElectrode(newElectrode);
+						int advancerID = xmlNode->getIntAttribute("advancerID");
+						float depthOffsetMM = xmlNode->getIntAttribute("depthOffsetMM");
+						int electrodeID = xmlNode->getIntAttribute("electrodeID");
+						String electrodeName=xmlNode->getStringAttribute("name");
 
-            }
-        }
-    }
 
+						int channelIndex = -1;
+
+						int *channels = new int[channelsPerElectrode];
+						float *thres = new float[channelsPerElectrode];
+						bool *isActive = new bool[channelsPerElectrode];
+
+						forEachXmlChildElement(*xmlNode, channelNode)
+						{
+							if (channelNode->hasTagName("SUBCHANNEL"))
+							{
+								channelIndex++;
+								channels[channelIndex] = channelNode->getIntAttribute("ch");
+								thres[channelIndex] = channelNode->getDoubleAttribute("thresh");
+								isActive[channelIndex] = channelNode->getBoolAttribute("isActive");
+							}
+						}
+						Electrode* newElectrode = new Electrode(electrodeID, &computingThread, electrodeName, channelsPerElectrode, channels,getDefaultThreshold(), 8,32, getSampleRate());
+						for (int k=0;k<channelsPerElectrode;k++)
+						{
+							newElectrode->thresholds[k] = thres[k];
+							newElectrode->isActive[k] = isActive[k];
+						}
+
+						// now read sorted units information
+
+						addElectrode(newElectrode);
+
+					}
+			}
+		}
+	}
     SpikeDetectorEditor* ed = (SpikeDetectorEditor*) getEditor();
     ed->checkSettings();
 
@@ -982,10 +995,11 @@ int SpikeDetector::getCurrentElectrodeIndex()
 	return currentElectrode;
 }
 
-void SpikeDetector::setCurrentElectrodeIndex(int i)
+Electrode* SpikeDetector::setCurrentElectrodeIndex(int i)
 {
 	jassert(i >= 0 & i  < electrodes.size());
 	currentElectrode = i;
+	return electrodes[i];
 }
 /*
 

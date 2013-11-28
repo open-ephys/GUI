@@ -302,7 +302,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
         }
 
 
-        getEditorViewport()->makeEditorVisible(this, true, true);
+        //getEditorViewport()->makeEditorVisible(this, true, true);
         return;
 
     }
@@ -359,7 +359,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 
         removeElectrode(electrodeList->getSelectedItemIndex());
 
-        getEditorViewport()->makeEditorVisible(this, true, true);
+        //getEditorViewport()->makeEditorVisible(this, true, true);
 
         return;
     }
@@ -516,16 +516,27 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
         {
 			SpikeDetector* processor = (SpikeDetector*) getProcessor();
             lastId = ID;
-			processor->setCurrentElectrodeIndex(ID-1);
+			Electrode * e= processor->setCurrentElectrodeIndex(ID-1);
             drawElectrodeButtons(ID-1);
-
+			int advancerIndex = 0;
+			for (int k=0;k<advancerIDs.size();k++)
+			{
+				if (advancerIDs[k] == e->advancerID)
+				{
+					advancerIndex = 1+k;
+				}
+			}
+			advancerList->setSelectedId(advancerIndex,dontSendNotification);
         }
 	} else if ( comboBox == advancerList)
 	{
 		// attach advancer to electrode.
 		int electrodeIndex = electrodeList->getSelectedId()-1;
 		SpikeDetector* processor = (SpikeDetector*) getProcessor();
-		processor->setElectrodeAdvancer(electrodeIndex,advancerIDs[advancerList->getSelectedId()-1]);
+		if (electrodeIndex >= 0 && advancerList->getSelectedId() > 0)
+			processor->setElectrodeAdvancer(electrodeIndex,advancerIDs[advancerList->getSelectedId()-1]);
+		else
+			advancerList->setSelectedId(0,dontSendNotification);
 	}
 	
 }
