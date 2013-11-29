@@ -157,22 +157,22 @@ public:
 
     void channelChanged(int chan);
 	
-    bool addElectrode(int nChans);
 	Visualizer* createNewCanvas();
     void checkSettings();
 	void setThresholdValue(int chan, double threshold);
     OwnedArray<cElectrodeButton> electrodeButtons;
 	SpikeDetectCanvas *spikeDetectorCanvas;
 	void updateAdvancerList();
-	void refreshElectrodeList();
+	void refreshElectrodeList(int selected = 0);
 	void setSelectedElectrode(int i);
+	int getSelectedElectrode();
 private:
 
     void drawElectrodeButtons(int);
 
     
 
-    ComboBox* electrodeTypes;
+  //  ComboBox* electrodeTypes;
     ComboBox* electrodeList;
 	ComboBox* advancerList;
 	Label *advancerLabel, *depthOffsetLabel, *depthOffsetEdit;

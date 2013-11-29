@@ -45,21 +45,20 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 
     desiredWidth = 300;
 
-    electrodeTypes = new ComboBox("Electrode Types");
+  //  electrodeTypes = new ComboBox("Electrode Types");
 
     SpikeDetector* processor = (SpikeDetector*) getProcessor();
-
+	/*
     for (int i = 0; i < processor->electrodeTypes.size(); i++)
     {
         String type = processor->electrodeTypes[i];
         electrodeTypes->addItem(type += "s", i+1);
-    }
+    }*/
 
 	 advancerList = new ComboBox("Advancers");
     advancerList->addListener(this);
     advancerList->setBounds(10,95,130,20);
     addAndMakeVisible(advancerList);
-	 updateAdvancerList();
 
     depthOffsetLabel = new Label("Depth Offset","Depth Offset");
 	depthOffsetLabel->setFont(Font("Default", 10, Font::plain));
@@ -86,18 +85,11 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 
     addAndMakeVisible(depthOffsetEdit);
 
-    electrodeTypes->setEditableText(false);
-    electrodeTypes->setJustificationType(Justification::centredLeft);
-    electrodeTypes->addListener(this);
-    electrodeTypes->setBounds(65,30,110,20);
-    electrodeTypes->setSelectedId(1);
-    addAndMakeVisible(electrodeTypes);
-
     electrodeList = new ComboBox("Electrode List");
     electrodeList->setEditableText(false);
     electrodeList->setJustificationType(Justification::centredLeft);
     electrodeList->addListener(this);
-    electrodeList->setBounds(30,60,115,20);
+    electrodeList->setBounds(65,30,130,20);
     addAndMakeVisible(electrodeList);
 
     numElectrodes = new Label("Number of Electrodes","1");
@@ -119,13 +111,13 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     plusButton = new UtilityButton("+", titleFont);
     plusButton->addListener(this);
     plusButton->setRadius(3.0f);
-    plusButton->setBounds(15,32,14,14);
+    plusButton->setBounds(15,27,14,14);
     addAndMakeVisible(plusButton);
 
 
 	removeElectrodeButton = new UtilityButton("-",font);
     removeElectrodeButton->addListener(this);
-    removeElectrodeButton->setBounds(10,62,14,14);
+    removeElectrodeButton->setBounds(15,45,14,14);
     addAndMakeVisible(removeElectrodeButton);
     
     thresholdSlider = new ThresholdSlider(font);
@@ -154,7 +146,9 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 	channelSelector->activateButtons();
 	channelSelector->setRadioStatus(true);
     channelSelector->paramButtonsToggledByDefault(false);
-   
+//   getEditorViewport()->makeEditorVisible(this, true, true);
+		 updateAdvancerList();
+
 }
 
 Visualizer* SpikeDetectorEditor::createNewCanvas()
@@ -260,33 +254,82 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
     else if (button == plusButton)
     {
         // std::cout << "Plus button pressed!" << std::endl;
-		updateAdvancerList();
-        int type = electrodeTypes->getSelectedId();
-        std::cout << type << std::endl;
-        int nChans;
+		//updateAdvancerList();
+		PopupMenu probeMenu;
+		probeMenu.addItem(1,"Single Electrode");
+		probeMenu.addItem(2,"Stereotrode");
+		probeMenu.addItem(3,"Tetrode");
+		PopupMenu depthprobeMenu;
+		depthprobeMenu.addItem(4,"8 ch, 125um");
+		depthprobeMenu.addItem(5,"16 ch, 125um");
+		depthprobeMenu.addItem(6,"24 ch, 125um");
+		depthprobeMenu.addItem(7,"32 ch, 50um");
+		probeMenu.addSubMenu("Depth probe", depthprobeMenu,true);
 
-        switch (type)
+		const int result = probeMenu.show();
+        int nChansPerElectrode;
+		int nElectrodes;
+		double interelectrodeDistance=0;
+		double firstElectrodeOffset ;
+		int numProbes = numElectrodes->getText().getIntValue();
+		String ProbeType;
+
+        switch (result)
         {
+			case 0:
+				return;
             case 1:
-                nChans = 1;
+				ProbeType = "Single Electrode";
+                nChansPerElectrode = 1;
+				nElectrodes = 1;
+				firstElectrodeOffset=0;
                 break;
             case 2:
-                nChans = 2;
+				ProbeType = "Stereotrode";
+                nChansPerElectrode = 2;
+				nElectrodes = 1;
+				firstElectrodeOffset = 0;
                 break;
             case 3:
-                nChans = 4;
+				ProbeType = "Tetrode";
+                nChansPerElectrode = 4;
+				nElectrodes = 1;
+				firstElectrodeOffset =0 ;
                 break;
-            default:
-                nChans = 1;
+            case 4:
+				ProbeType = "Depth Probe";
+                nChansPerElectrode = 1;
+				nElectrodes = 8;
+				interelectrodeDistance = 0.125;
+				firstElectrodeOffset= -0.5;
+                break;
+            case 5:
+				ProbeType = "Depth Probe";
+                nChansPerElectrode = 1;
+				nElectrodes = 16;
+				interelectrodeDistance = 0.125;
+				firstElectrodeOffset= -0.5;
+                break;
+            case 6:
+				ProbeType = "Depth Probe";
+                nChansPerElectrode = 1;
+				nElectrodes = 24;
+				interelectrodeDistance = 0.125;
+				firstElectrodeOffset= -0.5;
+                break;
+            case 7:
+				ProbeType = "Depth Probe";
+                nChansPerElectrode = 1;
+				nElectrodes = 32;
+				interelectrodeDistance = 0.050;
+				firstElectrodeOffset= -0.5;
+                break;
         }
 
-        for (int n = 0; n < num; n++)
-        {
-            if (!addElectrode(nChans))
-            {
-                sendActionMessage("Not enough channels to add electrode.");
-            }
-        }
+	    SpikeDetector* processor = (SpikeDetector*) getProcessor();
+		processor->addProbes(ProbeType,numProbes, nElectrodes,nChansPerElectrode, firstElectrodeOffset,interelectrodeDistance);
+		refreshElectrodeList();
+		
         return;
 
     }
@@ -334,12 +377,17 @@ void SpikeDetectorEditor::channelChanged(int chan)
 
 }
 
+int SpikeDetectorEditor::getSelectedElectrode()
+{
+	return electrodeList->getSelectedId();
+}
+
 void SpikeDetectorEditor::setSelectedElectrode(int i)
 {
 	electrodeList->setSelectedId(i);
 }
 
-void SpikeDetectorEditor::refreshElectrodeList()
+void SpikeDetectorEditor::refreshElectrodeList(int selected)
 {
     electrodeList->clear();
 
@@ -354,49 +402,32 @@ void SpikeDetectorEditor::refreshElectrodeList()
 
     if (electrodeList->getNumItems() > 0)
     {
-        electrodeList->setSelectedId(electrodeList->getNumItems(), true);
-        electrodeList->setText(electrodeList->getItemText(electrodeList->getNumItems()-1));
+		if (selected == 0)
+			selected = electrodeList->getNumItems();
+
+        electrodeList->setSelectedId(selected);
+//        electrodeList->setText(electrodeList->getItemText(electrodeList->getNumItems()-1));
         lastId = electrodeList->getNumItems();
         electrodeList->setEditableText(true);
 
-        drawElectrodeButtons(electrodeList->getNumItems()-1);
-		Electrode *e = processor->getElectrode( electrodeList->getNumItems() - 1);
+        drawElectrodeButtons(selected-1);
+		Electrode *e = processor->getElectrode( selected - 1);
 
 		int advancerIndex = 0;
 		for (int k=0;k<advancerIDs.size();k++)
 		{
 			if (advancerIDs[k] == e->advancerID)
 			{
-				advancerIndex = 1+k;
+					advancerIndex = 1+k;
+				break;
 			}
 		}
-		advancerList->setSelectedId(advancerIndex,dontSendNotification);
-
-
+	
+			advancerList->setSelectedId(advancerIndex);
 		depthOffsetEdit->setText(String(e->depthOffsetMM,4),dontSendNotification);
-
-
-
-
     }
 	if (spikeDetectorCanvas != nullptr)
 		spikeDetectorCanvas->update();
-}
-
-bool SpikeDetectorEditor::addElectrode(int nChans)
-{
-    SpikeDetector* processor = (SpikeDetector*) getProcessor();
-
-    if (processor->addElectrode(nChans))
-    {
-        refreshElectrodeList();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
 }
 
 
@@ -433,48 +464,17 @@ void SpikeDetectorEditor::labelTextChanged(Label* label)
 		if (electrodeIndex >= 0)
 			processor->setElectrodeAdvancerOffset(electrodeIndex, offset);
 
+	if (spikeDetectorCanvas != nullptr)
+		spikeDetectorCanvas->update();
 
-	} else
-    if (label->getText().equalsIgnoreCase("1") && isPlural)
-    {
-        for (int n = 1; n < electrodeTypes->getNumItems()+1; n++)
-        {
-            electrodeTypes->changeItemText(n,
-                                           electrodeTypes->getItemText(n-1).trimCharactersAtEnd("s"));
-        }
-
-        isPlural = false;
-
-        String currentText = electrodeTypes->getText();
-        electrodeTypes->setText(currentText.trimCharactersAtEnd("s"));
-
-    }
-    else if (!label->getText().equalsIgnoreCase("1") && !isPlural)
-    {
-        for (int n = 1; n < electrodeTypes->getNumItems()+1; n++)
-        {
-            String currentString = electrodeTypes->getItemText(n-1);
-            currentString += "s";
-
-            electrodeTypes->changeItemText(n,currentString);
-        }
-        isPlural = true;
-
-        String currentText = electrodeTypes->getText();
-        electrodeTypes->setText(currentText += "s");
-    }
-
-    getEditorViewport()->makeEditorVisible(this, false, true);
-
+	}
 }
 
 void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 {
     if (comboBox == electrodeList)
     {
-		updateAdvancerList();
-
-        int ID = comboBox->getSelectedId();
+	     int ID = comboBox->getSelectedId();
 
         if (ID == 0)
         {
@@ -496,20 +496,19 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 				if (advancerIDs[k] == e->advancerID)
 				{
 					advancerIndex = 1+k;
+					break;
 				}
 			}
-			advancerList->setSelectedId(advancerIndex,dontSendNotification);
-
-
+			advancerList->setSelectedId(advancerIndex,false);
 			depthOffsetEdit->setText(String(e->depthOffsetMM,4),dontSendNotification);
-
         }
 	} else if ( comboBox == advancerList)
 	{
 		// attach advancer to electrode.
 		int electrodeIndex = electrodeList->getSelectedId()-1;
 		SpikeDetector* processor = (SpikeDetector*) getProcessor();
-		if (electrodeIndex >= 0 && advancerList->getSelectedId() > 0)
+		int selectedAdvancer = advancerList->getSelectedId() ;
+		if (electrodeIndex >= 0 && selectedAdvancer > 0)
 			processor->setElectrodeAdvancer(electrodeIndex,advancerIDs[advancerList->getSelectedId()-1]);
 		else
 			advancerList->setSelectedId(0,dontSendNotification);
@@ -678,10 +677,17 @@ Path ThresholdSlider::makeRotaryPath(double min, double max, double val)
 
     Path p;
 
-    double start = 5*double_Pi/4 - 0.11;
-
-    double range = (val-min)/(max - min)*1.5*double_Pi + start + 0.22;
-
+    double start;
+    double range;
+	if (val > 0)
+	{
+		start = 0;
+		range = (val)/(1.3*max )*double_Pi ;
+	}
+	if (val < 0) {
+		start = -(val)/(1.3*min)*double_Pi ;
+		range = 0;
+	}
     p.addPieSegment(6,6, getWidth()-12, getHeight()-12, start, range, 0.65);
 
     return p;
@@ -715,12 +721,29 @@ void SpikeDetectorEditor::updateAdvancerList()
 			advancerNames = node->getAdvancerNames();
 			advancerIDs =  node->getAdvancerIDs();
 
-			advancerList->clear();
+			advancerList->clear(dontSendNotification);
 			for (int i=0;i<advancerNames.size();i++)
 			{
 				advancerList->addItem(advancerNames[i],1+i);
 			}
 		}
 	}
+
+
+        int selectedElectrode = electrodeList->getSelectedId();
+		if (selectedElectrode > 0) {
+			SpikeDetector* processor = (SpikeDetector*) getProcessor();
+			Electrode *e = processor->getElectrode( selectedElectrode-1);
+			int advancerIndex = 0;
+			for (int k=0;k<advancerIDs.size();k++)
+			{
+				if (advancerIDs[k] == e->advancerID)
+				{
+						advancerIndex = 1+k;
+					break;
+				}
+			}
+			advancerList->setSelectedId(advancerIndex);
+			}
 	repaint();
 }

@@ -103,6 +103,7 @@ public:
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	double getAdvancerPosition(String advancerName);
 
+	double getAdvancerPosition(int advancerID);
 	void loadCustomParametersFromXml();
 	Array<int> getAdvancerIDs();
 	int removeContainer(int containerIndex);

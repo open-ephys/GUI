@@ -35,43 +35,47 @@ SpikeDetector::SpikeDetector()
 	  numPreSamples(8),numPostSamples(32)
 {
     //// the standard form:
-    electrodeTypes.add("single electrode");
-    electrodeTypes.add("stereotrode");
-    electrodeTypes.add("tetrode");
 	uniqueID = 0;
     //// the technically correct form (Greek cardinal prefixes):
-    // electrodeTypes.add("hentrode");
-    // electrodeTypes.add("duotrode");
-    // electrodeTypes.add("triode");
-    // electrodeTypes.add("tetrode");
-    // electrodeTypes.add("pentrode");
-    // electrodeTypes.add("hextrode");
-    // electrodeTypes.add("heptrode");
-    // electrodeTypes.add("octrode");
-    // electrodeTypes.add("enneatrode");
-    // electrodeTypes.add("decatrode");
-    // electrodeTypes.add("hendecatrode");
-    // electrodeTypes.add("dodecatrode");
-    // electrodeTypes.add("triskaidecatrode");
-    // electrodeTypes.add("tetrakaidecatrode");
-    // electrodeTypes.add("pentakaidecatrode");
-    // electrodeTypes.add("hexadecatrode");
-    // electrodeTypes.add("heptakaidecatrode");
-    // electrodeTypes.add("octakaidecatrode");
-    // electrodeTypes.add("enneakaidecatrode");
-    // electrodeTypes.add("icosatrode");
+
 	juce::Time timer;
 	ticksPerSec = timer.getHighResolutionTicksPerSecond();
-
-    for (int i = 0; i < electrodeTypes.size()+1; i++)
-    {
-        electrodeCounter.add(0);
-    }
-
+	electrodeTypes.clear();
+	electrodeCounter.clear();
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
 	channelBuffers=nullptr;
 	PCAbeforeBoxes = true;
 }
+
+
+int SpikeDetector::getUniqueProbeID(String type)
+{
+    for (int i = 0; i < electrodeTypes.size(); i++)
+    {
+        if (electrodeTypes[i] == type)
+		{
+			return electrodeCounter[i];
+		}
+    }
+	// if we reached here, we didn't find the type. Add it.
+	electrodeTypes.push_back(type);
+	electrodeCounter.push_back(1);
+	return 1;
+}
+
+
+void SpikeDetector::increaseUniqueProbeID(String type)
+{
+    for (int i = 0; i < electrodeTypes.size(); i++)
+    {
+        if (electrodeTypes[i] == type)
+		{
+			electrodeCounter[i]++;
+		}
+    }
+}
+
+
 
 SpikeDetector::~SpikeDetector()
 {
@@ -183,6 +187,7 @@ void SpikeDetector::setElectrodeAdvancerOffset(int i, double v)
 	if (i >= 0) 
 	{
 		electrodes[i]->depthOffsetMM = v;
+		addNetworkEventToQueue(StringTS("NewElectrodeDepthOffset "+String(electrodes[i]->electrodeID)+" "+String(v,4)));
 	}
 	mut.exit();
 }
@@ -205,7 +210,7 @@ void SpikeDetector::addElectrode(Electrode* newElectrode)
 	mut.exit();
 }
 
-bool SpikeDetector::addElectrode(int nChans)
+bool SpikeDetector::addElectrode(int nChans, String name, double Depth)
 {
 
 	mut.enter();
@@ -226,32 +231,15 @@ bool SpikeDetector::addElectrode(int nChans)
 		mut.exit();
         return false;
     }
-
-    int currentVal = electrodeCounter[nChans];
-    electrodeCounter.set(nChans,++currentVal);
-
-    String electrodeName;
-
-    // hard-coded for tetrode configuration
-    if (nChans < 3)
-        electrodeName = electrodeTypes[nChans-1];
-    else
-        electrodeName = electrodeTypes[nChans-2];
-
-    String newName = electrodeName.substring(0,1);
-    newName = newName.toUpperCase();
-    electrodeName = electrodeName.substring(1,electrodeName.length());
-    newName += electrodeName;
-    newName += " ";
-    newName += electrodeCounter[nChans];
 	
 	int *channels = new int[nChans];
 	for (int k=0;k<nChans;k++)
 		channels[k] = firstChan+k;
 
-	Electrode* newElectrode = new Electrode(++uniqueID,&computingThread,newName, nChans,channels, getDefaultThreshold(), 
+	Electrode* newElectrode = new Electrode(++uniqueID,&computingThread,name, nChans,channels, getDefaultThreshold(), 
 		numPreSamples,numPostSamples, getSampleRate());
 
+	newElectrode->depthOffsetMM = Depth;
 	String log = "Added electrode (ID "+String(uniqueID)+") with " + String(nChans) + " channels." ;
     std::cout <<log << std::endl;
 	String eventlog = "NewElectrode "+String(uniqueID) + " "+String(nChans)+" ";
@@ -851,13 +839,88 @@ bool SpikeDetector::samplesAvailable(int& nSamples)
 
 }
 
+void SpikeDetector::addProbes(String probeType,int numProbes, int nElectrodesPerProbe, int nChansPerElectrode,  double firstContactOffset, double interelectrodeDistance)
+{
+	for (int probeIter=0;probeIter<numProbes;probeIter++)
+	{
+		int probeCounter = getUniqueProbeID(probeType);
+		for (int electrodeIter=0;electrodeIter<nElectrodesPerProbe;electrodeIter++)
+		{
+			double depth = firstContactOffset - electrodeIter*interelectrodeDistance;
+			String name;
+			if (nElectrodesPerProbe > 1)
+				 name = probeType + " " + String(probeCounter) + " ["+String(electrodeIter+1)+"/"+String(nElectrodesPerProbe)+"]";
+			else
+				 name = probeType + " " + String(probeCounter);
+
+			bool successful = addElectrode(nChansPerElectrode, name,  depth);
+			if (!successful) {
+                sendActionMessage("Not enough channels to add electrode.");
+				return;
+			}
+		}
+		increaseUniqueProbeID(probeType);
+	}
+}
+
+double SpikeDetector::getAdvancerPosition(int advancerID)
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Advancers")
+		{
+			AdvancerNode *node = (AdvancerNode*)p[k];
+			return node->getAdvancerPosition(advancerID);
+		}
+	}
+	return 0.0;
+}
+
+double SpikeDetector::getElectrodeDepth(int electrodeID)
+{
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == electrodeID)
+		{
+			double currentAdvancerPos = getAdvancerPosition(electrodes[k]->advancerID);
+			return electrodes[k]->depthOffsetMM + currentAdvancerPos;
+		}
+	}
+}
+
+
+double SpikeDetector::getSelectedElectrodeDepth()
+{
+	if (electrodes.size() == 0)
+	return 0.0;
+
+	double currentAdvancerPos = getAdvancerPosition(electrodes[currentElectrode]->advancerID);
+	return electrodes[currentElectrode]->depthOffsetMM + currentAdvancerPos;
+}
+
 void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 {
     XmlElement* mainNode = parentElement->createNewChildElement("SPIKEDETECTOR");
     mainNode->setAttribute("numElectrodes", electrodes.size());
-	mainNode->setAttribute("activeElectrode", currentElectrode);
+
+	SpikeDetectorEditor* ed = (SpikeDetectorEditor*) getEditor();
+	
+	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode());
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
+
+
+    XmlElement* countNode = parentElement->createNewChildElement("ELECTRODE_COUNTER");
+
+	countNode->setAttribute("numElectrodeTypes",  (int)electrodeTypes.size());
+	for (int k=0;k<electrodeTypes.size();k++)
+	{
+		XmlElement* countNode2 = parentElement->createNewChildElement("ELECTRODE_TYPE");
+		countNode2->setAttribute("type", electrodeTypes[k]);
+		countNode2->setAttribute("count", electrodeCounter[k]);
+	}
 
     for (int i = 0; i < electrodes.size(); i++)
     {
@@ -907,6 +970,24 @@ void SpikeDetector::loadCustomParametersFromXml()
 				numPreSamples = mainNode->getIntAttribute("numPreSamples");
 				numPostSamples = mainNode->getIntAttribute("numPostSamples");
 				forEachXmlChildElement(*mainNode, xmlNode)
+				{
+
+					if (xmlNode->hasTagName("ELECTRODE_COUNTER"))
+					{
+						int numElectrodeTypes = xmlNode->getIntAttribute("numElectrodeTypes");
+						electrodeCounter.resize(numElectrodeTypes);
+						electrodeTypes.resize(numElectrodeTypes);
+						int counter = 0;
+						forEachXmlChildElement(*mainNode, xmltype)
+							{
+								if (xmltype->hasTagName("ELECTRODE_TYPE"))
+								{
+									electrodeTypes[counter] = xmltype->getStringAttribute("type");
+									electrodeCounter[counter] = xmltype->getIntAttribute("count");
+									counter++;
+								}
+						}
+					} else
 					if (xmlNode->hasTagName("ELECTRODE"))
 					{
 
@@ -951,15 +1032,22 @@ void SpikeDetector::loadCustomParametersFromXml()
 						addElectrode(newElectrode);
 
 					}
+				}
 			}
 		}
 	}
     SpikeDetectorEditor* ed = (SpikeDetectorEditor*) getEditor();
-	ed->updateAdvancerList();
-    ed->refreshElectrodeList();
-	if (currentElectrode >= 0)
-		ed->setSelectedElectrode(currentElectrode+1);
+		ed->updateAdvancerList();
 
+	if (currentElectrode >= 0) {
+		ed->refreshElectrodeList(currentElectrode);
+		ed->setSelectedElectrode(currentElectrode);
+	} else
+	{
+		ed->refreshElectrodeList();
+	}
+
+	
 }
 
 

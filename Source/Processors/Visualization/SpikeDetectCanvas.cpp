@@ -1038,14 +1038,12 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
     {
         thresholdColour = Colours::yellow;
         //  std::cout << "Yes." << std::endl;
-        repaint();
         isOverThresholdSlider = true;
         // cursorType = MouseCursor::DraggingHandCursor;
     }
     else if ((y < h - 10.0f || y > h + 10.0f) && isOverThresholdSlider)
     {
         thresholdColour = Colours::red;
-        repaint();
         isOverThresholdSlider = false;
     } else 
 	{
@@ -1054,8 +1052,9 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
 		isOverBox = -1;
 		strOverWhere = "";
 		isOverUnitBox(event.x, event.y, isOverUnit, isOverBox, strOverWhere);
-	}
 
+	}
+	repaint();
 
 }
 
@@ -1225,8 +1224,9 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
         //std::cout << "Threshold = " << thresholdLevel << std::endl;
 
-        repaint();
+       
     } 
+	 repaint();
 }
 
 // MouseCursor WaveAxes::getMouseCursor()
@@ -1402,11 +1402,21 @@ void WaveformAxes::paint(Graphics& g)
     g.fillRect(0,0,getWidth(), getHeight());
 
    // int chan = 0;
-
-    // draw the grid lines for the waveforms
+	
 
     if (drawGrid)
         drawWaveformGrid(g);
+
+	if (channel == 0)
+	{
+		double depth = processor->getSelectedElectrodeDepth();
+		String d = "Depth: "+String(depth,4) +" mm";
+		g.setFont(Font("Small Text", 13, Font::plain));
+	   g.setColour(Colours::white);
+ 
+		g.drawText(d,10,10,150,20,Justification::left,false);
+	}
+    // draw the grid lines for the waveforms
 
     // draw the threshold line and labels
     drawThresholdSlider(g);

@@ -31,6 +31,7 @@
 #include "SpikeSortBoxes.h"
 #include "NetworkEvents.h"
 #include "Visualization/SpikeObject.h"
+#include "AdvancerNode.h"
 #include <algorithm>    // std::sort
 #include <queue>
 #include <stdlib.h>
@@ -175,7 +176,9 @@ public:
     // CREATE AND DELETE ELECTRODES //
 
     /** Adds an electrode with n channels to be processed. */
-    bool addElectrode(int nChans);
+    bool addElectrode(int nChans, String name, double depth);
+
+	void addProbes(String probeType,int numProbes, int nElectrodesPerProbe, int nChansPerElectrode,  double firstContactOffset, double interelectrodeDistance);
 
     /** Removes an electrode with a given index. */
     bool removeElectrode(int index);
@@ -210,7 +213,7 @@ public:
     StringArray getElectrodeNames();
 
     /** Returns a list of possible electrode types (e.g., stereotrode, tetrode). */
-    StringArray electrodeTypes;
+    std::vector<String> electrodeTypes;
 
     void setChannelThreshold(int electrodeNum, int channelNum, float threshold);
 
@@ -218,7 +221,7 @@ public:
 
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
-
+	double getElectrodeDepth(int electrodeID);
 	int getNumElectrodes();
 	void removeSpikePlots();
 	int getNumberOfChannelsForElectrode(int i);
@@ -232,8 +235,13 @@ public:
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void setElectrodeAdvancer(int i,int ID);
 	void setElectrodeAdvancerOffset(int i, double v);
+	double getAdvancerPosition(int advancerID);
+	double getSelectedElectrodeDepth();
+
 private:
 	void addElectrode(Electrode* newElectrode);
+	void increaseUniqueProbeID(String type);
+	int getUniqueProbeID(String type);
 
 	float ticksPerSec;
 	int uniqueID;
@@ -247,7 +255,7 @@ private:
 
     int sampleIndex;
 
-    Array<int> electrodeCounter;
+    std::vector<int> electrodeCounter;
     float getNextSample(int& chan);
     float getCurrentSample(int& chan);
     bool samplesAvailable(int& nSamples);

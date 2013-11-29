@@ -255,6 +255,24 @@ void AdvancerNode::addMessageToMidiQueue(StringTS S)
 }
 
 
+double AdvancerNode::getAdvancerPosition(int advancerID)
+{
+	lock.enter();
+	for (int c = 0; c < advancerContainers.size();c++)
+	{
+		for (int i=0;i< advancerContainers[c].advancers.size();i++)
+		{
+			if (advancerContainers[c].advancers[i].ID== advancerID)
+			{
+				double d=advancerContainers[c].advancers[i].depthMM;
+				lock.exit();
+				return d;
+			}
+		}
+	}
+	return 0;
+}
+
 double AdvancerNode::getAdvancerPosition(String advancerName)
 {
 	lock.enter();
@@ -264,7 +282,7 @@ double AdvancerNode::getAdvancerPosition(String advancerName)
 		{
 			if (advancerContainers[c].advancers[i].name == advancerName)
 			{
-				int d=advancerContainers[c].advancers[i].depthMM;
+				double d=advancerContainers[c].advancers[i].depthMM;
 				lock.exit();
 				return d;
 			}
@@ -287,6 +305,7 @@ void AdvancerNode::updateAdvancerPosition(int container, int advancer, float val
 {
 	lock.enter();
 	advancerContainers[container].advancers[advancer].depthMM = value;
+	addMessageToMidiQueue(StringTS("NewAdvancerPosition "+String(advancerContainers[container].advancers[advancer].ID)+" "+String(value,4)));
 	lock.exit();
 }
 
