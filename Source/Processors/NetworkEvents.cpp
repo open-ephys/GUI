@@ -162,6 +162,11 @@ void NetworkEvents::simulateSingleTrial()
 	float TrialLength = 0.4;
 	Time t;
 
+	if (firstTime) {
+		firstTime = false;
+		initSimulation();
+	}
+
 	int64 secondsToTicks = t.getHighResolutionTicksPerSecond();
 	simulationStartTime=3*secondsToTicks + t.getHighResolutionTicks(); // start 10 seconds after
 
@@ -245,10 +250,6 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 							int& nSamples)
 {
 	checkForEvents(events);
-	if (firstTime) {
-		firstTime = false;
-		initSimulation();
-	}
 	simulateDesignAndTrials(events);
 
 	//std::cout << *buffer.getSampleData(0, 0) << std::endl;
@@ -346,5 +347,30 @@ void NetworkEvents::enabledState(bool t)
 bool NetworkEvents::isSource()
 {
 	return true;
+}
+
+void NetworkEvents::saveCustomParametersToXml(XmlElement* parentElement)
+{
+    XmlElement* mainNode = parentElement->createNewChildElement("NETWORKEVENTS");
+    mainNode->setAttribute("port", urlport);
+}
+
+
+void NetworkEvents::loadCustomParametersFromXml()
+{
+
+	if (parametersAsXml != nullptr)
+	{
+
+		int electrodeIndex = -1;
+
+		forEachXmlChildElement(*parametersAsXml, mainNode)
+		{
+			if (mainNode->hasTagName("NETWORKEVENTS"))
+			{
+				setNewListeningPort(mainNode->getIntAttribute("port"));
+			}
+		}
+	}
 }
 

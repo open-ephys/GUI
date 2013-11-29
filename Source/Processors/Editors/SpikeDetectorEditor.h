@@ -164,11 +164,13 @@ public:
     OwnedArray<cElectrodeButton> electrodeButtons;
 	SpikeDetectCanvas *spikeDetectorCanvas;
 	void updateAdvancerList();
+	void refreshElectrodeList();
+	void setSelectedElectrode(int i);
 private:
 
     void drawElectrodeButtons(int);
 
-    void refreshElectrodeList();
+    
 
     ComboBox* electrodeTypes;
     ComboBox* electrodeList;

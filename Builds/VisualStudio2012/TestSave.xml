@@ -1,0 +1,1295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<SETTINGS>
+  <INFO>
+    <VERSION>0.1</VERSION>
+    <DATE>28 Nov 2013 21:11:15</DATE>
+    <OS>Windows 8</OS>
+    <MACHINE>SHAYO-LAPTOP</MACHINE>
+  </INFO>
+  <SIGNALCHAIN>
+    <PROCESSOR name="Sources/File Reader" insertionPoint="1" NodeId="100">
+      <FILENAME path="C:\Users\Shay\Documents\GitHub\GUI\Resources\DataFiles\data_stream_16ch_cortex"/>
+      <CHANNEL name="0" number="0">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="1" number="1">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="2" number="2">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="3" number="3">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="4" number="4">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="5" number="5">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="6" number="6">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="7" number="7">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="8" number="8">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="9" number="9">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="10" number="10">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="11" number="11">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="12" number="12">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="13" number="13">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="14" number="14">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="15" number="15">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <EDITOR/>
+    </PROCESSOR>
+    <PROCESSOR name="Utilities/Advancers" insertionPoint="1" NodeId="101">
+      <ADVANCER_CONTAINER type="Grid" name="Grid 1" ID="0" numAdvancerLocations="293" numAdvancers="3"
+                          centerX="0" centerY="0" numModelPolygons="1">
+        <POLYGON colorR="24" colorG="24" colorB="24" numPoints="21">
+          <POLYGON_POINT x="19" y="0"/>
+          <POLYGON_POINT x="17.9705887" y="6.16911459"/>
+          <POLYGON_POINT x="14.9938974" y="11.6697493"/>
+          <POLYGON_POINT x="10.3924809" y="15.905859"/>
+          <POLYGON_POINT x="4.66494274" y="18.4184227"/>
+          <POLYGON_POINT x="-1.56808531" y="18.9351826"/>
+          <POLYGON_POINT x="-7.63119364" y="17.4001408"/>
+          <POLYGON_POINT x="-12.8673954" y="13.9796333"/>
+          <POLYGON_POINT x="-16.7092953" y="9.04430389"/>
+          <POLYGON_POINT x="-18.740591" y="3.12894082"/>
+          <POLYGON_POINT x="-18.741169" y="-3.12547159"/>
+          <POLYGON_POINT x="-16.7109718" y="-9.04120731"/>
+          <POLYGON_POINT x="-12.8699884" y="-13.9772463"/>
+          <POLYGON_POINT x="-7.63441753" y="-17.3987255"/>
+          <POLYGON_POINT x="-1.57159412" y="-18.9348907"/>
+          <POLYGON_POINT x="4.66153288" y="-18.4192867"/>
+          <POLYGON_POINT x="10.389533" y="-15.9077845"/>
+          <POLYGON_POINT x="14.9917336" y="-11.6725292"/>
+          <POLYGON_POINT x="17.9694443" y="-6.17244196"/>
+          <POLYGON_POINT x="19" y="-0.00352083636"/>
+          <POLYGON_POINT x="19" y="0"/>
+        </POLYGON>
+        <ADVANCER_LOCATION x="-9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="3" rad="0.349999994"/>
+        <ADVANCER name="Advancer 4" probeType="unknown" locationIndex="0" ID="4"
+                  description="Advancer 4" depthMM="4"/>
+        <ADVANCER name="Advancer 5" probeType="unknown" locationIndex="-1" ID="5"
+                  description="Advancer 5" depthMM="0"/>
+        <ADVANCER name="Advancer 6" probeType="unknown" locationIndex="0" ID="6"
+                  description="Advancer 6" depthMM="2"/>
+      </ADVANCER_CONTAINER>
+      <ADVANCER_CONTAINER type="Grid" name="Grid 2" ID="0" numAdvancerLocations="293" numAdvancers="3"
+                          centerX="0" centerY="0" numModelPolygons="1">
+        <POLYGON colorR="24" colorG="24" colorB="24" numPoints="21">
+          <POLYGON_POINT x="19" y="0"/>
+          <POLYGON_POINT x="17.9705887" y="6.16911459"/>
+          <POLYGON_POINT x="14.9938974" y="11.6697493"/>
+          <POLYGON_POINT x="10.3924809" y="15.905859"/>
+          <POLYGON_POINT x="4.66494274" y="18.4184227"/>
+          <POLYGON_POINT x="-1.56808531" y="18.9351826"/>
+          <POLYGON_POINT x="-7.63119364" y="17.4001408"/>
+          <POLYGON_POINT x="-12.8673954" y="13.9796333"/>
+          <POLYGON_POINT x="-16.7092953" y="9.04430389"/>
+          <POLYGON_POINT x="-18.740591" y="3.12894082"/>
+          <POLYGON_POINT x="-18.741169" y="-3.12547159"/>
+          <POLYGON_POINT x="-16.7109718" y="-9.04120731"/>
+          <POLYGON_POINT x="-12.8699884" y="-13.9772463"/>
+          <POLYGON_POINT x="-7.63441753" y="-17.3987255"/>
+          <POLYGON_POINT x="-1.57159412" y="-18.9348907"/>
+          <POLYGON_POINT x="4.66153288" y="-18.4192867"/>
+          <POLYGON_POINT x="10.389533" y="-15.9077845"/>
+          <POLYGON_POINT x="14.9917336" y="-11.6725292"/>
+          <POLYGON_POINT x="17.9694443" y="-6.17244196"/>
+          <POLYGON_POINT x="19" y="-0.00352083636"/>
+          <POLYGON_POINT x="19" y="0"/>
+        </POLYGON>
+        <ADVANCER_LOCATION x="-9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-9" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="-1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="0" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="1" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="2" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="3" y="9" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="4" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="5" y="8" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="6" y="7" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="7" y="6" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="4" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="8" y="5" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-3" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="-1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="0" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="1" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="2" rad="0.349999994"/>
+        <ADVANCER_LOCATION x="9" y="3" rad="0.349999994"/>
+        <ADVANCER name="Advancer 1" probeType="unknown" locationIndex="0" ID="1"
+                  description="Advancer 1" depthMM="0"/>
+        <ADVANCER name="Advancer 2" probeType="unknown" locationIndex="-1" ID="2"
+                  description="Advancer 2" depthMM="0"/>
+        <ADVANCER name="Advancer 3" probeType="unknown" locationIndex="0" ID="3"
+                  description="Advancer 3" depthMM="0"/>
+      </ADVANCER_CONTAINER>
+      <CHANNEL name="0" number="0">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="1" number="1">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="2" number="2">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="3" number="3">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="4" number="4">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="5" number="5">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="6" number="6">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="7" number="7">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="8" number="8">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="9" number="9">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="10" number="10">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="11" number="11">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="12" number="12">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="13" number="13">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="14" number="14">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="15" number="15">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <EDITOR Type="Visualizer">
+        <TAB Active="0"/>
+        <WINDOW Active="0"/>
+      </EDITOR>
+    </PROCESSOR>
+    <PROCESSOR name="Filters/Spike Detector" insertionPoint="1" NodeId="102">
+      <SPIKEDETECTOR numElectrodes="5" activeElectrode="2" numPreSamples="8" numPostSamples="32">
+        <ELECTRODE name="Single electrode 1" numChannels="1" prePeakSamples="8"
+                   postPeakSamples="32" advancerID="5" depthOffsetMM="2" electrodeID="1">
+          <SUBCHANNEL ch="0" thresh="20" isActive="1"/>
+          <SPIKESORTING numBoxUnits="1" numPCAUnits="0" selectedUnit="1" selectedBox="0">
+            <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
+              <BOX ch="0" x="50" y="-40" w="300" h="40"/>
+            </BOXUNIT>
+          </SPIKESORTING>
+          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1">
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          </PCA>
+        </ELECTRODE>
+        <ELECTRODE name="Single electrode 2" numChannels="1" prePeakSamples="8"
+                   postPeakSamples="32" advancerID="4" depthOffsetMM="-0.5" electrodeID="2">
+          <SUBCHANNEL ch="1" thresh="-20" isActive="1"/>
+          <SPIKESORTING numBoxUnits="1" numPCAUnits="0" selectedUnit="1" selectedBox="0">
+            <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
+              <BOX ch="0" x="387" y="-38" w="300" h="32"/>
+            </BOXUNIT>
+          </SPIKESORTING>
+          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1">
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          </PCA>
+        </ELECTRODE>
+        <ELECTRODE name="Single electrode 3" numChannels="1" prePeakSamples="8"
+                   postPeakSamples="32" advancerID="1" depthOffsetMM="-0.600000024"
+                   electrodeID="3">
+          <SUBCHANNEL ch="2" thresh="-20" isActive="1"/>
+          <SPIKESORTING numBoxUnits="3" numPCAUnits="0" selectedUnit="3" selectedBox="0">
+            <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
+              <BOX ch="0" x="50" y="-40" w="300" h="40"/>
+            </BOXUNIT>
+            <BOXUNIT UnitID="2" ColorR="0" ColorG="255" ColorB="0" NumBoxes="1">
+              <BOX ch="0" x="50" y="-60" w="300" h="40"/>
+            </BOXUNIT>
+            <BOXUNIT UnitID="3" ColorR="0" ColorG="255" ColorB="255" NumBoxes="1">
+              <BOX ch="0" x="50" y="-80" w="300" h="40"/>
+            </BOXUNIT>
+          </SPIKESORTING>
+          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1">
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          </PCA>
+        </ELECTRODE>
+        <ELECTRODE name="Single electrode 4" numChannels="1" prePeakSamples="8"
+                   postPeakSamples="32" advancerID="-1" depthOffsetMM="0" electrodeID="4">
+          <SUBCHANNEL ch="3" thresh="3.39505816" isActive="1"/>
+          <SPIKESORTING numBoxUnits="0" numPCAUnits="1" selectedUnit="-1" selectedBox="-1">
+            <PCAUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" PolygonNumPoints="14"
+                     PolygonOffsetX="0" PolygonOffsetY="0">
+              <POLYGON_POINT pointX="-265.62207" pointY="-1877.25293"/>
+              <POLYGON_POINT pointX="485.017578" pointY="-1954.98975"/>
+              <POLYGON_POINT pointX="1021.1875" pointY="-1980.90234"/>
+              <POLYGON_POINT pointX="2629.69922" pointY="-1980.90234"/>
+              <POLYGON_POINT pointX="3326.72168" pointY="-1929.07764"/>
+              <POLYGON_POINT pointX="3809.27441" pointY="-1333.09521"/>
+              <POLYGON_POINT pointX="4077.35938" pointY="-685.288086"/>
+              <POLYGON_POINT pointX="3648.42383" pointY="143.905762"/>
+              <POLYGON_POINT pointX="2254.37988" pointY="688.063477"/>
+              <POLYGON_POINT pointX="324.165039" pointY="817.625"/>
+              <POLYGON_POINT pointX="2.46386719" pointY="791.712891"/>
+              <POLYGON_POINT pointX="-104.770508" pointY="-115.217285"/>
+              <POLYGON_POINT pointX="-265.62207" pointY="-1281.27051"/>
+              <POLYGON_POINT pointX="-480.089844" pointY="-1825.42822"/>
+            </PCAUNIT>
+          </SPIKESORTING>
+          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1">
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          </PCA>
+        </ELECTRODE>
+        <ELECTRODE name="Tetrode 1" numChannels="4" prePeakSamples="8" postPeakSamples="32"
+                   advancerID="-1" depthOffsetMM="0" electrodeID="5">
+          <SUBCHANNEL ch="1" thresh="-20" isActive="1"/>
+          <SUBCHANNEL ch="5" thresh="-20" isActive="1"/>
+          <SUBCHANNEL ch="6" thresh="-20" isActive="1"/>
+          <SUBCHANNEL ch="7" thresh="-20" isActive="1"/>
+          <SPIKESORTING numBoxUnits="0" numPCAUnits="3" selectedUnit="-1" selectedBox="-1">
+            <PCAUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" PolygonNumPoints="10"
+                     PolygonOffsetX="0" PolygonOffsetY="0">
+              <POLYGON_POINT pointX="-0.502127647" pointY="-0.38271606"/>
+              <POLYGON_POINT pointX="-0.53191489" pointY="-0.362962961"/>
+              <POLYGON_POINT pointX="-0.582978725" pointY="-0.274074078"/>
+              <POLYGON_POINT pointX="-0.58723402" pointY="-0.239506185"/>
+              <POLYGON_POINT pointX="-0.489361703" pointY="-0.165432096"/>
+              <POLYGON_POINT pointX="-0.35744679" pointY="-0.160493851"/>
+              <POLYGON_POINT pointX="-0.285106361" pointY="-0.175308645"/>
+              <POLYGON_POINT pointX="-0.208510637" pointY="-0.274074078"/>
+              <POLYGON_POINT pointX="-0.212765932" pointY="-0.338271618"/>
+              <POLYGON_POINT pointX="-0.255319178" pointY="-0.367901206"/>
+            </PCAUNIT>
+            <PCAUNIT UnitID="2" ColorR="0" ColorG="255" ColorB="0" PolygonNumPoints="10"
+                     PolygonOffsetX="0" PolygonOffsetY="0">
+              <POLYGON_POINT pointX="-0.323404253" pointY="-0.00246912241"/>
+              <POLYGON_POINT pointX="-0.387234032" pointY="0.00740742683"/>
+              <POLYGON_POINT pointX="-0.331914902" pointY="0.0567901134"/>
+              <POLYGON_POINT pointX="-0.268085122" pointY="0.0864197016"/>
+              <POLYGON_POINT pointX="-0.204255342" pointY="0.120987654"/>
+              <POLYGON_POINT pointX="-0.140425503" pointY="0.125925899"/>
+              <POLYGON_POINT pointX="-0.106382966" pointY="0.0814814568"/>
+              <POLYGON_POINT pointX="-0.0851063728" pointY="0.037037015"/>
+              <POLYGON_POINT pointX="-0.093617022" pointY="0.00246918201"/>
+              <POLYGON_POINT pointX="-0.123404264" pointY="-0.0172839761"/>
+            </PCAUNIT>
+            <PCAUNIT UnitID="3" ColorR="0" ColorG="255" ColorB="255" PolygonNumPoints="33"
+                     PolygonOffsetX="0" PolygonOffsetY="0">
+              <POLYGON_POINT pointX="-0.0765957236" pointY="-0.279012322"/>
+              <POLYGON_POINT pointX="-0.0638297796" pointY="-0.209876537"/>
+              <POLYGON_POINT pointX="-0.0085106492" pointY="-0.091358006"/>
+              <POLYGON_POINT pointX="0.0638297796" pointY="0.120987654"/>
+              <POLYGON_POINT pointX="0.106382966" pointY="0.244444489"/>
+              <POLYGON_POINT pointX="0.144680858" pointY="0.402469158"/>
+              <POLYGON_POINT pointX="0.153191447" pointY="0.432098746"/>
+              <POLYGON_POINT pointX="0.242553234" pointY="0.298765421"/>
+              <POLYGON_POINT pointX="0.306383014" pointY="0.111111164"/>
+              <POLYGON_POINT pointX="0.365957499" pointY="-0.037037015"/>
+              <POLYGON_POINT pointX="0.429787278" pointY="-0.199999988"/>
+              <POLYGON_POINT pointX="0.472340465" pointY="-0.328395069"/>
+              <POLYGON_POINT pointX="0.502127647" pointY="-0.461728394"/>
+              <POLYGON_POINT pointX="0.399999976" pointY="-0.486419737"/>
+              <POLYGON_POINT pointX="0.234042525" pointY="-0.52098763"/>
+              <POLYGON_POINT pointX="0.187234044" pointY="-0.535802484"/>
+              <POLYGON_POINT pointX="0.11914897" pointY="-0.570370376"/>
+              <POLYGON_POINT pointX="0.0765957832" pointY="-0.644444466"/>
+              <POLYGON_POINT pointX="0.0595744848" pointY="-0.688888907"/>
+              <POLYGON_POINT pointX="0.0468084812" pointY="-0.728395104"/>
+              <POLYGON_POINT pointX="0.0851063728" pointY="-0.644444466"/>
+              <POLYGON_POINT pointX="0.165957451" pointY="-0.481481493"/>
+              <POLYGON_POINT pointX="0.204255342" pointY="-0.402469158"/>
+              <POLYGON_POINT pointX="0.23829782" pointY="-0.303703725"/>
+              <POLYGON_POINT pointX="0.242553234" pointY="-0.234567881"/>
+              <POLYGON_POINT pointX="0.22978723" pointY="-0.125925899"/>
+              <POLYGON_POINT pointX="0.221276641" pointY="-0.0716049671"/>
+              <POLYGON_POINT pointX="0.17446804" pointY="-0.130864203"/>
+              <POLYGON_POINT pointX="0.114893675" pointY="-0.254320979"/>
+              <POLYGON_POINT pointX="0.0638297796" pointY="-0.338271618"/>
+              <POLYGON_POINT pointX="0.0297871828" pointY="-0.37283951"/>
+              <POLYGON_POINT pointX="-0.025531888" pointY="-0.417283952"/>
+              <POLYGON_POINT pointX="-0.0893617272" pointY="-0.441975296"/>
+            </PCAUNIT>
+          </SPIKESORTING>
+          <PCA numChannels="4" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1">
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          </PCA>
+        </ELECTRODE>
+      </SPIKEDETECTOR>
+      <CHANNEL name="0" number="0">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="1" number="1">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="2" number="2">
+        <SELECTIONSTATE param="1" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="3" number="3">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="4" number="4">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="5" number="5">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="6" number="6">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="7" number="7">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="8" number="8">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="9" number="9">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="10" number="10">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="11" number="11">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="12" number="12">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="13" number="13">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="14" number="14">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <CHANNEL name="15" number="15">
+        <SELECTIONSTATE param="0" record="0" audio="0"/>
+      </CHANNEL>
+      <EVENTCHANNEL name="0" number="0"/>
+      <EVENTCHANNEL name="1" number="1"/>
+      <EVENTCHANNEL name="2" number="2"/>
+      <EVENTCHANNEL name="3" number="3"/>
+      <EVENTCHANNEL name="4" number="4"/>
+      <EDITOR Type="Visualizer">
+        <TAB Active="1"/>
+        <WINDOW Active="0"/>
+      </EDITOR>
+    </PROCESSOR>
+  </SIGNALCHAIN>
+  <AUDIO bufferSize="1024"/>
+  <CONTROLPANEL isOpen="0" prependText="" appendText=""/>
+  <UICOMPONENT isProcessorListOpen="1" isEditorViewportOpen="1"/>
+</SETTINGS>

@@ -71,9 +71,11 @@ public:
 class Histogram
 {
 public:
+	Histogram();
 	Histogram(int N, double T0, double T1);
 	~Histogram();
 
+	void setParameters(int N, double T0, double T1);
 	std::vector<int> getCounter();
 	void reset();
 	void update(double x);
@@ -89,8 +91,9 @@ class RunningStats
 {
 public:
 	RunningStats();
+	~RunningStats();
 	void reset();
-	Histogram* getHistogram();
+	Histogram getHistogram();
 	std::vector<double> getMean(int index);
 	std::vector<double> getStandardDeviation(int index);
 	void update(SpikeObject *so);
@@ -98,7 +101,7 @@ public:
 
 	double LastSpikeTime;
 	bool newData;
-	Histogram *hist;
+	Histogram hist;
 	std::vector<std::vector<double>> WaveFormMean,WaveFormSk,WaveFormMk;
 	double numSamples;
 
@@ -247,10 +250,13 @@ public:
     void setSelectedUnitAndbox(int unitID, int boxID);
 	void getSelectedUnitAndbox(int &unitID, int &boxid);
 	void saveCustomParametersToXml(XmlElement *electrodeNode);
+	void loadCustomParametersFromXml(XmlElement *electrodeNode);
 private:
-	int selectedUnit, selectedBox;
 	void  StartCriticalSection();
 	void  EndCriticalSection();
+
+	int numChannels, waveformLength;
+	int selectedUnit, selectedBox;
 	CriticalSection mut;
 	std::vector<BoxUnit> boxUnits;
 	std::vector<PCAUnit> pcaUnits;

@@ -292,12 +292,12 @@ void AdvancerEditor::buttonEvent(Button* button)
 		hyperDriveMenu.addItem(4,"64ch drive");
 
 		gridMenu.addItem(5, "Circular grid");
-		gridMenu.addItem(6, "Custom grid [Load from file]");
+		gridMenu.addItem(6, "Custom grid [Load from file]",false);
 
 		containerMenu.addItem(1,"Cannula");
 		containerMenu.addSubMenu("Hyperdrive", hyperDriveMenu);
 		containerMenu.addSubMenu("Grid", gridMenu);
-		containerMenu.addItem(4,"Other [Load from file]");
+		containerMenu.addItem(7,"Other [Load from file]",false);
 		const int result = containerMenu.show();
 
 		if (result == 1)
@@ -317,8 +317,7 @@ void AdvancerEditor::buttonEvent(Button* button)
 			int newContainer = processor->addContainer("Hyperdrive", String(numTetrodes));
 			updateFromProcessor();
 			setActiveContainer(newContainer);
-		} else 
-		if (result == 5)
+		} else 	if (result == 5)
 		{
 			// build a new circular grid container.
 			int newContainer = processor->addContainer("StandardGrid","");

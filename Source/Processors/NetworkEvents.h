@@ -134,6 +134,10 @@ public:
 
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void setNewListeningPort(int port);
+
+	void saveCustomParametersToXml(XmlElement* parentElement);
+	void loadCustomParametersFromXml();
+
 	int urlport;
 	 String socketStatus;
 private:

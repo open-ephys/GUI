@@ -78,7 +78,8 @@ class Electrode
 {
 	public:
 		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
-        String name;
+        ~Electrode();
+		String name;
 
         int numChannels;
         int prePeakSamples, postPeakSamples;
@@ -225,10 +226,12 @@ public:
 	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
 	int getCurrentElectrodeIndex();
 	Electrode* setCurrentElectrodeIndex(int i);
+	Electrode* getElectrode(int i);
 	StringTS createStringTS(String S);
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void setElectrodeAdvancer(int i,int ID);
+	void setElectrodeAdvancerOffset(int i, double v);
 private:
 	void addElectrode(Electrode* newElectrode);
 
@@ -256,6 +259,7 @@ private:
     int currentIndex;
 
 
+	int numPreSamples,numPostSamples;
     uint8_t* spikeBuffer;///[256];
     //int64 timestamp;
 		  int64 hardware_timestamp;
