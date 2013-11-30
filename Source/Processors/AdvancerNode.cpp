@@ -27,12 +27,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "../UI/UIComponent.h"
 
 
+
+void AdvancerContainer::getModelRange(float &minX, float &maxX, float &minY, float &maxY)
+{
+	minX = 1e10;
+	maxX = -1e10;
+	minY = 1e10;
+	maxY = -1e10;
+	for (int k=0;k<model.size();k++)
+	{
+		for (int j=0;j<model[k].points.size();j++)
+		{
+			minX = MIN(minX,model[k].points[j].x);
+			minY = MIN(minY,model[k].points[j].y);
+			maxX = MAX(maxX,model[k].points[j].x);
+			maxY = MAX(maxY,model[k].points[j].y);
+
+		}
+	}
+}
+
 AdvancerNode::AdvancerNode()
 	:GenericProcessor("Advancers")
 
 {
 
 }
+
+
+AdvancerNode::~AdvancerNode()
+{
+
+}
+
+bool AdvancerNode::disable()
+{
+	return true;
+}
+
+
+bool AdvancerNode::enable()
+{
+	return true;
+}
+
+AudioProcessorEditor* AdvancerNode::createEditor()
+{
+	editor = new AdvancerEditor(this, true);
+
+	return editor;
+
+
+}
+
+
+
 
 Polygon2D::Polygon2D()
 {
@@ -49,8 +98,8 @@ Polygon2D AdvancerNode::createCircle(float diameterMM)
 	Polygon2D p(N+1);
 	for (int k=0;k<N;k++)
 	{
-		p.points[k].x= cos(float(k)/(N-1) * 2.0 * 3.1415)*diameterMM;
-		p.points[k].y= sin(float(k)/(N-1) * 2.0 * 3.1415)*diameterMM;
+		p.points[k].x= cos(float(k)/(N-1) * 2.0 * 3.1415)*diameterMM/2;
+		p.points[k].y= sin(float(k)/(N-1) * 2.0 * 3.1415)*diameterMM/2;
 	}
 	p.points[N].x = p.points[0].x;
 	p.points[N].y = p.points[0].y;
@@ -160,7 +209,7 @@ AdvancerContainer AdvancerNode::createStandardGridContainer()
 		for (int y = -gridDiameterMM/2; y < gridDiameterMM/2; y+=interHoleDistanceMM)
 		{
 			float dist = sqrt( x*x+y*y);
-			if (dist <= gridDiameterMM/2) 
+			if (dist <= gridDiameterMM/2 - holeDiameterMM/2) 
 			{
 				c.advancerLocations.push_back(Circle(x,y,holeDiameterMM/2));
 			}
@@ -188,8 +237,8 @@ AdvancerContainer AdvancerNode::createStandardHyperDriveContainer(int numTetrode
 	float PI = 3.1415;
 	for (int k=0;k<numTetrodes;k++)
 	{
-		float x = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*cos(float(k)/(numTetrodes) * PI + PI/2) ;
-		float y = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*sin((float)k/(numTetrodes) * PI + PI/2);
+		float x = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*cos(float(k)/(numTetrodes) * 2.0*PI + PI/2) ;
+		float y = (hyperDriveOuterDiameterMM/2*- screwAdvancerDiameterMM/2)*sin((float)k/(numTetrodes) * 2.0*PI + PI/2);
 		c.advancerLocations.push_back(Circle(x,y,screwAdvancerDiameterMM/2));
 	}
 
@@ -351,6 +400,8 @@ int AdvancerNode::addAdvancerToContainer(int idx)
 			}
 		}
 	}
+	if (unusedLocation == -1)
+		unusedLocation = usedLocations[usedLocations.size()-1] + 1;
 
 	advancer.locationIndex = unusedLocation;
 
@@ -359,27 +410,6 @@ int AdvancerNode::addAdvancerToContainer(int idx)
 	lock.exit();
 	return i;
 }
-
-AdvancerNode::~AdvancerNode()
-{
-
-}
-
-bool AdvancerNode::disable()
-{
-	return true;
-}
-
-AudioProcessorEditor* AdvancerNode::createEditor()
-{
-	editor = new AdvancerEditor(this, true);
-
-	return editor;
-
-
-}
-
-
 
 void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {

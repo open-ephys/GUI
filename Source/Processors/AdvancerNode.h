@@ -29,6 +29,15 @@
 #include "NetworkEvents.h"
 #include <list>
 
+#ifndef MAX
+#define MAX(a,b)((a)<(b)?(b):(a))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)((a)<(b)?(a):(b))
+#endif
+
+
 /* a class that represents a device that moves a probe. 
 in the most basic scenario, this is either a micromanipulator or a screw that advances
 the probe into the brain. It is very useful to keep track of electrodes position since
@@ -80,10 +89,11 @@ public:
 	String type; // hyperdrive / grid / cannule / ...?
 	std::vector<Advancer> advancers;
 
+	void getModelRange(float &minX, float &maxX, float &minY, float &maxY);
 	std::vector<Polygon2D> model;
 	std::vector<Circle> advancerLocations;
 	Point2D center; // anterior-posterior and medial-lateral coordinates and radius
-};
+	};
 
 
 class AdvancerNode : public GenericProcessor
@@ -94,6 +104,8 @@ public:
 	AudioProcessorEditor* createEditor();
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 	bool disable();
+	bool enable();
+
 	int addContainer(String type, String parameters);
 	int addContainer(AdvancerContainer c);
 	bool isUtility();
@@ -113,6 +125,7 @@ public:
 	int removeAdvancer(int containerIndex, int advancerIndex);
 
 	std::vector<AdvancerContainer> advancerContainers;
+	CriticalSection lock;
 
 private:
 	
@@ -127,8 +140,6 @@ private:
 	int getContainerCount(String containerType);
 	std::queue<StringTS> messageQueue;
 	Time timer;
-	std::list<float> advancerDepth;
-	CriticalSection lock;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerNode);
 };
 

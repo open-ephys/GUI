@@ -28,41 +28,17 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
 #include "VisualizerEditor.h"
+#include "../AdvancerNode.h"
 
 class AdvancerNode;
+class AdvancerEditor;
 
-
-/**
-
-  User interface for the "FileReader" source node.
-
-  @see SourceNode, FileReaderThread
-
-*/
-
-class AdvancerCanvas;
-
-class AdvancerDisplay : public Component
-{
-public:
-    AdvancerDisplay(AdvancerNode *, AdvancerCanvas*, Viewport*);
-
-    ~AdvancerDisplay();
-    void paint(Graphics& g);
-
-    void resized();
-
-private:
-   	AdvancerNode* processor;
-    AdvancerCanvas* canvas;
-    Viewport* viewport;
-};
 
 class AdvancerCanvas : public Visualizer
 
 {
 public:
-    AdvancerCanvas(AdvancerNode* n);
+    AdvancerCanvas(AdvancerEditor* ed,AdvancerNode* n);
     ~AdvancerCanvas();
 
     void paint(Graphics& g);
@@ -75,23 +51,20 @@ public:
     void setParameter(int, float) {}
     void setParameter(int, int, int, float) {}
 	
-	void update() {}
-	void refreshState() {}
-	void refresh() {}
+	void update() ;
+	void refreshState() ;
+	void refresh() ;
 
-	void resized() {}
+	void resized() ;
 
     void startRecording() { } // unused
     void stopRecording() { } // unused
+	void drawPolygon(Graphics &g,Polygon2D *p);
     
     AdvancerNode* processor;
-
+	AdvancerEditor* editor;
 private:
-
-    ScopedPointer<AdvancerDisplay> advancerDisplay;
-    ScopedPointer<Viewport> viewport;
-
-   
+	float minX,minY,maxX,maxY,scale;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerCanvas);
 
@@ -116,7 +89,10 @@ public:
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	void loadCustomParametersFromXml();
 	
+	int getSelectedContainer();
 	void setActiveContainer(int index);
+	int getSelectedAdvancer();
+
 private:
 	void setActiveAdvancer(int newAdvancerIndex) ;
 

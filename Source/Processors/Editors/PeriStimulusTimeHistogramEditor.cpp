@@ -381,6 +381,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
 	int plotCounter = 0;
+	numCols = maxUnitsPerRow;
+	numRows = 0;
 	for (int e=0;e<numElectrodes;e++) 
 	{
 		int offset = 0;
@@ -462,6 +464,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 		if (!compactView &&  plottedSomething) 
 			row++;			
 	}
+	numRows = row;
 	if (maxUnitsPerElectrode == 0 && !showLFP) {
 		// nothing to be drawn...
 		processor->trialCircularBuffer->unlockPSTH();
@@ -482,8 +485,8 @@ void PeriStimulusTimeHistogramCanvas::resized()
 	int scrollBarThickness = viewport->getScrollBarThickness();
 
 
-	int totalHeight = numElectrodes * heightPerElectrodePix;
-	int totalWidth = maxUnitsPerElectrode * widthPerUnit;
+	int totalHeight = numRows * heightPerElectrodePix;
+	int totalWidth = numCols * widthPerUnit;
 	psthDisplay->setBounds(0,0,totalWidth-scrollBarThickness, totalHeight);
 
 
@@ -493,7 +496,7 @@ void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
 {
 	if (updateNeeded)
 		update();
-	g.fillAll(Colours::darkgrey);
+	g.fillAll(Colours::grey);
 
 }
 

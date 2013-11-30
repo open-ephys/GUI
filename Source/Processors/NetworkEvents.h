@@ -44,97 +44,15 @@
 class StringTS
 {
 public:
-	StringTS()
-	{
-		
-		str = nullptr;
-		len= 0;
-		timestamp = 0;
-	}
-
-
-	std::vector<String> splitString(char sep)
-	{
-		String S((const char*)str,len);
-		std::list<String> ls;
-		String  curr;
-		for (int k=0;k < S.length();k++) {
-			if (S[k] != sep) {
-				curr+=S[k];
-			}
-			else
-			{
-				ls.push_back(curr);
-				while (S[k] == sep && k < S.length())
-					k++;
-
-				curr = "";
-				if (S[k] != sep && k < S.length())
-					curr+=S[k];
-			}
-		}
-		if (S[S.length()-1] != sep)
-			ls.push_back(curr);
-
-		std::vector<String> Svec(ls.begin(), ls.end()); 
-		return Svec;
-
-	}
-
-	StringTS(MidiMessage &event) 
-	{
-      const uint8* dataptr = event.getRawData();
-		int bufferSize = event.getRawDataSize();
-		len = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
-		
-		memcpy(&timestamp, dataptr + 4+len, 8); // remember to skip first four bytes
-		str = new uint8[len];
-		 memcpy(str,dataptr+4,len);
-	}
-
-
-	String getString()
-	{
-		
-		return String((const char*)str,len);
-	}
-	StringTS(String S)
-	{
-		Time t;
-		str = new uint8[S.length()];
-		memcpy(str,S.toRawUTF8(),S.length());
-		timestamp = t.getHighResolutionTicks();
-
-		len = S.length();
-	}
-
-	StringTS(String S, int64 ts_software)
-	{
-		str = new uint8[S.length()];
-		memcpy(str,S.toRawUTF8(),S.length());
-		timestamp = ts_software;
-
-		len = S.length();
-	}
-
-	StringTS(const StringTS &s)
-	{
-		str = new uint8[s.len];
-		memcpy(str,s.str,s.len);
-		timestamp = s.timestamp;
-		len = s.len;
-	}
-
-
-	StringTS(unsigned char *buf, int _len, int64 ts_software) : len(_len),timestamp(ts_software) {
-		str = new juce::uint8[len];
-		for (int k=0;k<len;k++)
-			str[k] = buf[k];
-	}
-
-	~StringTS() {
-			delete str;
-	}
+	StringTS();
+	std::vector<String> splitString(char sep);
+	StringTS(MidiMessage &event);
+	String getString();
+	StringTS(String S);
+	StringTS(String S, int64 ts_software);
+	StringTS(const StringTS &s);
+	StringTS(unsigned char *buf, int _len, int64 ts_software);
+	~StringTS();
 
 	juce::uint8 *str;
 	int len;
@@ -192,13 +110,15 @@ private:
     float bufferZone;
     bool state;
 	Time timer;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkEvents);
-	std::queue<StringTS> networkMessagesQueue;
+ 	std::queue<StringTS> networkMessagesQueue;
 	bool threadRunning ;
 
 	std::queue<StringTS> simulation;
 	int64 simulationStartTime;
 	bool firstTime ;
+
+   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkEvents);
+
 };
 
 #endif  // __NETWORKEVENT_H_91811541__

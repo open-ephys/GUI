@@ -85,6 +85,7 @@ public:
 	std::vector<double> Time;
 	int numBins;
 	std::vector<int> Counter;
+
 };
 
 class RunningStats
@@ -104,6 +105,7 @@ public:
 	Histogram hist;
 	std::vector<std::vector<double>> WaveFormMean,WaveFormSk,WaveFormMk;
 	double numSamples;
+ 
 
 };
 
@@ -144,6 +146,7 @@ public:
 	bool Active;
 	juce::int64 Activated_TS_S;
 	Time timer;
+
 };
 
 /*
@@ -170,7 +173,6 @@ private:
 	int svdcmp(float **a, int nRows, int nCols, float *w, float **v);
 	float pythag(float a, float b);
 	int dim;
-
 };
 
 
@@ -267,6 +269,7 @@ private:
 	PCAcomputingThread *computingThread;
 	bool bPCAJobSubmitted,bPCAcomputed,bRePCA,bPCAjobFinished ;
 	
+
 };
 
 #endif  __SPIKESORTBOXES_H

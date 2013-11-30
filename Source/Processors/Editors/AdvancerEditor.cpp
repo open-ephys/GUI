@@ -28,39 +28,17 @@
 #include <stdio.h>
 
 
-
-AdvancerDisplay::AdvancerDisplay(AdvancerNode *p, AdvancerCanvas* sdc, Viewport* v) :
-    processor(p),canvas(sdc), viewport(v)
-{
-
-
-}
-
-AdvancerDisplay::~AdvancerDisplay()
-{
-}
-
-void AdvancerDisplay::paint(Graphics &g)
-{
-}
-void AdvancerDisplay::resized()
-{
-}
-
 /************/
+class AdvancerEditor;
 
-AdvancerCanvas::AdvancerCanvas(AdvancerNode* n) :
-    processor(n)
+AdvancerCanvas::AdvancerCanvas(AdvancerEditor* ed, AdvancerNode* n) :
+    processor(n), editor(ed)
 {
-    viewport = new Viewport();
-	advancerDisplay = new AdvancerDisplay(n,this, viewport);
-
-    viewport->setViewedComponent(advancerDisplay, false);
-    viewport->setScrollBarsShown(true, true);
-
-    addAndMakeVisible(viewport);
-
-    setWantsKeyboardFocus(true);
+   minX = -30;
+   minY = -30;
+   maxX = 30;
+   maxY = 30;
+   setWantsKeyboardFocus(true);
 
     update();
 	 
@@ -70,8 +48,135 @@ AdvancerCanvas::~AdvancerCanvas()
 {
 }
 
+void AdvancerCanvas::drawPolygon(Graphics &g,Polygon2D *p)
+{
+
+
+	g.setColour(juce::Colour(p->color[0],p->color[1],p->color[2]));
+	for (int k=0;k<p->points.size()-1;k++)
+	{
+		float x1 = (p->points[k].x-minX)/(maxX-minX) * scale;
+		float x2 = (p->points[k+1].x-minX)/(maxX-minX) * scale;
+		float y1 = (p->points[k].y-minY)/(maxY-minY) * scale;
+		float y2 = (p->points[k+1].y-minY)/(maxY-minY) * scale;
+
+		g.drawLine(x1,y1,x2,y2);
+	}
+}
+
 void AdvancerCanvas::paint(Graphics &g)
 {
+	g.fillAll(Colours::grey);
+
+	g.setColour(Colours::lightgrey);
+
+	int selectedContainer = editor->getSelectedContainer()-1;
+	int selectedAdvancer =  editor->getSelectedAdvancer()-1;
+	if ( selectedContainer  < 0)
+		return;
+
+	AdvancerContainer c = processor->advancerContainers[selectedContainer];
+	c.getModelRange(minX,maxX,minY,maxY);
+	float rangeX = maxX-minX;
+	float rangeY = maxY-minY;
+	minX-=0.1*rangeX;
+	maxX+=0.1*rangeX;
+
+	minY-=0.1*rangeY;
+	maxY+=0.1*rangeY;
+
+	float x0 = (0-minX)/(maxX-minX) * scale;
+	float x1 = 0;
+	float x2 = scale;
+	float y0 = (0-minY)/(maxY-minY) * scale;
+	float y1 = 0;
+	float y2 = scale;
+
+
+	g.drawLine(x1,y0,x2,y0);
+	g.drawLine(x0,y1,x0,y2);
+
+	processor->lock.enter();
+
+
+	for (int i=0;i<c.model.size();i++)
+	{
+		drawPolygon(g,&(c.model[i]));
+	}
+
+	for (int i=0;i<c.advancerLocations.size();i++)
+	{
+		bool advancerInThisLocation = false;
+		bool selectedAdvancerInThisLocation  = false;
+		for (int j=0;j<c.advancers.size();j++)
+		{
+			if (c.advancers[j].locationIndex == i)
+			{
+				advancerInThisLocation = true;
+				selectedAdvancerInThisLocation = selectedAdvancer == j;
+			}
+		}
+
+		float rad = c.advancerLocations[i].rad;
+		float x = c.advancerLocations[i].x;
+		float y = c.advancerLocations[i].y;
+
+		float x0 = ((x-rad)-minX)/(maxX-minX) * scale;
+		float x1 = ((x+rad)-minX)/(maxX-minX) * scale;
+
+		float y0 = ((y-rad)-minY)/(maxY-minY) * scale;
+		float y1 = ((y+rad)-minY)/(maxY-minY) * scale;
+
+		if (advancerInThisLocation)
+		{
+			if (selectedAdvancerInThisLocation)
+				g.setColour(Colours::orangered);
+			else
+				g.setColour(Colours::royalblue);
+			g.fillEllipse(x0,y0,x1-x0,y1-y0);
+		}
+		else
+		{
+			g.setColour(Colours::aqua);
+			g.drawEllipse(x0,y0,x1-x0,y1-y0,1);
+		}
+	}
+
+	
+
+	processor->lock.exit();
+
+}
+
+void AdvancerCanvas::update()
+{
+	resized();
+	repaint();
+}
+
+
+void AdvancerCanvas::resized()
+{
+		int width = getWidth()/2;
+	int height = getHeight();
+
+	
+	if (width > height)
+		scale = height;
+	else
+		scale = width;
+
+}
+
+void AdvancerCanvas::refresh()
+{
+	repaint();
+}
+
+void AdvancerCanvas::refreshState()
+{
+    // called when the component's tab becomes visible again
+    resized();
 }
 
 /*************************/
@@ -79,6 +184,7 @@ AdvancerEditor::AdvancerEditor(GenericProcessor* parentNode, bool useDefaultPara
     : VisualizerEditor(parentNode, useDefaultParameterEditors)
 {
 	desiredWidth = 280;
+	tabText = "Advancers";
 
 	containerCombobox = new ComboBox("AdvancerContainers");
 
@@ -176,9 +282,23 @@ AdvancerEditor::AdvancerEditor(GenericProcessor* parentNode, bool useDefaultPara
     addAndMakeVisible(minusButton);
 	*/
 
-	setEnabledState(false);
+	setEnabledState(true);
 
 }
+
+
+AdvancerEditor::~AdvancerEditor()
+{
+
+}
+
+Visualizer* AdvancerEditor::createNewCanvas() 
+{
+   AdvancerNode* processor = (AdvancerNode*) getProcessor();
+    advancerCanvas = new AdvancerCanvas(this,processor);
+	return advancerCanvas;
+}
+
 
 void AdvancerEditor::setActiveContainer(int index)
 {
@@ -246,7 +366,8 @@ void AdvancerEditor::updateFromProcessor()
 		depthEditLabel->setEnabled(false);
 	}
 	repaint();
-
+	if (canvas != nullptr)
+		canvas->repaint();
 
 	
 	ProcessorGraph *g = getProcessor()->getProcessorGraph();
@@ -279,6 +400,7 @@ void AdvancerEditor::comboBoxChanged(ComboBox* comboBox)
 
 void AdvancerEditor::buttonEvent(Button* button)
 {
+	VisualizerEditor::buttonEvent(button);
 		AdvancerNode* processor = (AdvancerNode*) getProcessor();
 
 		//	NetworkEvents *processor  = (NetworkEvents*) getProcessor();
@@ -379,23 +501,13 @@ void AdvancerEditor::labelTextChanged(juce::Label *label)
 }
 
 
-AdvancerEditor::~AdvancerEditor()
+int AdvancerEditor::getSelectedContainer()
 {
-
+	return containerCombobox->getSelectedId();
 }
 
-Visualizer* AdvancerEditor::createNewCanvas() 
-{
-   AdvancerNode* processor = (AdvancerNode*) getProcessor();
-    advancerCanvas = new AdvancerCanvas(processor);
-	return advancerCanvas;
-}
 
-void AdvancerEditor::saveCustomParametersToXml(XmlElement* parentElement)
+int AdvancerEditor::getSelectedAdvancer()
 {
+	return advancerCombobox->getSelectedId();
 }
-
-void AdvancerEditor::loadCustomParametersFromXml()
-{
-}
-
