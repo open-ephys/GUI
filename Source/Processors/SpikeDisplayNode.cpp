@@ -267,7 +267,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 			int numChannels = inputs[2].getIntValue();
 			String name = "";
 			for (int k=3+numChannels;k<inputs.size();k++)
-				name+=inputs[k];
+				name+=inputs[k]+" ";
 
 			// check whether we have this electrode in our database
 			bool found = false;
