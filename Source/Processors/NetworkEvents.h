@@ -30,7 +30,7 @@
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "GenericProcessor.h"
 
-
+#include <list>
 #include <queue>
 
 /**
@@ -51,6 +51,47 @@ public:
 		len= 0;
 		timestamp = 0;
 	}
+
+
+	std::vector<String> splitString(char sep)
+	{
+		String S((const char*)str,len);
+		std::list<String> ls;
+		String  curr;
+		for (int k=0;k < S.length();k++) {
+			if (S[k] != sep) {
+				curr+=S[k];
+			}
+			else
+			{
+				ls.push_back(curr);
+				while (S[k] == sep && k < S.length())
+					k++;
+
+				curr = "";
+				if (S[k] != sep && k < S.length())
+					curr+=S[k];
+			}
+		}
+		if (S[S.length()-1] != sep)
+			ls.push_back(curr);
+
+		std::vector<String> Svec(ls.begin(), ls.end()); 
+		return Svec;
+
+	}
+
+	StringTS(MidiMessage &event) 
+	{
+      const uint8* dataptr = event.getRawData();
+		int bufferSize = event.getRawDataSize();
+		len = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
+		
+		memcpy(&timestamp, dataptr + 4+len, 8); // remember to skip first four bytes
+		str = new uint8[len];
+		 memcpy(str,dataptr+4,len);
+	}
+
 
 	String getString()
 	{

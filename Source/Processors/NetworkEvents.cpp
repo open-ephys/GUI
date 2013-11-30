@@ -186,37 +186,9 @@ void NetworkEvents::simulateSingleTrial()
 }
 
 
-
-std::vector<String> NetworkEvents::splitString(String S, char sep)
-{
-	std::list<String> ls;
-	String  curr;
-	for (int k=0;k < S.length();k++) {
-		if (S[k] != sep) {
-			curr+=S[k];
-		}
-		else
-		{
-			ls.push_back(curr);
-			while (S[k] == sep && k < S.length())
-				k++;
-
-			curr = "";
-			if (S[k] != sep && k < S.length())
-				curr+=S[k];
-		}
-	}
-	if (S[S.length()-1] != sep)
-		ls.push_back(curr);
-
-	 std::vector<String> Svec(ls.begin(), ls.end()); 
-	return Svec;
-
-}
-
 void NetworkEvents::handleSpecialMessages(StringTS msg)
 {
-	std::vector<String> input = splitString(msg.getString(),' ');
+	std::vector<String> input = msg.splitString(' ');
 	if (input[0] == "StartRecord")
 	{
 		 getUIComponent()->getLogWindow()->addLineToLog("Remote triggered start recording");

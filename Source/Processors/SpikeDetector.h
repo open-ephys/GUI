@@ -205,30 +205,45 @@ public:
     /** */
     bool isChannelActive(int electrodeIndex, int channelNum);
 
-
-	Electrode *getActiveElectrode();
-    // RETURN STRING ARRAYS //
-
+	/** returns the current active electrode, i.e., the one displayed in the editor */
+	Electrode* getActiveElectrode();
+    
     /** Returns a StringArray containing the names of all electrodes */
     StringArray getElectrodeNames();
 
-    /** Returns a list of possible electrode types (e.g., stereotrode, tetrode). */
-    std::vector<String> electrodeTypes;
-
+	/** modify a channel spike detection threshold */
     void setChannelThreshold(int electrodeNum, int channelNum, float threshold);
 
+	/** returns a channel's detection threshold */
     double getChannelThreshold(int electrodeNum, int channelNum);
-	void updatePSTHsink(Electrode* newElectrode, bool addRemove);
+	
+	/** sync PSTH : inform of a new electrode added / removed */
+	void updatePSTHsink(Electrode* newElectrode, bool addRemove); 
+	/** sync PSTH : inform of a channel swap */
+	void updatePSTHsink(int electrodeID, int channelindex, int newchannel);
+	/** sync PSTH: inform of a new unit added / removed */
 	void updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
+
+	/** used to generate messages over the network and to inform PSTH sink */
 	void addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b);
 	void removeUnit(int electrodeID, int newUnitID);
 
-
+	/** saves all electrodes, thresholds, units, etc to xml */
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
+
+	/** returns the depth of an electrode. The depth is calculated as the
+	known depth of the advancer that is used to control that electrode, plus
+	the defined depth offset. Depth offset is mainly useful for depth probes,
+	in which the contact position is not always the at the tip */
 	double getElectrodeDepth(int electrodeID);
+
+	/** returns the number of electrodes */
 	int getNumElectrodes();
+
+	/** clears up the spike plots. Called during updates */
 	void removeSpikePlots();
+
 	int getNumberOfChannelsForElectrode(int i);
 	String getNameForElectrode(int i);
 	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
@@ -244,6 +259,9 @@ public:
 	double getSelectedElectrodeDepth();
 
 	Array<Electrode*> getElectrodes();
+
+    std::vector<String> electrodeTypes;
+
 private:
 	void addElectrode(Electrode* newElectrode);
 	void increaseUniqueProbeID(String type);
@@ -282,22 +300,20 @@ private:
 	bool PCAbeforeBoxes;
  	ContinuousCircularBuffer* channelBuffers; // used to compute auto threshold
 
-    // void createSpikeEvent(int& peakIndex,
-    // 					  int& electrodeNumber,
-    // 					  int& currentChannel,
-    // 					  MidiBuffer& eventBuffer);
-
-    void handleEvent(int eventType, MidiMessage& event, int sampleNum);
+     void handleEvent(int eventType, MidiMessage& event, int sampleNum);
 
     void addSpikeEvent(SpikeObject* s, MidiBuffer& eventBuffer, int peakIndex);
-    void addWaveformToSpikeObject(SpikeObject* s,
+ 
+    void resetElectrode(Electrode*);
+	CriticalSection mut;
+
+	private:
+   void addWaveformToSpikeObject(SpikeObject* s,
                                   int& peakIndex,
                                   int& electrodeNumber,
                                   int& currentChannel);
 
-    void resetElectrode(Electrode*);
-	CriticalSection mut;
-	private:
+
 		   Array<Electrode*> electrodes;
 		   PCAcomputingThread computingThread;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeDetector);

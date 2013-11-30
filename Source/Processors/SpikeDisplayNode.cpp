@@ -60,7 +60,8 @@ void SpikeDisplayNode::updateSettings()
     //std::cout << "Setting num inputs on SpikeDisplayNode to " << getNumInputs() << std::endl;
 
     electrodes.clear();
-
+	// Old syncrhonization code
+	/*
     for (int i = 0; i < eventChannels.size(); i++)
     {
         if ((eventChannels[i]->eventType < 999) && (eventChannels[i]->eventType > SPIKE_BASE_CODE))
@@ -81,6 +82,7 @@ void SpikeDisplayNode::updateSettings()
             electrodes.add(elec);
         }
     }
+	*/
 
     recordNode = getProcessorGraph()->getRecordNode();
     diskWriteLock = recordNode->getLock();
@@ -253,7 +255,76 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 {
 
     //std::cout << "Received event of type " << eventType << std::endl;
+	if (eventType == NETWORK)
+	{
+		StringTS s(event);
+  
+		// parse network message
+		std::vector<String> inputs = s.splitString(' ');
+		if (inputs[0] == "NewElectrode")
+		{
+			int electrodeID = inputs[1].getIntValue();
+			int numChannels = inputs[2].getIntValue();
+			String name = "";
+			for (int k=3+numChannels;k<inputs.size();k++)
+				name+=inputs[k];
 
+			// check whether we have this electrode in our database
+			bool found = false;
+			for (int k=0;k<electrodes.size();k++)
+			{
+				if (electrodes[k].id == electrodeID)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				// add electrode
+				Electrode elec;
+				elec.numChannels = numChannels;
+				elec.id = electrodeID;
+				elec.name = name;
+				elec.currentSpikeIndex = 0;
+				elec.mostRecentSpikes.ensureStorageAllocated(displayBufferSize);
+				for (int j = 0; j < elec.numChannels; j++)
+				{
+					elec.displayThresholds.add(0);
+					elec.detectorThresholds.add(0);
+				}
+				 electrodes.add(elec);
+				 SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
+ 				 if (ed->canvas != nullptr) 
+				 {
+					 const MessageManagerLock mmLock;
+					ed->canvas->update();
+				 }
+			}
+		}
+		if (inputs[0] == "RemoveElectrode")
+		{
+			int electrodeID = inputs[1].getIntValue();
+			bool found = false;
+			for (int k=0;k<electrodes.size();k++)
+			{
+				if (electrodes[k].id == electrodeID)
+				{
+					electrodes.remove(k);
+					SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
+					if (ed->canvas != nullptr) 
+					{
+						const MessageManagerLock mmLock;
+						ed->canvas->update();
+					}
+					break;
+				}
+			}
+
+		}
+
+
+	}
     if (eventType == SPIKE)
     {
 

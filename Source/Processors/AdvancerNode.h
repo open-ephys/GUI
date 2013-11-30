@@ -29,6 +29,10 @@
 #include "NetworkEvents.h"
 #include <list>
 
+/* a class that represents a device that moves a probe. 
+in the most basic scenario, this is either a micromanipulator or a screw that advances
+the probe into the brain. It is very useful to keep track of electrodes position since
+it makes post processing analysis easier and fully automated */
 class Advancer
 {
 public:
@@ -37,7 +41,7 @@ public:
 	String description; // what is this advancer targeting?
 	String probeType;  // screw/narashige drive/...
 	float depthMM;
-	int ID;
+	int ID; // unique identifier.
 	int locationIndex; // location in advancerLocations
 };
 
@@ -89,7 +93,6 @@ public:
     ~AdvancerNode();
 	AudioProcessorEditor* createEditor();
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
-	std::vector<String> splitString(String S, char sep);
 	bool disable();
 	int addContainer(String type, String parameters);
 	int addContainer(AdvancerContainer c);
@@ -112,7 +115,6 @@ public:
 	std::vector<AdvancerContainer> advancerContainers;
 
 private:
-	StringTS unpackStringTS(MidiMessage &event) ;
 	
 	
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);

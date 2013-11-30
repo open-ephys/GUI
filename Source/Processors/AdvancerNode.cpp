@@ -381,22 +381,12 @@ AudioProcessorEditor* AdvancerNode::createEditor()
 
 
 
-StringTS AdvancerNode::unpackStringTS(MidiMessage &event) 
-{
-	const uint8* dataptr = event.getRawData();
-	int bufferSize = event.getRawDataSize();
-	int string_length = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
-	int64 timestamp;
-	memcpy(&timestamp, dataptr + 4+string_length, 8); // remember to skip first four bytes
-	return StringTS((unsigned char *)dataptr+4,string_length,timestamp);
-}
-
 void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
 	if (eventType == NETWORK)
 	{
-		StringTS s = unpackStringTS(event);
-		std::vector<String> input= splitString(s.getString(),' ');
+		StringTS s(event);
+		std::vector<String> input= s.splitString(' ');
 		if (input[0] == "UpdateAdvancerPosition")
 		{
 			int advancerID = input[1].getIntValue();
@@ -419,32 +409,6 @@ void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samp
 }
 
 
-std::vector<String> AdvancerNode::splitString(String S, char sep)
-{
-	std::list<String> ls;
-	String  curr;
-	for (int k=0;k < S.length();k++) {
-		if (S[k] != sep) {
-			curr+=S[k];
-		}
-		else
-		{
-			ls.push_back(curr);
-			while (S[k] == sep && k < S.length())
-				k++;
-
-			curr = "";
-			if (S[k] != sep && k < S.length())
-				curr+=S[k];
-		}
-	}
-	if (S[S.length()-1] != sep)
-		ls.push_back(curr);
-
-	std::vector<String> Svec(ls.begin(), ls.end()); 
-	return Svec;
-
-}
 
 void AdvancerNode::process(AudioSampleBuffer& buffer,
 						   MidiBuffer& events,

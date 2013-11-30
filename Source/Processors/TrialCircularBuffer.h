@@ -226,7 +226,7 @@ public:
 	void clearDesign();
 	void clearAll();
 	
-
+	void channelChange(int electrodeID, int channelindex, int newchannel);
 	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
 	void addNewElectrode(Electrode *electrode);
 	void removeElectrode(Electrode *electrode);
@@ -305,9 +305,6 @@ public:
 	CriticalSection conditionsMutex;
 	*/
 private:
-	std::vector<String> splitString(String S, char sep);
-	
-
 	PeriStimulusTimeHistogramNode *processor;
 };
 

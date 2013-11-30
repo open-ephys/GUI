@@ -822,32 +822,6 @@ TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, Pe
 
 
 
-std::vector<String> TrialCircularBuffer::splitString(String S, char sep)
-{
-	std::list<String> ls;
-	String  curr;
-	for (int k=0;k < S.length();k++) {
-		if (S[k] != sep) {
-			curr+=S[k];
-		}
-		else
-		{
-			ls.push_back(curr);
-			while (S[k] == sep && k < S.length())
-				k++;
-
-			curr = "";
-			if (S[k] != sep && k < S.length())
-				curr+=S[k];
-		}
-	}
-	if (S[S.length()-1] != sep)
-		ls.push_back(curr);
-
-	 std::vector<String> Svec(ls.begin(), ls.end()); 
-	return Svec;
-
-}
 
 void TrialCircularBuffer::lockPSTH()
 {
@@ -875,8 +849,8 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 	  int numExistingConditions = conditions.size();
 	  for (int channel = 0; channel < numTTLchannels; channel++)
 	  {
-		  String simulatedConditionString = "addcondition name ttl"+String(channel+1)+" trialtypes "+String(TTL_TRIAL_OFFSET+channel)+" visible 0";
-		   std::vector<String> input = splitString(simulatedConditionString,' ');
+		  StringTS simulatedConditionString = String("addcondition name ttl"+String(channel+1)+" trialtypes "+String(TTL_TRIAL_OFFSET+channel)+" visible 0");
+		   std::vector<String> input = simulatedConditionString.splitString(' ');
  		  Condition newcondition(input,numExistingConditions+1+channel);
 		  lockConditions();
 		  newcondition.conditionID = ++conditionCounter;
@@ -985,6 +959,27 @@ void TrialCircularBuffer::toggleConditionVisibility(int cond)
 	unlockPSTH();
 	// inform editor repaint is needed
 
+}
+
+void TrialCircularBuffer::channelChange(int electrodeID, int channelindex, int newchannel)
+{
+	lockPSTH();
+	lockConditions();
+	for (int i=0;i<electrodesPSTH.size();i++) 
+	{
+		if (electrodesPSTH[i].electrodeID == electrodeID)
+		{
+			electrodesPSTH[i].channels[channelindex] = newchannel;
+			electrodesPSTH[i].channelsPSTHs[channelindex].clearStatistics();
+			for (int k=0;k<electrodesPSTH[i].unitsPSTHs.size();k++)
+			{
+				electrodesPSTH[i].unitsPSTHs[k].clearStatistics();
+			}
+		}
+	}
+	
+	unlockConditions();
+	unlockPSTH();
 }
 
 void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes)
@@ -1128,7 +1123,7 @@ void TrialCircularBuffer::removeElectrode(Electrode *electrode)
 
 void TrialCircularBuffer::parseMessage(StringTS msg)
   {
-	  std::vector<String> input = splitString(msg.getString(),' ');
+	  std::vector<String> input = msg.splitString(' ');
 	  String command = input[0].toLowerCase();
 	  
  if (command == "trialstart")

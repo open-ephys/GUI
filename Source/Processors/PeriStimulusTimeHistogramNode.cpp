@@ -112,15 +112,6 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 
 }
 
-StringTS PeriStimulusTimeHistogramNode::unpackStringTS(MidiMessage &event) 
-{
-      const uint8* dataptr = event.getRawData();
-		int bufferSize = event.getRawDataSize();
-		int string_length = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
-		int64 timestamp;
-		memcpy(&timestamp, dataptr + 4+string_length, 8); // remember to skip first four bytes
-		return StringTS((unsigned char *)dataptr+4,string_length,timestamp);
-}
 
 
 void PeriStimulusTimeHistogramNode::dumpStartStopRecordEventToDisk(int64 ts, bool startRecord)
@@ -272,7 +263,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
     
 	if (eventType == NETWORK)
 	{
-		StringTS s = unpackStringTS(event);
+		StringTS s(event);
   		trialCircularBuffer->parseMessage(s);
 		if (isRecording && saveNetworkEvents)
 		{

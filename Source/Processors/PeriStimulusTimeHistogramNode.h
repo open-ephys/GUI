@@ -51,8 +51,6 @@ public:
 	
 	void toggleConditionVisibility(int cond);
 
-	std::vector<String> splitString(String S, char sep);
-
     bool isSink()
     {
         return true;
@@ -96,7 +94,6 @@ private:
 	void dumpTTLeventToDisk(int channel,bool risingEdge, int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, int samplePosition );
 	void dumpStartStopRecordEventToDisk(int64 ts, bool startRecord);
 
-	StringTS unpackStringTS(MidiMessage &event);
 	bool isRecording;
     int displayBufferSize;
     bool redrawRequested;

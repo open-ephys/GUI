@@ -113,18 +113,9 @@ void SpikeDetector::updateSettings()
 	channelBuffers = new ContinuousCircularBuffer(numChannels,SamplingRate,1, ContinuousBufferLengthSec);
 	 
 	
-
-	// delete existing histograms
+	/** this code was used to sync SpikeDisplayNode  */
 	
 	/*
-	channelHistograms.clear();
-	// create new histograms
-	for (int k=0;k<numChannels;k++)
-	{
-		channelHistograms.add(new Histogram(-500,500,5, true));
-	}
-	*/
-
     for (int i = 0; i < electrodes.size(); i++)
     {
 
@@ -132,9 +123,21 @@ void SpikeDetector::updateSettings()
         ch->isEventChannel = true;
         ch->eventType = SPIKE_BASE_CODE + electrodes[i]->numChannels;
         ch->name = electrodes[i]->name;
-
         eventChannels.add(ch);
-    }
+    } */
+
+	// instead, we pass things now in this new form:
+	for (int k=0;k<electrodes.size();k++)
+	{
+		String eventlog = "NewElectrode "+String(electrodes[k]->electrodeID) + " "+String(electrodes[k]->numChannels)+" ";
+		for (int j=0;j<electrodes[k]->numChannels;j++)
+			eventlog += String(electrodes[k]->channels[j])+ " "+electrodes[k]->name;
+
+		addNetworkEventToQueue(StringTS(eventlog));
+	}
+	
+
+	
 	mut.exit();
 }
 
@@ -240,6 +243,20 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g
 	}
 }
 
+void SpikeDetector::updatePSTHsink(int electrodeID, int channelindex, int newchannel)
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
+		}
+	}
+}
+
 
 void SpikeDetector::updatePSTHsink(Electrode* electrode, bool addRemove)
 {
@@ -308,7 +325,7 @@ bool SpikeDetector::addElectrode(int nChans, String name, double Depth)
     std::cout <<log << std::endl;
 	String eventlog = "NewElectrode "+String(uniqueID) + " "+String(nChans)+" ";
 	for (int k=0;k<nChans;k++)
-		eventlog += String(channels[k])+ " ";
+		eventlog += String(channels[k])+ " " + name;
 
 	addNetworkEventToQueue(StringTS(eventlog));
 
@@ -385,6 +402,13 @@ void SpikeDetector::setChannel(int electrodeIndex, int channelNum, int newChanne
 	String log = "Setting electrode " + String(electrodeIndex) + " channel " + String( channelNum )+
               " to " + String( newChannel );
     std::cout << log<< std::endl;
+
+
+	
+	String eventlog = "ChanelElectrodeChannel " + String(electrodes[electrodeIndex]->electrodeID) + " " + String(channelNum) + " " + String(newChannel);
+	addNetworkEventToQueue(StringTS(eventlog));
+	
+	updatePSTHsink(electrodes[electrodeIndex]->electrodeID, channelNum,newChannel);
 
     *(electrodes[electrodeIndex]->channels+channelNum) = newChannel;
 	mut.exit();
