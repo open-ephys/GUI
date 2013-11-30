@@ -242,6 +242,7 @@ void PeriStimulusTimeHistogramEditor::updateCanvas()
 {
 	if (periStimulusTimeHistogramCanvas != nullptr) {
 		periStimulusTimeHistogramCanvas->updateNeeded = true;
+		periStimulusTimeHistogramCanvas->repaint();
 	}
 }
 
@@ -819,8 +820,6 @@ void XYPlot::paint(Graphics &g)
 	}
 	tcb->unlockPSTH();
 
-	if (!found || xmin == xmax || ymin == ymax)
-		return; // nothing to draw.
 
 	g.setColour(Colours::black);
 	g.fillRect(x0,y0, plotWidth,plotHeight);
@@ -828,6 +827,20 @@ void XYPlot::paint(Graphics &g)
 	g.setColour(Colours::white);
 	g.drawRect(x0,y0, plotWidth,plotHeight);
 
+		g.setFont(font);
+
+	String axesName;
+	if (spikePlot)
+		axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+		String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
+	else
+		axesName = String("LFP ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+		String(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID);
+
+	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
+
+	if (!found || xmin == xmax || ymin == ymax)
+		return; // nothing to draw.
 
 	// determine tick position
 	if (firstTime || autoRescale)
@@ -869,17 +882,6 @@ void XYPlot::paint(Graphics &g)
 	g.drawLine(x0,h-y0,x0,h-(y0+plotHeight),1);
 
 
-	g.setFont(font);
-
-	String axesName;
-	if (spikePlot)
-		axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
-		String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
-	else
-		axesName = String("LFP ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
-		String(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID);
-
-	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
 
 	float ticklabelWidth = float(plotWidth)/numXTicks;
 	int tickLabelHeight = 20;

@@ -218,6 +218,11 @@ public:
     void setChannelThreshold(int electrodeNum, int channelNum, float threshold);
 
     double getChannelThreshold(int electrodeNum, int channelNum);
+	void updatePSTHsink(Electrode* newElectrode, bool addRemove);
+	void updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
+	void addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b);
+	void removeUnit(int electrodeID, int newUnitID);
+
 
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
@@ -238,6 +243,7 @@ public:
 	double getAdvancerPosition(int advancerID);
 	double getSelectedElectrodeDepth();
 
+	Array<Electrode*> getElectrodes();
 private:
 	void addElectrode(Electrode* newElectrode);
 	void increaseUniqueProbeID(String type);

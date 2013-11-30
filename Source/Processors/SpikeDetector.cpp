@@ -26,6 +26,7 @@
 #include "SpikeSortBoxes.h"
 #include "Visualization/SpikeDetectCanvas.h"
 #include "Channel.h"
+#include "PeriStimulusTimeHistogramNode.h"
 class spikeSorter;
 
 SpikeDetector::SpikeDetector()
@@ -39,7 +40,7 @@ SpikeDetector::SpikeDetector()
     //// the technically correct form (Greek cardinal prefixes):
 
 	juce::Time timer;
-	ticksPerSec = timer.getHighResolutionTicksPerSecond();
+	ticksPerSec = (float) timer.getHighResolutionTicksPerSecond();
 	electrodeTypes.clear();
 	electrodeCounter.clear();
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
@@ -202,10 +203,73 @@ void SpikeDetector::setElectrodeAdvancer(int i, int ID)
 	mut.exit();
 }
 
+void SpikeDetector::addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b)
+{
+	String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID)+" "+String(r)+" "+String(g)+" "+String(b);
+	addNetworkEventToQueue(StringTS(eventlog));
+	updatePSTHsink( electrodeID,  newUnitID, r,g,b,true);
+}
+
+void SpikeDetector::removeUnit(int electrodeID, int unitID)
+{
+	String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
+	addNetworkEventToQueue(StringTS(eventlog));
+	updatePSTHsink( electrodeID,  unitID, 0,0,0,false);
+}
+
+void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove)
+{
+	ProcessorGraph *gr = getProcessorGraph();
+	Array<GenericProcessor*> p = gr->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			if (addRemove) 
+			{
+				// add electrode
+				node->trialCircularBuffer->addNewUnit(electrodeID,unitID,r,g,b);
+			} else
+			{
+				// remove electrode
+				node->trialCircularBuffer->removeUnit(electrodeID,unitID);
+			}
+			break;
+		}
+	}
+}
+
+
+void SpikeDetector::updatePSTHsink(Electrode* electrode, bool addRemove)
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			if (addRemove) 
+			{
+				// add electrode
+				node->trialCircularBuffer->addNewElectrode(electrode);
+			} else
+			{
+				// remove electrode
+				node->trialCircularBuffer->removeElectrode(electrode);
+			}
+			break;
+		}
+	}
+}
+
 void SpikeDetector::addElectrode(Electrode* newElectrode)
 {
 	mut.enter();
     resetElectrode(newElectrode);
+	// inform PSTH sink, if it exists, about this new electrode.
+	updatePSTHsink(newElectrode, true);
     electrodes.add(newElectrode);
 	mut.exit();
 }
@@ -249,7 +313,7 @@ bool SpikeDetector::addElectrode(int nChans, String name, double Depth)
 	addNetworkEventToQueue(StringTS(eventlog));
 
     resetElectrode(newElectrode);
-
+	updatePSTHsink(newElectrode, true);
     electrodes.add(newElectrode);
 	setCurrentElectrodeIndex(electrodes.size()-1);
 	mut.exit();
@@ -295,7 +359,8 @@ bool SpikeDetector::removeElectrode(int index)
 
 	String eventlog = "RemoveElectrode " + String(electrodes[index]->electrodeID);
 	addNetworkEventToQueue(StringTS(eventlog));
-	//getUIComponent()->getLogWindow()->addLineToLog(log);
+	
+	updatePSTHsink(electrodes[index], false);
 
     electrodes.remove(index);
 	if (electrodes.size() > 0)
@@ -861,6 +926,10 @@ void SpikeDetector::addProbes(String probeType,int numProbes, int nElectrodesPer
 		}
 		increaseUniqueProbeID(probeType);
 	}
+}
+Array<Electrode*> SpikeDetector::getElectrodes()
+{
+	return electrodes;
 }
 
 double SpikeDetector::getAdvancerPosition(int advancerID)

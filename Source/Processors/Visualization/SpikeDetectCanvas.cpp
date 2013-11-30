@@ -222,8 +222,7 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 			processor->getActiveElectrode()->spikeSort->getUnitColor(newUnitID, r,g,b);
 			electrode->spikePlot->updateUnitsFromProcessor();
 			electrode->spikePlot->setSelectedUnitAndbox(newUnitID,0);
-			String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID)+" "+String(r)+" "+String(g)+" "+String(b);
-			processor->addNetworkEventToQueue(StringTS(eventlog));
+			processor->addNewUnit(electrodeID,newUnitID,r,g,b);
 		}
 
 	}else if (button == delUnitButton)
@@ -236,8 +235,7 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 			processor->getActiveElectrode()->spikeSort->removeUnit(unitID);
 			electrode->spikePlot->updateUnitsFromProcessor();
 
-			String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
-			processor->addNetworkEventToQueue(StringTS(eventlog));
+			processor->removeUnit(electrodeID, unitID);
 
 			// set new selected unit to be the last existing unit
 			std::vector<BoxUnit> u = processor->getActiveElectrode()->spikeSort->getBoxUnits();
@@ -561,8 +559,8 @@ void SpikeHistogramPlot::resized()
 {
 	mut.enter();
 
-    float width = getWidth()-10;
-    float height = getHeight()-25;
+    float width = (float)getWidth()-10;
+    float height = (float) getHeight()-25;
 
     float axesWidth, axesHeight;
 
@@ -1816,8 +1814,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 		uint8 r,g,b;
 		e->spikeSort->getUnitColor(drawnUnit.getUnitID(), r,g,b);
 		
-		String eventlog = "NewUnit "+String(e->electrodeID) + " "+String(drawnUnit.getUnitID()) +" "+String(r)+" "+String(g)+" "+String(b);
-		processor->addNetworkEventToQueue(StringTS(eventlog));
+		processor->addNewUnit(e->electrodeID, drawnUnit.getUnitID(),r,g,b);
 
 		drawnPolygon.clear();
 	}

@@ -38,6 +38,8 @@ class DataViewport;
 class SpikePlot;
 class TrialCircularBuffer;
 
+
+
 class PeriStimulusTimeHistogramNode :  public GenericProcessor
 {
 public:
@@ -58,7 +60,8 @@ public:
 
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 
-    
+    void syncInternalDataStructuresWithSpikeSorter();
+
 
     void handleEvent(int, MidiMessage&, int);
 

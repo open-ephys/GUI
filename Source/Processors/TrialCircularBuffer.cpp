@@ -133,7 +133,7 @@ void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *tri
 	}
 
 	float lastUpdateTS = float(trial->endTS-trial->alignTS) / ticksPerSec + postSecs;
-	int lastBinIndex = (lastUpdateTS + preSecs) / timeSpanSecs * numBins;
+	int lastBinIndex = (int)( (lastUpdateTS + preSecs) / timeSpanSecs * numBins);
 
 
 	xmax = MAX(xmax,lastUpdateTS);
@@ -374,7 +374,7 @@ UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, u
 	colorRGB[0] = R;
 	colorRGB[1] = G;
 	colorRGB[2] = B;
-	redrawNeeded = true;
+	redrawNeeded = false;
 }
 
 void UnitPSTHs::informPainted()
@@ -980,89 +980,152 @@ void TrialCircularBuffer::toggleConditionVisibility(int cond)
 	// inform editor repaint is needed
 
 }
-  void TrialCircularBuffer::parseMessage(StringTS msg)
+
+void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes)
+{
+	lockPSTH();
+	lockConditions();
+	// note. This will erase all existing internal structures. Only call this in the constructor.
+	electrodesPSTH.clear();
+	for (int electrodeIter=0;electrodeIter<electrodes.size();electrodeIter++)
+	{
+
+		ElectrodePSTH electrodePSTH(electrodes[electrodeIter]->electrodeID);
+		int numChannels = electrodes[electrodeIter]->numChannels;
+		  
+		for (int k=0;k<numChannels;k++) {
+			int channelID = electrodes[electrodeIter]->channels[k];
+			electrodePSTH.channels.push_back(channelID);
+			ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
+			// add all known conditions
+			for (int c=0;c<conditions.size();c++)
+			{
+				channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
+			}
+			electrodePSTH.channelsPSTHs.push_back(channelPSTH);
+		  }
+
+		  // add all known units
+		  std::vector<BoxUnit> boxUnits = electrodes[electrodeIter]->spikeSort->getBoxUnits();
+		  std::vector<PCAUnit> pcaUnits = electrodes[electrodeIter]->spikeSort->getPCAUnits();
+		  for (int boxIter=0;boxIter<boxUnits.size();boxIter++)
+		  {
+
+			  int unitID = boxUnits[boxIter].UnitID;
+			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,boxUnits[boxIter].ColorRGB[0],
+				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
+			  for (int k=0;k<conditions.size();k++)
+			  {
+				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+			  }
+			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
+		  }
+
+		  for (int pcaIter=0;pcaIter<pcaUnits.size();pcaIter++)
+		  {
+
+			  int unitID = pcaUnits[pcaIter].UnitID;
+			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,pcaUnits[pcaIter].ColorRGB[0],
+				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2]);
+			  for (int k=0;k<conditions.size();k++)
+			  {
+				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+			  }
+			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
+		  }
+		  electrodesPSTH.push_back(electrodePSTH);
+	}
+	unlockConditions();
+	unlockPSTH();
+}
+
+void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
+{
+	lockPSTH();
+	ElectrodePSTH e(electrode->electrodeID);
+	int numChannels = electrode->numChannels;
+
+	for (int k=0;k<numChannels;k++) {
+		int channelID = electrode->channels[k];
+		e.channels.push_back(channelID);
+		ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
+		// add all known conditions
+		for (int c=0;c<conditions.size();c++)
+		{
+			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
+		}
+		e.channelsPSTHs.push_back(channelPSTH);
+	}
+	electrodesPSTH.push_back(e);
+	unlockPSTH();
+	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+}
+
+void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b)
+{
+	// build a new PSTH for all defined conditions
+	UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,r,g,b);
+	for (int k=0;k<conditions.size();k++)
+	{
+		unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+	}
+	for (int k=0;k<electrodesPSTH.size();k++) {
+		if (electrodesPSTH[k].electrodeID == electrodeID) {
+			electrodesPSTH[k].unitsPSTHs.push_back(unitPSTHs);
+			break;
+		}
+	}
+	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+	// inform editor repaint is needed
+}
+
+void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
+{
+  lockPSTH();
+  for (int e =0;e<electrodesPSTH.size();e++)
+  {
+	  if (electrodesPSTH[e].electrodeID == electrodeID)
+	  {
+		  for (int u=0;u<electrodesPSTH[e].unitsPSTHs.size();u++)
+		  {
+			  if (electrodesPSTH[e].unitsPSTHs[u].unitID == unitID)
+			  {
+				  electrodesPSTH[e].unitsPSTHs.erase(electrodesPSTH[e].unitsPSTHs.begin()+u);
+			  }
+		  }
+	  }
+  }
+  unlockPSTH();
+  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+  // inform editor repaint is needed
+}
+
+
+void TrialCircularBuffer::removeElectrode(Electrode *electrode)
+{
+	lockPSTH();
+	int electrodeID = electrode->electrodeID;
+	for (int e =0;e<electrodesPSTH.size();e++)
+	{
+		if (electrodesPSTH[e].electrodeID == electrodeID)
+		{
+			electrodesPSTH.erase(electrodesPSTH.begin() + e);
+			break;
+		}
+	}
+	unlockPSTH();
+	// inform editor repaint is in order
+	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
+}
+
+
+
+void TrialCircularBuffer::parseMessage(StringTS msg)
   {
 	  std::vector<String> input = splitString(msg.getString(),' ');
 	  String command = input[0].toLowerCase();
 	  
-	  if (command == "newelectrode")
-	  {
-		  lockPSTH();
-		  ElectrodePSTH e(input[1].getIntValue());
-		  int numChannels = input[2].getIntValue();
-		  
-		  for (int k=0;k<numChannels;k++) {
-			  int channelID = input[k+3].getIntValue();
-			  e.channels.push_back(channelID);
-			  ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
-			  // add all known conditions
-			  for (int c=0;c<conditions.size();c++)
-			  {
-				  channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
-			  }
-			  e.channelsPSTHs.push_back(channelPSTH);
-		  }
-		  electrodesPSTH.push_back(e);
-		  unlockPSTH();
-		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-	  } else if (command == "newunit")
-	  {
-		  int electrodeID = input[1].getIntValue();
-		  int unitID = input[2].getIntValue();
-		  int R = input[3].getIntValue();
-		  int G = input[4].getIntValue();
-		  int B = input[5].getIntValue();
-		  // build a new PSTH for all defined conditions
-		  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,R,G,B);
-		  for (int k=0;k<conditions.size();k++)
-		  {
-			  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
-		  }
-		  for (int k=0;k<electrodesPSTH.size();k++) {
-			  if (electrodesPSTH[k].electrodeID == electrodeID) {
-				  electrodesPSTH[k].unitsPSTHs.push_back(unitPSTHs);
-				  break;
-			  }
-		  }
-		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-		  // inform editor repaint is needed
-	  } else if (command == "removeunit")
-	  {
-		  lockPSTH();
-		    int electrodeID = input[1].getIntValue();
-	   	    int unitID = input[2].getIntValue();
-			for (int e =0;e<electrodesPSTH.size();e++)
-			{
-				if (electrodesPSTH[e].electrodeID == electrodeID)
-				{
-					for (int u=0;u<electrodesPSTH[e].unitsPSTHs.size();u++)
-					{
-						if (electrodesPSTH[e].unitsPSTHs[u].unitID == unitID)
-						{
-							electrodesPSTH[e].unitsPSTHs.erase(electrodesPSTH[e].unitsPSTHs.begin()+u);
-						}
-					}
-				}
-			}
-		  unlockPSTH();
-		  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-		  // inform editor repaint is needed
-	  } else if (command == "removeelectrode")
-	  {
-			 lockPSTH();
-		    int electrodeID = input[1].getIntValue();
-			for (int e =0;e<electrodesPSTH.size();e++)
-			{
-				if (electrodesPSTH[e].electrodeID == electrodeID)
-				{
-					electrodesPSTH.erase(electrodesPSTH.begin() + e);
-					break;
-				}
-			}
-		  unlockPSTH();
-		  // inform editor repaint is in order
-			((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-	  } else if (command == "trialstart")
+ if (command == "trialstart")
 	  {
 		  currentTrial.trialID = ++trialCounter;
 		  currentTrial.startTS = msg.timestamp;
@@ -1127,7 +1190,6 @@ void TrialCircularBuffer::toggleConditionVisibility(int cond)
 		  conditions.push_back(newcondition);
 
 		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-//		  edt->updateCondition(conditions);
 
 		  unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes

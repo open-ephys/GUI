@@ -25,17 +25,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TRIALCIRCULARBUFFER_H__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
-
-#include "GenericProcessor.h"
 #include "PeriStimulusTimeHistogramNode.h"
+#include "GenericProcessor.h"
+
 #include "Editors/PeriStimulusTimeHistogramEditor.h"
 #include "Visualization/SpikeObject.h"
 #include "SpikeDetector.h"
+
 #include <algorithm>    
 #include <queue>
 #include <vector>
 #include <list>
-
+class Electrode;
 class PeriStimulusTimeHistogramNode;
 
 #define TTL_TRIAL_OFFSET 30000
@@ -224,6 +225,14 @@ public:
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
 	void clearAll();
+	
+
+	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
+	void addNewElectrode(Electrode *electrode);
+	void removeElectrode(Electrode *electrode);
+	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
+	void removeUnit(int electrodeID, int unitID);
+
 	bool firstTime;
 	 double postSec, preSec;
      int numTTLchannels ;

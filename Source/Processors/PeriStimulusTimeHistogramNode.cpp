@@ -54,6 +54,13 @@ AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 
 void PeriStimulusTimeHistogramNode::updateSettings()
 {
+	delete trialCircularBuffer;
+	if (trialCircularBuffer  == nullptr)
+	{
+		trialCircularBuffer = new TrialCircularBuffer(getNumInputChannels(),getSampleRate(),this);
+		syncInternalDataStructuresWithSpikeSorter();
+	}
+
 	recordNode = getProcessorGraph()->getRecordNode();
     diskWriteLock = recordNode->getLock();
 }
@@ -91,11 +98,6 @@ void PeriStimulusTimeHistogramNode::toggleConditionVisibility(int cond)
 
 void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
-	if (trialCircularBuffer  == nullptr)
-	{
-		trialCircularBuffer = new TrialCircularBuffer(getNumInputChannels(),getSampleRate(),this);//
-	}
-	//trialCircularBuffer->reallocate(getNumInputChannels());
 
 	// Update internal statistics 
     checkForEvents(events); 
@@ -240,6 +242,28 @@ void PeriStimulusTimeHistogramNode::dumpTimestampEventToDisk(int64 softwareTS,in
 
 	diskWriteLock->exit();
 
+}
+
+void PeriStimulusTimeHistogramNode::syncInternalDataStructuresWithSpikeSorter()
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Spike Detector")
+		{
+			SpikeDetector *node = (SpikeDetector*)p[k];
+			Array<Electrode*> electrodes = node->getElectrodes();
+
+			// for each electrode, verify that 
+			// 1. We have it in our internal structure 
+			// 2. All channels match
+			// 3. We have all sorted unit information
+			trialCircularBuffer->syncInternalDataStructuresWithSpikeSorter(electrodes);
+
+
+		}
+	}
 }
 
 void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
