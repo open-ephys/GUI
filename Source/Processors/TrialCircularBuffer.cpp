@@ -779,9 +779,15 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 
 TrialCircularBuffer::~TrialCircularBuffer()
 {
+	delete lfpBuffer;
+	lfpBuffer=nullptr;
+	electrodesPSTH.clear();
 
 }
-
+TrialCircularBuffer::TrialCircularBuffer()
+{
+	lfpBuffer = nullptr;
+}
 TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, PeriStimulusTimeHistogramNode *p) : processor(p)
 {
 	Time t;

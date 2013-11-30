@@ -191,6 +191,48 @@ void Merger::updateSettings()
 
 }
 
+void Merger::saveCustomParametersToXml(XmlElement* parentElement)
+{
+    XmlElement* mainNode = parentElement->createNewChildElement("MERGER");
+	if (sourceNodeA!= nullptr)
+		mainNode->setAttribute("NodeA",	sourceNodeA->getNodeId());
+	else
+		mainNode->setAttribute("NodeA",	-1);
+
+	if (sourceNodeB != nullptr)
+		mainNode->setAttribute("NodeB",	sourceNodeB->getNodeId());
+	else
+		mainNode->setAttribute("NodeB",	-1);
+}
+
+
+void Merger::loadCustomParametersFromXml()
+{
+
+	if (parametersAsXml != nullptr)
+	{
+		forEachXmlChildElement(*parametersAsXml, mainNode)
+		{
+			if (mainNode->hasTagName("MERGER"))
+			{
+				int NodeAid = mainNode->getIntAttribute("NodeA");
+				int NodeBid = mainNode->getIntAttribute("NodeB");
+
+				ProcessorGraph *gr = getProcessorGraph();
+				Array<GenericProcessor*> p = gr->getListOfProcessors();
+				for (int k=0;k<p.size();k++)
+				{
+					if (p[k]->getNodeId() == NodeAid)
+						sourceNodeA = p[k];
+					if (p[k]->getNodeId() == NodeBid)
+						sourceNodeB = p[k];
+				}
+				updateSettings();
+			}
+		}
+	}
+}
+
 // void Merger::setNumOutputs(int /*outputs*/)
 // {
 // 	numOutputs = 0;

@@ -55,7 +55,8 @@ AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 void PeriStimulusTimeHistogramNode::updateSettings()
 {
 	delete trialCircularBuffer;
-	if (trialCircularBuffer  == nullptr)
+	trialCircularBuffer = nullptr;
+	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputChannels() > 0)
 	{
 		trialCircularBuffer = new TrialCircularBuffer(getNumInputChannels(),getSampleRate(),this);
 		syncInternalDataStructuresWithSpikeSorter();
