@@ -123,6 +123,7 @@ public:
 	Array<int> getAdvancerIDs();
 	int removeContainer(int containerIndex);
 	int removeAdvancer(int containerIndex, int advancerIndex);
+	void updateAdvancerLocation(int selectedContainer, int selectedAdvancer, int newLocation);
 
 	std::vector<AdvancerContainer> advancerContainers;
 	CriticalSection lock;

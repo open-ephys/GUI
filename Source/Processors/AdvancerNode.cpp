@@ -124,6 +124,34 @@ int AdvancerNode::removeAdvancer(int containerIndex, int advancerIndex)
 	return k;
 }
 
+void AdvancerNode::updateAdvancerLocation(int selectedContainer, int selectedAdvancer, int newLocation)
+{
+	// find out if we already have an advancer there (then a swap is needed)
+	int advancerAtTarger = -1;
+	for (int j=0;j<advancerContainers[selectedContainer].advancers.size();j++)
+	{
+		if (advancerContainers[selectedContainer].advancers[j].locationIndex == newLocation)
+		{
+			advancerAtTarger = j;
+			break;
+		}
+	}
+	if (advancerAtTarger == -1)
+	{
+		// no swap is needed.
+		advancerContainers[selectedContainer].advancers[selectedAdvancer].locationIndex = newLocation;
+	} else
+	{
+		// swap
+		int oldLocation = advancerContainers[selectedContainer].advancers[selectedAdvancer].locationIndex;
+		advancerContainers[selectedContainer].advancers[selectedAdvancer].locationIndex = newLocation;
+		advancerContainers[selectedContainer].advancers[advancerAtTarger].locationIndex = oldLocation;
+	}
+	AdvancerEditor* ed = 	(AdvancerEditor* )getEditor();
+	if (ed->canvas != nullptr)
+		ed->canvas->repaint();
+}
+
 int AdvancerNode::getAdvancerCount()
 {
 	int counter = 1;
