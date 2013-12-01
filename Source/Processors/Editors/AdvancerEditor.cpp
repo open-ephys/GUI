@@ -21,6 +21,8 @@
 
 */
 
+
+#include "../../../JuceLibraryCode/JuceHeader.h"
 #include "AdvancerEditor.h"
 #include "../AdvancerNode.h"
 #include "SpikeDetectorEditor.h"
@@ -31,26 +33,120 @@
 /************/
 class AdvancerEditor;
 
-AdvancerCanvas::AdvancerCanvas(AdvancerEditor* ed, AdvancerNode* n) :
-    processor(n), editor(ed)
-{
-   minX = -30;
-   minY = -30;
-   maxX = 30;
-   maxY = 30;
-   setWantsKeyboardFocus(true);
 
-    update();
+
+
+
+ContainersPlot::ContainersPlot(AdvancerCanvas *cv,AdvancerEditor* ed,AdvancerNode* n) :
+		canvas(cv), editor(ed), processor(n)
+{
+	
+	 monkeyImage= ImageCache::getFromMemory(BinaryData::monkey_png, BinaryData::monkey_pngSize);
+	 rodentImage = ImageCache::getFromMemory(BinaryData::rodent_png, BinaryData::rodent_pngSize);
+	
 	 
+	 animalPicture = 0;
+	 animalButton = new UtilityButton("Switch animal",Font("Default", 15, Font::plain));
+	animalButton->addListener(this);
+	animalButton->setColour(Label::textColourId, Colours::white);
+	animalButton->setBounds(10,10,150,20);
+	addAndMakeVisible(animalButton);
 }
 
-AdvancerCanvas::~AdvancerCanvas()
+void ContainersPlot::buttonClicked(juce::Button *button)
 {
+	if (button == animalButton)
+	{
+		animalPicture++;
+		if (animalPicture >= 2)
+			animalPicture = 0;
+
+		repaint();
+	}
 }
 
-void AdvancerCanvas::drawPolygon(Graphics &g,Polygon2D *p)
+void ContainersPlot::drawPolygon(Graphics &g,Polygon2D *p, float x0, float y0)
 {
 
+	g.setColour(juce::Colour(p->color[0],p->color[1],p->color[2]));
+	for (int k=0;k<p->points.size()-1;k++)
+	{
+		float x1 = (x0+p->points[k].x-minX)/(maxX-minX) * scale;
+		float x2 = (x0+p->points[k+1].x-minX)/(maxX-minX) * scale;
+		float y1 = (y0+p->points[k].y-minY)/(maxY-minY) * scale;
+		float y2 = (y0+p->points[k+1].y-minY)/(maxY-minY) * scale;
+
+		g.drawLine(x1,y1,x2,y2,2);
+	}
+}
+
+void ContainersPlot::resized()
+{
+		int width = getWidth();
+	int height = getHeight();
+
+	if (width > height)
+		scale = height;
+	else
+		scale = width;
+}
+
+
+void ContainersPlot::paint(Graphics &g)
+{
+	g.fillAll(Colours::white);
+	if (animalPicture == 0)
+		g.drawImageWithin(monkeyImage,getWidth()/5,0,getWidth(),getHeight(),RectanglePlacement::xLeft);
+	else if (animalPicture == 1)
+		g.drawImageWithin(rodentImage,getWidth()/5,0,getWidth(),getHeight(),RectanglePlacement::xLeft);
+
+	g.setColour(Colours::lightgrey);
+
+	int selectedContainer = editor->getSelectedContainer()-1;
+	if ( selectedContainer  < 0)
+		return;
+	
+	processor->lock.enter();
+	AdvancerContainer c = processor->advancerContainers[selectedContainer];
+	processor->lock.exit();
+	minX = -100;
+	maxX = 100;
+	minY = -100;
+	maxY = 100;
+
+	float x0 = (0-minX)/(maxX-minX) * scale;
+	float x1 = 0;
+	float x2 = scale;
+	float y0 = (0-minY)/(maxY-minY) * scale;
+	float y1 = 0;
+	float y2 = scale;
+
+
+	g.drawLine(x1,y0,x2,y0);
+	g.drawLine(x0,y1,x0,y2);
+
+
+	for (int i=0;i<c.model.size();i++)
+	{
+		drawPolygon(g,&(c.model[i]),c.center.x,c.center.y);
+	}
+
+}
+
+
+/*************************************/
+/*************************************/
+
+ContainerPlot::ContainerPlot(AdvancerCanvas *cv,AdvancerEditor* ed,AdvancerNode* n) :
+		canvas(cv), editor(ed), processor(n)
+{
+	
+
+}
+
+
+void ContainerPlot::drawPolygon(Graphics &g,Polygon2D *p)
+{
 
 	g.setColour(juce::Colour(p->color[0],p->color[1],p->color[2]));
 	for (int k=0;k<p->points.size()-1;k++)
@@ -64,18 +160,73 @@ void AdvancerCanvas::drawPolygon(Graphics &g,Polygon2D *p)
 	}
 }
 
-void AdvancerCanvas::paint(Graphics &g)
+void ContainerPlot::resized()
+{
+		int width = getWidth();
+	int height = getHeight();
+
+	if (width > height)
+		scale = height;
+	else
+		scale = width;
+}
+
+void ContainerPlot::mouseDown(const juce::MouseEvent& event)
+{
+	// if we clicked inside an advancer location, switch the current advancer to this new position
+
+	int selectedContainer = editor->getSelectedContainer()-1;
+	int selectedAdvancer =  editor->getSelectedAdvancer()-1;
+	if ( selectedContainer  < 0 || selectedAdvancer < 0)
+		return;
+	
+	processor->lock.enter();
+	AdvancerContainer c = processor->advancerContainers[selectedContainer];
+	processor->lock.exit();
+
+	for (int i=0;i<c.advancerLocations.size();i++)
+	{
+		float rad = c.advancerLocations[i].rad;
+		float x = c.advancerLocations[i].x;
+		float y = c.advancerLocations[i].y;
+
+		float x0 = ((x-rad)-minX)/(maxX-minX) * scale;
+		float x1 = ((x+rad)-minX)/(maxX-minX) * scale;
+		float y0 = ((y-rad)-minY)/(maxY-minY) * scale;
+		float y1 = ((y+rad)-minY)/(maxY-minY) * scale;
+		float xc = (x0+x1)/2;
+		float yc = (y0+y1)/2;
+
+		float sqrMousedistance = ( (event.x - xc)*(event.x - xc)+ (event.y - yc)*(event.y - yc));
+		float radpix = (x1-x0)/2;
+		if (sqrMousedistance <= radpix*radpix)
+		{
+			// yes! we hit a potential location
+
+				processor->lock.enter();
+				processor->updateAdvancerLocation(selectedContainer, selectedAdvancer, i);
+				processor->lock.exit();
+				break;
+		}
+	}
+
+}
+
+void ContainerPlot::paint(Graphics &g)
 {
 	g.fillAll(Colours::grey);
-
+	
 	g.setColour(Colours::lightgrey);
 
 	int selectedContainer = editor->getSelectedContainer()-1;
 	int selectedAdvancer =  editor->getSelectedAdvancer()-1;
 	if ( selectedContainer  < 0)
 		return;
-
+	
+	processor->lock.enter();
 	AdvancerContainer c = processor->advancerContainers[selectedContainer];
+	processor->lock.exit();
+
 	c.getModelRange(minX,maxX,minY,maxY);
 	float rangeX = maxX-minX;
 	float rangeY = maxY-minY;
@@ -96,7 +247,6 @@ void AdvancerCanvas::paint(Graphics &g)
 	g.drawLine(x1,y0,x2,y0);
 	g.drawLine(x0,y1,x0,y2);
 
-	processor->lock.enter();
 
 
 	for (int i=0;i<c.model.size();i++)
@@ -144,7 +294,32 @@ void AdvancerCanvas::paint(Graphics &g)
 
 	
 
-	processor->lock.exit();
+
+}
+
+
+AdvancerCanvas::AdvancerCanvas(AdvancerEditor* ed, AdvancerNode* n) :
+    processor(n), editor(ed)
+{
+    setWantsKeyboardFocus(true);
+
+   containerPlot = new ContainerPlot(this,ed,n);
+   addAndMakeVisible(containerPlot);
+
+   containersPlot = new ContainersPlot(this,ed,n);
+   addAndMakeVisible(containersPlot);
+
+   update();
+	 
+}
+
+AdvancerCanvas::~AdvancerCanvas()
+{
+}
+
+void AdvancerCanvas::paint(Graphics &g)
+{
+
 
 }
 
@@ -157,15 +332,11 @@ void AdvancerCanvas::update()
 
 void AdvancerCanvas::resized()
 {
-		int width = getWidth()/2;
+	int width = getWidth()/2;
 	int height = getHeight();
 
-	
-	if (width > height)
-		scale = height;
-	else
-		scale = width;
-
+	containerPlot->setBounds(0,0,width,height);
+	containersPlot->setBounds(width,0,width,height);
 }
 
 void AdvancerCanvas::refresh()

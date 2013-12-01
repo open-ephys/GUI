@@ -2044,6 +2044,8 @@
     <None Include="..\..\Resources\Fonts\silkscreen.ttf"/>
     <None Include="..\..\Resources\Fonts\unibody-8.otf"/>
     <None Include="..\..\Resources\Images\Icons\ArduinoIcon.png"/>
+    <None Include="..\..\Resources\Images\Icons\monkey.png"/>
+    <None Include="..\..\Resources\Images\Icons\rodent.png"/>
     <None Include="..\..\Resources\Images\Icons\OpenEphysBoardLogoBlack.png"/>
     <None Include="..\..\Resources\Images\Icons\OpenEphysBoardLogoGray.png"/>
     <None Include="..\..\Resources\Images\Icons\RadioButtons-01.png"/>

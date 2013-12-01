@@ -86,6 +86,8 @@
         <GROUP id="Gu1BsKu" name="Icons">
           <FILE id="Ke1Tihu" name="ArduinoIcon.png" compile="0" resource="1"
                 file="Resources/Images/Icons/ArduinoIcon.png"/>
+          <FILE id="ZnT2bt" name="monkey.png" compile="0" resource="1" file="Resources/Images/Icons/monkey.png"/>
+          <FILE id="T8WDLw" name="rodent.png" compile="0" resource="1" file="Resources/Images/Icons/rodent.png"/>
           <FILE id="zPy0mgT" name="OpenEphysBoardLogoBlack.png" compile="0" resource="1"
                 file="Resources/Images/Icons/OpenEphysBoardLogoBlack.png"/>
           <FILE id="Swb7oDw" name="OpenEphysBoardLogoGray.png" compile="0" resource="1"

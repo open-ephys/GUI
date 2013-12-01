@@ -3617,6 +3617,12 @@
     <None Include="..\..\Resources\Images\Icons\ArduinoIcon.png">
       <Filter>open-ephys\Resources\Images\Icons</Filter>
     </None>
+    <None Include="..\..\Resources\Images\Icons\monkey.png">
+      <Filter>open-ephys\Resources\Images\Icons</Filter>
+    </None>
+    <None Include="..\..\Resources\Images\Icons\rodent.png">
+      <Filter>open-ephys\Resources\Images\Icons</Filter>
+    </None>
     <None Include="..\..\Resources\Images\Icons\OpenEphysBoardLogoBlack.png">
       <Filter>open-ephys\Resources\Images\Icons</Filter>
     </None>

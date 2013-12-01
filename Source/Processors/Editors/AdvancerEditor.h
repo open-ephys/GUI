@@ -33,6 +33,44 @@
 class AdvancerNode;
 class AdvancerEditor;
 
+class AdvancerCanvas;
+
+
+class ContainersPlot : public Component, public Button::Listener
+{
+public:
+	ContainersPlot(AdvancerCanvas *cv,AdvancerEditor* ed,AdvancerNode* n);
+	void drawPolygon(Graphics &g,Polygon2D *p, float x0, float y0);
+
+	void paint(Graphics &g);
+	void resized();
+	void buttonClicked(juce::Button *button);
+private:
+	int animalPicture;
+	float minX,minY,maxX,maxY,scale;
+	AdvancerCanvas* canvas;
+	AdvancerEditor* editor;
+	AdvancerNode* processor;
+	Image monkeyImage, rodentImage;
+	UtilityButton* animalButton;
+};
+
+class ContainerPlot : public Component
+{
+public:
+	ContainerPlot(AdvancerCanvas *cv,AdvancerEditor* ed,AdvancerNode* n);
+	void paint(Graphics &g);
+	void drawPolygon(Graphics &g,Polygon2D *p);
+	void resized();
+	void mouseDown(const juce::MouseEvent& event);
+
+private:
+	float minX,minY,maxX,maxY,scale;
+	AdvancerCanvas* canvas;
+	AdvancerEditor* editor;
+	AdvancerNode* processor;
+
+};
 
 class AdvancerCanvas : public Visualizer
 
@@ -59,13 +97,12 @@ public:
 
     void startRecording() { } // unused
     void stopRecording() { } // unused
-	void drawPolygon(Graphics &g,Polygon2D *p);
     
     AdvancerNode* processor;
 	AdvancerEditor* editor;
 private:
-	float minX,minY,maxX,maxY,scale;
-
+	ContainerPlot* containerPlot;
+	ContainersPlot* containersPlot;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerCanvas);
 
 };
@@ -104,6 +141,7 @@ private:
 	UtilityButton *addAdvancer, *removeAdvancer;
 	
 	AdvancerCanvas* advancerCanvas;
+	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AdvancerEditor);
 
 };
