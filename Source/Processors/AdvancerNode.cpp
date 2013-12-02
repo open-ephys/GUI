@@ -545,7 +545,30 @@ void AdvancerNode::saveCustomParametersToXml(XmlElement* parentElement)
 
 }
 
-Array<String> AdvancerNode::getAdvancerNames()
+String AdvancerNode::interProcessorCommunication(String input)
+{
+	StringTS tmp(input);
+	std::vector<String> inputs = tmp.splitString(' ');
+
+	if (inputs[0] == "GetNumAdvancers")
+	{
+		Array<String> names = getAdvancerNames(false);
+		return String(names.size());
+	} else if (inputs[0] == "GetAdvancerName")
+	{
+		int advancerIndex = inputs[1].getIntValue();
+		
+		Array<String> names = getAdvancerNames(false);
+		if (advancerIndex >= 0 & advancerIndex < names.size())
+			return String(names[advancerIndex]);
+		else
+			return String("IndexOutOfRange");
+	}
+
+	return String("UnknownParamer");
+}
+
+Array<String> AdvancerNode::getAdvancerNames(bool addContainer)
 {
 	Array<String> names;
 	lock.enter();

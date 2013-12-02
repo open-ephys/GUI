@@ -577,6 +577,9 @@ public:
     /** Load custom parameters for each channel. */
     virtual void loadCustomChannelParametersFromXml(XmlElement* channelElement, bool isEventChannel=false);
 
+	/** handle messages from other processors */
+	virtual String interProcessorCommunication(String command) { return String("OK"); };
+
     /** Holds loaded parameters */
     XmlElement* parametersAsXml;
 

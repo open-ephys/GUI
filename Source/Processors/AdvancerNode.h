@@ -111,13 +111,13 @@ public:
 	bool isUtility();
 	int addAdvancerToContainer(int containerIndex);
 	void updateAdvancerPosition(int container, int advancer, float value);
-	Array<String> getAdvancerNames();
+	Array<String> getAdvancerNames(bool addContainer = true);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void addMessageToMidiQueue(StringTS S);
 
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	double getAdvancerPosition(String advancerName);
-
+	String interProcessorCommunication(String command);
 	double getAdvancerPosition(int advancerID);
 	void loadCustomParametersFromXml();
 	Array<int> getAdvancerIDs();
