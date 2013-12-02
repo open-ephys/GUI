@@ -24,9 +24,12 @@
 #ifndef __PROCESSORGRAPH_H_124F8B50__
 #define __PROCESSORGRAPH_H_124F8B50__
 
-#include "../../Resources/ZeroMQ/include/zmq.h"
-#include "../../Resources/ZeroMQ/include/zmq_utils.h"
-
+//#if JUCE_WINDOWS
+    #include "../../Resources/ZeroMQ/include/zmq.h"
+    #include "../../Resources/ZeroMQ/include/zmq_utils.h"
+//#else
+//    #include <zmq.h>
+//#endif
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 
@@ -86,8 +89,6 @@ public:
     void updatePointers();
     
     void setRecordState(bool);
-
-    Array<GenericProcessor*> getListOfProcessors();
 
 	void* createZmqContext();
 

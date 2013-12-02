@@ -103,7 +103,7 @@ public:
 	double LastSpikeTime;
 	bool newData;
 	Histogram hist;
-	std::vector<std::vector<double>> WaveFormMean,WaveFormSk,WaveFormMk;
+	std::vector<std::vector<double> > WaveFormMean,WaveFormSk,WaveFormMk;
 	double numSamples;
  
 
@@ -272,4 +272,4 @@ private:
 
 };
 
-#endif  __SPIKESORTBOXES_H
+#endif // __SPIKESORTBOXES_H

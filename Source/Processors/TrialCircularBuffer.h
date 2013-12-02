@@ -111,7 +111,7 @@ public:
 	SmartContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
 	void getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 									float preSec, float postSec,
-									std::vector<std::vector<float>> &output,
+									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid);
 
 	void addTrialStartToSmartBuffer(int trialID);

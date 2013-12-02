@@ -110,4 +110,4 @@ private:
 };
 
 
-#endif  PSTHNODE_H_
+#endif // PSTHNODE_H_

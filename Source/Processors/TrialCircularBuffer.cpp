@@ -469,7 +469,7 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 {
 	// compute trial aligned lfp for all channels 
 	std::vector<float> valid;
-	std::vector<std::vector<float>> alignedLFP;
+	std::vector<std::vector<float> > alignedLFP;
 	// resample all electrode channels 
 	lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
 		channelsPSTHs[0].preSecs,channelsPSTHs[0].postSecs, alignedLFP,valid);
@@ -515,7 +515,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 
 void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
-									std::vector<std::vector<float>> &output,
+									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid)
 {
 	// to update a condition's continuous data psth, we will first find 

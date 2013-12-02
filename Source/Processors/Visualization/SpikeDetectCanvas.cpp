@@ -891,7 +891,7 @@ void WaveformAxes::plotSpike(const SpikeObject& s, Graphics& g)
 {
 
     float h = getHeight();
-	g.setColour(juce::Colour::Colour(s.color[0],s.color[1],s.color[2]));
+	g.setColour(Colour(s.color[0],s.color[1],s.color[2]));
     //compute the spatial width for each waveform sample
     float dx = getWidth()/float(spikeBuffer[0].nSamples);
 
@@ -1359,7 +1359,7 @@ void WaveformAxes::drawBoxes(Graphics &g)
 	// Typical spike is 40 samples, at 30kHz ~ 1.3 ms or 1300 usecs.
 	for (int k=0;k<units.size();k++) 
 	{
-		g.setColour(juce::Colour::Colour(units[k].ColorRGB[0],units[k].ColorRGB[1],units[k].ColorRGB[2]));
+		g.setColour(Colour(units[k].ColorRGB[0],units[k].ColorRGB[1],units[k].ColorRGB[2]));
 		
 		for (int boxiter = 0;boxiter < units[k].lstBoxes.size(); boxiter++) 
 		{
@@ -1515,7 +1515,7 @@ void PCAProjectionAxes::drawUnit(Graphics &g, PCAUnit unit)
 
 		int selectedUnitID, selectedBoxID;
 		processor->getActiveElectrode()->spikeSort->getSelectedUnitAndbox(selectedUnitID, selectedBoxID);
-	g.setColour(juce::Colour::Colour(unit.ColorRGB[0],unit.ColorRGB[1],unit.ColorRGB[2]));
+	g.setColour(Colour(unit.ColorRGB[0],unit.ColorRGB[1],unit.ColorRGB[2]));
 	if (unit.poly.pts.size() > 2) {	
 		float thickness;
 		if (unit.getUnitID() == selectedUnitID)
@@ -1569,7 +1569,7 @@ void PCAProjectionAxes::paint(Graphics& g)
 			
 		if (drawnPolygon.size() > 0)
 		{
-			g.setColour(juce::Colour::Colour(drawnUnit.ColorRGB[0],drawnUnit.ColorRGB[1],drawnUnit.ColorRGB[2]));
+			g.setColour(Colour(drawnUnit.ColorRGB[0],drawnUnit.ColorRGB[1],drawnUnit.ColorRGB[2]));
 		
 		for (std::list<PointD>::iterator it = drawnPolygon.begin(); it != drawnPolygon.end(); it++)
 		{
@@ -1615,7 +1615,7 @@ void PCAProjectionAxes::drawProjectedSpike(SpikeObject s)
 	{
 		Graphics g(projectionImage);
         
-		g.setColour(juce::Colour::Colour(s.color[0],s.color[1],s.color[2]));
+		g.setColour(Colour(s.color[0],s.color[1],s.color[2]));
 		
 		float x = (s.pcProj[0] - pcaMin[0]) / (pcaMax[0]-pcaMin[0]) * rangeX;
 		float y = (s.pcProj[1] - pcaMin[1]) / (pcaMax[1]-pcaMin[1]) * rangeY;

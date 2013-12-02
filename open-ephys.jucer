@@ -49,6 +49,8 @@
   </EXPORTFORMATS>
   <MAINGROUP id="h3HbSTV" name="open-ephys">
     <GROUP id="0wpTCpt" name="Resources">
+      <FILE id="cbpVYl" name="zmq.cpp" compile="1" resource="0" file="Resources/ZeroMQ/include/zmq.cpp"/>
+      <FILE id="xjHa07" name="zmq.h" compile="0" resource="0" file="Resources/ZeroMQ/include/zmq.h"/>
       <GROUP id="kVU7EYu" name="Fonts">
         <FILE id="g9dipB" name="cpmono-black-serialized" compile="0" resource="1"
               file="Resources/Fonts/cpmono-black-serialized"/>

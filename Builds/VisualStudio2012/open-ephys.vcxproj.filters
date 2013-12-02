@@ -355,6 +355,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Resources\ZeroMQ\include\zmq.cpp">
+      <Filter>open-ephys\Resources</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\AccessClass.cpp">
       <Filter>open-ephys\Source</Filter>
     </ClCompile>
@@ -1893,6 +1896,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Resources\ZeroMQ\include\zmq.h">
+      <Filter>open-ephys\Resources</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\AccessClass.h">
       <Filter>open-ephys\Source</Filter>
     </ClInclude>

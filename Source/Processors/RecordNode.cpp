@@ -599,12 +599,9 @@ void RecordNode::closeAllFiles()
         }
     }
 
-<<<<<<< HEAD
-    closeFile(eventChannel);
-=======
+
 	if (!eventsSavedBySink)
 		closeFile(eventChannel);
->>>>>>> 900cd1aa616b0f168533c506134c4893c7813cc0
 
     blockIndex = 0; // back to the beginning of the block
 }

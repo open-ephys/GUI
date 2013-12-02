@@ -116,7 +116,7 @@ public:
 	int ptr;
 	int bufLen;
 	int leftover_k;
-	std::vector<std::vector<float>> Buf;
+	std::vector<std::vector<float> > Buf;
 	std::vector<bool> valid;
 	std::vector<int64> hardwareTS,softwareTS;
 };
