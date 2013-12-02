@@ -783,7 +783,8 @@ void WaveAxes::plotSpike(const SpikeObject& s, Graphics& g)
     int dSamples = 1;
 
     float x = 0.0f;
-
+	
+	g.setColour(juce::Colour(s.color[0],s.color[1],s.color[2]));
     for (int i = 0; i < s.nSamples-1; i++)
     {
         //std::cout << s.data[sampIdx] << std::endl;
@@ -1111,7 +1112,7 @@ void ProjectionAxes::calcWaveformPeakIdx(const SpikeObject& s, int d1, int d2, i
 
 void ProjectionAxes::clear()
 {
-    projectionImage.clear(Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+    projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
                           Colours::black);
 
     repaint();

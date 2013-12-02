@@ -31,6 +31,7 @@
 #include "EditorViewport.h"
 #include "DataViewport.h"
 #include "MessageCenter.h"
+#include "LogWindow.h"
 #include "../Processors/ProcessorGraph.h"
 #include "../Audio/AudioComponent.h"
 #include "../MainWindow.h"
@@ -117,6 +118,12 @@ public:
         return audio;
     }
 
+	/** Retrusn a pointer to the log window */
+	LogWindow* getLogWindow()
+	{
+		return logWindow;
+	}
+
     /** Stops the callbacks to the ProcessorGraph which drive data acquisition. */
     void disableCallbacks();
 
@@ -164,7 +171,9 @@ private:
     ScopedPointer<ControlPanel> controlPanel;
     ScopedPointer<MessageCenter> messageCenter;
     ScopedPointer<InfoLabel> infoLabel;
+	ScopedPointer<LogWindow> logWindow;
 
+	
     /** Pointer to the GUI's MainWindow, which owns the UIComponent. */
     MainWindow* mainWindow;
 

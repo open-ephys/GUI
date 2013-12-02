@@ -21,6 +21,9 @@
 
 */
 #ifdef WIN32
+#include "../Resources/ZeroMQ/include/zmq.h"
+#include "../Resources/ZeroMQ/include/zmq_utils.h"
+
 #include <Windows.h>
 #define _MAIN
 #endif

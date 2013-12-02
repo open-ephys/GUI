@@ -24,6 +24,10 @@
 #ifndef __PROCESSORGRAPH_H_124F8B50__
 #define __PROCESSORGRAPH_H_124F8B50__
 
+#include "../../Resources/ZeroMQ/include/zmq.h"
+#include "../../Resources/ZeroMQ/include/zmq_utils.h"
+
+
 #include "../../JuceLibraryCode/JuceHeader.h"
 
 #include "../AccessClass.h"
@@ -61,7 +65,7 @@ public:
     GenericProcessor* createProcessorFromDescription(String& description);
 
     void removeProcessor(GenericProcessor* processor);
-
+	Array<GenericProcessor*> getListOfProcessors();
     void clearSignalChain();
 
     bool enableProcessors();
@@ -85,8 +89,10 @@ public:
 
     Array<GenericProcessor*> getListOfProcessors();
 
-private:
+	void* createZmqContext();
 
+private:
+	void* zmqcontext;
     int currentNodeId;
 
     enum nodeIds
@@ -100,6 +106,7 @@ private:
     void createDefaultNodes();
 
     void clearConnections();
+
 
 };
 

@@ -32,11 +32,12 @@ UIComponent::UIComponent(MainWindow* mainWindow_, ProcessorGraph* pgraph, AudioC
     processorGraph->setUIComponent(this);
 
     infoLabel = new InfoLabel();
+	logWindow = new LogWindow();
 
     dataViewport = new DataViewport();
     addChildComponent(dataViewport);
     dataViewport->addTabToDataViewport("Info", infoLabel,0);
-
+	dataViewport->addTabToDataViewport("Log",logWindow,0);
     std::cout << "Created data viewport." << std::endl;
 
     editorViewport = new EditorViewport();

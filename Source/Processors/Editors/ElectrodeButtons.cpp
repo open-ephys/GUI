@@ -23,7 +23,7 @@
 
 #include "ElectrodeButtons.h"
 
-void ElectrodeButton::paintButton(Graphics& g, bool isMouseOver, bool isButtonDown)
+void ElectrodeButton::paintButton(juce::Graphics& g, bool isMouseOver, bool isButtonDown)
 {
     if (getToggleState() == true)
         g.setColour(Colours::orange);
@@ -67,7 +67,7 @@ void ElectrodeButton::setChannelNum(int i, bool changeButtonText)
 	}
 }
 
-
+/*
 void ElectrodeEditorButton::paintButton(Graphics& g, bool isMouseOver, bool isButtonDown)
 {
     if (getToggleState() == true)
@@ -78,4 +78,4 @@ void ElectrodeEditorButton::paintButton(Graphics& g, bool isMouseOver, bool isBu
     g.setFont(font);
 
     g.drawText(name,0,0,getWidth(),getHeight(),Justification::left,true);
-}
+}*/

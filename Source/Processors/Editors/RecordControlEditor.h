@@ -50,7 +50,7 @@ public:
 private:
     ScopedPointer<ComboBox> availableChans;
     ScopedPointer<Label> chanSel;
-    ScopedPointer<UtilityButton> newFileToggleButton;
+    ScopedPointer<UtilityButton> newFileToggleButton,eventsBySink;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RecordControlEditor);
 

@@ -472,7 +472,8 @@ public:
         TTL = 3,
         SPIKE = 4,
         EEG = 5,
-        CONTINUOUS = 6
+        CONTINUOUS = 6,
+		NETWORK = 7
     };
 
     enum eventChannelTypes

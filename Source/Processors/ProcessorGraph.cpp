@@ -30,6 +30,7 @@
 #include "LfpTriggeredAverageNode.h"
 #include "SpikeDisplayNode.h"
 #include "EventNode.h"
+#include "AdvancerNode.h"
 #include "FilterNode.h"
 #include "GenericProcessor.h"
 #include "RecordNode.h"
@@ -40,6 +41,8 @@
 #include "SignalGenerator.h"
 #include "SourceNode.h"
 #include "EventDetector.h"
+#include "NetworkEvents.h"
+#include "PeriStimulusTimeHistogramNode.h"
 #include "SpikeDetector.h"
 #include "PhaseDetector.h"
 #include "WiFiOutput.h"
@@ -53,9 +56,11 @@
 #include "../UI/UIComponent.h"
 #include "../UI/EditorViewport.h"
 
+
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
 
+	createZmqContext();
     // The ProcessorGraph will always have 0 inputs (all content is generated within graph)
     // but it will have N outputs, where N is the number of channels for the audio monitor
     setPlayConfigDetails(0, // number of inputs
@@ -67,8 +72,17 @@ ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 
 }
 
-ProcessorGraph::~ProcessorGraph() { }
+ProcessorGraph::~ProcessorGraph() {
+	if (zmqcontext != NULL)
+		zmq_ctx_destroy (zmqcontext);
 
+}
+
+void* ProcessorGraph::createZmqContext()
+{
+	zmqcontext =  zmq_ctx_new ();
+	return zmqcontext;
+}
 
 void ProcessorGraph::createDefaultNodes()
 {
@@ -487,7 +501,12 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             processor = new FileReader();
             std::cout << "Creating a new file reader." << std::endl;
-        }
+        }   
+		else if (subProcessorType.equalsIgnoreCase("Network Events"))
+        {
+            std::cout << "Creating a new network events source." << std::endl;
+			processor = new NetworkEvents(zmqcontext);
+        } 
 
 
         sendActionMessage("New source node created.");
@@ -568,6 +587,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
 
             sendActionMessage("New record controller created.");
 
+        }else if (subProcessorType.equalsIgnoreCase("Advancers"))
+        {
+            std::cout << "Creating a new advancers node." << std::endl;
+			processor = new AdvancerNode();
         }
 
     }
@@ -593,6 +616,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a SpikeDisplayNode." << std::endl;
             processor = new SpikeDisplayNode();
+        } 
+        else if (subProcessorType.equalsIgnoreCase("PSTH"))
+        {
+            std::cout << "Creating a PSTH sink." << std::endl;
+            processor = new PeriStimulusTimeHistogramNode();
         }
         else if (subProcessorType.equalsIgnoreCase("WiFi Output"))
         {

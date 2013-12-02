@@ -35,7 +35,6 @@ FileReader::FileReader()
     enabledState(false);
 
     counter = 0;
-
 }
 
 FileReader::~FileReader()
@@ -131,9 +130,11 @@ void FileReader::updateSettings()
 
 void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
-
-    uint8 data[8];
+	Time timer;
+    uint8 data[16];
+	int64 software_timestamp = timer.getHighResolutionTicks();
     memcpy(data, &timestamp, 8);
+	memcpy(data+8, &software_timestamp, 8);
 
     // generate timestamp
     addEvent(events,    // MidiBuffer
@@ -141,7 +142,7 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
              0,         // sampleNum
              nodeId,    // eventID
              0,		 // eventChannel
-             8,         // numBytes
+             16,         // numBytes
              data   // data
             );
 
@@ -177,7 +178,44 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
     //     counter = 0;
     // }
 
-    if (ftell(input) >= lengthOfInputFile - samplesNeeded)
+	if (0)
+	{
+		// generate perfect sine waves for debugging purposes...
+		int numRead = samplesNeeded*buffer.getNumChannels();
+		static float counter = 0;
+
+		float Amplitude = 500;
+		static bool rampup = true;
+		for (int k=0;k<samplesNeeded;k++)
+		{
+			//	counter++;
+
+			// generate perfect ramps
+			if (rampup)
+			{
+				counter+=0.1;
+				if (counter >=1000)
+					rampup = false;
+			} else 
+			{
+				counter -= 0.1;
+				if (counter <= 0) {
+					counter = 0;
+					rampup = true;
+				}
+			}
+			for (int ch=0;ch<buffer.getNumChannels();ch++)
+			{
+				// generate perfect sine waves
+				//readBuffer[k*buffer.getNumChannels()+ch] = sin((ch+1)*float(counter)/40000.0F*2.0*3.14)*Amplitude/getDefaultBitVolts();
+
+
+				readBuffer[k*buffer.getNumChannels()+ch] = counter/getDefaultBitVolts();
+			}
+		}
+	}
+
+  if (ftell(input) >= lengthOfInputFile - samplesNeeded)
     {
         rewind(input);
     }

@@ -759,8 +759,7 @@ void ControlPanel::disableCallbacks()
 void ControlPanel::timerCallback()
 {
     //std::cout << "Message Received." << std::endl;
-
-    refreshMeters();
+   refreshMeters();
 
 }
 
