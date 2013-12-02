@@ -147,6 +147,7 @@ void AdvancerNode::updateAdvancerLocation(int selectedContainer, int selectedAdv
 		advancerContainers[selectedContainer].advancers[selectedAdvancer].locationIndex = newLocation;
 		advancerContainers[selectedContainer].advancers[advancerAtTarger].locationIndex = oldLocation;
 	}
+	const MessageManagerLock mmLock;
 	AdvancerEditor* ed = 	(AdvancerEditor* )getEditor();
 	if (ed->canvas != nullptr)
 		ed->canvas->repaint();
@@ -368,6 +369,33 @@ double AdvancerNode::getAdvancerPosition(String advancerName)
 	return 0;
 }
 
+
+
+double AdvancerNode::setAdvancerPosition(int advancerID, double newDepth, bool add)
+{
+	lock.enter();
+	for (int c = 0; c < advancerContainers.size();c++)
+	{
+		for (int i=0;i< advancerContainers[c].advancers.size();i++)
+		{
+			if (advancerContainers[c].advancers[i].ID == advancerID)
+			{
+				if (add)
+					updateAdvancerPosition(c,i, advancerContainers[c].advancers[i].depthMM + newDepth);
+				else 
+					updateAdvancerPosition(c,i, newDepth);
+
+				lock.exit();
+				const MessageManagerLock mmLock;
+				AdvancerEditor *ed = (AdvancerEditor*) getEditor();
+				ed->updateFromProcessor();
+				return advancerContainers[c].advancers[i].depthMM;
+			}
+		}
+	}
+	return 0.0;
+}
+
 int AdvancerNode::addContainer(AdvancerContainer c)
 {
 	lock.enter();
@@ -439,31 +467,10 @@ int AdvancerNode::addAdvancerToContainer(int idx)
 	return i;
 }
 
+
 void AdvancerNode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
-	if (eventType == NETWORK)
-	{
-		StringTS s(event);
-		std::vector<String> input= s.splitString(' ');
-		if (input[0] == "UpdateAdvancerPosition")
-		{
-			int advancerID = input[1].getIntValue();
-			float newPosition = input[2].getFloatValue();
-			// search for this advancer....
-			lock.enter();
-			for (int c=0;c<advancerContainers.size();c++)
-			{
-				for (int a=0;a<advancerContainers[c].advancers.size();a++)
-				{
-					if (advancerContainers[c].advancers[a].ID == advancerID)
-					{
-						advancerContainers[c].advancers[a].depthMM = newPosition;
-					}					
-				}
-			}
-			lock.exit();
-		}
-	}
+	
 }
 
 
@@ -473,6 +480,7 @@ void AdvancerNode::process(AudioSampleBuffer& buffer,
 						   int& nSamples)
 {
 	checkForEvents(events);
+
 	while (messageQueue.size() > 0)
 	{
 		StringTS S = messageQueue.front();
@@ -545,28 +553,19 @@ void AdvancerNode::saveCustomParametersToXml(XmlElement* parentElement)
 
 }
 
-String AdvancerNode::interProcessorCommunication(String input)
+String AdvancerNode::DropStringFrom(std::vector<String> input, int index)
 {
-	StringTS tmp(input);
-	std::vector<String> inputs = tmp.splitString(' ');
-
-	if (inputs[0] == "GetNumAdvancers")
+	String S = "";
+	for (int k=index;k<input.size();k++)
 	{
-		Array<String> names = getAdvancerNames(false);
-		return String(names.size());
-	} else if (inputs[0] == "GetAdvancerName")
-	{
-		int advancerIndex = inputs[1].getIntValue();
-		
-		Array<String> names = getAdvancerNames(false);
-		if (advancerIndex >= 0 & advancerIndex < names.size())
-			return String(names[advancerIndex]);
-		else
-			return String("IndexOutOfRange");
+		if (k == input.size()-1)
+			S += input[k];
+			else
+				S += input[k] + " ";
 	}
-
-	return String("UnknownParamer");
+	return S;
 }
+
 
 Array<String> AdvancerNode::getAdvancerNames(bool addContainer)
 {
@@ -576,7 +575,10 @@ Array<String> AdvancerNode::getAdvancerNames(bool addContainer)
 	{
 		for (int i=0;i<advancerContainers[k].advancers.size();i++)
 		{
-			names.add(advancerContainers[k].name+"/"+advancerContainers[k].advancers[i].name);
+			if (addContainer)
+				names.add(advancerContainers[k].name+"/"+advancerContainers[k].advancers[i].name);
+			else
+				names.add(advancerContainers[k].advancers[i].name);
 		}
 	}
 	lock.exit();
@@ -682,8 +684,47 @@ void AdvancerNode::loadCustomParametersFromXml()
 			
 		}
 	}
+
 	AdvancerEditor *ed = (AdvancerEditor*) getEditor();
 	ed->updateFromProcessor();
 	if (advancerContainers.size() > 0)
 		ed->setActiveContainer(1);
+}
+
+
+
+String AdvancerNode::interProcessorCommunication(String input)
+{
+	StringTS tmp(input);
+	std::vector<String> inputs = tmp.splitString(' ');
+
+	if (inputs[0] == "GetNumAdvancers")
+	{
+		Array<String> names = getAdvancerNames(false);
+		return String("NumAdvancers ")+String(names.size());
+	} else if (inputs[0] == "GetAdvancerIdName")
+	{
+		int advancerIndex = inputs[1].getIntValue();
+		
+		Array<String> names = getAdvancerNames(false);
+		Array<int> IDs = getAdvancerIDs();
+		if (advancerIndex >= 0 & advancerIndex < names.size())
+			return String("AdvancerIdName ")+String(IDs[advancerIndex])+ " "+String(names[advancerIndex]);
+		else
+			return String("IndexOutOfRange");
+	} else if (inputs[0] == "GetAdvancerDepth")
+	{
+		int advancerID = inputs[1].getIntValue();
+		double depth = getAdvancerPosition(advancerID);
+		return String("AdvancerDepth ")+String(depth,5);
+	} else if (inputs[0] == "SetAdvancerDepth")
+	{
+		double depth = inputs[2].getDoubleValue();
+		int advancerID = inputs[1].getIntValue();
+		double newDepth = setAdvancerPosition(advancerID,depth,true);
+		
+		return String("NewAdvancerDepth ") + String(advancerID) + " " + String(newDepth);
+	}
+
+	return String("UnknownParamer");
 }

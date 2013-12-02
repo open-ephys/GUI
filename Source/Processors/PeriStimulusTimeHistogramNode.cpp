@@ -103,7 +103,9 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 	// Update internal statistics 
     checkForEvents(events); 
 	
-	trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
+	if (trialCircularBuffer  != nullptr) {
+		trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
+	}
 	// draw the PSTH
     if (redrawRequested)
     {

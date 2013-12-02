@@ -114,7 +114,7 @@ public:
 	Array<String> getAdvancerNames(bool addContainer = true);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void addMessageToMidiQueue(StringTS S);
-
+	double setAdvancerPosition(int AdvancerID, double newDepth, bool add);
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	double getAdvancerPosition(String advancerName);
 	String interProcessorCommunication(String command);
@@ -129,8 +129,9 @@ public:
 	CriticalSection lock;
 
 private:
-	
-	
+		
+	String DropStringFrom(std::vector<String> input, int index);
+
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);
 	int getAdvancerCount();
 	AdvancerContainer createStandardGridContainer();
