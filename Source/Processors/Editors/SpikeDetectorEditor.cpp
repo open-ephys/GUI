@@ -717,14 +717,16 @@ void SpikeDetectorEditor::updateAdvancerList()
 		if (p[k]->getName() == "Advancers")
 		{
 			AdvancerNode *node = (AdvancerNode *)p[k];
-
-			advancerNames = node->getAdvancerNames();
-			advancerIDs =  node->getAdvancerIDs();
-
-			advancerList->clear(dontSendNotification);
-			for (int i=0;i<advancerNames.size();i++)
+			if (node != nullptr)
 			{
-				advancerList->addItem(advancerNames[i],1+i);
+				advancerNames = node->getAdvancerNames();
+				advancerIDs =  node->getAdvancerIDs();
+
+				advancerList->clear(dontSendNotification);
+				for (int i=0;i<advancerNames.size();i++)
+				{
+					advancerList->addItem(advancerNames[i],1+i);
+				}
 			}
 		}
 	}

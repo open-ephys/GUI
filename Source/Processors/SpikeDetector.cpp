@@ -229,16 +229,19 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			if (addRemove) 
+			if (node->trialCircularBuffer != nullptr)
 			{
-				// add electrode
-				node->trialCircularBuffer->addNewUnit(electrodeID,unitID,r,g,b);
-			} else
-			{
-				// remove electrode
-				node->trialCircularBuffer->removeUnit(electrodeID,unitID);
+				if (addRemove) 
+				{
+					// add electrode
+					node->trialCircularBuffer->addNewUnit(electrodeID,unitID,r,g,b);
+				} else
+				{
+					// remove electrode
+					node->trialCircularBuffer->removeUnit(electrodeID,unitID);
+				}
+				break;
 			}
-			break;
 		}
 	}
 }
@@ -252,7 +255,10 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int channelindex, int newcha
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
+			if (node->trialCircularBuffer != nullptr)
+			{
+				node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
+			}
 		}
 	}
 }
@@ -267,14 +273,17 @@ void SpikeDetector::updatePSTHsink(Electrode* electrode, bool addRemove)
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			if (addRemove) 
+			if (node->trialCircularBuffer != nullptr)
 			{
-				// add electrode
-				node->trialCircularBuffer->addNewElectrode(electrode);
-			} else
-			{
-				// remove electrode
-				node->trialCircularBuffer->removeElectrode(electrode);
+				if (addRemove) 
+				{
+					// add electrode
+					node->trialCircularBuffer->addNewElectrode(electrode);
+				} else
+				{
+					// remove electrode
+					node->trialCircularBuffer->removeElectrode(electrode);
+				}
 			}
 			break;
 		}
