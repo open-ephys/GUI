@@ -1014,7 +1014,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("numPostSamples", numPostSamples);
 
 
-    XmlElement* countNode = parentElement->createNewChildElement("ELECTRODE_COUNTER");
+    XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
 
 	countNode->setAttribute("numElectrodeTypes",  (int)electrodeTypes.size());
 	for (int k=0;k<electrodeTypes.size();k++)

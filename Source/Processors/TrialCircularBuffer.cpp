@@ -667,6 +667,7 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 	int MaxFiringRateHz = 300;
 	maxTrialsInMemory = _maxTrialsInMemory;
 	bufferSize = MaxFiringRateHz * maxTrialTimeSeconds * maxTrialsInMemory;
+	jassert(bufferSize > 0);
 
 	bufferIndex = 0;
 	trialIndex = 0;
@@ -727,6 +728,7 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 {
 	// we need to update the average firing rate with the spikes that were stored in the spike buffer.
 	// first, query spike buffer where does the trial start....
+	jassert(spikeTimesSoftware.size() > 0);
 	std::vector<int64> alignedSpikes;
 	Time t;
 	int64 numTicksPreTrial =preSecs * t.getHighResolutionTicksPerSecond(); 

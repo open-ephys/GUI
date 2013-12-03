@@ -69,6 +69,7 @@ void LogWindow::addLineToLog(StringTS S)
 
 void LogWindow::addLineToLog(String S)
 {
+	lock.enter();
 	const int maxLines = 15;
 	Time t= 	t.getCurrentTime();
 	String tm = String(t.getMinutes()) + String(":") + String(t.getSeconds()) + ":"+String(t.getMilliseconds())+" ";
@@ -80,7 +81,7 @@ void LogWindow::addLineToLog(String S)
 	for (std::list<String>::iterator it = log.begin(); it!=log.end();it++) {
 		infoString+=(*it)+"\n";
 	}
-	
+	lock.exit();
 }
 
 
