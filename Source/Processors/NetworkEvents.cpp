@@ -295,6 +295,9 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 	    getControlPanel()->setRecordState(true);
 		return String("OK");      
 	//	getControlPanel()->placeMessageInQueue("StartRecord");
+	} if (input[0] == "SetSessionName")
+	{
+			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
 	} else if (input[0] == "StopRecord")
 	{
 		const MessageManagerLock mmLock;
@@ -310,12 +313,12 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 			if (p[k]->getName().toLowerCase() == input[1].toLowerCase())
 			{
 				String Query="";
-				for (int k=2;k<input.size();k++)
+				for (int i=2;i<input.size();i++)
 				{
-					if (k == input.size()-1)
-						Query+=input[k];
+					if (i == input.size()-1)
+						Query+=input[i];
 					else
-						Query+=input[k]+" ";
+						Query+=input[i]+" ";
 				}
 					
 				return p[k]->interProcessorCommunication(Query);
