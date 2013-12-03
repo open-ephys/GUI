@@ -57,9 +57,11 @@ std::vector<String> StringTS::splitString(char sep)
 				curr+=S[k];
 		}
 	}
-	if (S[S.length()-1] != sep)
-		ls.push_back(curr);
-
+	if (S.length() > 0)
+	{
+		if (S[S.length()-1] != sep)
+			ls.push_back(curr);
+	}
 	std::vector<String> Svec(ls.begin(), ls.end()); 
 	return Svec;
 
@@ -381,12 +383,18 @@ void NetworkEvents::run() {
 			break;
 
 		StringTS Msg(buffer, result, timestamp_software);
-		networkMessagesQueue.push(Msg);
-	    
-		 // handle special messages
-		 String response = handleSpecialMessages(Msg);
-
-		 zmq_send (responder, response.getCharPointer(), response.length(), 0);
+		if (result > 0) {
+			networkMessagesQueue.push(Msg);
+		    
+			// handle special messages
+			String response = handleSpecialMessages(Msg);
+	
+			zmq_send (responder, response.getCharPointer(), response.length(), 0);
+		} else 
+		{
+			String zeroMessageError = "Recieved Zero Message?!?!?";
+			zmq_send (responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
+		}
     }
 
 	zmq_close(responder);

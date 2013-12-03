@@ -471,13 +471,15 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 	std::vector<float> valid;
 	std::vector<std::vector<float>> alignedLFP;
 	// resample all electrode channels 
-	lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
+	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
 		channelsPSTHs[0].preSecs,channelsPSTHs[0].postSecs, alignedLFP,valid);
 	// now we can average data
-
-	for (int ch=0;ch<channelsPSTHs.size();ch++)
+	if (success)
 	{
-		channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid);
+		for (int ch=0;ch<channelsPSTHs.size();ch++)
+		{
+			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid);
+		}
 	}
 
 }
@@ -513,7 +515,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 }
 
 
-void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float>> &output,
 									std::vector<float> &valid)
@@ -553,7 +555,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	{
 		//jassertfalse;
 		// couldn't find the trial !?!?!? buffer overrun?
-		return;
+		return false;
 	}
 
 	// now we have a handle where to search the data...
@@ -651,12 +653,12 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 
 			if (cnt == bufLen) 
 			{
-				jassertfalse;
-				break; // missing data!?!?!?
+				// missing data. This can happen when we just add a channel and a trial is in progress?!?!?
+				return false; 
 			}
 		}
 	}
-
+	return true;
 }
 
 /*************************/
@@ -1175,7 +1177,7 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.alignTS = msg.timestamp;
 	  }  else if (command == "newdesign")
 	  {
-		  clearDesign();
+		  //clearDesign();
 		  designName = input[1];
 	  }
 	  else if (command == "cleardesign")
@@ -1318,14 +1320,17 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software)
 	// and only if its above some threshold, simulate a ttl trial.
 	// this is useful when sending train of pulses and you are interested in aligning things just
 	// to the first pulse.
-	int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
-	float secElapsed = float(tickdiff) / numTicksPerSecond;
-	if (secElapsed > ttlSupressionTimeSec)
+	if (channel >= 0 && channel < lastTTLts.size())
 	{
-		// simulate a ttl trial 
-		simulateTTLtrial(channel, ttl_timestamp_software);
+		int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
+		float secElapsed = float(tickdiff) / numTicksPerSecond;
+		if (secElapsed > ttlSupressionTimeSec)
+		{
+			// simulate a ttl trial 
+			simulateTTLtrial(channel, ttl_timestamp_software);
+		}
+		lastTTLts[channel] = tickdiff;
 	}
-	lastTTLts[channel] = tickdiff;
 
 }
 	

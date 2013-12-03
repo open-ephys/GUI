@@ -1009,7 +1009,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 
 	SpikeDetectorEditor* ed = (SpikeDetectorEditor*) getEditor();
 	
-	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode());
+	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode()-1);
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
 
@@ -1143,7 +1143,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 
 	if (currentElectrode >= 0) {
 		ed->refreshElectrodeList(currentElectrode);
-		ed->setSelectedElectrode(currentElectrode);
+		ed->setSelectedElectrode(1+currentElectrode);
 	} else
 	{
 		ed->refreshElectrodeList();

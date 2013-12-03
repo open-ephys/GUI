@@ -309,7 +309,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		   int channel = dataptr[3];
 		   int64  ttl_timestamp_software,ttl_timestamp_hardware;
 		   memcpy(&ttl_timestamp_software, dataptr+4, 8);
-		   memcpy(&ttl_timestamp_hardware, dataptr+4, 8);
+		   memcpy(&ttl_timestamp_hardware, dataptr+12, 8);
 		   if (ttl_raise)
 				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software);
 		   if (isRecording && saveTTLs)
