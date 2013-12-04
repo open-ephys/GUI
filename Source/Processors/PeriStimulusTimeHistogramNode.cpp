@@ -56,9 +56,9 @@ void PeriStimulusTimeHistogramNode::updateSettings()
 {
 	delete trialCircularBuffer;
 	trialCircularBuffer = nullptr;
-	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputChannels() > 0)
+	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)
 	{
-		trialCircularBuffer = new TrialCircularBuffer(getNumInputChannels(),getSampleRate(),this);
+		trialCircularBuffer = new TrialCircularBuffer(getNumInputs(),getSampleRate(),this);
 		syncInternalDataStructuresWithSpikeSorter();
 	}
 
@@ -103,7 +103,16 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 	// Update internal statistics 
     checkForEvents(events); 
 	
-	trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
+
+	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)  {
+		trialCircularBuffer = new TrialCircularBuffer(getNumInputs(),getSampleRate(),this);
+		syncInternalDataStructuresWithSpikeSorter();	
+	} else if (trialCircularBuffer != nullptr)
+	{
+		trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
+	}
+
+
 	// draw the PSTH
     if (redrawRequested)
     {
@@ -300,7 +309,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		   int channel = dataptr[3];
 		   int64  ttl_timestamp_software,ttl_timestamp_hardware;
 		   memcpy(&ttl_timestamp_software, dataptr+4, 8);
-		   memcpy(&ttl_timestamp_hardware, dataptr+4, 8);
+		   memcpy(&ttl_timestamp_hardware, dataptr+12, 8);
 		   if (ttl_raise)
 				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software);
 		   if (isRecording && saveTTLs)

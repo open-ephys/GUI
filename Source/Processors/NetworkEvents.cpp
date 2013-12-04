@@ -57,9 +57,11 @@ std::vector<String> StringTS::splitString(char sep)
 				curr+=S[k];
 		}
 	}
-	if (S[S.length()-1] != sep)
-		ls.push_back(curr);
-
+	if (S.length() > 0)
+	{
+		if (S[S.length()-1] != sep)
+			ls.push_back(curr);
+	}
 	std::vector<String> Svec(ls.begin(), ls.end()); 
 	return Svec;
 
@@ -278,7 +280,7 @@ void NetworkEvents::simulateSingleTrial()
 }
 
 
-void NetworkEvents::handleSpecialMessages(StringTS msg)
+String NetworkEvents::handleSpecialMessages(StringTS msg)
 {
 	std::vector<String> input = msg.splitString(' ');
 	if (input[0] == "StartRecord")
@@ -291,22 +293,45 @@ void NetworkEvents::handleSpecialMessages(StringTS msg)
 			// session name was also given.
 			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
 		}
-
-
-
-		      const MessageManagerLock mmLock;
-
-            getControlPanel()->setRecordState(true);
-          
-      
+        const MessageManagerLock mmLock;
+	    getControlPanel()->setRecordState(true);
+		return String("OK");      
 	//	getControlPanel()->placeMessageInQueue("StartRecord");
+	} if (input[0] == "SetSessionName")
+	{
+			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
 	} else if (input[0] == "StopRecord")
 	{
 		const MessageManagerLock mmLock;
 		//getControlPanel()->placeMessageInQueue("StopRecord");
 		  getControlPanel()->setRecordState(false);
-	}
+  		return String("OK");      
+	} else if (input[0] == "ProcessorCommunication")
+	{
+		ProcessorGraph *g = getProcessorGraph();
+		Array<GenericProcessor*> p = g->getListOfProcessors();
+		for (int k=0;k<p.size();k++)
+		{
+			if (p[k]->getName().toLowerCase() == input[1].toLowerCase())
+			{
+				String Query="";
+				for (int i=2;i<input.size();i++)
+				{
+					if (i == input.size()-1)
+						Query+=input[i];
+					else
+						Query+=input[i]+" ";
+				}
+					
+				return p[k]->interProcessorCommunication(Query);
+			}
+		}
 
+  		return String("OK");      
+	} 
+
+
+	return String("NotHandled");
 }
 
 void NetworkEvents::process(AudioSampleBuffer& buffer,
@@ -320,10 +345,6 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 	
 	 while (!networkMessagesQueue.empty()) {
 			 StringTS msg = networkMessagesQueue.front();
-
-			 // handle special messages
-			 handleSpecialMessages(msg);
-
 			 postTimestamppedStringToMidiBuffer(msg, events);
 			 getUIComponent()->getLogWindow()->addLineToLog(msg);
 		     networkMessagesQueue.pop();
@@ -362,9 +383,18 @@ void NetworkEvents::run() {
 			break;
 
 		StringTS Msg(buffer, result, timestamp_software);
-		networkMessagesQueue.push(Msg);
-	     
-        zmq_send (responder, "OK", 2, 0);
+		if (result > 0) {
+			networkMessagesQueue.push(Msg);
+		    
+			// handle special messages
+			String response = handleSpecialMessages(Msg);
+	
+			zmq_send (responder, response.getCharPointer(), response.length(), 0);
+		} else 
+		{
+			String zeroMessageError = "Recieved Zero Message?!?!?";
+			zmq_send (responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
+		}
     }
 
 	zmq_close(responder);

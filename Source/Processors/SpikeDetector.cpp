@@ -229,16 +229,19 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			if (addRemove) 
+			if (node->trialCircularBuffer != nullptr)
 			{
-				// add electrode
-				node->trialCircularBuffer->addNewUnit(electrodeID,unitID,r,g,b);
-			} else
-			{
-				// remove electrode
-				node->trialCircularBuffer->removeUnit(electrodeID,unitID);
+				if (addRemove) 
+				{
+					// add electrode
+					node->trialCircularBuffer->addNewUnit(electrodeID,unitID,r,g,b);
+				} else
+				{
+					// remove electrode
+					node->trialCircularBuffer->removeUnit(electrodeID,unitID);
+				}
+				break;
 			}
-			break;
 		}
 	}
 }
@@ -252,7 +255,10 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int channelindex, int newcha
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
+			if (node->trialCircularBuffer != nullptr)
+			{
+				node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
+			}
 		}
 	}
 }
@@ -267,14 +273,17 @@ void SpikeDetector::updatePSTHsink(Electrode* electrode, bool addRemove)
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
-			if (addRemove) 
+			if (node->trialCircularBuffer != nullptr)
 			{
-				// add electrode
-				node->trialCircularBuffer->addNewElectrode(electrode);
-			} else
-			{
-				// remove electrode
-				node->trialCircularBuffer->removeElectrode(electrode);
+				if (addRemove) 
+				{
+					// add electrode
+					node->trialCircularBuffer->addNewElectrode(electrode);
+				} else
+				{
+					// remove electrode
+					node->trialCircularBuffer->removeElectrode(electrode);
+				}
 			}
 			break;
 		}
@@ -1007,17 +1016,17 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 
 	SpikeDetectorEditor* ed = (SpikeDetectorEditor*) getEditor();
 	
-	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode());
+	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode()-1);
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
 
 
-    XmlElement* countNode = parentElement->createNewChildElement("ELECTRODE_COUNTER");
+    XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
 
 	countNode->setAttribute("numElectrodeTypes",  (int)electrodeTypes.size());
 	for (int k=0;k<electrodeTypes.size();k++)
 	{
-		XmlElement* countNode2 = parentElement->createNewChildElement("ELECTRODE_TYPE");
+		XmlElement* countNode2 = countNode->createNewChildElement("ELECTRODE_TYPE");
 		countNode2->setAttribute("type", electrodeTypes[k]);
 		countNode2->setAttribute("count", electrodeCounter[k]);
 	}
@@ -1078,7 +1087,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 						electrodeCounter.resize(numElectrodeTypes);
 						electrodeTypes.resize(numElectrodeTypes);
 						int counter = 0;
-						forEachXmlChildElement(*mainNode, xmltype)
+						forEachXmlChildElement(*xmlNode, xmltype)
 							{
 								if (xmltype->hasTagName("ELECTRODE_TYPE"))
 								{
@@ -1141,7 +1150,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 
 	if (currentElectrode >= 0) {
 		ed->refreshElectrodeList(currentElectrode);
-		ed->setSelectedElectrode(currentElectrode);
+		ed->setSelectedElectrode(1+currentElectrode);
 	} else
 	{
 		ed->refreshElectrodeList();

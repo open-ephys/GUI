@@ -208,7 +208,8 @@ void Merger::saveCustomParametersToXml(XmlElement* parentElement)
 
 void Merger::loadCustomParametersFromXml()
 {
-
+	if (0)
+	{
 	if (parametersAsXml != nullptr)
 	{
 		forEachXmlChildElement(*parametersAsXml, mainNode)
@@ -231,6 +232,7 @@ void Merger::loadCustomParametersFromXml()
 			}
 		}
 	}
+}
 }
 
 // void Merger::setNumOutputs(int /*outputs*/)

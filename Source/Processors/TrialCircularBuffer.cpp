@@ -471,13 +471,15 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 	std::vector<float> valid;
 	std::vector<std::vector<float> > alignedLFP;
 	// resample all electrode channels 
-	lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
+	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
 		channelsPSTHs[0].preSecs,channelsPSTHs[0].postSecs, alignedLFP,valid);
 	// now we can average data
-
-	for (int ch=0;ch<channelsPSTHs.size();ch++)
+	if (success)
 	{
-		channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid);
+		for (int ch=0;ch<channelsPSTHs.size();ch++)
+		{
+			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid);
+		}
 	}
 
 }
@@ -513,7 +515,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 }
 
 
-void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid)
@@ -521,6 +523,8 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	// to update a condition's continuous data psth, we will first find 
 	// data samples in the vicinity of the trial, and then interpolate at the
 	// needed time bins.
+	if (numSamplesInBuf <= 1 )
+		return false;
 
 	int numTimeBins = timeBins->size();
 
@@ -553,7 +557,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	{
 		//jassertfalse;
 		// couldn't find the trial !?!?!? buffer overrun?
-		return;
+		return false;
 	}
 
 	// now we have a handle where to search the data...
@@ -590,8 +594,7 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 		if (search_forward_ptr == bufLen)
 			search_forward_ptr=0;
 	}
-	jassert(numSamplesInBuf > 1);
-
+	
 	// we would like to return the lfp, sampled at specific time bins
 	// (typically, 1 ms resolution, which is an overkill).
 	//
@@ -651,12 +654,12 @@ void SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 
 			if (cnt == bufLen) 
 			{
-				jassertfalse;
-				break; // missing data!?!?!?
+				// missing data. This can happen when we just add a channel and a trial is in progress?!?!?
+				return false; 
 			}
 		}
 	}
-
+	return true;
 }
 
 /*************************/
@@ -665,6 +668,7 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 	int MaxFiringRateHz = 300;
 	maxTrialsInMemory = _maxTrialsInMemory;
 	bufferSize = MaxFiringRateHz * maxTrialTimeSeconds * maxTrialsInMemory;
+	jassert(bufferSize > 0);
 
 	bufferIndex = 0;
 	trialIndex = 0;
@@ -725,6 +729,7 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 {
 	// we need to update the average firing rate with the spikes that were stored in the spike buffer.
 	// first, query spike buffer where does the trial start....
+	jassert(spikeTimesSoftware.size() > 0);
 	std::vector<int64> alignedSpikes;
 	Time t;
 	int64 numTicksPreTrial =preSecs * t.getHighResolutionTicksPerSecond(); 
@@ -1046,7 +1051,8 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 	ElectrodePSTH e(electrode->electrodeID);
 	int numChannels = electrode->numChannels;
 
-	for (int k=0;k<numChannels;k++) {
+	for (int k=0;k<numChannels;k++) 
+	{
 		int channelID = electrode->channels[k];
 		e.channels.push_back(channelID);
 		ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
@@ -1055,9 +1061,25 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 		{
 			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
 		}
-		e.channelsPSTHs.push_back(channelPSTH);
+		e.channelsPSTHs.push_back(channelPSTH);	
 	}
 	electrodesPSTH.push_back(e);
+
+
+	// Usually when we add a new electrode it doesn't have any units, unless it was added when loading an xml...
+		if (electrode->spikeSort != nullptr)
+		{
+			std::vector<BoxUnit> boxUnits = electrode->spikeSort->getBoxUnits();
+			for (int boxIter=0;boxIter < boxUnits.size();boxIter++)
+			{
+				addNewUnit(electrode->electrodeID, boxUnits[boxIter].UnitID, boxUnits[boxIter].ColorRGB[0],boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
+			}
+			std::vector<PCAUnit> PcaUnits = electrode->spikeSort->getPCAUnits();
+			for (int pcaIter=0;pcaIter < PcaUnits.size();pcaIter++)
+			{
+				addNewUnit(electrode->electrodeID, PcaUnits[pcaIter].UnitID, PcaUnits[pcaIter].ColorRGB[0],PcaUnits[pcaIter].ColorRGB[1],PcaUnits[pcaIter].ColorRGB[2]);
+			}
+		}
 	unlockPSTH();
 	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
 }
@@ -1175,7 +1197,7 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.alignTS = msg.timestamp;
 	  }  else if (command == "newdesign")
 	  {
-		  clearDesign();
+		  //clearDesign();
 		  designName = input[1];
 	  }
 	  else if (command == "cleardesign")
@@ -1318,14 +1340,17 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software)
 	// and only if its above some threshold, simulate a ttl trial.
 	// this is useful when sending train of pulses and you are interested in aligning things just
 	// to the first pulse.
-	int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
-	float secElapsed = float(tickdiff) / numTicksPerSecond;
-	if (secElapsed > ttlSupressionTimeSec)
+	if (channel >= 0 && channel < lastTTLts.size())
 	{
-		// simulate a ttl trial 
-		simulateTTLtrial(channel, ttl_timestamp_software);
+		int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
+		float secElapsed = float(tickdiff) / numTicksPerSecond;
+		if (secElapsed > ttlSupressionTimeSec)
+		{
+			// simulate a ttl trial 
+			simulateTTLtrial(channel, ttl_timestamp_software);
+		}
+		lastTTLts[channel] = tickdiff;
 	}
-	lastTTLts[channel] = tickdiff;
 
 }
 	

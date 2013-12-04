@@ -548,8 +548,11 @@ void AdvancerEditor::updateFromProcessor()
 		if (p[k]->getName() == "Spike Detector")
 		{
 			SpikeDetector *node = (SpikeDetector*)p[k];
-			SpikeDetectorEditor *ed = (SpikeDetectorEditor *)node->getEditor();
-			ed->updateAdvancerList();
+			if (node != nullptr)
+			{
+				SpikeDetectorEditor *ed = (SpikeDetectorEditor *)node->getEditor();
+				ed->updateAdvancerList();
+			}
 		}
 	}
 }

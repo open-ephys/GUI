@@ -1,4 +1,4 @@
-%function [data, timestamps, info] = load_open_ephys_data(filename)
+function [data, timestamps, info] = load_open_ephys_data(filename)
 
 %
 % [data, timestamps, info] = load_open_ephys_data(filename)
@@ -49,7 +49,7 @@
 %
 %     <http://www.gnu.org/licenses/>.
 %
-filename = 'C:\Users\Shay\SkyDrive\Ephs scripts\2013-11-25_22-35-22\all_channels.events';
+filename = 'C:\Users\shayo\Documents\GitHub\GUI\Builds\VisualStudio2012\Debug64\bin\2013-12-02_13-59-34\all_channels.events';
 filetype = filename(max(strfind(filename,'.'))+1:end); % parse filetype
 
 fid = fopen(filename);
@@ -88,7 +88,7 @@ SPIKE = 4;
 NETWORK = 7;
 
 timestampCounter = 1;
-fseek(fid,1024,-1)
+fseek(fid,NUM_HEADER_BYTES,-1)
 while (1)
     index=index+1;
     eventTy= fread(fid, 1, 'uint8=>uint8');
@@ -133,8 +133,6 @@ while (1)
     
 end
 fclose(fid);
-
-dbg = 1;
 
 
 figure;
