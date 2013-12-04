@@ -24,12 +24,8 @@
 #ifndef __NETWORKEVENT_H_91811541__
 #define __NETWORKEVENT_H_91811541__
 
-//#if JUCE_WINDOWS
-	#include "../../Resources/ZeroMQ/include/zmq.h"
-	#include "../../Resources/ZeroMQ/include/zmq_utils.h"
-//#else 
-//    #include <zmq.h>
-//#endif
+#include "../../Resources/ZeroMQ/include/zmq.h"
+#include "../../Resources/ZeroMQ/include/zmq_utils.h"
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "GenericProcessor.h"
