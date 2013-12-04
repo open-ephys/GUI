@@ -79,7 +79,8 @@ ProcessorGraph::~ProcessorGraph() {
 
 void* ProcessorGraph::createZmqContext()
 {
-	zmqcontext = zmq_ctx_new ();
+	zmqcontext =  zmq_ctx_new ();
+
 	return zmqcontext;
 }
 
