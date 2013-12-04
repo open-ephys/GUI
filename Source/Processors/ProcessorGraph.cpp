@@ -56,7 +56,6 @@
 #include "../UI/UIComponent.h"
 #include "../UI/EditorViewport.h"
 
-
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
 
@@ -73,15 +72,15 @@ ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 }
 
 ProcessorGraph::~ProcessorGraph() {
-	//if (zmqcontext != NULL)
-	//	zmq_ctx_destroy (zmqcontext);
+	if (zmqcontext != NULL)
+		zmq_ctx_destroy (zmqcontext);
 
 }
 
 void* ProcessorGraph::createZmqContext()
 {
-	//zmqcontext =  zmq_ctx_new ();
-	//return zmqcontext;
+	zmqcontext = zmq_ctx_new ();
+	return zmqcontext;
 }
 
 void ProcessorGraph::createDefaultNodes()
