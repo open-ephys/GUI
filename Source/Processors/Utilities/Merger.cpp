@@ -58,11 +58,13 @@ void Merger::setMergerSourceNode(GenericProcessor* sn)
     {
         std::cout << "Setting source node A." << std::endl;
         sourceNodeA = sn;
+        sn->setDestNode(this);
     }
     else
     {
         sourceNodeB = sn;
         std::cout << "Setting source node B." << std::endl;
+        sn->setDestNode(this);
     }
 }
 
@@ -208,7 +210,7 @@ void Merger::saveCustomParametersToXml(XmlElement* parentElement)
 
 void Merger::loadCustomParametersFromXml()
 {
-	if (0)
+	if (1)
 	{
 	if (parametersAsXml != nullptr)
 	{
@@ -221,14 +223,24 @@ void Merger::loadCustomParametersFromXml()
 
 				ProcessorGraph *gr = getProcessorGraph();
 				Array<GenericProcessor*> p = gr->getListOfProcessors();
-				for (int k=0;k<p.size();k++)
+				
+                for (int k = 0; k < p.size(); k++)
 				{
 					if (p[k]->getNodeId() == NodeAid)
-						sourceNodeA = p[k];
-					if (p[k]->getNodeId() == NodeBid)
-						sourceNodeB = p[k];
-				}
-				updateSettings();
+                    {
+                        std::cout << "Setting Merger source A to " << NodeAid << std::endl;
+                        switchIO(0);
+						setMergerSourceNode(p[k]);
+					}
+                    if (p[k]->getNodeId() == NodeBid)
+                    {
+                        std::cout << "Setting Merger source B to " << NodeBid << std::endl;
+						switchIO(1);
+                        setMergerSourceNode(p[k]);
+				    }
+                }
+				
+                updateSettings();
 			}
 		}
 	}

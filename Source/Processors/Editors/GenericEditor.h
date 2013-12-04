@@ -117,6 +117,9 @@ public:
         return name;
     }
 
+    /** Updates name if processor ID changes. */
+    void updateName();
+
     /** Determines how wide the editor will be drawn. */
     int desiredWidth;
 

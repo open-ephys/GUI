@@ -210,6 +210,8 @@ private:
 
     void resized();
 
+    int currentId;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditorViewport);
 
 };
