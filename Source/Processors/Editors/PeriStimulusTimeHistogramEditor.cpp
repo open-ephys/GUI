@@ -660,7 +660,7 @@ std::vector<float> XYPlot::diff(std::vector<float> x)
 }
 
 
-void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid)
+void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid, float &min, float &max)
 {
 	// linear interpolate
 	int N = x.size();
@@ -674,6 +674,8 @@ void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<floa
 
 	std::vector<int> ind = histc(xi, x);
 	std::vector<float> h = diff(x);
+	min = 1e10;
+	max = -1e10;
 
 	for (int i = 0; i < xi.size(); i++)
 	{
@@ -688,7 +690,11 @@ void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<floa
 
 		double s = (xi[i] - x[ind[i]]) / h[ind[i]];
 		yi[i] = y[ind[i]] + s * (y[ind[i] + 1] - y[ind[i]]);
+		min = MIN(min,yi[i]);
+		max = MAX(max, yi[i]);
 	}
+
+
 
 }
 
@@ -746,8 +752,279 @@ void XYPlot::buildSmoothKernel(float _guassianStandardDeviationMS)
 }
 
 
+bool XYPlot::findIndices(int &electrodeIndex, int &entryindex)
+{
+	for (electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
+	{
+		if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (entryindex = 0; entryindex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					return true;
+				}
+			}
+
+		}
+	}
+	return false;
+}
+
+void XYPlot::paintPlotNameAndRect(Graphics &g)
+{
+
+	 w = getWidth();
+	 h = getHeight();
+	// draw a bounding box of the plot.
+	 x0;
+
+	if (w >= 300) {
+		font = Font("Default", 15, Font::plain);
+		x0 = 60;
+	} else if (w >= 250)
+	{
+		font = Font("Default", 10, Font::plain);
+		x0 = 50;
+	} else 
+	{
+		font = Font("Default", 8, Font::plain);
+		x0 = 30;
+	}
+
+	 y0 = 30;
+
+	 plotWidth  = getWidth()-1.5*x0;
+	 plotHeight = getHeight()-2*y0;
+
+	g.setColour(Colours::black);
+	g.fillRect(x0,y0, plotWidth,plotHeight);
+	g.setColour(Colours::white);
+	g.drawRect(x0,y0, plotWidth,plotHeight);
+
+	g.setFont(font);
+	String axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
+		String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
+
+	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
+
+
+	// keep a fixed amount of pixels for axes labels
+	g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
+		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
+		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]));
+	g.drawRect(0,0,w,h,2);
+
+
+	g.setColour(Colours::white);
+	// plot the x axis
+	g.drawLine(x0,h-y0,x0+plotWidth,h-y0, 1);
+	// plot the y axis
+	g.drawLine(x0,h-y0,x0,h-(y0+plotHeight),1);
+}
+
+
+void XYPlot::computeSamplePositions(float &xmin, float &xmax)
+{
+	 subsample = 5; // subsample every 5 pixels to speed things up.
+
+	 // reduce range so we don't see the effects of convolving with the kernel outside function values.
+
+	if (smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
+			xmin += 7*guassianStandardDeviationMS/1e3;
+			xmax -= 7*guassianStandardDeviationMS/1e3;
+	}
+
+	// finally, draw the function....
+	// first, generate the sample positions
+	int numSamplePoints = plotWidth/subsample;
+	samplePositions.clear();
+	samplePositions.resize(numSamplePoints);
+
+	for (int k=0;k<numSamplePoints;k++)
+	{
+		samplePositions[k] = (float(k)/(numSamplePoints-1)) * (xmax-xmin) + xmin;
+		// which corresponds to pixel location subsample*k
+	}
+}
+
+void XYPlot::sampleConditions(float &minY, float &maxY)
+{
+	std::vector<float> smooth_res;
+	int numConditions = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();
+
+	interpolatedConditions.clear();
+	interpolatedConditions.resize(numConditions);
+	interpolatedConditionsValid.resize(numConditions);
+	conditionMaxY.clear();
+	conditionMinY.clear();
+	conditionMaxY.resize(numConditions);
+	conditionMinY.resize(numConditions);
+	minY = 1e10;
+	maxY = -1e10;
+
+	for (int cond=0;cond<numConditions;cond++)
+	{
+
+		if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0 &&
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
+		{
+			
+			if (smoothPlot) {
+				smooth_res = smooth(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse);
+
+				interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
+					smooth_res,
+					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
+			}
+			else 
+			{
+				interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
+					tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
+					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
+			}
+			minY = MIN(minY, conditionMinY[cond]);
+			maxY = MAX(maxY, conditionMinY[cond]);
+		}
+	}
+}
+
+void XYPlot::plotTicks(Graphics &g, float xmin, float xmax, float ymin, float ymax)
+{
+	// determine tick position
+	if (firstTime || autoRescale)
+	{
+		firstTime = false;
+		axesRange[0] = xmin;
+		axesRange[1] = ymin;
+		axesRange[2] = xmax;
+		axesRange[3] = ymax;
+	}
+	rangeX = (axesRange[2]-axesRange[0]);
+	rangeY = (axesRange[3]-axesRange[1]);
+	int numXTicks = 5;
+	int numYTicks = 5;
+
+	// determine tick positions.
+	std::vector<float> tickX,tickY;
+	tickX.resize(numXTicks);
+	tickY.resize(numYTicks);
+	for (int k=0;k<numXTicks;k++)
+	{
+		tickX[k] = float(k)/(numXTicks-1) * rangeX +axesRange[0];
+	}
+	for (int k=0;k<numYTicks;k++)
+	{
+		tickY[k] = float(k)/(numYTicks-1) * rangeY +axesRange[1];
+	}
+
+	int tickHeight = 6;
+	float tickThickness = 2;
+
+
+	float ticklabelWidth = float(plotWidth)/numXTicks;
+	int tickLabelHeight = 20;
+	// plot the tick marks and corresponding text.
+	for (int k=0;k<numXTicks;k++)
+	{
+		// convert to screen coordinates.
+		float tickloc = x0+(tickX[k]- axesRange[0]) / rangeX * plotWidth;
+		g.drawLine(tickloc,h-y0,tickloc,h-(y0+tickHeight),tickThickness);
+		String tickLabel(tickX[k],1);;
+
+		if (k > 0)
+			g.drawText(tickLabel,tickloc-ticklabelWidth/2,h-(y0),ticklabelWidth,tickLabelHeight,Justification::centred,false);
+		else
+			g.drawText(tickLabel,tickloc,h-(y0),ticklabelWidth,tickLabelHeight,Justification::left,false);
+
+	}
+	for (int k=1;k<numYTicks;k++)
+	{
+		// convert to screen coordinates.
+		float tickloc = y0+(tickY[k]- axesRange[1]) / rangeY * plotHeight;
+		g.drawLine(x0,h-tickloc,x0+tickHeight,h-tickloc, tickThickness);
+
+		String tickLabel(tickY[k],1);;
+		g.drawText(tickLabel,x0-ticklabelWidth-3,h-tickloc-tickLabelHeight/2,ticklabelWidth,tickLabelHeight,Justification::right,false);
+
+	}
+}
+void XYPlot::paintSpikes(Graphics &g)
+{
+	// 1. Find the corresponding data.
+	// 2. smooth if needed.
+	// 3. find the drawing range.
+	// 4. interpolate
+	// 5. draw.
+	bool newdata = false;
+	tcb->lockPSTH();
+	if (!findIndices(electrodeIndex, entryindex))
+	{
+		tcb->unlockPSTH();
+		return;
+	}
+	paintPlotNameAndRect(g);
+
+	float xmin=0, xmax=0, ymax=-1e10, ymin = 1e10;
+	float minConditionValue, maxConditionValue;
+
+	tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
+	// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
+	if (xmax-xmin<1e-6   || ymax-ymin < 1e-6)
+	{
+		tcb->unlockPSTH();
+		return;
+	}
+
+	computeSamplePositions(xmin, xmax);
+	
+	sampleConditions(minConditionValue,maxConditionValue);
+	ymin = minConditionValue ;
+	ymax = maxConditionValue ;
+
+	plotTicks(g,xmin, xmax, ymin, ymax);
+
+	newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
+
+	int numSamplePoints = plotWidth/subsample;
+	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
+	{
+		if (interpolatedConditions[cond].size() == 0)
+			continue;
+
+			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
+				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]));
+
+			for (int k=0;k<numSamplePoints-1;k++) 
+			{
+				// remap f_xi to pixels!
+				float fx_pix = MIN(plotHeight, MAX(0,(interpolatedConditions[cond][k]-axesRange[1])/rangeY * plotHeight));
+				float fxp1_pix = MIN(plotHeight,MAX(0,(interpolatedConditions[cond][k+1]-axesRange[1])/rangeY * plotHeight));
+				if (interpolatedConditionsValid[cond][k] && interpolatedConditionsValid[cond][k+1])
+					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
+			}
+
+	}
+	tcb->unlockPSTH();
+	repaint();
+}
+
+
+void XYPlot::paintLFP(Graphics &g)
+{
+}
+
+
 void XYPlot::paint(Graphics &g)
 {
+	if (spikePlot)
+		paintSpikes(g);
+	else
+		paintLFP(g);
+
+	return;
+
 	int w = getWidth();
 	int h = getHeight();
 	// draw a bounding box of the plot.
@@ -939,18 +1216,19 @@ void XYPlot::paint(Graphics &g)
 				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			{
 				std::vector<bool> valid;
+				float m;
 				if (smoothPlot) {
 					smooth_res = smooth(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse);
 
 					interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
 						smooth_res,
-						samplePositions,  f_xi,  valid);
+						samplePositions,  f_xi,  valid,m,m);
 				}
 				else 
 				{
 					interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
 						tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
-						samplePositions,  f_xi,  valid);
+						samplePositions,  f_xi,  valid,m,m);
 
 				}
 
@@ -979,9 +1257,10 @@ void XYPlot::paint(Graphics &g)
 				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			{
 				std::vector<bool> valid;
+				float m;
 				interp1(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
 					tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].avgResponse,
-					samplePositions,  f_xi,  valid);
+					samplePositions,  f_xi,  valid,m,m);
 
 				// and finally.... plot!
 				g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],

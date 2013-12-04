@@ -144,11 +144,11 @@ void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *tri
 	ymax = -1e10;
 	ymin = 1e10;
 
-
+	 float scale = 1000.0;
 	for (int k = 0; k < lastBinIndex; k++)
 	{
 		numDataPoints[k]++;
-		avgResponse[k] = ((numDataPoints[k] - 1) * avgResponse[k] + instantaneousSpikesRate[k]) / numDataPoints[k];
+		avgResponse[k] = ((numDataPoints[k] - 1) * avgResponse[k] + scale*instantaneousSpikesRate[k]) / numDataPoints[k];
 		ymax = MAX(ymax,avgResponse[k]);
 		ymin = MIN(ymin,avgResponse[k]);
 	}
@@ -776,6 +776,7 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 		CurrPtr++;
 
 	}
+
 	std::sort(alignedSpikes.begin(),alignedSpikes.begin()+alignedSpikes.size());
 	return alignedSpikes;
 }

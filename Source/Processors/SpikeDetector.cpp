@@ -997,6 +997,7 @@ double SpikeDetector::getElectrodeDepth(int electrodeID)
 			return electrodes[k]->depthOffsetMM + currentAdvancerPos;
 		}
 	}
+	return 0.0;
 }
 
 

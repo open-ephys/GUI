@@ -50,22 +50,42 @@ public:
 	void buildSmoothKernel(float guassianKernelSizeMS);
 	
 
+	
+	void paintSpikes(Graphics &g);
+	void paintLFP(Graphics &g);
+
 	juce::Font font;
 	int row, col;
 	int electrodeID, unitID;
 	TrialCircularBuffer *tcb;
 private:
-	
+	void paintPlotNameAndRect(Graphics &g);
+	void computeSamplePositions(float &xmin, float &xmax);
+	void plotTicks(Graphics &g,float xmin, float xmax, float ymin, float ymax);
+
+	void sampleConditions(float &minY, float &maxY);
+
 	std::vector<int> histc(std::vector<float> xi, std::vector<float> x);
 	std::vector<float> diff(std::vector<float> x);
-	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid);
+	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid, float &min, float &max);
 	std::vector<float> smooth(std::vector<float> x);
 	
+	bool findIndices(int &electrodeIndex, int &entryindex);
+
 	bool spikePlot, smoothPlot,autoRescale,firstTime;
 	float axesRange[4];
 
 	std::vector<float> smoothKernel; 
 	float guassianStandardDeviationMS;
+	int electrodeIndex, entryindex,w,h,x0,y0,plotWidth, plotHeight;
+	int subsample;
+	std::vector<float> samplePositions;
+	std::vector<std::vector<float>> interpolatedConditions;
+	std::vector<std::vector<bool>> interpolatedConditionsValid;
+	std::vector<float> conditionMaxY;
+	std::vector<float> conditionMinY;
+	float rangeX,rangeY;
+
 };
 class PeriStimulusTimeHistogramCanvas;
 
@@ -85,6 +105,7 @@ public:
 	PeriStimulusTimeHistogramCanvas* canvas;
 
 	juce::Font font;
+
 	  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramDisplay);
 
 };
