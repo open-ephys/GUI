@@ -1019,7 +1019,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	countNode->setAttribute("numElectrodeTypes",  (int)electrodeTypes.size());
 	for (int k=0;k<electrodeTypes.size();k++)
 	{
-		XmlElement* countNode2 = parentElement->createNewChildElement("ELECTRODE_TYPE");
+		XmlElement* countNode2 = countNode->createNewChildElement("ELECTRODE_TYPE");
 		countNode2->setAttribute("type", electrodeTypes[k]);
 		countNode2->setAttribute("count", electrodeCounter[k]);
 	}
@@ -1080,7 +1080,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 						electrodeCounter.resize(numElectrodeTypes);
 						electrodeTypes.resize(numElectrodeTypes);
 						int counter = 0;
-						forEachXmlChildElement(*mainNode, xmltype)
+						forEachXmlChildElement(*xmlNode, xmltype)
 							{
 								if (xmltype->hasTagName("ELECTRODE_TYPE"))
 								{

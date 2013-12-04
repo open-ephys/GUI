@@ -3,7 +3,7 @@
 <SETTINGS>
   <INFO>
     <VERSION>0.1</VERSION>
-    <DATE>3 Dec 2013 11:57:28</DATE>
+    <DATE>3 Dec 2013 16:08:11</DATE>
     <OS>Windows 7</OS>
     <MACHINE>ALPHA</MACHINE>
   </INFO>
@@ -130,10 +130,10 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EDITOR SampleRate="17" LowCut="1.20484568" HighCut="7603.76512" ADCsOn="0"/>
+      <EDITOR SampleRate="17" LowCut="1" HighCut="7500" ADCsOn="0"/>
     </PROCESSOR>
     <PROCESSOR name="Utilities/Merger" insertionPoint="1" NodeId="101">
-      <MERGER NodeA="100" NodeB="106"/>
+      <MERGER NodeA="100" NodeB="102"/>
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
@@ -257,7 +257,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR/>
     </PROCESSOR>
-    <PROCESSOR name="Utilities/Advancers" insertionPoint="1" NodeId="102">
+    <PROCESSOR name="Utilities/Advancers" insertionPoint="1" NodeId="106">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="0" record="0" audio="0"/>
       </CHANNEL>
@@ -384,7 +384,7 @@
         <WINDOW Active="0"/>
       </EDITOR>
     </PROCESSOR>
-    <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="103">
+    <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="105">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
         <PARAMETERS highcut="6000" lowcut="300"/>
@@ -547,89 +547,117 @@
     </PROCESSOR>
     <PROCESSOR name="Filters/Spike Detector" insertionPoint="1" NodeId="104">
       <SPIKEDETECTOR numElectrodes="1" activeElectrode="0" numPreSamples="8" numPostSamples="32">
-        <ELECTRODE name="Single Electrode 1" numChannels="1" prePeakSamples="8"
-                   postPeakSamples="32" advancerID="-1" depthOffsetMM="0" electrodeID="1">
-          <SUBCHANNEL ch="0" thresh="-40" isActive="1"/>
-          <SPIKESORTING numBoxUnits="0" numPCAUnits="3" selectedUnit="-1" selectedBox="-1">
-            <PCAUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" PolygonNumPoints="7"
+        <ELECTRODE_COUNTER numElectrodeTypes="1">
+          <ELECTRODE_TYPE type="Stereotrode" count="2"/>
+        </ELECTRODE_COUNTER>
+        <ELECTRODE name="Stereotrode 1" numChannels="2" prePeakSamples="8" postPeakSamples="32"
+                   advancerID="-1" depthOffsetMM="0" electrodeID="1">
+          <SUBCHANNEL ch="0" thresh="-110" isActive="1"/>
+          <SUBCHANNEL ch="1" thresh="-20" isActive="1"/>
+          <SPIKESORTING numBoxUnits="0" numPCAUnits="2" selectedUnit="-1" selectedBox="-1">
+            <PCAUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" PolygonNumPoints="5"
                      PolygonOffsetX="0" PolygonOffsetY="0">
-              <POLYGON_POINT pointX="-428.325806" pointY="77.7512207"/>
-              <POLYGON_POINT pointX="-481.060669" pointY="259.595459"/>
-              <POLYGON_POINT pointX="-444.551941" pointY="596.00708"/>
-              <POLYGON_POINT pointX="-375.590942" pointY="641.468262"/>
-              <POLYGON_POINT pointX="-322.856079" pointY="532.361816"/>
-              <POLYGON_POINT pointX="-318.799561" pointY="377.794189"/>
-              <POLYGON_POINT pointX="-347.19519" pointY="205.042236"/>
+              <POLYGON_POINT pointX="-394.850464" pointY="-55.5968018"/>
+              <POLYGON_POINT pointX="-351.151489" pointY="-46.96875"/>
+              <POLYGON_POINT pointX="-209.969971" pointY="-107.36438"/>
+              <POLYGON_POINT pointX="-354.512939" pointY="-374.830322"/>
+              <POLYGON_POINT pointX="-472.164185" pointY="-348.946533"/>
             </PCAUNIT>
-            <PCAUNIT UnitID="2" ColorR="0" ColorG="255" ColorB="0" PolygonNumPoints="7"
+            <PCAUNIT UnitID="2" ColorR="0" ColorG="255" ColorB="0" PolygonNumPoints="6"
                      PolygonOffsetX="0" PolygonOffsetY="0">
-              <POLYGON_POINT pointX="-395.873596" pointY="-85.9086914"/>
-              <POLYGON_POINT pointX="-225.49939" pointY="-158.646484"/>
-              <POLYGON_POINT pointX="-148.425293" pointY="-204.107422"/>
-              <POLYGON_POINT pointX="-176.821045" pointY="-322.306274"/>
-              <POLYGON_POINT pointX="-233.612427" pointY="-367.767334"/>
-              <POLYGON_POINT pointX="-347.19519" pointY="-358.675171"/>
-              <POLYGON_POINT pointX="-416.15625" pointY="-340.490723"/>
-            </PCAUNIT>
-            <PCAUNIT UnitID="3" ColorR="0" ColorG="255" ColorB="255" PolygonNumPoints="9"
-                     PolygonOffsetX="0" PolygonOffsetY="0">
-              <POLYGON_POINT pointX="-2.39038086" pointY="-176.830811"/>
-              <POLYGON_POINT pointX="-95.6904297" pointY="-158.646484"/>
-              <POLYGON_POINT pointX="-148.425293" pointY="-113.185303"/>
-              <POLYGON_POINT pointX="-172.764526" pointY="-4.07873535"/>
-              <POLYGON_POINT pointX="-148.425293" pointY="50.4744873"/>
-              <POLYGON_POINT pointX="-95.6904297" pointY="77.7512207"/>
-              <POLYGON_POINT pointX="-47.012085" pointY="95.9355469"/>
-              <POLYGON_POINT pointX="34.1184082" pointY="105.02771"/>
-              <POLYGON_POINT pointX="94.9663086" pointY="-31.3553467"/>
+              <POLYGON_POINT pointX="-401.573364" pointY="177.357544"/>
+              <POLYGON_POINT pointX="-529.309082" pointY="142.845703"/>
+              <POLYGON_POINT pointX="-586.453918" pointY="574.242798"/>
+              <POLYGON_POINT pointX="-451.995361" pointY="643.265991"/>
+              <POLYGON_POINT pointX="-334.344116" pointY="470.707397"/>
+              <POLYGON_POINT pointX="-280.560669" pointY="375.799927"/>
             </PCAUNIT>
           </SPIKESORTING>
-          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
-               pc2max="1">
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
-            <PCA_DIM pc1="-431602080" pc2="-431602080"/>
+          <PCA numChannels="2" waveformLength="40" pc1min="-1497.41064" pc2min="-1712.16052"
+               pc1max="1252.26685" pc2max="1782.15369">
+            <PCA_DIM pc1="-0.00548041193" pc2="0.0221083611"/>
+            <PCA_DIM pc1="-0.0206714366" pc2="0.0141957654"/>
+            <PCA_DIM pc1="-0.0473301001" pc2="0.00757956132"/>
+            <PCA_DIM pc1="-0.0788368955" pc2="0.00749406591"/>
+            <PCA_DIM pc1="-0.113238566" pc2="0.0223189481"/>
+            <PCA_DIM pc1="-0.16708003" pc2="0.0569441542"/>
+            <PCA_DIM pc1="-0.253870577" pc2="0.0974155441"/>
+            <PCA_DIM pc1="-0.342825115" pc2="0.126413867"/>
+            <PCA_DIM pc1="-0.38654694" pc2="0.131653786"/>
+            <PCA_DIM pc1="-0.356358796" pc2="0.121328332"/>
+            <PCA_DIM pc1="-0.302663982" pc2="0.0898260549"/>
+            <PCA_DIM pc1="-0.265955269" pc2="0.0516659543"/>
+            <PCA_DIM pc1="-0.251643717" pc2="0.022660112"/>
+            <PCA_DIM pc1="-0.232285723" pc2="0.00237642438"/>
+            <PCA_DIM pc1="-0.207009345" pc2="-0.0103055956"/>
+            <PCA_DIM pc1="-0.170855775" pc2="-0.030550411"/>
+            <PCA_DIM pc1="-0.139870152" pc2="-0.0644097999"/>
+            <PCA_DIM pc1="-0.12566714" pc2="-0.102501191"/>
+            <PCA_DIM pc1="-0.123791166" pc2="-0.130198568"/>
+            <PCA_DIM pc1="-0.122823171" pc2="-0.140884891"/>
+            <PCA_DIM pc1="-0.118535258" pc2="-0.140221283"/>
+            <PCA_DIM pc1="-0.112292051" pc2="-0.142518893"/>
+            <PCA_DIM pc1="-0.103818968" pc2="-0.156956539"/>
+            <PCA_DIM pc1="-0.0887617767" pc2="-0.177219808"/>
+            <PCA_DIM pc1="-0.0641921237" pc2="-0.192661747"/>
+            <PCA_DIM pc1="-0.0382756256" pc2="-0.204679519"/>
+            <PCA_DIM pc1="-0.0243462417" pc2="-0.220783919"/>
+            <PCA_DIM pc1="-0.0313266553" pc2="-0.239201292"/>
+            <PCA_DIM pc1="-0.0444843955" pc2="-0.249576673"/>
+            <PCA_DIM pc1="-0.0444133766" pc2="-0.252910882"/>
+            <PCA_DIM pc1="-0.0292524155" pc2="-0.258140236"/>
+            <PCA_DIM pc1="-0.00719097396" pc2="-0.272713661"/>
+            <PCA_DIM pc1="0.00668468932" pc2="-0.288243681"/>
+            <PCA_DIM pc1="5.42707858e-006" pc2="-0.283290774"/>
+            <PCA_DIM pc1="-0.0234161802" pc2="-0.244616598"/>
+            <PCA_DIM pc1="-0.0464712568" pc2="-0.185302466"/>
+            <PCA_DIM pc1="-0.0543527827" pc2="-0.137021363"/>
+            <PCA_DIM pc1="-0.0467840433" pc2="-0.119178876"/>
+            <PCA_DIM pc1="-0.0328148156" pc2="-0.119257033"/>
+            <PCA_DIM pc1="-0.0190788954" pc2="-0.116531305"/>
+            <PCA_DIM pc1="0.000535022526" pc2="0.00224538613"/>
+            <PCA_DIM pc1="-0.00275637256" pc2="0.00206844066"/>
+            <PCA_DIM pc1="-0.0057013859" pc2="0.00351086888"/>
+            <PCA_DIM pc1="-0.00691158185" pc2="0.00477771368"/>
+            <PCA_DIM pc1="-0.00947595015" pc2="0.006065425"/>
+            <PCA_DIM pc1="-0.0163090359" pc2="0.00799503922"/>
+            <PCA_DIM pc1="-0.0259652734" pc2="0.00982013904"/>
+            <PCA_DIM pc1="-0.0333525054" pc2="0.0123631265"/>
+            <PCA_DIM pc1="-0.0353744589" pc2="0.0139110964"/>
+            <PCA_DIM pc1="-0.0296288859" pc2="0.0136056123"/>
+            <PCA_DIM pc1="-0.0222258158" pc2="0.0106480978"/>
+            <PCA_DIM pc1="-0.0185143184" pc2="0.00673584174"/>
+            <PCA_DIM pc1="-0.0186081268" pc2="0.00325945811"/>
+            <PCA_DIM pc1="-0.0189589206" pc2="0.00127470156"/>
+            <PCA_DIM pc1="-0.018813014" pc2="0.000754235021"/>
+            <PCA_DIM pc1="-0.018221559" pc2="-0.00207658298"/>
+            <PCA_DIM pc1="-0.0169593859" pc2="-0.00765322475"/>
+            <PCA_DIM pc1="-0.0133231487" pc2="-0.0119993836"/>
+            <PCA_DIM pc1="-0.010101785" pc2="-0.0147977611"/>
+            <PCA_DIM pc1="-0.0106486231" pc2="-0.0171679109"/>
+            <PCA_DIM pc1="-0.0126822526" pc2="-0.0171551388"/>
+            <PCA_DIM pc1="-0.0125651723" pc2="-0.0152907856"/>
+            <PCA_DIM pc1="-0.00998434424" pc2="-0.0144419959"/>
+            <PCA_DIM pc1="-0.0064231595" pc2="-0.0151416576"/>
+            <PCA_DIM pc1="-0.00364661426" pc2="-0.0161012821"/>
+            <PCA_DIM pc1="-0.00207230821" pc2="-0.0170817152"/>
+            <PCA_DIM pc1="-0.00190689135" pc2="-0.0176617708"/>
+            <PCA_DIM pc1="-0.00445897412" pc2="-0.0181804243"/>
+            <PCA_DIM pc1="-0.00430036522" pc2="-0.0199530404"/>
+            <PCA_DIM pc1="-0.00077347568" pc2="-0.0205648188"/>
+            <PCA_DIM pc1="0.00079944008" pc2="-0.018830834"/>
+            <PCA_DIM pc1="0.000582752633" pc2="-0.0194183607"/>
+            <PCA_DIM pc1="0.00280352961" pc2="-0.0239394326"/>
+            <PCA_DIM pc1="0.00551884435" pc2="-0.0253979638"/>
+            <PCA_DIM pc1="0.0045884857" pc2="-0.0207503606"/>
+            <PCA_DIM pc1="0.00238008099" pc2="-0.0146822911"/>
+            <PCA_DIM pc1="0.00145058241" pc2="-0.0113494471"/>
+            <PCA_DIM pc1="0.000464530021" pc2="-0.0105183804"/>
+            <PCA_DIM pc1="-0.000464977202" pc2="-0.00961070601"/>
+            <PCA_DIM pc1="-0.00102199987" pc2="-0.00783972908"/>
           </PCA>
         </ELECTRODE>
       </SPIKEDETECTOR>
-      <ELECTRODE_COUNTER numElectrodeTypes="0"/>
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
@@ -756,7 +784,7 @@
         <WINDOW Active="0"/>
       </EDITOR>
     </PROCESSOR>
-    <PROCESSOR name="Sinks/PSTH" insertionPoint="1" NodeId="105">
+    <PROCESSOR name="Sinks/PSTH" insertionPoint="1" NodeId="103">
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
@@ -879,12 +907,12 @@
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR Type="Visualizer">
-        <TAB Active="1"/>
+        <TAB Active="0"/>
         <WINDOW Active="0"/>
       </EDITOR>
     </PROCESSOR>
     <SWITCH number="1"/>
-    <PROCESSOR name="Sources/Network Events" insertionPoint="0" NodeId="106">
+    <PROCESSOR name="Sources/Network Events" insertionPoint="0" NodeId="102">
       <NETWORKEVENTS port="5556"/>
       <EDITOR/>
     </PROCESSOR>
