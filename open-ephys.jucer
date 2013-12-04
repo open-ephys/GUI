@@ -49,8 +49,6 @@
   </EXPORTFORMATS>
   <MAINGROUP id="h3HbSTV" name="open-ephys">
     <GROUP id="0wpTCpt" name="Resources">
-      <FILE id="cbpVYl" name="zmq.cpp" compile="1" resource="0" file="Resources/ZeroMQ/include/zmq.cpp"/>
-      <FILE id="xjHa07" name="zmq.h" compile="0" resource="0" file="Resources/ZeroMQ/include/zmq.h"/>
       <GROUP id="kVU7EYu" name="Fonts">
         <FILE id="g9dipB" name="cpmono-black-serialized" compile="0" resource="1"
               file="Resources/Fonts/cpmono-black-serialized"/>
@@ -229,28 +227,6 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
-        <FILE id="if0Niy" name="AdvancerNode.cpp" compile="1" resource="0"
-              file="Source/Processors/AdvancerNode.cpp"/>
-        <FILE id="oolUTM" name="AdvancerNode.h" compile="0" resource="0" file="Source/Processors/AdvancerNode.h"/>
-        <FILE id="yQDif2" name="NetworkEventsEditor.cpp" compile="1" resource="0"
-              file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
-        <FILE id="YH6DNs" name="NetworkEventsEditor.h" compile="0" resource="0"
-              file="Source/Processors/Editors/NetworkEventsEditor.h"/>
-        <FILE id="tIrGei" name="NetworkEvents.cpp" compile="1" resource="0"
-              file="Source/Processors/NetworkEvents.cpp"/>
-        <FILE id="USW3Zh" name="NetworkEvents.h" compile="0" resource="0" file="Source/Processors/NetworkEvents.h"/>
-        <FILE id="moy6rV" name="PeriStimulusTimeHistogramNode.cpp" compile="1"
-              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.cpp"/>
-        <FILE id="JND6oQ" name="PeriStimulusTimeHistogramNode.h" compile="0"
-              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.h"/>
-        <FILE id="KL8wYd" name="SpikeSortBoxes.cpp" compile="1" resource="0"
-              file="Source/Processors/SpikeSortBoxes.cpp"/>
-        <FILE id="G03Bw9" name="SpikeSortBoxes.h" compile="0" resource="0"
-              file="Source/Processors/SpikeSortBoxes.h"/>
-        <FILE id="v3DP8J" name="TrialCircularBuffer.cpp" compile="1" resource="0"
-              file="Source/Processors/TrialCircularBuffer.cpp"/>
-        <FILE id="DjK560" name="TrialCircularBuffer.h" compile="0" resource="0"
-              file="Source/Processors/TrialCircularBuffer.h"/>
         <FILE id="E7s1De" name="LfpTriggeredAverageNode.cpp" compile="1" resource="0"
               file="Source/Processors/LfpTriggeredAverageNode.cpp"/>
         <FILE id="MKL66o" name="LfpTriggeredAverageNode.h" compile="0" resource="0"
@@ -325,10 +301,6 @@
                 resource="0" file="Source/Processors/Visualization/LfpTriggeredAverageCanvas.cpp"/>
           <FILE id="OPRWvZ" name="LfpTriggeredAverageCanvas.h" compile="0" resource="0"
                 file="Source/Processors/Visualization/LfpTriggeredAverageCanvas.h"/>
-          <FILE id="twzEfE" name="SpikeDetectCanvas.cpp" compile="1" resource="0"
-                file="Source/Processors/Visualization/SpikeDetectCanvas.cpp"/>
-          <FILE id="ykdLuM" name="SpikeDetectCanvas.h" compile="0" resource="0"
-                file="Source/Processors/Visualization/SpikeDetectCanvas.h"/>
           <FILE id="ajAJi" name="SpikeObject.cpp" compile="1" resource="0" file="Source/Processors/Visualization/SpikeObject.cpp"/>
           <FILE id="xqF5zL" name="SpikeObject.h" compile="0" resource="0" file="Source/Processors/Visualization/SpikeObject.h"/>
           <FILE id="jGEqDp" name="SpikeDisplayCanvas.cpp" compile="1" resource="0"
@@ -355,20 +327,12 @@
         <FILE id="hGnGAjh" name="EventNode.cpp" compile="1" resource="0" file="Source/Processors/EventNode.cpp"/>
         <FILE id="dUtRN6" name="EventNode.h" compile="0" resource="0" file="Source/Processors/EventNode.h"/>
         <GROUP id="AqvwO6w" name="Editors">
-          <FILE id="syECoX" name="AdvancerEditor.cpp" compile="1" resource="0"
-                file="Source/Processors/Editors/AdvancerEditor.cpp"/>
-          <FILE id="c5Etbw" name="AdvancerEditor.h" compile="0" resource="0"
-                file="Source/Processors/Editors/AdvancerEditor.h"/>
           <FILE id="E2PXvz" name="ElectrodeButtons.cpp" compile="1" resource="0"
                 file="Source/Processors/Editors/ElectrodeButtons.cpp"/>
           <FILE id="yriJOG" name="ElectrodeButtons.h" compile="0" resource="0"
                 file="Source/Processors/Editors/ElectrodeButtons.h"/>
           <FILE id="wyH6Hs" name="LfpTriggeredAverageEditor.cpp" compile="1"
                 resource="0" file="Source/Processors/Editors/LfpTriggeredAverageEditor.cpp"/>
-          <FILE id="bYPZSW" name="PeriStimulusTimeHistogramEditor.cpp" compile="1"
-                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp"/>
-          <FILE id="KZCAEr" name="PeriStimulusTimeHistogramEditor.h" compile="0"
-                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.h"/>
           <FILE id="GE3VJI" name="LfpTriggeredAverageEditor.h" compile="0" resource="0"
                 file="Source/Processors/Editors/LfpTriggeredAverageEditor.h"/>
           <FILE id="g1ki17" name="ChannelMappingEditor.cpp" compile="1" resource="0"

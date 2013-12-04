@@ -43,7 +43,6 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/zmq_561c0033.o \
   $(OBJDIR)/AccessClass_de9602d5.o \
   $(OBJDIR)/PracticalSocket_2574ecc8.o \
   $(OBJDIR)/Bessel_63b88b81.o \
@@ -64,12 +63,6 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
-  $(OBJDIR)/AdvancerNode_12999801.o \
-  $(OBJDIR)/NetworkEventsEditor_fd22826.o \
-  $(OBJDIR)/NetworkEvents_28b3b762.o \
-  $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
-  $(OBJDIR)/SpikeSortBoxes_e42a3d04.o \
-  $(OBJDIR)/TrialCircularBuffer_93e57770.o \
   $(OBJDIR)/LfpTriggeredAverageNode_ff52d7b9.o \
   $(OBJDIR)/FileReader_18023b0e.o \
   $(OBJDIR)/ChannelMappingNode_d9219b9c.o \
@@ -92,7 +85,6 @@ OBJECTS := \
   $(OBJDIR)/Merger_2f90542e.o \
   $(OBJDIR)/Splitter_6e27a57b.o \
   $(OBJDIR)/LfpTriggeredAverageCanvas_50148944.o \
-  $(OBJDIR)/SpikeDetectCanvas_a3370a31.o \
   $(OBJDIR)/SpikeObject_24e8c655.o \
   $(OBJDIR)/SpikeDisplayCanvas_b208ff6e.o \
   $(OBJDIR)/DataWindow_83ce6754.o \
@@ -101,10 +93,8 @@ OBJECTS := \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
-  $(OBJDIR)/AdvancerEditor_6d27d95.o \
   $(OBJDIR)/ElectrodeButtons_a6064cc.o \
   $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o \
-  $(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o \
   $(OBJDIR)/ChannelMappingEditor_dd803b0.o \
   $(OBJDIR)/FileReaderEditor_16fd7744.o \
   $(OBJDIR)/PhaseDetectorEditor_f53aa520.o \
@@ -194,11 +184,6 @@ clean:
 strip:
 	@echo Stripping open-ephys
 	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
-
-$(OBJDIR)/zmq_561c0033.o: ../../Resources/ZeroMQ/include/zmq.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling zmq.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AccessClass_de9602d5.o: ../../Source/AccessClass.cpp
 	-@mkdir -p $(OBJDIR)
@@ -298,36 +283,6 @@ $(OBJDIR)/State_22979684.o: ../../Source/Dsp/State.cpp
 $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioComponent.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/AdvancerNode_12999801.o: ../../Source/Processors/AdvancerNode.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling AdvancerNode.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/NetworkEventsEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling NetworkEventsEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/NetworkEvents_28b3b762.o: ../../Source/Processors/NetworkEvents.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling NetworkEvents.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o: ../../Source/Processors/PeriStimulusTimeHistogramNode.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling PeriStimulusTimeHistogramNode.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/SpikeSortBoxes_e42a3d04.o: ../../Source/Processors/SpikeSortBoxes.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling SpikeSortBoxes.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/TrialCircularBuffer_93e57770.o: ../../Source/Processors/TrialCircularBuffer.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling TrialCircularBuffer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/LfpTriggeredAverageNode_ff52d7b9.o: ../../Source/Processors/LfpTriggeredAverageNode.cpp
@@ -440,11 +395,6 @@ $(OBJDIR)/LfpTriggeredAverageCanvas_50148944.o: ../../Source/Processors/Visualiz
 	@echo "Compiling LfpTriggeredAverageCanvas.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/SpikeDetectCanvas_a3370a31.o: ../../Source/Processors/Visualization/SpikeDetectCanvas.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling SpikeDetectCanvas.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/SpikeObject_24e8c655.o: ../../Source/Processors/Visualization/SpikeObject.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SpikeObject.cpp"
@@ -485,11 +435,6 @@ $(OBJDIR)/EventNode_95c842b7.o: ../../Source/Processors/EventNode.cpp
 	@echo "Compiling EventNode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AdvancerEditor_6d27d95.o: ../../Source/Processors/Editors/AdvancerEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling AdvancerEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/ElectrodeButtons_a6064cc.o: ../../Source/Processors/Editors/ElectrodeButtons.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ElectrodeButtons.cpp"
@@ -498,11 +443,6 @@ $(OBJDIR)/ElectrodeButtons_a6064cc.o: ../../Source/Processors/Editors/ElectrodeB
 $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o: ../../Source/Processors/Editors/LfpTriggeredAverageEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LfpTriggeredAverageEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o: ../../Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling PeriStimulusTimeHistogramEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ChannelMappingEditor_dd803b0.o: ../../Source/Processors/Editors/ChannelMappingEditor.cpp

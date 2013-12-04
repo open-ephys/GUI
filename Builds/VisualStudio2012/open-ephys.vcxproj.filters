@@ -355,9 +355,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Resources\ZeroMQ\include\zmq.cpp">
-      <Filter>open-ephys\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\AccessClass.cpp">
       <Filter>open-ephys\Source</Filter>
     </ClCompile>
@@ -417,24 +414,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\NetworkEvents.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\SpikeSortBoxes.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\TrialCircularBuffer.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\LfpTriggeredAverageNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
@@ -502,9 +481,6 @@
     <ClCompile Include="..\..\Source\Processors\Visualization\LfpTriggeredAverageCanvas.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.cpp">
-      <Filter>open-ephys\Source\Processors\Visualization</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeObject.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
@@ -529,16 +505,10 @@
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\ElectrodeButtons.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\ChannelMappingEditor.cpp">
@@ -1896,9 +1866,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Resources\ZeroMQ\include\zmq.h">
-      <Filter>open-ephys\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\AccessClass.h">
       <Filter>open-ephys\Source</Filter>
     </ClInclude>
@@ -1977,24 +1944,6 @@
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\AdvancerNode.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\NetworkEvents.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\SpikeSortBoxes.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\TrialCircularBuffer.h">
-      <Filter>open-ephys\Source\Processors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\LfpTriggeredAverageNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
@@ -2064,9 +2013,6 @@
     <ClInclude Include="..\..\Source\Processors\Visualization\LfpTriggeredAverageCanvas.h">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.h">
-      <Filter>open-ephys\Source\Processors\Visualization</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeObject.h">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClInclude>
@@ -2094,13 +2040,7 @@
     <ClInclude Include="..\..\Source\Processors\EventNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\ElectrodeButtons.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.h">

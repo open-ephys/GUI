@@ -267,7 +267,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Resources\ZeroMQ\include\zmq.cpp"/>
     <ClCompile Include="..\..\Source\AccessClass.cpp"/>
     <ClCompile Include="..\..\Source\Network\PracticalSocket.cpp"/>
     <ClCompile Include="..\..\Source\Dsp\Bessel.cpp"/>
@@ -288,12 +287,6 @@
     <ClCompile Include="..\..\Source\Dsp\RootFinder.cpp"/>
     <ClCompile Include="..\..\Source\Dsp\State.cpp"/>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\NetworkEvents.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\SpikeSortBoxes.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\TrialCircularBuffer.cpp"/>
     <ClCompile Include="..\..\Source\Processors\LfpTriggeredAverageNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\FileReader.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ChannelMappingNode.cpp"/>
@@ -316,7 +309,6 @@
     <ClCompile Include="..\..\Source\Processors\Utilities\Merger.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Utilities\Splitter.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\LfpTriggeredAverageCanvas.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeObject.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDisplayCanvas.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\DataWindow.cpp"/>
@@ -325,10 +317,8 @@
     <ClCompile Include="..\..\Source\Processors\SpikeDetector.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AudioNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\ElectrodeButtons.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\ChannelMappingEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\FileReaderEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\PhaseDetectorEditor.cpp"/>
@@ -1469,7 +1459,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Resources\ZeroMQ\include\zmq.h"/>
     <ClInclude Include="..\..\Source\AccessClass.h"/>
     <ClInclude Include="..\..\Source\Network\PracticalSocket.h"/>
     <ClInclude Include="..\..\Source\Dsp\Bessel.h"/>
@@ -1496,12 +1485,6 @@
     <ClInclude Include="..\..\Source\Dsp\Types.h"/>
     <ClInclude Include="..\..\Source\Dsp\Utilities.h"/>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h"/>
-    <ClInclude Include="..\..\Source\Processors\AdvancerNode.h"/>
-    <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h"/>
-    <ClInclude Include="..\..\Source\Processors\NetworkEvents.h"/>
-    <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h"/>
-    <ClInclude Include="..\..\Source\Processors\SpikeSortBoxes.h"/>
-    <ClInclude Include="..\..\Source\Processors\TrialCircularBuffer.h"/>
     <ClInclude Include="..\..\Source\Processors\LfpTriggeredAverageNode.h"/>
     <ClInclude Include="..\..\Source\Processors\FileReader.h"/>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode.h"/>
@@ -1525,7 +1508,6 @@
     <ClInclude Include="..\..\Source\Processors\Utilities\Merger.h"/>
     <ClInclude Include="..\..\Source\Processors\Utilities\Splitter.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\LfpTriggeredAverageCanvas.h"/>
-    <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeObject.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDisplayCanvas.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\Visualizer.h"/>
@@ -1535,9 +1517,7 @@
     <ClInclude Include="..\..\Source\Processors\SpikeDetector.h"/>
     <ClInclude Include="..\..\Source\Processors\AudioNode.h"/>
     <ClInclude Include="..\..\Source\Processors\EventNode.h"/>
-    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\ElectrodeButtons.h"/>
-    <ClInclude Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\ChannelMappingEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\FileReaderEditor.h"/>

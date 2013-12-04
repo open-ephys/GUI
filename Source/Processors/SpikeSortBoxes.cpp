@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
-#include <algorithm>
 #include "SpikeSortBoxes.h"
 
 PointD::PointD()
@@ -1893,13 +1892,20 @@ void PCAjob::computeCov()
 
 }
 
-std::vector<int> sort_indexes( std::vector<float> v) {
+std::vector<int> sort_indexes( std::vector<float> v) 
+{
   // initialize original index locations
   std::vector<int> idx(v.size());
-  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+  
+  for (int i = 0; i != idx.size(); ++i) 
+  { 
+  	idx[i] = i;
+  }
 
   // sort indexes based on comparing values in v
-	std::sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {return v[i1] > v[i2];});
+	sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {
+		return v[i1] > v[i2];
+	});
 
   return idx;
 }
