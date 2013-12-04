@@ -642,10 +642,10 @@ void SpikeDetector::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 	memcpy(msg_with_ts+s.len, &s.timestamp, 8);
 
 	addEvent(events,           // eventBuffer
-             NETWORK,          // type
+             (uint8) NETWORK,          // type
              0,                // sampleNum
              0,                // eventId
-             GENERIC_EVENT,    // eventChannel
+             (uint8) GENERIC_EVENT,    // eventChannel
              (uint8) s.len+8,  // numBytes
              msg_with_ts);     // eventData
 
