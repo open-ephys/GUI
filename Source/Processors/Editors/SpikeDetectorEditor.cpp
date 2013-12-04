@@ -33,7 +33,7 @@
 
 
 SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
-    : VisualizerEditor(parentNode, useDefaultParameterEditors), isPlural(true),spikeDetectorCanvas(nullptr)
+    : VisualizerEditor(parentNode, 300, useDefaultParameterEditors), isPlural(true),spikeDetectorCanvas(nullptr)
 
 {
 	tabText = "Spike Detector";

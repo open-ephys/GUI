@@ -132,7 +132,7 @@ public:
     bool showLFP, showSpikes, smoothPlots, autoRescale,compactView;
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport;
-	PeriStimulusTimeHistogramDisplay *psthDisplay;
+	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
 	float gaussianStandardDeviationMS;
 	int numRows,numCols;
 
