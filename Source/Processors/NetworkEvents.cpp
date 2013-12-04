@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "NetworkEvents.h"
 #include "Editors/NetworkEventsEditor.h"
 #include "../UI/UIComponent.h"
+
 const int MAX_MESSAGE_LENGTH = 32000;
 
 
@@ -231,7 +232,14 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 	uint8* msg_with_ts = new uint8[s.len+8]; // for the two timestamps
 	memcpy(msg_with_ts, s.str, s.len);	
 	memcpy(msg_with_ts+s.len, &s.timestamp, 8);
-	addEvent(events, NETWORK,0,0,GENERIC_EVENT,s.len+8,msg_with_ts);
+	addEvent(events, 
+			 (uint8) NETWORK,
+			 0,
+			 0,
+			 (uint8) GENERIC_EVENT,
+			 (uint8) s.len+8,
+			 msg_with_ts);
+
 	delete msg_with_ts;
 }
 

@@ -68,6 +68,8 @@ EditorViewport::EditorViewport()
     addAndMakeVisible(rightButton);
     addAndMakeVisible(leftButton);
 
+    currentId = 100;
+
 }
 
 EditorViewport::~EditorViewport()
@@ -231,7 +233,7 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         /// needed to remove const cast --> should be a better way to do this
         //String description = sourceDescription.substring(0);
 
-        GenericEditor* activeEditor = (GenericEditor*) getProcessorGraph()->createNewProcessor(description);//, source, dest);
+        GenericEditor* activeEditor = (GenericEditor*) getProcessorGraph()->createNewProcessor(description, currentId);//, source, dest);
 
         std::cout << "Active editor: " << activeEditor << std::endl;
 
@@ -262,6 +264,8 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         somethingIsBeingDraggedOver = false;
 
         repaint();
+
+        currentId++;
     }
 }
 
@@ -1354,6 +1358,7 @@ const String EditorViewport::loadState(File fileToLoad)
             {
 
                 int insertionPt = processor->getIntAttribute("insertionPoint");
+                currentId = processor->getIntAttribute("NodeId");
 
                 if (insertionPt == 1)
                 {
@@ -1374,6 +1379,7 @@ const String EditorViewport::loadState(File fileToLoad)
                 p = (GenericProcessor*) lastEditor->getProcessor();
                 p->loadOrder = loadOrder;
                 p->parametersAsXml = processor;
+
                 //Sets parameters based on XML files
                 setParametersByXML(p, processor);
                 loadOrder++;

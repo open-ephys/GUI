@@ -109,6 +109,12 @@ void GenericEditor::constructorInitialize(GenericProcessor* owner, bool useDefau
 
 }
 
+void GenericEditor::updateName()
+{
+    nodeId = getProcessor()->getNodeId();
+    repaint();
+}
+
 void GenericEditor::addParameterEditors(bool useDefaultParameterEditors=true)
 {
     if (useDefaultParameterEditors)
