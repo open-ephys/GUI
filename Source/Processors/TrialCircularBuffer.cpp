@@ -523,6 +523,8 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	// to update a condition's continuous data psth, we will first find 
 	// data samples in the vicinity of the trial, and then interpolate at the
 	// needed time bins.
+	if (numSamplesInBuf <= 1 )
+		return false;
 
 	int numTimeBins = timeBins->size();
 
@@ -592,8 +594,7 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 		if (search_forward_ptr == bufLen)
 			search_forward_ptr=0;
 	}
-	jassert(numSamplesInBuf > 1);
-
+	
 	// we would like to return the lfp, sampled at specific time bins
 	// (typically, 1 ms resolution, which is an overkill).
 	//
@@ -1050,7 +1051,8 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 	ElectrodePSTH e(electrode->electrodeID);
 	int numChannels = electrode->numChannels;
 
-	for (int k=0;k<numChannels;k++) {
+	for (int k=0;k<numChannels;k++) 
+	{
 		int channelID = electrode->channels[k];
 		e.channels.push_back(channelID);
 		ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
@@ -1059,9 +1061,25 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 		{
 			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
 		}
-		e.channelsPSTHs.push_back(channelPSTH);
+		e.channelsPSTHs.push_back(channelPSTH);	
 	}
 	electrodesPSTH.push_back(e);
+
+
+	// Usually when we add a new electrode it doesn't have any units, unless it was added when loading an xml...
+		if (electrode->spikeSort != nullptr)
+		{
+			std::vector<BoxUnit> boxUnits = electrode->spikeSort->getBoxUnits();
+			for (int boxIter=0;boxIter < boxUnits.size();boxIter++)
+			{
+				addNewUnit(electrode->electrodeID, boxUnits[boxIter].UnitID, boxUnits[boxIter].ColorRGB[0],boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
+			}
+			std::vector<PCAUnit> PcaUnits = electrode->spikeSort->getPCAUnits();
+			for (int pcaIter=0;pcaIter < PcaUnits.size();pcaIter++)
+			{
+				addNewUnit(electrode->electrodeID, PcaUnits[pcaIter].UnitID, PcaUnits[pcaIter].ColorRGB[0],PcaUnits[pcaIter].ColorRGB[1],PcaUnits[pcaIter].ColorRGB[2]);
+			}
+		}
 	unlockPSTH();
 	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
 }
