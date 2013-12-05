@@ -47,7 +47,7 @@ public:
 
     void buttonEvent(Button* button);
 	void labelTextChanged(juce::Label *);
-
+	void setLabelColor(juce::Colour color);
 private:
 
 	UtilityButton* trialSimulation;

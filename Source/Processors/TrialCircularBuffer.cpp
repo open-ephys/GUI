@@ -49,7 +49,7 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 
 /******************************/
 ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post) : conditionID(ID), preSecs(pre), 
-	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1)
+	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1),preSec(pre),postSec(post)
 {
 	// allocate data for 1 ms resolution bins to cover trials 
 	xmin = -pre;
@@ -93,13 +93,18 @@ ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
 	colorRGB[1] = c.colorRGB[1];
 	colorRGB[2] = c.colorRGB[2];
 	visible = c.visible;
-	
+	preSec = c.preSec;
+	postSec = c.postSec;
 }
 
 
 void ConditionPSTH::clear()
 {
 	numTrials= 0;
+	xmin = -preSec;
+	xmax = postSec;
+	ymax = -1e10;
+	ymin = 1e10;
 	for (int k = 0; k < numBins; k++)
 	{
 		numDataPoints[k] = 0;
@@ -1170,6 +1175,8 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 	  {
 		  currentTrial.endTS = msg.timestamp;
 		  currentTrial.trialInProgress = false;
+
+		
 		  if (input.size() > 1) {
 			  currentTrial.outcome = input[1].getIntValue();
 		  }
@@ -1181,6 +1188,8 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 				  currentTrial.alignTS = currentTrial.startTS;
 			  }
 
+			  double trialLength = (currentTrial.endTS-currentTrial.alignTS)/numTicksPerSecond;
+		
 			  aliveTrials.push(Trial(currentTrial));
 		  }
 	  } else if (command == "trialtype")

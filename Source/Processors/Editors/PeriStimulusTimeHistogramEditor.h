@@ -37,11 +37,12 @@ class Condition;
 
 class TrialCircularBuffer;
 class PeriStimulusTimeHistogramNode;
+class PeriStimulusTimeHistogramDisplay;
 
 class XYPlot : public Component
 {
 public:
-	XYPlot(bool spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
+	XYPlot(PeriStimulusTimeHistogramDisplay* dsp, int _plotID, bool spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
 	void resized();
 	void paint(Graphics &g);
 	void setSmoothState(bool enable);
@@ -49,11 +50,13 @@ public:
 	void mouseDown(const juce::MouseEvent& event);
 	void buildSmoothKernel(float guassianKernelSizeMS);
 	
+	 void mouseDoubleClick(const juce::MouseEvent& event);
+	int getPlotID();
 
-	
 	void paintSpikes(Graphics &g);
 	void paintLFP(Graphics &g);
-
+	void toggleFullScreen(bool fullScreenOn);
+	bool isFullScreen();
 	juce::Font font;
 	int row, col;
 	int electrodeID, unitID;
@@ -64,13 +67,15 @@ private:
 	void plotTicks(Graphics &g,float xmin, float xmax, float ymin, float ymax);
 
 	void sampleConditions(float &minY, float &maxY);
+	
+	void sampleConditionsForLFP(float &minY, float &maxY);
 
 	std::vector<int> histc(std::vector<float> xi, std::vector<float> x);
 	std::vector<float> diff(std::vector<float> x);
 	void interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid, float &min, float &max);
 	std::vector<float> smooth(std::vector<float> x);
 	
-	bool findIndices(int &electrodeIndex, int &entryindex);
+	bool findIndices(int &electrodeIndex, int &entryindex, bool findUnitOrChannel);
 
 	bool spikePlot, smoothPlot,autoRescale,firstTime;
 	float axesRange[4];
@@ -85,7 +90,9 @@ private:
 	std::vector<float> conditionMaxY;
 	std::vector<float> conditionMinY;
 	float rangeX,rangeY;
-
+	int plotID;
+	bool fullScreenMode;
+	PeriStimulusTimeHistogramDisplay* display;
 };
 class PeriStimulusTimeHistogramCanvas;
 
@@ -96,9 +103,11 @@ public:
 	PeriStimulusTimeHistogramDisplay(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c);
 	~PeriStimulusTimeHistogramDisplay();
 	void resized();
+
 	std::vector<XYPlot*> psthPlots;
 	void paint(Graphics &g);
 	void refresh();
+	void focusOnPlot(int plotIndex);
 
 	PeriStimulusTimeHistogramNode* processor;
 	Viewport *viewport;
@@ -106,6 +115,7 @@ public:
 
 	juce::Font font;
 
+	
 	  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramDisplay);
 
 };
@@ -129,14 +139,13 @@ public:
     void resized();
 	void buttonClicked(Button* button);
 
-
 	void setLFPvisibility(bool visible);
 	void setSpikesVisibility(bool visible);
 	void setSmoothPSTH(bool smooth);
 	void setSmoothing(float _gaussianStandardDeviationMS);
 	void setAutoRescale(bool state);
 	void setCompactView(bool compact);
-	
+	void setMatchRange(bool on);
 	void setParameter(int, float) {}
 	void setParameter(int, int, int, float) {}
 
@@ -148,9 +157,10 @@ public:
 	int heightPerElectrodePix;
 	int widthPerUnit;
 	bool updateNeeded;
+		int screenHeight, screenWidth;
 
    private:
-    bool showLFP, showSpikes, smoothPlots, autoRescale,compactView;
+    bool showLFP, showSpikes, smoothPlots, autoRescale,compactView, matchRange, inFocusedMode;
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport;
 	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
@@ -180,6 +190,7 @@ private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
 	UtilityButton *visibleConditions, *saveOptions, *clearDisplay;
+	ToggleButton *matchRangeButton;
 	ToggleButton *smoothPSTH;
 	ToggleButton *autoRescale;
 	ToggleButton *lfp, *spikes;
