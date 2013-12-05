@@ -46,10 +46,16 @@ public:
 	void resized();
 	void paint(Graphics &g);
 	void setSmoothState(bool enable);
+	bool getSmoothState();
+
 	void setAutoRescale(bool enable);
+	bool getAutoRescale();
+
 	void mouseDown(const juce::MouseEvent& event);
+	void mouseDrag(const juce::MouseEvent& event);
+	void mouseUp(const juce::MouseEvent& event);
+
 	void buildSmoothKernel(float guassianKernelSizeMS);
-	
 	 void mouseDoubleClick(const juce::MouseEvent& event);
 	int getPlotID();
 
@@ -92,6 +98,10 @@ private:
 	float rangeX,rangeY;
 	int plotID;
 	bool fullScreenMode;
+	float xmin, xmax, ymax, ymin;
+	int mouseDownX, mouseDownY,mouseDragX,mouseDragY;
+	bool zooming;
+
 	PeriStimulusTimeHistogramDisplay* display;
 };
 class PeriStimulusTimeHistogramCanvas;

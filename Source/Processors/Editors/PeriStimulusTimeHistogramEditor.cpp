@@ -341,13 +341,23 @@ void PeriStimulusTimeHistogramCanvas::setSpikesVisibility(bool visible)
 void PeriStimulusTimeHistogramCanvas::setSmoothing(float _gaussianStandardDeviationMS)
 {
 	gaussianStandardDeviationMS=_gaussianStandardDeviationMS;
-	update();
+	for (int k=0;k<	psthDisplay->psthPlots.size();k++)
+	{
+		psthDisplay->psthPlots[k]->buildSmoothKernel(gaussianStandardDeviationMS);
+		psthDisplay->psthPlots[k]->repaint();
+	}
+
 }
 
 void PeriStimulusTimeHistogramCanvas::setSmoothPSTH(bool smooth)
 {
 	smoothPlots = smooth;
-	update();
+	for (int k=0;k<	psthDisplay->psthPlots.size();k++)
+	{
+		psthDisplay->psthPlots[k]->setSmoothState(smoothPlots);
+		psthDisplay->psthPlots[k]->repaint();
+	}
+
 }
 
 void PeriStimulusTimeHistogramCanvas::setCompactView(bool compact)
@@ -365,7 +375,11 @@ void PeriStimulusTimeHistogramCanvas::setMatchRange(bool on)
 void PeriStimulusTimeHistogramCanvas::setAutoRescale(bool state)
 {
 	autoRescale = state;
-	update();
+	for (int k=0;k<	psthDisplay->psthPlots.size();k++)
+	{
+		psthDisplay->psthPlots[k]->setAutoRescale(autoRescale);
+		psthDisplay->psthPlots[k]->repaint();
+	}
 }
 
 
@@ -641,12 +655,27 @@ XYPlot::XYPlot(PeriStimulusTimeHistogramDisplay *dsp, int _plotID, bool _spikePl
 	autoRescale = true;
 	firstTime = true;
 	fullScreenMode = false;
+	zooming = false;
 }
+
+void XYPlot::mouseUp(const juce::MouseEvent& event)
+{
+	zooming = false;
+}
+
+void XYPlot::mouseDrag(const juce::MouseEvent& event)
+{
+	mouseDragX = event.x;
+	mouseDragY = event.y;
+
+	repaint();
+}
+
 
 void XYPlot::mouseDown(const juce::MouseEvent& event)
 {
 	
-	if (event.mods.isRightButtonDown())
+	if (event.mods.isRightButtonDown() && !event.mods.isShiftDown())
 	{
 
 		tcb->lockPSTH();
@@ -679,6 +708,17 @@ void XYPlot::mouseDown(const juce::MouseEvent& event)
 			}
 		}
 		tcb->unlockPSTH();
+	} else if (event.mods.isRightButtonDown() && event.mods.isShiftDown())
+	{
+		// zoom out
+	} else if (event.mods.isLeftButtonDown())
+	{
+		mouseDownX = event.x;
+		mouseDownY = event.y;
+		mouseDragX = event.x;
+		mouseDragY = event.y;
+
+		zooming = true;
 	}
 }
 
@@ -766,9 +806,19 @@ void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<floa
 
 }
 
+bool XYPlot::getSmoothState()
+{
+	return smoothPlot;
+}
+
 void XYPlot::setSmoothState(bool enable)
 {
 	smoothPlot = enable;
+}
+
+bool XYPlot::getAutoRescale()
+{
+	return autoRescale;
 }
 
 void XYPlot::setAutoRescale(bool enable)
@@ -806,6 +856,7 @@ bool XYPlot::isFullScreen()
 {
 	return fullScreenMode;
 }
+
 
 
 void XYPlot::mouseDoubleClick(const juce::MouseEvent& event)
@@ -922,9 +973,16 @@ void XYPlot::paintPlotNameAndRect(Graphics &g)
 
 
 	// keep a fixed amount of pixels for axes labels
-	g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
-		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
-		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]));
+	if (spikePlot) 
+	{
+		g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
+			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]));
+	} else
+	{
+		g.setColour(Colours::white);
+	}
+
 	g.drawRect(0,0,w,h,2);
 
 
@@ -942,7 +1000,7 @@ void XYPlot::computeSamplePositions(float &xmin, float &xmax)
 
 	 // reduce range so we don't see the effects of convolving with the kernel outside function values.
 
-	if (smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
+	if (autoRescale && smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
 			xmin += 7*guassianStandardDeviationMS/1e3;
 			xmax -= 7*guassianStandardDeviationMS/1e3;
 	}
@@ -1048,14 +1106,11 @@ void XYPlot::sampleConditions(float &minY, float &maxY)
 void XYPlot::plotTicks(Graphics &g, float xmin, float xmax, float ymin, float ymax)
 {
 	// determine tick position
-	if (firstTime || autoRescale)
-	{
-		firstTime = false;
-		axesRange[0] = xmin;
-		axesRange[1] = ymin;
-		axesRange[2] = xmax;
-		axesRange[3] = ymax;
-	}
+	axesRange[0] = xmin;
+	axesRange[1] = ymin;
+	axesRange[2] = xmax;
+	axesRange[3] = ymax;
+	
 	rangeX = (axesRange[2]-axesRange[0]);
 	rangeY = (axesRange[3]-axesRange[1]);
 	int numXTicks = 5;
@@ -1128,10 +1183,15 @@ void XYPlot::paintSpikes(Graphics &g)
 	}
 	paintPlotNameAndRect(g);
 
-	float xmin=0, xmax=0, ymax=-1e10, ymin = 1e10;
-	float minConditionValue, maxConditionValue;
+	if (autoRescale)
+	{
+		xmin=0;
+		xmax=0;
+		ymax=-1e10;
+		ymin = 1e10;
+		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
+	}
 
-	tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
 	// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
 	if (fabs(xmax-xmin)<1e-4   || fabs(ymax-ymin) < 1e-4)
 	{
@@ -1140,10 +1200,14 @@ void XYPlot::paintSpikes(Graphics &g)
 	}
 
 	computeSamplePositions(xmin, xmax);
-	
+
+	float minConditionValue, maxConditionValue;
 	sampleConditions(minConditionValue,maxConditionValue);
-	ymin = 0 ;
-	ymax = maxConditionValue ;
+	if (autoRescale)
+	{
+		ymin = 0 ;
+		ymax = maxConditionValue ;
+	}
 
 	if (fabs(ymax-ymin) < 1e-4)
 	{
@@ -1196,28 +1260,38 @@ void XYPlot::paintLFP(Graphics &g)
 	}
 	paintPlotNameAndRect(g);
 
-	float xmin=0, xmax=0, ymax=-1e10, ymin = 1e10;
-	float minConditionValue, maxConditionValue;
-
-	tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
-	// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
-	if (fabs(xmax-xmin)<1e-4   || fabs(ymax-ymin) < 1e-4)
+	if (autoRescale)
 	{
-		tcb->unlockPSTH();
-		return;
+		xmin=0;
+		xmax=0;
+		ymax=-1e10;
+		ymin = 1e10;
+		
+		tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
+		// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
 	}
+	if (fabs(xmax-xmin)<1e-4   || fabs(ymax-ymin) < 1e-4)
+		{
+			tcb->unlockPSTH();
+			return;
+		}
 
 	computeSamplePositions(xmin, xmax);
-	
+
+	float minConditionValue, maxConditionValue;
 	sampleConditionsForLFP(minConditionValue,maxConditionValue);
-	ymin =minConditionValue;
-	ymax = maxConditionValue ;
+	if (autoRescale)
+	{
+		ymin =minConditionValue;
+		ymax = maxConditionValue ;
+	}
 
 	if (fabs(ymax-ymin) < 1e-4)
 	{
 		tcb->unlockPSTH();
 		return;
 	}
+
 
 	plotTicks(g,xmin, xmax, ymin, ymax);
 
@@ -1244,6 +1318,8 @@ void XYPlot::paintLFP(Graphics &g)
 
 	}
 	tcb->unlockPSTH();
+
+
 	repaint();
 }
 
@@ -1254,4 +1330,14 @@ void XYPlot::paint(Graphics &g)
 		paintSpikes(g);
 	else
 		paintLFP(g);
+
+	if (zooming)
+	{
+		g.setColour(juce::Colours::white);
+		int width = abs(mouseDownX-mouseDragX);
+		int height= abs(mouseDownY-mouseDragY);
+		if (width > 0 & height > 0)
+			g.drawRect(MIN(mouseDownX,mouseDragX),MIN(mouseDownY,mouseDragY),width,height,2);
+	}
+
 }
