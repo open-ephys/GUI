@@ -58,6 +58,8 @@ LogWindow::LogWindow()
 	  //  viewport->setScrollBarsShown(true, false);
 
     //scrollBarThickness = viewport->getScrollBarThickness();
+    
+    firstTime = true;
 
 }
 
