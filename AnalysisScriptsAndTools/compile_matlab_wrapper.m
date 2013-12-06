@@ -1,7 +1,13 @@
 % compile 0MQ matlab wrapper 
+%
+% NOTE: On OS X, you may need to implement this patch
+%       for compilation to work:
+%       http://www.mathworks.com/matlabcentral/answers/94092
+%
+
 
 % 1. make sure mex is setup properly and a compiler is available
-%mex -setup
+mex -setup
 
 %GUIfolder = 'C:\Users\Shay\Documents\GitHub\GUI';
 %GUIfolder = '/home/jsiegle/Programming/GUI/';
