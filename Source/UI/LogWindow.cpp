@@ -58,6 +58,8 @@ LogWindow::LogWindow()
 	  //  viewport->setScrollBarsShown(true, false);
 
     //scrollBarThickness = viewport->getScrollBarThickness();
+    
+    firstTime = true;
 
 }
 
@@ -87,7 +89,7 @@ void LogWindow::addLineToLog(String S)
 
 LogWindow::~LogWindow()
 {
-int x = 5;
+    int x = 5;
 }
 
 void LogWindow::timerCallback()
