@@ -56,7 +56,17 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     labelPort->setBounds(70,85,80,18);
     labelPort->setFont(Font("Default", 15, Font::plain));
     labelPort->setColour(Label::textColourId, Colours::white);
-    labelPort->setColour(Label::backgroundColourId, Colours::grey);
+
+
+
+//		NetworkEvents *processor  = (NetworkEvents*) getProcessor();
+
+	//if (processor->threadRunning)
+		labelPort->setColour(Label::backgroundColourId, Colours::grey);
+//	else
+//		labelPort->setColour(Label::backgroundColourId, Colours::red);
+
+
     labelPort->setEditable(true);
     labelPort->addListener(this);
     addAndMakeVisible(labelPort);
@@ -90,6 +100,13 @@ void NetworkEventsEditor::buttonEvent(Button* button)
     
 
 }
+
+void NetworkEventsEditor::setLabelColor(juce::Colour color)
+{
+	labelPort->setColour(Label::backgroundColourId, color);
+}
+
+
 void NetworkEventsEditor::labelTextChanged(juce::Label *label)
 {
 	if (label == labelPort)

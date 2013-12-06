@@ -146,6 +146,7 @@ public:
 	std::vector<float> binTime;
 	std::vector<float> avgResponse; // either firing rate or lfp
 	uint8 colorRGB[3];
+	float preSec,postSec;
 private:
 	std::vector<int64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
 };

@@ -99,6 +99,7 @@ public:
 
 	int urlport;
 	 String socketStatus;
+	 bool threadRunning ;
 private:
 	   void handleEvent(int eventType, MidiMessage& event, int samplePos);
 
@@ -111,7 +112,7 @@ private:
     bool state;
 	Time timer;
  	std::queue<StringTS> networkMessagesQueue;
-	bool threadRunning ;
+	
 
 	std::queue<StringTS> simulation;
 	int64 simulationStartTime;

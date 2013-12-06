@@ -132,6 +132,7 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 	firstTime = true;
 	responder = nullptr;
 	urlport = 5556;
+	threadRunning = false;
 	opensocket();
 	
 	
@@ -155,8 +156,11 @@ NetworkEvents::~NetworkEvents()
 
 bool NetworkEvents::disable()
 {
-	zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
-	zmqcontext = getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
+	if (threadRunning)
+	{
+		zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
+		zmqcontext = getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
+	}
 	return true;
 }
 
@@ -368,7 +372,7 @@ void NetworkEvents::opensocket()
 
 void NetworkEvents::run() {
 
-  responder = zmq_socket (zmqcontext, ZMQ_REP);
+ responder = zmq_socket (zmqcontext, ZMQ_REP);
   String url= String("tcp://*:")+String(urlport);
   int rc = zmq_bind (responder, url.toRawUTF8());
   
@@ -380,7 +384,7 @@ void NetworkEvents::run() {
   threadRunning = true;
 	 unsigned char *buffer = new unsigned char[MAX_MESSAGE_LENGTH];
 	 int result=-1;
-
+ 
 	while (threadRunning) {
 		
          result = zmq_recv (responder, buffer, MAX_MESSAGE_LENGTH-1, 0); // blocking
@@ -404,6 +408,7 @@ void NetworkEvents::run() {
 			zmq_send (responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
 		}
     }
+	
 
 	zmq_close(responder);
 	delete buffer;
