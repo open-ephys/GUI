@@ -30,6 +30,7 @@
 #include "LfpTriggeredAverageNode.h"
 #include "SpikeDisplayNode.h"
 #include "EventNode.h"
+#include "AdvancerNode.h"
 #include "FilterNode.h"
 #include "GenericProcessor.h"
 #include "RecordNode.h"
@@ -55,7 +56,6 @@
 #include "../UI/UIComponent.h"
 #include "../UI/EditorViewport.h"
 
-
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
 
@@ -77,9 +77,11 @@ ProcessorGraph::~ProcessorGraph() {
 
 }
 
-void ProcessorGraph::createZmqContext()
+void* ProcessorGraph::createZmqContext()
 {
 	zmqcontext =  zmq_ctx_new ();
+
+	return zmqcontext;
 }
 
 void ProcessorGraph::createDefaultNodes()
@@ -134,14 +136,14 @@ void ProcessorGraph::updatePointers()
     getRecordNode()->setUIComponent(getUIComponent());
 }
 
-void* ProcessorGraph::createNewProcessor(String& description)//,
+void* ProcessorGraph::createNewProcessor(String& description, int id)//,
 // GenericProcessor* source,
 // GenericProcessor* dest)
 {
 
     GenericProcessor* processor = createProcessorFromDescription(description);
 
-    int id = currentNodeId++;
+   // int id = currentNodeId++;
 
     if (processor != 0)
     {
@@ -169,26 +171,33 @@ void* ProcessorGraph::createNewProcessor(String& description)//,
 void ProcessorGraph::clearSignalChain()
 {
 
-    int n = 0;
+    Array<GenericProcessor*> processors = getListOfProcessors();
 
-    while (getNumNodes() > 4)
+    for (int i = 0; i < processors.size(); i++)
     {
-        Node* node = getNode(n);
-        int nodeId = node->nodeId;
-
-        if (nodeId != OUTPUT_NODE_ID &&
-            nodeId != AUDIO_NODE_ID &&
-            nodeId != RECORD_NODE_ID &&
-            nodeId != RESAMPLING_NODE_ID)
-        {
-            GenericProcessor* p =(GenericProcessor*) node->getProcessor();
-            removeProcessor(p);
-        }
-        else
-        {
-            n++;
-        }
+         removeProcessor(processors[i]);
     }
+
+    // int n = 0;
+
+    // while (getNumNodes() > 4)
+    // {
+    //     Node* node = getNode(n);
+    //     int nodeId = node->nodeId;
+
+    //     if (nodeId != OUTPUT_NODE_ID &&
+    //         nodeId != AUDIO_NODE_ID &&
+    //         nodeId != RECORD_NODE_ID &&
+    //         nodeId != RESAMPLING_NODE_ID)
+    //     {
+    //         GenericProcessor* p =(GenericProcessor*) node->getProcessor();
+    //         removeProcessor(p);
+    //     }
+    //     else
+    //     {
+    //         n++;
+    //     }
+    // }
 
 }
 
@@ -499,7 +508,12 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             processor = new FileReader();
             std::cout << "Creating a new file reader." << std::endl;
-        }
+        }   
+		else if (subProcessorType.equalsIgnoreCase("Network Events"))
+        {
+            std::cout << "Creating a new network events source." << std::endl;
+			processor = new NetworkEvents(zmqcontext);
+        } 
 
 
         sendActionMessage("New source node created.");
@@ -531,10 +545,6 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new event detector." << std::endl;
             processor = new EventDetector();
-        } else if (subProcessorType.equalsIgnoreCase("Network Events"))
-        {
-            std::cout << "Creating a new network events detector." << std::endl;
-			processor = new NetworkEvents(zmqcontext);
         }
         else if (subProcessorType.equalsIgnoreCase("Phase Detector"))
         {
@@ -584,6 +594,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
 
             sendActionMessage("New record controller created.");
 
+        }else if (subProcessorType.equalsIgnoreCase("Advancers"))
+        {
+            std::cout << "Creating a new advancers node." << std::endl;
+			processor = new AdvancerNode();
         }
 
     }

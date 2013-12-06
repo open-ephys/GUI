@@ -36,7 +36,7 @@
 GenericEditor::GenericEditor(GenericProcessor* owner, bool useDefaultParameterEditors=true)
     : AudioProcessorEditor(owner),
       desiredWidth(150), isFading(false), accumulator(0.0), acquisitionIsActive(false),
-      drawerButton(0), channelSelector(0),
+      drawerButton(0), channelSelector(0),drawerWidth(170),
       isSelected(false),  isEnabled(true), tNum(-1)
 {
     constructorInitialize(owner, useDefaultParameterEditors);
@@ -107,6 +107,12 @@ void GenericEditor::constructorInitialize(GenericProcessor* owner, bool useDefau
 
     //fadeIn();
 
+}
+
+void GenericEditor::updateName()
+{
+    nodeId = getProcessor()->getNodeId();
+    repaint();
 }
 
 void GenericEditor::addParameterEditors(bool useDefaultParameterEditors=true)
@@ -318,7 +324,7 @@ void GenericEditor::paint(Graphics& g)
     }
 
     // draw title
-    g.drawText(name, 6, 5, 500, 15, Justification::left, false);
+    g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
 
 
     if (isSelected)
@@ -756,6 +762,11 @@ void UtilityButton::resized()
 
     outlinePath.closeSubPath();
 
+}
+
+String UtilityButton::getLabel()
+{
+	return label;
 }
 
 void UtilityButton::setLabel(String label_)

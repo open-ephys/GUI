@@ -38,6 +38,8 @@ RecordNode::RecordNode()
     isRecording = false;
     blockIndex = 0;
     signalFilesShouldClose = false;
+	directoryName = "";
+	eventsSavedBySink = false;
 
     continuousDataIntegerBuffer = new int16[10000];
     continuousDataFloatBuffer = new float[10000];
@@ -190,6 +192,15 @@ void RecordNode::addInputChannel(GenericProcessor* sourceNode, int chan)
 
 }
 
+void RecordNode::setEventSavingState(bool b)
+{
+	eventsSavedBySink = b;
+	if (isRecording)
+	{
+		if (!eventsSavedBySink)
+			openFile(eventChannel);
+	}
+}
 void RecordNode::updateFileName(Channel* ch)
 {
     String filename = rootFolder.getFullPathName();
@@ -233,6 +244,11 @@ void RecordNode::appendTrialNumber(bool t)
     appendTrialNum = t;
 }
 
+void RecordNode::setDirectoryName(String S)
+{
+	directoryName = S;
+}
+
 void RecordNode::createNewDirectory()
 {
     std::cout << "Creating new directory." << std::endl;
@@ -263,6 +279,9 @@ void RecordNode::createNewFiles()
 
 String RecordNode::generateDirectoryName()
 {
+	if (directoryName != "")
+		return directoryName;
+
     Time calendar = Time::getCurrentTime();
 
     Array<int> t;
@@ -367,10 +386,10 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
 
         createNewFiles();
         
-        openFile(eventChannel);
+		if (!eventsSavedBySink)
+			openFile(eventChannel);
 
         blockIndex = 0; // reset index
-
 
         // create / open necessary files
         for (int i = 0; i < channelPointers.size(); i++)
@@ -580,7 +599,9 @@ void RecordNode::closeAllFiles()
         }
     }
 
-    closeFile(eventChannel);
+
+	if (!eventsSavedBySink)
+		closeFile(eventChannel);
 
     blockIndex = 0; // back to the beginning of the block
 }
@@ -726,9 +747,15 @@ void RecordNode::writeEventBuffer(MidiMessage& event, int samplePosition) //, in
 
 }
 
+uint16 RecordNode::getRecordingNumber()
+{
+	return recordingNumber;
+}
+
+
 void RecordNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
-    if (eventType == TTL)
+    if (eventType == TTL && !eventsSavedBySink)
     {
         writeEventBuffer(event, samplePosition);
     }

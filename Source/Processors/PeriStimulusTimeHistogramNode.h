@@ -38,6 +38,8 @@ class DataViewport;
 class SpikePlot;
 class TrialCircularBuffer;
 
+
+
 class PeriStimulusTimeHistogramNode :  public GenericProcessor
 {
 public:
@@ -47,9 +49,7 @@ public:
 
     AudioProcessorEditor* createEditor();
 	
-	
-
-	std::vector<String> splitString(String S, char sep);
+	void toggleConditionVisibility(int cond);
 
     bool isSink()
     {
@@ -58,7 +58,8 @@ public:
 
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 
-    
+    void syncInternalDataStructuresWithSpikeSorter();
+
 
     void handleEvent(int, MidiMessage&, int);
 
@@ -74,18 +75,39 @@ public:
     void addSpikePlotForElectrode(SpikePlot* sp, int i);
     void removeSpikePlots();
 	void reallocate(int numChannels);
-	TrialCircularBuffer *trialCircularBuffer;
-  
-private:
-	StringTS unpackStringTS(MidiMessage &event);
+	void stopRecording();
+	void startRecording();
 
+	TrialCircularBuffer *trialCircularBuffer;
+	bool saveTTLs, saveNetworkEvents ;
+	int spikeSavingMode;
+	
+private:
+
+	FILE* eventFile;
+	String generateHeader();
+	void openFile(String filename);
+
+	void dumpNetworkEventToDisk(String S, int64 ts);
+	void dumpSpikeEventToDisk(SpikeObject *s,  bool dumpWave);
+	void dumpTimestampEventToDisk(int64 softwareTS,int64 hardwareTS);
+	void dumpTTLeventToDisk(int channel,bool risingEdge, int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, int samplePosition );
+	void dumpStartStopRecordEventToDisk(int64 ts, bool startRecord);
+
+	bool isRecording;
     int displayBufferSize;
     bool redrawRequested;
+	int syncCounter;
 	int64 hardware_timestamp,software_timestamp;
+
+
+    RecordNode* recordNode;
+    uint16 recordingNumber;
+    CriticalSection* diskWriteLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramNode);
 
 };
 
 
-#endif  PSTHNODE_H_
+#endif // PSTHNODE_H_

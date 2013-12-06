@@ -65,7 +65,7 @@ private:
 	std::list<String> log;
     Font labelFont;
 	bool firstTime;
-
+	CriticalSection lock;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LogWindow);
 
 

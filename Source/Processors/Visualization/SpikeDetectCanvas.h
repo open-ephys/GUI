@@ -102,15 +102,15 @@ public:
     void stopRecording() { } // unused
     
     SpikeDetector* processor;
-	 ScopedPointer<UtilityButton> clearButton,addPolygonUnitButton,
-		addUnitButton,delUnitButton,addBoxButton, delBoxButton,rePCAButton;
+	
+    ScopedPointer<UtilityButton> clearButton, addPolygonUnitButton,
+		addUnitButton, delUnitButton, addBoxButton, delBoxButton, rePCAButton;
 
 private:
 
     ScopedPointer<SpikeThresholdDisplay> spikeDisplay;
     ScopedPointer<Viewport> viewport;
 
-   
 	bool inDrawingPolygonMode;
     bool newSpike;
     SpikeObject spike;
@@ -271,7 +271,7 @@ private:
 	String strOverWhere;
 
 	std::vector<BoxUnit> units;
-	SpikeDetector *processor;
+	SpikeDetector* processor;
     MouseCursor::StandardCursorType cursorType;
 
 };
@@ -310,10 +310,10 @@ private:
 	void drawProjectedSpike(SpikeObject s);
 
 	bool rangeSet;
-	SpikeDetector *processor;
+	SpikeDetector* processor;
     void updateProjectionImage(uint16_t, uint16_t, uint16_t, const uint8_t *col);
 	void updateRange(const SpikeObject& s);
-	UtilityButton *rangeDownButton,*rangeUpButton;
+	ScopedPointer<UtilityButton> rangeDownButton, rangeUpButton;
 
 	Array<SpikeObject> spikeBuffer;
 	int bufferSize;

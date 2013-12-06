@@ -84,7 +84,7 @@ private:
     struct Electrode
     {
         String name;
-
+		int id;
         int numChannels;
 
         Array<float> displayThresholds;

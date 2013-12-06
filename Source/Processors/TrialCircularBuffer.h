@@ -25,17 +25,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TRIALCIRCULARBUFFER_H__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
-
-#include "GenericProcessor.h"
 #include "PeriStimulusTimeHistogramNode.h"
+#include "GenericProcessor.h"
+
 #include "Editors/PeriStimulusTimeHistogramEditor.h"
 #include "Visualization/SpikeObject.h"
 #include "SpikeDetector.h"
+
 #include <algorithm>    
 #include <queue>
 #include <vector>
 #include <list>
-
+class Electrode;
 class PeriStimulusTimeHistogramNode;
 
 #define TTL_TRIAL_OFFSET 30000
@@ -108,9 +109,9 @@ class SmartContinuousCircularBuffer : public ContinuousCircularBuffer
 {
 public:
 	SmartContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
-	void getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+	bool getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 									float preSec, float postSec,
-									std::vector<std::vector<float>> &output,
+									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid);
 
 	void addTrialStartToSmartBuffer(int trialID);
@@ -136,7 +137,7 @@ public:
 	int conditionID;
 
 	float xmin, xmax, ymax,ymin;
-
+	bool visible;
 	int numBins;
 	int binResolutionMS;
 	int numTrials;
@@ -145,6 +146,7 @@ public:
 	std::vector<float> binTime;
 	std::vector<float> avgResponse; // either firing rate or lfp
 	uint8 colorRGB[3];
+	float preSec,postSec;
 private:
 	std::vector<int64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
 };
@@ -158,11 +160,14 @@ public:
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
+	bool isNewDataAvailable();
+	void informPainted();
 
 	std::vector<ConditionPSTH> conditionPSTHs;
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
+	bool redrawNeeded;
 };
 
 class ChannelPSTHs 
@@ -172,11 +177,13 @@ public:
 	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
-
+	bool isNewDataAvailable();
+	void informPainted();
 	int channelID;
 	std::vector<ConditionPSTH> conditionPSTHs;
 	std::vector<float> binTime;
 	float preSecs, postSecs;
+	bool redrawNeeded;
 };
 
 
@@ -203,7 +210,7 @@ public:
 	~TrialCircularBuffer();
     void updatePSTHwithTrial(Trial *trial);
 	bool contains(std::vector<int> v, int x);
-	
+	void toggleConditionVisibility(int cond);
 	void parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
@@ -218,6 +225,15 @@ public:
 	void reallocate(int numChannels);
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
+	void clearAll();
+	
+	void channelChange(int electrodeID, int channelindex, int newchannel);
+	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
+	void addNewElectrode(Electrode *electrode);
+	void removeElectrode(Electrode *electrode);
+	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
+	void removeUnit(int electrodeID, int unitID);
+
 	bool firstTime;
 	 double postSec, preSec;
      int numTTLchannels ;
@@ -290,9 +306,6 @@ public:
 	CriticalSection conditionsMutex;
 	*/
 private:
-	std::vector<String> splitString(String S, char sep);
-	
-
 	PeriStimulusTimeHistogramNode *processor;
 };
 

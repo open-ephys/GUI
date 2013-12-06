@@ -32,7 +32,7 @@ UIComponent::UIComponent(MainWindow* mainWindow_, ProcessorGraph* pgraph, AudioC
     processorGraph->setUIComponent(this);
 
     infoLabel = new InfoLabel();
-	logWindow = new LogWindow();
+    logWindow = new LogWindow();
 
     dataViewport = new DataViewport();
     addChildComponent(dataViewport);

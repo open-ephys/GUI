@@ -56,11 +56,12 @@ ProcessorList::ProcessorList()
     //sources->addSubItem(new ProcessorListItem("Custom FPGA"));
     sources->addSubItem(new ProcessorListItem("Rhythm FPGA"));
     sources->addSubItem(new ProcessorListItem("File Reader"));
+	sources->addSubItem(new ProcessorListItem("Network Events"));
+
     //sources->addSubItem(new ProcessorListItem("Event Generator"));
 
     ProcessorListItem* filters = new ProcessorListItem("Filters");
     filters->addSubItem(new ProcessorListItem("Bandpass Filter"));
-    filters->addSubItem(new ProcessorListItem("Network Events"));
     filters->addSubItem(new ProcessorListItem("Spike Detector"));
     //filters->addSubItem(new ProcessorListItem("Resampler"));
     filters->addSubItem(new ProcessorListItem("Phase Detector"));
@@ -81,6 +82,7 @@ ProcessorList::ProcessorList()
     utilities->addSubItem(new ProcessorListItem("Splitter"));
     utilities->addSubItem(new ProcessorListItem("Merger"));
     utilities->addSubItem(new ProcessorListItem("Record Control"));
+    utilities->addSubItem(new ProcessorListItem("Advancers"));
 
     baseItem = new ProcessorListItem("Processors");
     baseItem->addSubItem(sources);

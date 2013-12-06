@@ -31,6 +31,7 @@
 #include "SpikeSortBoxes.h"
 #include "NetworkEvents.h"
 #include "Visualization/SpikeObject.h"
+#include "AdvancerNode.h"
 #include <algorithm>    // std::sort
 #include <queue>
 #include <stdlib.h>
@@ -78,15 +79,15 @@ class Electrode
 {
 	public:
 		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
-
-        String name;
+        ~Electrode();
+		String name;
 
         int numChannels;
         int prePeakSamples, postPeakSamples;
         int lastBufferIndex;
 
-		String advancerID;
-		float *channelsDepthOffset;
+		int advancerID;
+		float depthOffsetMM;
 
 		int electrodeID;
         int* channels;
@@ -103,7 +104,7 @@ class ContinuousCircularBuffer
 public:
 	ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
 	void reallocate(int N);
-	void update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts);
+	void update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts, int numpts);
 	int GetPtr();
 	void addTrialStartToSmartBuffer(int trialID);
 	int numCh;
@@ -115,7 +116,7 @@ public:
 	int ptr;
 	int bufLen;
 	int leftover_k;
-	std::vector<std::vector<float>> Buf;
+	std::vector<std::vector<float> > Buf;
 	std::vector<bool> valid;
 	std::vector<int64> hardwareTS,softwareTS;
 };
@@ -154,6 +155,8 @@ public:
     /** Called after acquisition is finished. */
     bool disable();
 
+	
+	bool isReady();
     /** Creates the SpikeDetectorEditor. */
     AudioProcessorEditor* createEditor();
 
@@ -173,7 +176,9 @@ public:
     // CREATE AND DELETE ELECTRODES //
 
     /** Adds an electrode with n channels to be processed. */
-    bool addElectrode(int nChans);
+    bool addElectrode(int nChans, String name, double depth);
+
+	void addProbes(String probeType,int numProbes, int nElectrodesPerProbe, int nChansPerElectrode,  double firstContactOffset, double interelectrodeDistance);
 
     /** Removes an electrode with a given index. */
     bool removeElectrode(int index);
@@ -200,35 +205,69 @@ public:
     /** */
     bool isChannelActive(int electrodeIndex, int channelNum);
 
-
-	Electrode *getActiveElectrode();
-    // RETURN STRING ARRAYS //
-
+	/** returns the current active electrode, i.e., the one displayed in the editor */
+	Electrode* getActiveElectrode();
+    
     /** Returns a StringArray containing the names of all electrodes */
     StringArray getElectrodeNames();
 
-    /** Returns a list of possible electrode types (e.g., stereotrode, tetrode). */
-    StringArray electrodeTypes;
-
+	/** modify a channel spike detection threshold */
     void setChannelThreshold(int electrodeNum, int channelNum, float threshold);
 
+	/** returns a channel's detection threshold */
     double getChannelThreshold(int electrodeNum, int channelNum);
+	
+	/** sync PSTH : inform of a new electrode added / removed */
+	void updatePSTHsink(Electrode* newElectrode, bool addRemove); 
+	/** sync PSTH : inform of a channel swap */
+	void updatePSTHsink(int electrodeID, int channelindex, int newchannel);
+	/** sync PSTH: inform of a new unit added / removed */
+	void updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
 
+	/** used to generate messages over the network and to inform PSTH sink */
+	void addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b);
+	void removeUnit(int electrodeID, int newUnitID);
+
+	/** saves all electrodes, thresholds, units, etc to xml */
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
 
+	/** returns the depth of an electrode. The depth is calculated as the
+	known depth of the advancer that is used to control that electrode, plus
+	the defined depth offset. Depth offset is mainly useful for depth probes,
+	in which the contact position is not always the at the tip */
+	double getElectrodeDepth(int electrodeID);
+
+	/** returns the number of electrodes */
 	int getNumElectrodes();
+
+	/** clears up the spike plots. Called during updates */
 	void removeSpikePlots();
+
 	int getNumberOfChannelsForElectrode(int i);
 	String getNameForElectrode(int i);
 	void addSpikePlotForElectrode(SpikeHistogramPlot* sp, int i);
 	int getCurrentElectrodeIndex();
-	void setCurrentElectrodeIndex(int i);
+	Electrode* setCurrentElectrodeIndex(int i);
+	Electrode* getElectrode(int i);
 	StringTS createStringTS(String S);
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
+	void setElectrodeAdvancer(int i,int ID);
+	void setElectrodeAdvancerOffset(int i, double v);
+	double getAdvancerPosition(int advancerID);
+	double getSelectedElectrodeDepth();
+
+	Array<Electrode*> getElectrodes();
+
+    std::vector<String> electrodeTypes;
 
 private:
+	void addElectrode(Electrode* newElectrode);
+	void increaseUniqueProbeID(String type);
+	int getUniqueProbeID(String type);
+
+	float ticksPerSec;
 	int uniqueID;
 	std::queue<StringTS> eventQueue;
     /** Reference to a continuous buffer. */
@@ -240,7 +279,7 @@ private:
 
     int sampleIndex;
 
-    Array<int> electrodeCounter;
+    std::vector<int> electrodeCounter;
     float getNextSample(int& chan);
     float getCurrentSample(int& chan);
     bool samplesAvailable(int& nSamples);
@@ -252,6 +291,7 @@ private:
     int currentIndex;
 
 
+	int numPreSamples,numPostSamples;
     uint8_t* spikeBuffer;///[256];
     //int64 timestamp;
 		  int64 hardware_timestamp;
@@ -260,22 +300,20 @@ private:
 	bool PCAbeforeBoxes;
  	ContinuousCircularBuffer* channelBuffers; // used to compute auto threshold
 
-    // void createSpikeEvent(int& peakIndex,
-    // 					  int& electrodeNumber,
-    // 					  int& currentChannel,
-    // 					  MidiBuffer& eventBuffer);
-
-    void handleEvent(int eventType, MidiMessage& event, int sampleNum);
+     void handleEvent(int eventType, MidiMessage& event, int sampleNum);
 
     void addSpikeEvent(SpikeObject* s, MidiBuffer& eventBuffer, int peakIndex);
-    void addWaveformToSpikeObject(SpikeObject* s,
+ 
+    void resetElectrode(Electrode*);
+	CriticalSection mut;
+
+	private:
+   void addWaveformToSpikeObject(SpikeObject* s,
                                   int& peakIndex,
                                   int& electrodeNumber,
                                   int& currentChannel);
 
-    void resetElectrode(Electrode*);
-	CriticalSection mut;
-	private:
+
 		   Array<Electrode*> electrodes;
 		   PCAcomputingThread computingThread;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeDetector);

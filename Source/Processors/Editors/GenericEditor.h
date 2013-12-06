@@ -117,6 +117,9 @@ public:
         return name;
     }
 
+    /** Updates name if processor ID changes. */
+    void updateName();
+
     /** Determines how wide the editor will be drawn. */
     int desiredWidth;
 
@@ -357,6 +360,7 @@ public:
     }
 
     void setLabel(String label);
+	String getLabel();
 
 private:
     void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);

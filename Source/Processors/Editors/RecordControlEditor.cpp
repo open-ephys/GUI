@@ -61,10 +61,18 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
     
     newFileToggleButton = new UtilityButton("SPLIT FILES", Font("Small Text", 13, Font::plain));
     newFileToggleButton->setRadius(3.0f);
-    newFileToggleButton->setBounds(35, 95, 90, 18);
+    newFileToggleButton->setBounds(35, 85, 90, 18);
     newFileToggleButton->addListener(this);
     newFileToggleButton->setClickingTogglesState(true);
     addAndMakeVisible(newFileToggleButton);
+
+  
+    eventsBySink = new UtilityButton("SINK WRITE EVENTS", Font("Default", 10, Font::plain));
+    eventsBySink->setRadius(3.0f);
+    eventsBySink->setBounds(10, 110, 140, 18);
+    eventsBySink->addListener(this);
+    eventsBySink->setClickingTogglesState(true);
+    addAndMakeVisible(eventsBySink);
 
 }
 
@@ -84,13 +92,18 @@ void RecordControlEditor::comboBoxChanged(ComboBox* comboBox)
 
 void RecordControlEditor::buttonEvent(Button* button)
 {
-
-    if (button->getToggleState())
-    {
-        getProcessor()->setParameter(1, 1.0f);
-    } else {
-        getProcessor()->setParameter(1, 0.0f);
-    }
+	if (button == newFileToggleButton)
+	{
+		if (button->getToggleState())
+		{
+			getProcessor()->setParameter(1, 1.0f);
+		} else {
+			getProcessor()->setParameter(1, 0.0f);
+		}
+	} else if (button == eventsBySink)
+	{
+		getProcessor()->setParameter(2, eventsBySink->getToggleState());
+	}
 }
 
 void RecordControlEditor::updateSettings()
@@ -109,6 +122,7 @@ void RecordControlEditor::saveEditorParameters(XmlElement* xml)
     info->setAttribute("Type", "RecordControlEditor");
     info->setAttribute("Channel",availableChans->getSelectedId());
     info->setAttribute("FileSaveOption",newFileToggleButton->getToggleState());
+	info->setAttribute("EventSaveOption",eventsBySink->getToggleState());
     
 }
 
@@ -122,6 +136,7 @@ void RecordControlEditor::loadEditorParameters(XmlElement* xml)
         {
             newFileToggleButton->setToggleState(xmlNode->getBoolAttribute("FileSaveOption"), true);
             availableChans->setSelectedId(xmlNode->getIntAttribute("Channel"), sendNotification);
+			eventsBySink->setToggleState(xmlNode->getBoolAttribute("EventSaveOption"), true);
         }
 
     }

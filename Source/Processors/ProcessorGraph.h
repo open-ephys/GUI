@@ -27,7 +27,6 @@
 #include "../../Resources/ZeroMQ/include/zmq.h"
 #include "../../Resources/ZeroMQ/include/zmq_utils.h"
 
-
 #include "../../JuceLibraryCode/JuceHeader.h"
 
 #include "../AccessClass.h"
@@ -61,7 +60,7 @@ public:
     ProcessorGraph();
     ~ProcessorGraph();
 
-    void* createNewProcessor(String& description);
+    void* createNewProcessor(String& description, int id);
     GenericProcessor* createProcessorFromDescription(String& description);
 
     void removeProcessor(GenericProcessor* processor);
@@ -86,8 +85,9 @@ public:
     void updatePointers();
     
     void setRecordState(bool);
-	void createZmqContext();
-	
+
+	void* createZmqContext();
+
 private:
 	void* zmqcontext;
     int currentNodeId;

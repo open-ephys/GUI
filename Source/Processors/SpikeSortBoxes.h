@@ -71,9 +71,11 @@ public:
 class Histogram
 {
 public:
+	Histogram();
 	Histogram(int N, double T0, double T1);
 	~Histogram();
 
+	void setParameters(int N, double T0, double T1);
 	std::vector<int> getCounter();
 	void reset();
 	void update(double x);
@@ -83,14 +85,16 @@ public:
 	std::vector<double> Time;
 	int numBins;
 	std::vector<int> Counter;
+
 };
 
 class RunningStats
 {
 public:
 	RunningStats();
+	~RunningStats();
 	void reset();
-	Histogram* getHistogram();
+	Histogram getHistogram();
 	std::vector<double> getMean(int index);
 	std::vector<double> getStandardDeviation(int index);
 	void update(SpikeObject *so);
@@ -98,9 +102,10 @@ public:
 
 	double LastSpikeTime;
 	bool newData;
-	Histogram *hist;
-	std::vector<std::vector<double>> WaveFormMean,WaveFormSk,WaveFormMk;
+	Histogram hist;
+	std::vector<std::vector<double> > WaveFormMean,WaveFormSk,WaveFormMk;
 	double numSamples;
+ 
 
 };
 
@@ -141,6 +146,7 @@ public:
 	bool Active;
 	juce::int64 Activated_TS_S;
 	Time timer;
+
 };
 
 /*
@@ -167,7 +173,6 @@ private:
 	int svdcmp(float **a, int nRows, int nCols, float *w, float **v);
 	float pythag(float a, float b);
 	int dim;
-
 };
 
 
@@ -246,11 +251,14 @@ public:
 
     void setSelectedUnitAndbox(int unitID, int boxID);
 	void getSelectedUnitAndbox(int &unitID, int &boxid);
-		
+	void saveCustomParametersToXml(XmlElement *electrodeNode);
+	void loadCustomParametersFromXml(XmlElement *electrodeNode);
 private:
-	int selectedUnit, selectedBox;
 	void  StartCriticalSection();
 	void  EndCriticalSection();
+
+	int numChannels, waveformLength;
+	int selectedUnit, selectedBox;
 	CriticalSection mut;
 	std::vector<BoxUnit> boxUnits;
 	std::vector<PCAUnit> pcaUnits;
@@ -261,6 +269,7 @@ private:
 	PCAcomputingThread *computingThread;
 	bool bPCAJobSubmitted,bPCAcomputed,bRePCA,bPCAjobFinished ;
 	
+
 };
 
-#endif  __SPIKESORTBOXES_H
+#endif // __SPIKESORTBOXES_H

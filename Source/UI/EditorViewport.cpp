@@ -68,6 +68,8 @@ EditorViewport::EditorViewport()
     addAndMakeVisible(rightButton);
     addAndMakeVisible(leftButton);
 
+    currentId = 100;
+
 }
 
 EditorViewport::~EditorViewport()
@@ -231,7 +233,7 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         /// needed to remove const cast --> should be a better way to do this
         //String description = sourceDescription.substring(0);
 
-        GenericEditor* activeEditor = (GenericEditor*) getProcessorGraph()->createNewProcessor(description);//, source, dest);
+        GenericEditor* activeEditor = (GenericEditor*) getProcessorGraph()->createNewProcessor(description, currentId);//, source, dest);
 
         std::cout << "Active editor: " << activeEditor << std::endl;
 
@@ -262,6 +264,8 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         somethingIsBeingDraggedOver = false;
 
         repaint();
+
+        currentId++;
     }
 }
 
@@ -1126,8 +1130,11 @@ const String EditorViewport::saveState(File fileToUse)
     int saveOrder = 0;
 
     XmlElement* xml = new XmlElement("SETTINGS");
-
+	
     XmlElement* info = xml->createNewChildElement("INFO");
+
+    XmlElement* version = info->createNewChildElement("VERSION");
+    version->addTextElement("0.1");
 
     Time currentTime = Time::getCurrentTime();
 
@@ -1303,6 +1310,34 @@ const String EditorViewport::loadState(File fileToLoad)
         return "Not a valid file.";
     }
 
+	bool olderVersionFound = true;
+	forEachXmlChildElement(*xml, element)
+    {
+		  if (element->hasTagName("INFO"))
+		  {
+			  forEachXmlChildElement(*element, element2)
+			  {
+			   if (element2->hasTagName("VERSION")) 
+			   {
+				   String S= element2->getAllSubText();
+				   double version =S.getDoubleValue();
+				   if (version >= 0.1)
+					   olderVersionFound = false;
+			   }
+			  }
+			  break;
+		  }
+	}
+	if (olderVersionFound)
+	{
+		    bool response = AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
+                                   "Old configuration file.",
+                                    "File may not load properly since it could lack some fields. Continute?",
+                                     "Yes", "No", 0, 0);
+        if (!response)
+			return "Failed To Open " + fileToLoad.getFileName();
+  
+	}
     clearSignalChain();
 
     String description;// = " ";
@@ -1323,6 +1358,7 @@ const String EditorViewport::loadState(File fileToLoad)
             {
 
                 int insertionPt = processor->getIntAttribute("insertionPoint");
+                currentId = processor->getIntAttribute("NodeId");
 
                 if (insertionPt == 1)
                 {
@@ -1343,6 +1379,7 @@ const String EditorViewport::loadState(File fileToLoad)
                 p = (GenericProcessor*) lastEditor->getProcessor();
                 p->loadOrder = loadOrder;
                 p->parametersAsXml = processor;
+
                 //Sets parameters based on XML files
                 setParametersByXML(p, processor);
                 loadOrder++;

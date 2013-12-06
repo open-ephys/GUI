@@ -783,7 +783,8 @@ void WaveAxes::plotSpike(const SpikeObject& s, Graphics& g)
     int dSamples = 1;
 
     float x = 0.0f;
-
+	
+	g.setColour(juce::Colour(s.color[0],s.color[1],s.color[2]));
     for (int i = 0; i < s.nSamples-1; i++)
     {
         //std::cout << s.data[sampIdx] << std::endl;

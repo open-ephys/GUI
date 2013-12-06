@@ -22,7 +22,7 @@
 */
 
 #include "NetworkEventsEditor.h"
-
+#include "../NetworkEvents.h"
 
 #include <stdio.h>
 
@@ -30,21 +30,94 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     : GenericEditor(parentNode, useDefaultParameterEditors)
 
 {
+	desiredWidth = 180;
 
-    urlButton = new UtilityButton("Select port",Font("Small Text", 13, Font::plain));
-    urlButton->addListener(this);
-    urlButton->setBounds(30,50,120,25);
-    addAndMakeVisible(urlButton);
-
-    urlLabel = new Label("FileNameLabel", "No port defined.");
+    urlLabel = new Label("Port", "Port:");
     urlLabel->setBounds(20,80,140,25);
     addAndMakeVisible(urlLabel);
 
-    desiredWidth = 180;
+
+	NetworkEvents *p= (NetworkEvents *)getProcessor();
+	
+
+	trialSimulation = new UtilityButton("Trial",Font("Default", 15, Font::plain));
+    trialSimulation->setBounds(20,25,80,18);
+    trialSimulation->addListener(this);
+    addAndMakeVisible(trialSimulation);
+
+	
+	startRecord = new UtilityButton("Start Record",Font("Default", 15, Font::plain));
+    startRecord->setBounds(20,55,100,18);
+    startRecord->addListener(this);
+    addAndMakeVisible(startRecord);
+
+
+	labelPort = new Label("Smooth MS", String(p->urlport));
+    labelPort->setBounds(70,85,80,18);
+    labelPort->setFont(Font("Default", 15, Font::plain));
+    labelPort->setColour(Label::textColourId, Colours::white);
+
+
+
+//		NetworkEvents *processor  = (NetworkEvents*) getProcessor();
+
+	//if (processor->threadRunning)
+		labelPort->setColour(Label::backgroundColourId, Colours::grey);
+//	else
+//		labelPort->setColour(Label::backgroundColourId, Colours::red);
+
+
+    labelPort->setEditable(true);
+    labelPort->addListener(this);
+    addAndMakeVisible(labelPort);
 
     setEnabledState(false);
 
 }
+
+
+
+void NetworkEventsEditor::buttonEvent(Button* button)
+{
+			NetworkEvents *processor  = (NetworkEvents*) getProcessor();
+
+	if (button == trialSimulation)
+	{
+		processor->simulateSingleTrial();
+
+	} else if (button == startRecord)
+	{
+		if (startRecord->getLabel() == "Start Record") 
+		{
+			processor->simulateStartRecord();
+			startRecord->setLabel("Stop Record");
+		} else if (startRecord->getLabel() == "Stop Record") 
+		{
+			processor->simulateStopRecord();
+			startRecord->setLabel("Start Record");
+		}
+	}
+    
+
+}
+
+void NetworkEventsEditor::setLabelColor(juce::Colour color)
+{
+	labelPort->setColour(Label::backgroundColourId, color);
+}
+
+
+void NetworkEventsEditor::labelTextChanged(juce::Label *label)
+{
+	if (label == labelPort)
+	{
+	   Value val = label->getTextValue();
+
+		NetworkEvents *p= (NetworkEvents *)getProcessor();
+		p->setNewListeningPort(val.getValue());
+	}
+}
+
 
 NetworkEventsEditor::~NetworkEventsEditor()
 {
@@ -52,24 +125,3 @@ NetworkEventsEditor::~NetworkEventsEditor()
 }
 
 
-void NetworkEventsEditor::buttonEvent(Button* button)
-{
-
-    if (!acquisitionIsActive)
-    {
-
-        if (button == urlButton)
-        {
-            //std::cout << "Button clicked." << std::endl;
-			/*
-            FileChooser chooseFileReaderFile("Please select the file you want to load...",
-                                             lastFilePath,
-                                             "*");
-											 */
-           
-                // fileNameLabel->setText(fileToRead.getFileName(),false);
-           
-        }
-
-    }
-}

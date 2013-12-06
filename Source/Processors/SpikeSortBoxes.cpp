@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
+#include <algorithm>
 #include "SpikeSortBoxes.h"
 
 PointD::PointD()
@@ -329,6 +330,31 @@ int BoxUnit::getUnitID()
 
 /************************/
 
+Histogram::~Histogram()
+{
+	Time.clear();
+	Counter.clear();
+}
+
+Histogram::Histogram()
+{
+}
+
+void Histogram::setParameters(int N, double T0, double T1)
+{
+
+	t0=T0;
+	t1=T1;
+	numBins = N;
+	Time.resize(N);
+	Counter.resize(N);
+	for (int k = 0; k < N; k++)
+	{
+		Time[k] = (double)k / (N - 1) * (T1 - T0) + T0;
+		Counter[k] = 0;
+	}
+}
+
 Histogram::Histogram(int N, double T0, double T1)
 {
 	t0=T0;
@@ -377,20 +403,22 @@ std::vector<int> Histogram::getCounter()
 //Mk = Mk-1+ (xk - Mk-1)/k 
 //Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
 //For 2 ≤ k ≤ n, the kth estimate of the variance is s2 = Sk/(k - 1).
-
+RunningStats::~RunningStats()
+{
+}
 RunningStats::RunningStats()
 {
-	hist = new Histogram(101, 0, 100); // Inter spike histogram. Fixed range [0..100 ms]
+	hist.setParameters(101, 0, 100); // Inter spike histogram. Fixed range [0..100 ms]
 	numSamples = 0;
 }
 
 void RunningStats::reset()
 {
 	numSamples = 0;
-	hist->reset();
+	hist.reset();
 }
 
-Histogram* RunningStats::getHistogram()
+Histogram RunningStats::getHistogram()
 {
 	return hist;
 }
@@ -444,7 +472,7 @@ void RunningStats::update(SpikeObject *so)
 	}
 	else
 	{
-		hist->update(1000.0 * (ts - LastSpikeTime));
+		hist.update(1000.0 * (ts - LastSpikeTime));
 		LastSpikeTime = ts;
 	}
 	
@@ -532,7 +560,7 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 
   SpikeSortBoxes::SpikeSortBoxes(PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength)
   {
-	  computingThread = pth;
+	 computingThread = pth;
 	 pc1 = pc2 = nullptr;
 	 bufferSize = 200;
 	 spikeBufferIndex = -1;
@@ -546,6 +574,8 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	 pc2min = -1;
 	 pc1max = 1;
 	 pc2max = 1;
+	 numChannels = numch;
+	 waveformLength = WaveFormLength;
 
 	 pc1 = new float[numch * WaveFormLength];
 	 pc2 = new float[numch * WaveFormLength];
@@ -557,6 +587,180 @@ void BoxUnit::updateWaveform(SpikeObject *so)
         spikeBuffer.add(so);
     }
   }
+
+  void SpikeSortBoxes::loadCustomParametersFromXml(XmlElement *electrodeNode)
+  {
+
+		forEachXmlChildElement(*electrodeNode, spikesortNode)
+		{
+			if (spikesortNode->hasTagName("SPIKESORTING"))
+			{
+				int numBoxUnit  = spikesortNode->getIntAttribute("numBoxUnits");
+				int numPCAUnit  = spikesortNode->getIntAttribute("numPCAUnits");
+				selectedUnit  = spikesortNode->getIntAttribute("selectedUnit");
+				selectedBox =  spikesortNode->getIntAttribute("selectedBox");
+  
+
+				pcaUnits.clear();
+				boxUnits.clear();
+
+				forEachXmlChildElement(*spikesortNode, UnitNode)
+				{
+					if (UnitNode->hasTagName("PCA"))
+					{
+						numChannels = UnitNode->getIntAttribute("numChannels");
+						waveformLength = UnitNode->getIntAttribute("waveformLength");
+
+						pc1min = UnitNode->getDoubleAttribute("pc1min");
+						pc2min = UnitNode->getDoubleAttribute("pc2min");
+						pc1max = UnitNode->getDoubleAttribute("pc1max");
+						pc2max = UnitNode->getDoubleAttribute("pc2max");
+						delete(pc1);
+						delete(pc2);
+
+						pc1 = new float[waveformLength*numChannels];
+						pc2 = new float[waveformLength*numChannels];
+						int dimcounter = 0;
+						forEachXmlChildElement(*UnitNode, dimNode)
+						{
+							if (dimNode->hasTagName("PCA_DIM"))
+							{
+								pc1[dimcounter]=dimNode->getDoubleAttribute("pc1");
+								pc2[dimcounter]=dimNode->getDoubleAttribute("pc2");
+								dimcounter++;
+							}
+						}
+					}
+				
+				if (UnitNode->hasTagName("BOXUNIT"))
+					{
+						BoxUnit boxUnit;
+						boxUnit.UnitID = UnitNode->getIntAttribute("UnitID");
+						boxUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
+						boxUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
+						boxUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
+						int numBoxes = UnitNode->getIntAttribute("NumBoxes");
+						boxUnit.lstBoxes.resize(numBoxes);
+						int boxCounter = 0;
+						forEachXmlChildElement(*UnitNode, boxNode)
+						{
+							if (boxNode->hasTagName("BOX"))
+							{
+								Box box; 
+								box.channel = boxNode->getIntAttribute("ch");
+								box.x = boxNode->getDoubleAttribute("x");
+								box.y = boxNode->getDoubleAttribute("y");
+								box.w = boxNode->getDoubleAttribute("w");
+								box.h = boxNode->getDoubleAttribute("h");
+								boxUnit.lstBoxes[boxCounter++] = box;
+							}
+						}
+						// add box unit
+						boxUnits.push_back(boxUnit);
+					}
+					if (UnitNode->hasTagName("PCAUNIT"))
+					{
+						PCAUnit pcaUnit;
+
+						pcaUnit.UnitID = UnitNode->getIntAttribute("UnitID");
+						pcaUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
+						pcaUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
+						pcaUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
+
+						int numPolygonPoints = UnitNode->getIntAttribute("PolygonNumPoints");
+						pcaUnit.poly.pts.resize(numPolygonPoints);
+						pcaUnit.poly.offset.X = UnitNode->getDoubleAttribute("PolygonOffsetX");
+						pcaUnit.poly.offset.Y = UnitNode->getDoubleAttribute("PolygonOffsetY");
+						// read polygon
+						int pointCounter = 0;
+						forEachXmlChildElement(*UnitNode, polygonPoint)
+						{
+							if (polygonPoint->hasTagName("POLYGON_POINT"))
+							{
+								pcaUnit.poly.pts[pointCounter].X =  polygonPoint->getDoubleAttribute("pointX");
+								pcaUnit.poly.pts[pointCounter].Y =  polygonPoint->getDoubleAttribute("pointY");
+								pointCounter++;
+							}
+						}
+						// add polygon unit	
+						pcaUnits.push_back(pcaUnit);
+					}
+				}
+			}
+		}
+  }
+
+  void SpikeSortBoxes::saveCustomParametersToXml(XmlElement *electrodeNode)
+  {
+
+	  XmlElement* spikesortNode = electrodeNode->createNewChildElement("SPIKESORTING");
+	  spikesortNode->setAttribute("numBoxUnits", (int)boxUnits.size());
+	  spikesortNode->setAttribute("numPCAUnits", (int)pcaUnits.size());
+	  spikesortNode->setAttribute("selectedUnit",selectedUnit);
+	  spikesortNode->setAttribute("selectedBox",selectedBox);
+
+
+
+	  XmlElement* pcaNode = electrodeNode->createNewChildElement("PCA");
+	  pcaNode->setAttribute("numChannels",numChannels);
+	  pcaNode->setAttribute("waveformLength",waveformLength);
+	  pcaNode->setAttribute("pc1min", pc1min);
+	  pcaNode->setAttribute("pc2min", pc2min);
+	  pcaNode->setAttribute("pc1max", pc1max);
+	  pcaNode->setAttribute("pc2max", pc2max);
+
+	  for (int k=0;k<numChannels*waveformLength;k++)
+	  {
+		  XmlElement* dimNode = pcaNode->createNewChildElement("PCA_DIM");
+		  dimNode->setAttribute("pc1",pc1[k]);
+		  dimNode->setAttribute("pc2",pc2[k]);
+	  }
+
+	  for (int boxUnitIter=0;boxUnitIter<boxUnits.size();boxUnitIter++)
+	  {
+		  XmlElement* BoxUnitNode = spikesortNode->createNewChildElement("BOXUNIT");
+
+		  BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].UnitID);
+		  BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].ColorRGB[0]);
+		  BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].ColorRGB[1]);
+		  BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].ColorRGB[2]);
+		  BoxUnitNode->setAttribute("NumBoxes", (int)boxUnits[boxUnitIter].lstBoxes.size());
+		  for (int boxIter=0;boxIter<boxUnits[boxUnitIter].lstBoxes.size();boxIter++)
+		  {
+			  XmlElement* BoxNode = BoxUnitNode->createNewChildElement("BOX");
+			  BoxNode->setAttribute("ch", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].channel);
+			  BoxNode->setAttribute("x", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].x);
+			  BoxNode->setAttribute("y", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].y);
+			  BoxNode->setAttribute("w", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].w);
+			  BoxNode->setAttribute("h", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].h);
+		  }
+	  }
+
+	  for (int pcaUnitIter=0;pcaUnitIter<pcaUnits.size();pcaUnitIter++)
+	  {
+		  XmlElement* PcaUnitNode = spikesortNode->createNewChildElement("PCAUNIT");
+
+		  PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].UnitID);
+		  PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].ColorRGB[0]);
+		  PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].ColorRGB[1]);
+		  PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].ColorRGB[2]);
+		  PcaUnitNode->setAttribute("PolygonNumPoints",(int)pcaUnits[pcaUnitIter].poly.pts.size());
+		  PcaUnitNode->setAttribute("PolygonOffsetX",(int)pcaUnits[pcaUnitIter].poly.offset.X);
+		  PcaUnitNode->setAttribute("PolygonOffsetY",(int)pcaUnits[pcaUnitIter].poly.offset.Y);
+
+		  for (int p=0;p<pcaUnits[pcaUnitIter].poly.pts.size();p++)
+		  {
+			  XmlElement* PolygonNode = PcaUnitNode->createNewChildElement("POLYGON_POINT");
+			  PolygonNode->setAttribute("pointX", pcaUnits[pcaUnitIter].poly.pts[p].X);
+			  PolygonNode->setAttribute("pointY", pcaUnits[pcaUnitIter].poly.pts[p].Y);
+		  }
+	  }
+    
+
+	//float *pc1, *pc2;
+	
+
+  }
   
   SpikeSortBoxes::~SpikeSortBoxes()
   {
@@ -565,6 +769,8 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	 delete pc2;
 	pc1 = nullptr;
 	pc2 = nullptr;
+
+
   }
 
     void SpikeSortBoxes::setSelectedUnitAndbox(int unitID, int boxID)
@@ -1421,14 +1627,7 @@ PCAjob::PCAjob(Array<SpikeObject> _spikes, float *_pc1, float *_pc2,
 
  PCAjob::~PCAjob()
 {
-	if (cov != nullptr)
-	{
-		for (int k=0;k<dim;k++)
-			delete(cov[k]);
-
-		delete cov;
-		cov = nullptr;
-	}
+	
 }
 
 
@@ -1694,15 +1893,27 @@ void PCAjob::computeCov()
 
 }
 
-std::vector<int> sort_indexes( std::vector<float> v) {
-  // initialize original index locations
-  std::vector<int> idx(v.size());
-  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+std::vector<int> sort_indexes( std::vector<float> v) 
+{
+	// initialize original index locations
+	std::vector<int> idx(v.size());
 
-  // sort indexes based on comparing values in v
-	sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {return v[i1] > v[i2];});
+	for (int i = 0; i != idx.size(); ++i) 
+	{ 
+		idx[i] = i;
+	}
 
-  return idx;
+	// sort indexes based on comparing values in v
+	sort(
+		idx.begin(), 
+		idx.end(), 
+		[&v](size_t i1, size_t i2) 
+		{
+			return v[i1] > v[i2];
+		}
+	);
+
+	return idx;
 }
 
 void PCAjob::computeSVD()
@@ -1723,6 +1934,12 @@ void PCAjob::computeSVD()
 	
 	svdcmp(cov, dim, dim, sigvalues,eigvec );
 	// find the two largest eigen values
+	for (int k=0;k<dim;k++)
+		delete cov[k];
+
+	delete(cov);
+	cov=nullptr;
+
 	  std::vector<float> sig;
 	  sig.resize(dim);
 	  for (int k=0;k<dim;k++)
