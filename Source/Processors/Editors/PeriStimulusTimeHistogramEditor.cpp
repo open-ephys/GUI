@@ -133,6 +133,11 @@ void PeriStimulusTimeHistogramEditor::labelTextChanged(Label* label)
 
 }
 
+void PeriStimulusTimeHistogramEditor::setAutoRescale(bool state)
+{
+	autoRescale->setToggleState(state,false);
+}
+
 void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 {
 	VisualizerEditor::buttonEvent(button);
@@ -582,6 +587,20 @@ void PeriStimulusTimeHistogramDisplay::paint(Graphics &g)
 	g.drawText("Test",10,0,200,20,Justification::left,false);
 }  
 
+
+void PeriStimulusTimeHistogramDisplay::setAutoRescale(bool state)
+{
+	// draw n by m grid
+	PeriStimulusTimeHistogramEditor* ed = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
+	ed->setAutoRescale(state);
+	
+	for (int k=0;k<psthPlots.size();k++)
+	{
+		psthPlots[k]->setAutoRescale(state);
+	}
+
+}
+
 void PeriStimulusTimeHistogramDisplay::resized()
 {
 	// draw n by m grid
@@ -660,7 +679,38 @@ XYPlot::XYPlot(PeriStimulusTimeHistogramDisplay *dsp, int _plotID, bool _spikePl
 
 void XYPlot::mouseUp(const juce::MouseEvent& event)
 {
-	zooming = false;
+	if (zooming)
+	{
+		zooming = false;
+		// first, turn off auto rescale, if it is enabled.
+		display->setAutoRescale(false); // zoom is now enabled. We can't have auto rescale and zoom at the same time.
+
+		float downX = float(mouseDownX-x0) /(float)plotWidth * rangeX + xmin;
+		float downY = float(plotHeight-(mouseDownY-y0)) /(float)plotHeight * rangeY + ymin;
+
+		float upX = float(event.x-x0) /(float)plotWidth * rangeX + xmin;
+		float upY = float(plotHeight-(event.y-y0)) /(float)plotHeight * rangeY + ymin;
+		
+		// convert mouse down and up position to proper x,y range
+		// save current zoom 
+		if ( ( fabs(downX-upX) < 0.01) ||  ( fabs(downY-upY) < 0.01) )
+		{
+			// do not zoom more. probably just incorrect click
+			return;
+		}
+		zoom CurrentZoom;
+		CurrentZoom.xmin=xmin;
+		CurrentZoom.ymin=ymin;
+		CurrentZoom.xmax=xmax;
+		CurrentZoom.ymax=ymax;
+		zoomMemory.push_back(CurrentZoom);
+
+		xmin = MIN(downX, upX);
+		xmax = MAX(downX, upX);
+		ymin = MIN(downY, upY);
+		ymax = MAX(downY, upY);
+		repaint();
+	}
 }
 
 void XYPlot::mouseDrag(const juce::MouseEvent& event)
@@ -674,43 +724,19 @@ void XYPlot::mouseDrag(const juce::MouseEvent& event)
 
 void XYPlot::mouseDown(const juce::MouseEvent& event)
 {
-	
-	if (event.mods.isRightButtonDown() && !event.mods.isShiftDown())
+	if (event.mods.isRightButtonDown())
 	{
-
-		tcb->lockPSTH();
-		for (int electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
+		if (zoomMemory.size() > 0)
 		{
-			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
-			{
-				if (spikePlot)
-				{
-					for (int unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
-					{
-						if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
-						{
-							tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].clearStatistics();
-							break;
-						}
-					}
-				} else 
-				{
-					for (int Index = 0; Index < tcb->electrodesPSTH[electrodeIndex].channels.size();Index++)
-					{
-						if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].channelID  == unitID)
-						{
-							tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].clearStatistics();
-							break;
-						}
-					}
-
-				}
-			}
+			zoom prevZoom = zoomMemory.back();
+			zoomMemory.pop_back();
+			xmin = prevZoom.xmin;
+			xmax = prevZoom.xmax;
+			ymin = prevZoom.ymin;
+			ymax = prevZoom.ymax;
+			repaint();
 		}
-		tcb->unlockPSTH();
-	} else if (event.mods.isRightButtonDown() && event.mods.isShiftDown())
-	{
-		// zoom out
+
 	} else if (event.mods.isLeftButtonDown())
 	{
 		mouseDownX = event.x;
@@ -861,7 +887,45 @@ bool XYPlot::isFullScreen()
 
 void XYPlot::mouseDoubleClick(const juce::MouseEvent& event)
 {
-	display->focusOnPlot(plotID);
+	if (event.mods.isRightButtonDown())
+	{
+		tcb->lockPSTH();
+		for (int electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
+		{
+			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+			{
+				if (spikePlot)
+				{
+					for (int unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
+					{
+						if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
+						{
+							tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].clearStatistics();
+							break;
+						}
+					}
+				} else 
+				{
+					for (int Index = 0; Index < tcb->electrodesPSTH[electrodeIndex].channels.size();Index++)
+					{
+						if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].channelID  == unitID)
+						{
+							tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].clearStatistics();
+							break;
+						}
+					}
+
+				}
+			}
+		}
+		tcb->unlockPSTH();
+		repaint();
+	} else 
+	if (event.mods.isLeftButtonDown())
+	{
+		// full screen toggle
+		display->focusOnPlot(plotID);
+	}
 }
 
 void XYPlot::buildSmoothKernel(float _guassianStandardDeviationMS)
@@ -1141,7 +1205,12 @@ void XYPlot::plotTicks(Graphics &g, float xmin, float xmax, float ymin, float ym
 		// convert to screen coordinates.
 		float tickloc = x0+(tickX[k]- axesRange[0]) / rangeX * plotWidth;
 		g.drawLine(tickloc,h-y0,tickloc,h-(y0+tickHeight),tickThickness);
-		String tickLabel(tickX[k],1);;
+
+		String tickLabel;
+		if (axesRange[0] > 0.2)
+			tickLabel = String(tickX[k],1);
+		else
+			tickLabel = String(tickX[k],2);
 
 		if (k > 0)
 			g.drawText(tickLabel,tickloc-ticklabelWidth/2,h-(y0),ticklabelWidth,tickLabelHeight,Justification::centred,false);
@@ -1155,7 +1224,13 @@ void XYPlot::plotTicks(Graphics &g, float xmin, float xmax, float ymin, float ym
 		float tickloc = y0+(tickY[k]- axesRange[1]) / rangeY * plotHeight;
 		g.drawLine(x0,h-tickloc,x0+tickHeight,h-tickloc, tickThickness);
 
-		String tickLabel(tickY[k],1);;
+
+		String tickLabel;
+		if (axesRange[1] > 0.2)
+			tickLabel = String(tickY[k],1);
+		else
+			tickLabel = String(tickY[k],2);
+
 		g.drawText(tickLabel,x0-ticklabelWidth-3,h-tickloc-tickLabelHeight/2,ticklabelWidth,tickLabelHeight,Justification::right,false);
 
 	}
@@ -1217,6 +1292,12 @@ void XYPlot::paintSpikes(Graphics &g)
 
 	plotTicks(g,xmin, xmax, ymin, ymax);
 
+	// plot zero line
+	float fx0 = (0-axesRange[0])/rangeX * plotWidth;
+	g.setColour(juce::Colours::grey);
+	g.drawLine(fx0,y0,fx0,y0+plotHeight,1);
+		
+	//g.drawLine(
 //	newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
 
 	int numSamplePoints = plotWidth/subsample;
@@ -1296,6 +1377,10 @@ void XYPlot::paintLFP(Graphics &g)
 	plotTicks(g,xmin, xmax, ymin, ymax);
 
 //	newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
+	float fx0 = (0-axesRange[0])/rangeX * plotWidth;
+
+	g.setColour(juce::Colours::grey);
+	g.drawLine(fx0,y0,fx0,y0+plotHeight,1);
 
 	int numSamplePoints = plotWidth/subsample;
 	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)

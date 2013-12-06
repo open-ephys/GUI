@@ -39,6 +39,11 @@ class TrialCircularBuffer;
 class PeriStimulusTimeHistogramNode;
 class PeriStimulusTimeHistogramDisplay;
 
+struct zoom
+{
+	float xmin,xmax,ymin,ymax;
+};
+
 class XYPlot : public Component
 {
 public:
@@ -101,7 +106,7 @@ private:
 	float xmin, xmax, ymax, ymin;
 	int mouseDownX, mouseDownY,mouseDragX,mouseDragY;
 	bool zooming;
-
+	std::list<zoom> zoomMemory;
 	PeriStimulusTimeHistogramDisplay* display;
 };
 class PeriStimulusTimeHistogramCanvas;
@@ -112,6 +117,9 @@ class PeriStimulusTimeHistogramDisplay : public Component
 public:
 	PeriStimulusTimeHistogramDisplay(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c);
 	~PeriStimulusTimeHistogramDisplay();
+	
+
+	void setAutoRescale(bool state);
 	void resized();
 
 	std::vector<XYPlot*> psthPlots;
@@ -196,6 +204,7 @@ public:
 	void comboBoxChanged (ComboBox* comboBoxThatHasChanged);
 	void updateCanvas();
 	void buttonEvent(Button* button);
+	void setAutoRescale(bool state);
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
