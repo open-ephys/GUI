@@ -125,7 +125,7 @@ StringTS::~StringTS() {
 
 /*********************************************/
 NetworkEvents::NetworkEvents(void *zmq_context)
-	:Thread("NetworkThread"), GenericProcessor("Network Events"), threshold(200.0), bufferZone(5.0f), state(false)
+	: GenericProcessor("Network Events"), Thread("NetworkThread"), threshold(200.0), bufferZone(5.0f), state(false)
 
 {
 	zmqcontext = zmq_context;
@@ -135,8 +135,6 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 	threadRunning = false;
 	opensocket();
 	
-	
-	//parameters.add(Parameter("thresh", 0.0, 500.0, 200.0, 0));
 }
 
 void NetworkEvents::setNewListeningPort(int port)
@@ -263,6 +261,9 @@ Time t;
 
 void NetworkEvents::simulateSingleTrial()
 {
+    
+    std::cout << "Simulating trial." << std::endl;
+    
 	int numTrials = 1;
 	float ITI = 0.7;
 	float TrialLength = 0.4;
@@ -468,9 +469,6 @@ void NetworkEvents::loadCustomParametersFromXml()
 
 	if (parametersAsXml != nullptr)
 	{
-
-		int electrodeIndex = -1;
-
 		forEachXmlChildElement(*parametersAsXml, mainNode)
 		{
 			if (mainNode->hasTagName("NETWORKEVENTS"))

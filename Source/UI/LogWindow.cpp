@@ -87,7 +87,7 @@ void LogWindow::addLineToLog(String S)
 
 LogWindow::~LogWindow()
 {
-int x = 5;
+    int x = 5;
 }
 
 void LogWindow::timerCallback()
