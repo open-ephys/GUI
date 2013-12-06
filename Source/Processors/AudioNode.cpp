@@ -90,7 +90,8 @@ void AudioNode::setChannel(Channel* ch)
 
     std::cout << "Audio node setting channel to " << channelNum << std::endl;
 
-    setCurrentChannel(channelNum);
+    if (channelNum > -1)
+        setCurrentChannel(channelNum);
 }
 
 void AudioNode::setChannelStatus(Channel* chan, bool status)

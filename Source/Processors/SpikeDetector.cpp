@@ -183,6 +183,8 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
     }
 	spikePlot = nullptr;
 	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
+
+    isMonitored = false;
 }
 
 void SpikeDetector::setElectrodeAdvancerOffset(int i, double v)

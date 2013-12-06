@@ -432,7 +432,11 @@ void ChannelSelector::setAudioStatus(int chan, bool b)
 
 }
 
-
+void ChannelSelector::clearAudio()
+{
+    for (int chan = 0; chan < audioButtons.size(); chan++)
+        audioButtons[chan]->setToggleState(false, true);
+}
 
 int ChannelSelector::getDesiredWidth()
 {
@@ -555,11 +559,12 @@ void ChannelSelector::buttonClicked(Button* button)
             //int channelNum = editor->getStartChannel() + b->getChannel() - 1;
             bool status = b->getToggleState();
 
+            std::cout << "Requesting audio monitor for channel " << ch->num << std::endl;
+
             if (acquisitionIsActive) // use setParameter to change parameter safely
             {
                 editor->getProcessorGraph()->
-                getAudioNode()->
-                setChannelStatus(ch, status);
+                    getAudioNode()->setChannelStatus(ch, status);
             }
             else     // change parameter directly
             {

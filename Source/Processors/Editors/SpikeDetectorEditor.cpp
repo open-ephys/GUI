@@ -114,6 +114,12 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     plusButton->setBounds(15,27,14,14);
     addAndMakeVisible(plusButton);
 
+    audioMonitorButton = new UtilityButton("MONITOR", titleFont);
+    audioMonitorButton->addListener(this);
+    audioMonitorButton->setRadius(3.0f);
+    audioMonitorButton->setBounds(70,60,75,20);
+    audioMonitorButton->setClickingTogglesState(true);
+    addAndMakeVisible(audioMonitorButton);
 
 	removeElectrodeButton = new UtilityButton("-",font);
     removeElectrodeButton->addListener(this);
@@ -138,7 +144,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     // create a custom channel selector
     deleteAndZero(channelSelector);
 
-    channelSelector = new ChannelSelector(false, font);
+    channelSelector = new ChannelSelector(true, font);
     addChildComponent(channelSelector);
     channelSelector->setVisible(false);
 
@@ -341,6 +347,31 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
         //getEditorViewport()->makeEditorVisible(this, true, true);
 
         return;
+    } else if (button == audioMonitorButton)
+    {
+
+       channelSelector->clearAudio();
+
+       SpikeDetector* processor = (SpikeDetector*) getProcessor();
+
+        Array<Electrode*> electrodes = processor->getElectrodes();
+
+        for (int i = 0; i < electrodes.size(); i++)
+        {
+            Electrode* e = electrodes[i];
+            e->isMonitored = false;
+        }
+
+        Electrode* e = processor->getActiveElectrode();
+        e->isMonitored = audioMonitorButton->getToggleState();
+
+        for (int i = 0; i < e->numChannels; i++)
+        {
+            int channelNum = e->channels[i];
+            channelSelector->setAudioStatus(channelNum, audioMonitorButton->getToggleState());
+
+        }
+
     }
 
 
@@ -491,6 +522,9 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 			Electrode * e= processor->setCurrentElectrodeIndex(ID-1);
             drawElectrodeButtons(ID-1);
 			int advancerIndex = 0;
+
+            audioMonitorButton->setToggleState(e->isMonitored, false);
+
 			for (int k=0;k<advancerIDs.size();k++)
 			{
 				if (advancerIDs[k] == e->advancerID)
@@ -501,7 +535,13 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 			}
 			advancerList->setSelectedId(advancerIndex,false);
 			depthOffsetEdit->setText(String(e->depthOffsetMM,4),dontSendNotification);
+
+
+
         }
+
+
+
 	} else if ( comboBox == advancerList)
 	{
 		// attach advancer to electrode.
