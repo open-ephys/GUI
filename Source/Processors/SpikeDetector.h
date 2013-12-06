@@ -96,6 +96,8 @@ class Electrode
 		SpikeHistogramPlot* spikePlot;
 		SpikeSortBoxes* spikeSort;
 		PCAcomputingThread *computingThread;
+
+        bool isMonitored;
 };
 
 

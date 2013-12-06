@@ -182,6 +182,7 @@ private:
     TriangleButton* downButton;
     UtilityButton* plusButton;
 	UtilityButton* removeElectrodeButton;
+    UtilityButton* audioMonitorButton;
 
     ThresholdSlider* thresholdSlider;
 
