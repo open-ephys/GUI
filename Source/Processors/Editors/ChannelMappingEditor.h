@@ -68,13 +68,17 @@ public:
 
 private:
 
+	void createElectrodeButtons(int numNeeded, bool clearPrevious);
 	void setChannelReference(ElectrodeButton *button);
 	void setChannelPosition(int position, int channel);
+	void checkUnusedChannels();
+	void setConfigured(bool state);
 
 	OwnedArray<ElectrodeButton> electrodeButtons;
 	OwnedArray<ElectrodeButton> referenceButtons;
     ScopedPointer<ElectrodeEditorButton> selectAllButton;
     ScopedPointer<ElectrodeEditorButton> modifyButton;
+	ScopedPointer<ElectrodeEditorButton> resetButton;
 
     Array<int> channelArray;
     Array<int> referenceArray;
@@ -92,6 +96,7 @@ private:
 	int initialDraggedButton;
 	int draggingChannel;
 	int lastHoverButton;
+	bool isConfigured;
 	
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelMappingEditor);
