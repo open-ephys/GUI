@@ -1295,7 +1295,7 @@ const String EditorViewport::loadState(File fileToLoad)
     // {
     //     return "No configuration selected.";
     // }
-
+	int maxID=100;
     currentFile = fileToLoad;
 
     std::cout << "Loading processor graph." << std::endl;
@@ -1362,10 +1362,7 @@ const String EditorViewport::loadState(File fileToLoad)
                 int insertionPt = processor->getIntAttribute("insertionPoint");
                 currentId = processor->getIntAttribute("NodeId");
 
-                if (currentId > maxId)
-                {
-                    maxId = currentId;
-                }
+				maxID= (maxID > currentId) ? maxID  : currentId ;
 
                 if (insertionPt == 1)
                 {
@@ -1460,9 +1457,10 @@ const String EditorViewport::loadState(File fileToLoad)
     String error = "Opened ";
     error += currentFile.getFileName();
 
-    currentId = ++maxId; // make sure future processors don't have overlapping id numbers
-
     delete xml;
+
+	currentId=maxID+1; // make sure future processors don't have overlapping id numbers
+
     return error;
 }
 /* Set parameters based on XML.*/
