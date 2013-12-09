@@ -456,7 +456,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 				newplot->setAutoRescale(autoRescale);
 				newplot->buildSmoothKernel(gaussianStandardDeviationMS);
 				psthDisplay->psthPlots.push_back(newplot);
-				addAndMakeVisible(newplot);
+				psthDisplay->addAndMakeVisible(newplot);
 				plottedSomething = true;
 			}
 
@@ -495,7 +495,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					newplot->buildSmoothKernel(gaussianStandardDeviationMS);
 
 					psthDisplay->psthPlots.push_back(newplot);
-					addAndMakeVisible(newplot);
+					psthDisplay->addAndMakeVisible(newplot);
 				}
 				plottedSomething = true;
 			}
@@ -579,12 +579,13 @@ void PeriStimulusTimeHistogramDisplay::paint(Graphics &g)
 {
 	g.setColour(Colours::white);
 	g.drawRect(0,0,getWidth(),getHeight());
-
+/*
 	font = Font("Default", 15, Font::plain);
 
 	g.setFont(font);
 
 	g.drawText("Test",10,0,200,20,Justification::left,false);
+	*/
 }  
 
 
