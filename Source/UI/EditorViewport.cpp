@@ -1293,7 +1293,7 @@ const String EditorViewport::loadState(File fileToLoad)
     // {
     //     return "No configuration selected.";
     // }
-
+	int maxID=100;
     currentFile = fileToLoad;
 
     std::cout << "Loading processor graph." << std::endl;
@@ -1359,7 +1359,7 @@ const String EditorViewport::loadState(File fileToLoad)
 
                 int insertionPt = processor->getIntAttribute("insertionPoint");
                 currentId = processor->getIntAttribute("NodeId");
-
+				maxID= (maxID > currentId) ? maxID  : currentId ;
                 if (insertionPt == 1)
                 {
                     insertionPoint = editorArray.size();
@@ -1454,6 +1454,9 @@ const String EditorViewport::loadState(File fileToLoad)
     error += currentFile.getFileName();
 
     delete xml;
+
+	currentId=maxID+1;
+
     return error;
 }
 /* Set parameters based on XML.*/
