@@ -330,6 +330,11 @@ public:
     
 	void handleIncomdingMessages();
 
+		/** Informs the Control Panel that recording has begun.*/
+    void startRecording();
+    
+    /** Informs the Control Panel that recording has stopped.*/
+    void stopRecording();
 
 private:
     ScopedPointer<PlayButton> playButton;
@@ -368,11 +373,6 @@ private:
 
     bool keyPressed(const KeyPress& key);
 
-	/** Informs the Control Panel that recording has begun.*/
-    void startRecording();
-    
-    /** Informs the Control Panel that recording has stopped.*/
-    void stopRecording();
 
     Font font;
 
