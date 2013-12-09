@@ -69,6 +69,7 @@ EditorViewport::EditorViewport()
     addAndMakeVisible(leftButton);
 
     currentId = 100;
+    maxId = 100;
 
 }
 
@@ -266,6 +267,7 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         repaint();
 
         currentId++;
+
     }
 }
 
@@ -1360,6 +1362,11 @@ const String EditorViewport::loadState(File fileToLoad)
                 int insertionPt = processor->getIntAttribute("insertionPoint");
                 currentId = processor->getIntAttribute("NodeId");
 
+                if (currentId > maxId)
+                {
+                    maxId = currentId;
+                }
+
                 if (insertionPt == 1)
                 {
                     insertionPoint = editorArray.size();
@@ -1452,6 +1459,8 @@ const String EditorViewport::loadState(File fileToLoad)
 
     String error = "Opened ";
     error += currentFile.getFileName();
+
+    currentId = ++maxId; // make sure future processors don't have overlapping id numbers
 
     delete xml;
     return error;
