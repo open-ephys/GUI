@@ -63,6 +63,8 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/NetworkSink_28a35cdc.o \
+  $(OBJDIR)/NetworkSinkProcotol.pb_4af1b0cd.o \
   $(OBJDIR)/AdvancerNode_12999801.o \
   $(OBJDIR)/NetworkEvents_28b3b762.o \
   $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
@@ -292,6 +294,16 @@ $(OBJDIR)/State_22979684.o: ../../Source/Dsp/State.cpp
 $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkSink_28a35cdc.o: ../../Source/Processors/NetworkSink.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkSink.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkSinkProcotol.pb_4af1b0cd.o: ../../Source/Processors/NetworkSinkProcotol.pb.cc
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkSinkProcotol.pb.cc"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AdvancerNode_12999801.o: ../../Source/Processors/AdvancerNode.cpp

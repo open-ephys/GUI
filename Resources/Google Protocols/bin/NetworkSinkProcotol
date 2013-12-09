@@ -1,0 +1,37 @@
+package OpenEphys;
+
+message DoubleMatrix {
+  required uint32 rows = 1;
+  required uint32 cols = 2;
+  repeated double data = 3 [packed=true];
+}
+
+message Spike {
+  required sfixed64 timestamp = 1;
+  required sfixed64 timestamp_software = 2;
+  required int32 source = 3;
+  required int32 nChannels = 4;
+  required int32 nSamples = 5;
+  required int32 sortedId = 6;
+  required int32 electrodeID = 7;
+  repeated int32 color = 8 [packed=true]; 
+  repeated float pcProj = 9; 
+  required int32 samplingFrequencyHz = 10;
+  repeated int32 data = 11 [packed=true];
+  repeated int32 gain = 12 [packed=true];
+  repeated int32 threshold = 13 [packed=true];
+}
+
+message ChannelData
+{
+  required int32 channel = 1;
+  required int32 nSamples = 2;
+  repeated int32 data = 3 [packed=true];
+  required int32 samplingFrequencyHz = 4;
+}
+
+message ChannelsData
+{
+  required int32 nChannels = 1;
+  repeated ChannelData channels = 2;
+}

@@ -42,6 +42,7 @@
 #include "SourceNode.h"
 #include "EventDetector.h"
 #include "NetworkEvents.h"
+#include "NetworkSink.h"
 #include "PeriStimulusTimeHistogramNode.h"
 #include "SpikeDetector.h"
 #include "PhaseDetector.h"
@@ -628,6 +629,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a PSTH sink." << std::endl;
             processor = new PeriStimulusTimeHistogramNode();
+        }else if (subProcessorType.equalsIgnoreCase("Network Sink"))
+        {
+            std::cout << "Creating a Network sink." << std::endl;
+            processor = new NetworkSinkNode(zmqcontext);
         }
         else if (subProcessorType.equalsIgnoreCase("WiFi Output"))
         {

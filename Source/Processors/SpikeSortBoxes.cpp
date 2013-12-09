@@ -615,6 +615,10 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 						pc2min = UnitNode->getDoubleAttribute("pc2min");
 						pc1max = UnitNode->getDoubleAttribute("pc1max");
 						pc2max = UnitNode->getDoubleAttribute("pc2max");
+
+						bPCAjobFinished = UnitNode->getBoolAttribute("PCAjobFinished");
+						bPCAcomputed = UnitNode->getBoolAttribute("PCAcomputed");
+
 						delete(pc1);
 						delete(pc2);
 
@@ -700,7 +704,6 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	  spikesortNode->setAttribute("selectedBox",selectedBox);
 
 
-
 	  XmlElement* pcaNode = electrodeNode->createNewChildElement("PCA");
 	  pcaNode->setAttribute("numChannels",numChannels);
 	  pcaNode->setAttribute("waveformLength",waveformLength);
@@ -708,6 +711,9 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	  pcaNode->setAttribute("pc2min", pc2min);
 	  pcaNode->setAttribute("pc1max", pc1max);
 	  pcaNode->setAttribute("pc2max", pc2max);
+
+	  pcaNode->setAttribute("PCAjobFinished", bPCAjobFinished);
+	  pcaNode->setAttribute("PCAcomputed", bPCAcomputed);
 
 	  for (int k=0;k<numChannels*waveformLength;k++)
 	  {
