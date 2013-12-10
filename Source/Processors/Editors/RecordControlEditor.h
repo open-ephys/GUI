@@ -26,6 +26,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
+#include "../RecordNode.h"
 
 /**
 
@@ -48,8 +49,10 @@ public:
     void saveEditorParameters(XmlElement*);
 
 private:
-    ScopedPointer<ComboBox> availableChans;
-    ScopedPointer<Label> chanSel;
+	int lastId;
+	StringArray channelNames;
+    ScopedPointer<ComboBox> availableChans,chanRenameCombo;
+    ScopedPointer<Label> chanSel,chanRename;
     ScopedPointer<UtilityButton> newFileToggleButton,eventsBySink;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RecordControlEditor);

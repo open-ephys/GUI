@@ -24,29 +24,50 @@
 #include "RecordControlEditor.h"
 #include "../Utilities/RecordControl.h"
 #include "ChannelSelector.h"
+#include "../ProcessorGraph.h"
 #include <stdio.h>
 
 RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
     : GenericEditor(parentNode, useDefaultParameterEditors)
 {
-    desiredWidth = 170;
+    desiredWidth = 230;
 
     //channelSelector->eventsOnly = true;
 
-    chanSel = new Label("Channel Text","Trigger Channel:");
+    chanSel = new Label("Channel Text","Trigger:");
     chanSel->setEditable(false);
+	chanSel->setFont(Font("Default", 15, Font::plain));
     chanSel->setJustificationType(Justification::centredLeft);
-    chanSel->setBounds(15,35,120,20);
+    chanSel->setBounds(10,60,120,20);
 
     addAndMakeVisible(chanSel);
 
+
+    chanRename = new Label("Channel Text","Ch Names:");
+    chanRename->setEditable(false);
+	chanRename->setFont(Font("Default", 15, Font::plain));
+    chanRename->setJustificationType(Justification::centredLeft);
+    chanRename->setBounds(10,30,120,20);
+
+    addAndMakeVisible(chanRename);
+
+	chanRenameCombo = new ComboBox("Channels");
+
+    chanRenameCombo->setEditableText(true);
+    chanRenameCombo->setJustificationType(Justification::centredLeft);
+    chanRenameCombo->addListener(this);
+    chanRenameCombo->setBounds(100,30,120,20);
+    chanRenameCombo->setSelectedId(0);
+
+    addAndMakeVisible(chanRenameCombo);
+    
 
     availableChans = new ComboBox("Event Channels");
 
     availableChans->setEditableText(false);
     availableChans->setJustificationType(Justification::centredLeft);
     availableChans->addListener(this);
-    availableChans->setBounds(20,60,120,20);
+    availableChans->setBounds(100,60,120,20);
     availableChans->setSelectedId(0);
 
     addAndMakeVisible(availableChans);
@@ -58,6 +79,8 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
         channelName += i + 1;
         availableChans->addItem(channelName,i+2);
     }
+	availableChans->setSelectedId(1);
+
     
     newFileToggleButton = new UtilityButton("SPLIT FILES", Font("Small Text", 13, Font::plain));
     newFileToggleButton->setRadius(3.0f);
@@ -73,7 +96,7 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
     eventsBySink->addListener(this);
     eventsBySink->setClickingTogglesState(true);
     addAndMakeVisible(eventsBySink);
-
+	lastId = 0;
 }
 
 RecordControlEditor::~RecordControlEditor()
@@ -83,11 +106,28 @@ RecordControlEditor::~RecordControlEditor()
 
 void RecordControlEditor::comboBoxChanged(ComboBox* comboBox)
 {
+	if (comboBox == availableChans)
+	{
+		if (comboBox->getSelectedId() > 1)
+	        getProcessor()->setParameter(0, (float) comboBox->getSelectedId()-2);
+	    else
+			getProcessor()->setParameter(0, -1);
+	} else if (comboBox == chanRenameCombo)
+	{
 
-    if (comboBox->getSelectedId() > 1)
-        getProcessor()->setParameter(0, (float) comboBox->getSelectedId()-2);
-    else
-        getProcessor()->setParameter(0, -1);
+	     int ID = comboBox->getSelectedId();
+		 if (ID == 0)
+			{
+	            // name change
+				getProcessor()->getProcessorGraph()->getRecordNode()->updateChannelName(lastId-1,comboBox->getText());
+				updateSettings();
+				comboBox->setSelectedId(lastId,dontSendNotification);
+        }
+		else
+        {
+            lastId = ID;
+		}
+	}
 }
 
 void RecordControlEditor::buttonEvent(Button* button)
@@ -111,7 +151,16 @@ void RecordControlEditor::updateSettings()
     //availableChans->clear();
     //GenericProcessor* processor = getProcessor();
     
-
+	// update number of recorded channels...
+		const MessageManagerLock mmLock;
+	Array<bool> isRecording;
+	((RecordControl *)getProcessor())->getProcessorGraph()->getRecordNode()->getChannelNamesAndRecordingStatus(channelNames, isRecording);
+	chanRenameCombo->clear();
+	for (int k=0;k<channelNames.size();k++)
+	{
+		chanRenameCombo->addItem(channelNames[k],k+1);
+	}
+	
 }
 
 void RecordControlEditor::saveEditorParameters(XmlElement* xml)
@@ -123,7 +172,13 @@ void RecordControlEditor::saveEditorParameters(XmlElement* xml)
     info->setAttribute("Channel",availableChans->getSelectedId());
     info->setAttribute("FileSaveOption",newFileToggleButton->getToggleState());
 	info->setAttribute("EventSaveOption",eventsBySink->getToggleState());
-    
+
+	info->setAttribute("numChannels",channelNames.size());
+    for (int k=0;k<channelNames.size();k++)
+	{
+		XmlElement* ch = xml->createNewChildElement("CHANNEL_NAME");
+		ch->setAttribute("Name",channelNames[k]);
+	}
 }
 
 void RecordControlEditor::loadEditorParameters(XmlElement* xml)
@@ -137,6 +192,18 @@ void RecordControlEditor::loadEditorParameters(XmlElement* xml)
             newFileToggleButton->setToggleState(xmlNode->getBoolAttribute("FileSaveOption"), true);
             availableChans->setSelectedId(xmlNode->getIntAttribute("Channel"), sendNotification);
 			eventsBySink->setToggleState(xmlNode->getBoolAttribute("EventSaveOption"), true);
+
+			int numCh = xmlNode->getIntAttribute("numChannels");
+			channelNames.clear();
+			int ch = 0;
+		    forEachXmlChildElement(*xml, xmlSubNode)
+			{
+				  if (xmlSubNode->hasTagName("CHANNEL_NAME"))
+				  {
+					  String chName = xmlSubNode->getStringAttribute("Name");
+					  channelNames.add(chName);
+				  }
+			}
         }
 
     }

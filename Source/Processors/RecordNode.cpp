@@ -249,6 +249,15 @@ void RecordNode::setDirectoryName(String S)
 	directoryName = S;
 }
 
+void RecordNode::updateChannelName(int channelIndex, String newname)
+{
+	if (channelPointers[channelIndex] != nullptr)
+	{
+		channelPointers[channelIndex]->name = newname;
+		updateFileName(channelPointers[channelIndex]);
+	}
+}
+
 void RecordNode::createNewDirectory()
 {
     std::cout << "Creating new directory." << std::endl;
@@ -352,6 +361,42 @@ String RecordNode::generateDateString()
 
 }
 
+void RecordNode::getChannelNamesAndRecordingStatus(StringArray &names, Array<bool> &recording)
+{
+	names.clear();
+	recording.clear();
+
+	for (int k=0;k<	channelPointers.size();k++)
+	{
+		if (channelPointers[k] == nullptr)
+		{
+			names.add("not allocated");
+			recording.add(false);
+
+		}
+		else
+		{
+			Channel *ch = channelPointers[k];
+			String n = ch->name;
+			names.add(n);
+			recording.add(channelPointers[k]->getRecordState());
+		}
+	}
+}
+
+void RecordNode::updateRecordControl()
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Record Control")
+		{
+			p[k]->updateSettings();
+		}
+	}
+}
+
 
 void RecordNode::setParameter(int parameterIndex, float newValue)
 {
@@ -424,6 +469,8 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
     else if (parameterIndex == 2)
     {
 
+		// inform RecordControl about this change.
+		updateRecordControl();
         if (isProcessing)
         {
 

@@ -30,12 +30,18 @@ RecordControl::RecordControl()
     : GenericProcessor("Record Control"), 
       createNewFilesOnTrigger(false), triggerChannel(0), recordNode(0),eventsSavedBySink(false)
 {
-
+	firstTime=true;
 }
 
 RecordControl::~RecordControl()
 {
 
+}
+
+void RecordControl::updateSettings()
+{
+	//const MessageManagerLock mmLock;
+	//editor->updateSettings();
 }
 
 AudioProcessorEditor* RecordControl::createEditor()
@@ -78,6 +84,7 @@ bool RecordControl::enable()
     
     recordNode->appendTrialNumber(createNewFilesOnTrigger);
     recordNode->setEventSavingState(eventsSavedBySink);
+		
 
     return true;
 }
@@ -86,6 +93,12 @@ void RecordControl::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)
 {
+	if (firstTime)
+	{
+		firstTime = false;
+		const MessageManagerLock mmLock;
+		editor->updateSettings();
+	}
     checkForEvents(events);
 }
 

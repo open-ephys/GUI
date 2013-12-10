@@ -118,6 +118,12 @@ public:
         return rootFolder;
     }
 
+	/** returns channel names and whether we record them */
+	void getChannelNamesAndRecordingStatus(StringArray &names, Array<bool> &recording);
+
+	/** update channel name */
+	void updateChannelName(int channelIndex, String newname);
+
     /** Signals when to create a new data directory when recording starts.*/
     bool newDirectoryNeeded;
 
@@ -136,6 +142,8 @@ public:
 
 	uint16 getRecordingNumber();
 private:
+	/** used to keep sync with Record Control node*/
+	void updateRecordControl();
 
     /** Keep the RecordNode informed of acquisition and record states.
     */

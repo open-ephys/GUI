@@ -52,12 +52,13 @@ public:
     bool createNewFilesOnTrigger;
     
     bool isUtility() {return true;}
+	void updateSettings();
 
     AudioProcessorEditor* createEditor();
 
 private:
     int triggerChannel;
-    bool eventsSavedBySink;
+    bool eventsSavedBySink,firstTime;
     
     RecordNode* recordNode;
 
