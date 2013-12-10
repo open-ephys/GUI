@@ -288,7 +288,7 @@ PeriStimulusTimeHistogramEditor::~PeriStimulusTimeHistogramEditor()
 PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTimeHistogramNode* n) :
 	processor(n)
 {
-
+	screenWidth = screenHeight = 0;
 	inFocusedMode = false;
 	showLFP = true;
 	showSpikes = true;
@@ -302,7 +302,7 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	viewport->setScrollBarsShown(true, true);
 
 	addAndMakeVisible(viewport);
-
+	resized();
 	update();
 
 }
@@ -403,8 +403,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 
 	heightPerElectrodePix = 200;
 	widthPerUnit = 200;
-
-	int maxUnitsPerRow = getWidth() / widthPerUnit;
+	
+	int maxUnitsPerRow = MAX(4,screenWidth/ widthPerUnit);
 	updateNeeded = false;
 	for (int k=0; k < psthDisplay->psthPlots.size();k++)
 	{
@@ -514,6 +514,9 @@ void PeriStimulusTimeHistogramCanvas::update()
 
 	psthDisplay->resized();
 	psthDisplay->repaint();
+	psthDisplay->refresh();
+	repaint();
+
 	processor->trialCircularBuffer->unlockPSTH();
 }
 

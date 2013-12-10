@@ -331,7 +331,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
         const uint8_t* dataptr = event.getRawData();
         int bufferSize = event.getRawDataSize();
             
-        if (bufferSize > 0)
+        if (bufferSize > 0 && electrodes.size() > 0)
         {
 
             SpikeObject newSpike;
