@@ -27,7 +27,7 @@
 GenericProcessor::GenericProcessor(const String& name_) : AccessClass(),
     sourceNode(0), destNode(0), isEnabled(true), wasConnected(false),
     nextAvailableChannel(0), saveOrder(-1), loadOrder(-1), currentChannel(-1),
-     parametersAsXml(nullptr),  name(name_), paramsWereLoaded(false), editor(0)
+     parametersAsXml(nullptr),  name(name_), paramsWereLoaded(false), editor(0), sendSampleCount(true)
 {
 	  settings.numInputs = settings.numOutputs = settings.sampleRate = 0;
 }
@@ -395,7 +395,9 @@ int GenericProcessor::getNumSamples(MidiBuffer& events)
     // the sample rate to change at different points in the signal chain.
     //
 
-    int numRead = 0;
+    int numRead = 0; 
+
+    //int numRead = 0;
 
     if (events.getNumEvents() > 0)
     {
@@ -408,17 +410,22 @@ int GenericProcessor::getNumSamples(MidiBuffer& events)
         const uint8* dataptr;
         int dataSize;
 
-        int samplePosition = -5;
+        int samplePosition = -1;
 
         while (i.getNextEvent(dataptr, dataSize, samplePosition))
         {
 
-            if (*dataptr == BUFFER_SIZE)
-            {
+             if (*dataptr == BUFFER_SIZE)
+             {
                 
-                numRead = samplePosition;
+                int16 nr;
+                memcpy(&nr, dataptr+2, 2);
 
-            } else if (*dataptr == TTL &&    // a TTL event
+                 numRead = nr;
+
+             } else 
+
+            if (*dataptr == TTL &&    // a TTL event
                         getNodeId() < 900 && // not handled by a specialized processor (e.g. AudioNode))
                         *(dataptr+1) > 0)    // that's flagged for saving
             {
@@ -447,14 +454,19 @@ void GenericProcessor::setNumSamples(MidiBuffer& events, int sampleIndex)
     // immediate source.
     //
 
-    uint8 data[2];
+    uint8 data[4];
+
+    int16 si = (int16) sampleIndex;
 
     data[0] = BUFFER_SIZE;  // most-significant byte
     data[1] = nodeId;       // least-significant byte
+    memcpy(data+2, &si, 2);
 
     events.addEvent(data,       // spike data
-                    2,          // total bytes
-                    sampleIndex); // sample index
+                    4,          // total bytes
+                    0); // sample index
+
+   // std::cout << "Processor " << getNodeId() << " adding a new sample count of " << sampleIndex << std::endl;
 
 }
 
@@ -529,7 +541,8 @@ void GenericProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& event
 
     process(buffer, eventBuffer, nSamples);
 
-    setNumSamples(eventBuffer, nSamples); // adds it back,
+    if (sendSampleCount)
+        setNumSamples(eventBuffer, nSamples); // adds it back,
     // even if it's unchanged
 
 }

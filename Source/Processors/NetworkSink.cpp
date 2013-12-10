@@ -159,7 +159,7 @@ void NetworkSinkNode::handleEvent(int eventType, MidiMessage& event, int sampleP
 
 
 				std::string s = sp.SerializeAsString();
-				zmq_send(socket, s.c_str(), s.length(), 0); // 5
+				//zmq_send(socket, s.c_str(), s.length(), 0); // 5
 			}
 		}
 	}

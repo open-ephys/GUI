@@ -134,7 +134,10 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 	urlport = 5556;
 	threadRunning = false;
 	opensocket();
-	
+
+	sendSampleCount = false; // disable updating the continuous buffer sample counts,
+							 // since this processor only sends events
+
 }
 
 void NetworkEvents::setNewListeningPort(int port)
@@ -351,8 +354,11 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 							MidiBuffer& events,
 							int& nSamples)
 {
+
+	//std::cout << "NETWORK NODE" << std::endl;
+
 	checkForEvents(events);
-	simulateDesignAndTrials(events);
+	//simulateDesignAndTrials(events);
 
 	//std::cout << *buffer.getSampleData(0, 0) << std::endl;
 	
@@ -362,6 +368,8 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 			 getUIComponent()->getLogWindow()->addLineToLog(msg);
 		     networkMessagesQueue.pop();
 	 }
+
+	 nSamples = -10; // make sure this is not processed;
 	
 }
 

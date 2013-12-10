@@ -475,7 +475,7 @@ public:
 
     enum eventChannelTypes
     {
-        GENERIC_EVENT = 999,
+        GENERIC_EVENT = 100,
         SINGLE_ELECTRODE = 1,
         STEREOTRODE = 2,
         TETRODE = 4
@@ -580,6 +580,9 @@ public:
     /** Holds loaded parameters */
     XmlElement* parametersAsXml;
 
+    /** When set to false, this disables the sending of sample counts through the event buffer. */
+    bool sendSampleCount;
+
 private:
 
     /** Automatically extracts the number of samples in the buffer, then
@@ -604,6 +607,7 @@ private:
     static const String unusedNameString;
 
     bool paramsWereLoaded;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GenericProcessor);
 

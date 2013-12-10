@@ -125,16 +125,16 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
     {
         const uint8* dataptr = event.getRawData();
 
-        // int eventNodeId = *(dataptr+1);
+         int eventNodeId = *(dataptr+1);
         int eventId = *(dataptr+2);
         int eventChannel = *(dataptr+3);
         int eventTime = event.getTimeStamp();
 
         int samplesLeft = totalSamples - eventTime;
 
-        //	std::cout << "Received event from " << eventNodeId << ", channel "
-        //	          << eventChannel << ", with ID " << eventId << std::endl;
-        //
+        	// std::cout << "Received event from " << eventNodeId << ", channel "
+        	//           << eventChannel << ", with ID " << eventId << std::endl;
+        
         int bufferIndex = (displayBufferIndex + eventTime);// % displayBuffer->getNumSamples();
 
         if (eventId == 1)
@@ -199,9 +199,9 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
 
         const uint8* dataptr = event.getRawData();
 
-        // int eventNodeId = *(dataptr+1);
-        // int eventId = *(dataptr+2);
-        // int eventChannel = *(dataptr+3);
+         int eventNodeId = *(dataptr+1);
+         int eventId = *(dataptr+2);
+         int eventChannel = *(dataptr+3);
 
         // update the timestamp for the current buffer:
         memcpy(&bufferTimestamp, dataptr+4, 8);
@@ -217,10 +217,22 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
 
         //   	std::cout << "Time in seconds is " << timeInSeconds << std::endl;
 
-        // // std::cout << "Received event from " << eventNodeId <<
-        //    	//              " on channel " << eventChannel <<
-        //    	 //             " with value " << eventId <<
-        //    	 //             " for time: " << ts << std::endl;
+         // std::cout << "Received event from " << eventNodeId <<
+         //              " on channel " << eventChannel <<
+         //             " with value " << eventId <<
+         //             " for time: " << bufferTimestamp << std::endl;
+    } else {
+
+        // const uint8* dataptr = event.getRawData();
+
+        //  int eventNodeId = *(dataptr+1);
+        //  int eventId = *(dataptr+2);
+        //  int eventChannel = *(dataptr+3);
+        //  int type = *(dataptr);
+
+        //  std::cout << "Received event of type " << type << " from " << eventNodeId <<
+        //               " on channel " << eventChannel <<
+        //              " with value " << event.getTimeStamp() << std::endl;
     }
 }
 
@@ -270,7 +282,13 @@ void LfpDisplayNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int&
     //std::cout << "Display node sample count: " << nSamples << std::endl; ///buffer.getNumSamples() << std::endl;
 
     totalSamples = nSamples;
+
+    if (totalSamples <= 0)
+        return;
+
     displayBufferIndexEvents = displayBufferIndex;
+
+   // std::cout << nSamples << std::endl;
 
     initializeEventChannel();
 

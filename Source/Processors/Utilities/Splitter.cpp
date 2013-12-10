@@ -30,7 +30,7 @@ Splitter::Splitter()
     : GenericProcessor("Splitter"),
       destNodeA(0), destNodeB(0), activePath(0)
 {
-
+    sendSampleCount = false;
 }
 
 Splitter::~Splitter()
