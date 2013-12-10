@@ -125,7 +125,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 
 void PeriStimulusTimeHistogramNode::dumpStartStopRecordEventToDisk(int64 ts, bool startRecord)
 {
-	diskWriteLock->enter();
+	diskWriteLock->enter(); 
 	#define SESSION 10
 	uint8 eventType = SESSION;
 
