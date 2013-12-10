@@ -187,7 +187,7 @@ void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool du
 	// 1. software ts
 	fwrite(&s->timestamp_software, 8,1, eventFile);
 	// 2. hardware ts
-	fwrite(&s->timestamp_software, 8,1, eventFile);
+	fwrite(&s->timestamp, 8,1, eventFile);
 	// 3. sorted ID
 	fwrite(&s->sortedId, 2,1, eventFile);
 	// 4. sorted ID

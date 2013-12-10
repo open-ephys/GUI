@@ -28,7 +28,7 @@
 
 RecordControl::RecordControl()
     : GenericProcessor("Record Control"), 
-      createNewFilesOnTrigger(false), triggerChannel(0), recordNode(0),eventsSavedBySink(false)
+      createNewFilesOnTrigger(false), triggerChannel(0), recordNode(0),eventsSavedBySink(true)
 {
 	firstTime=true;
 }
@@ -93,12 +93,7 @@ void RecordControl::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)
 {
-	if (firstTime)
-	{
-		firstTime = false;
-		const MessageManagerLock mmLock;
-		editor->updateSettings();
-	}
+
     checkForEvents(events);
 }
 
