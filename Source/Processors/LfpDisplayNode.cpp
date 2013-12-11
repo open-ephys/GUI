@@ -226,13 +226,13 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
         // const uint8* dataptr = event.getRawData();
 
         //  int eventNodeId = *(dataptr+1);
-        //  int eventId = *(dataptr+2);
-        //  int eventChannel = *(dataptr+3);
-        //  int type = *(dataptr);
+         
+        //  int16 nr;
+        //  memcpy(&nr, dataptr+2, 2);
 
-        //  std::cout << "Received event of type " << type << " from " << eventNodeId <<
-        //               " on channel " << eventChannel <<
-        //              " with value " << event.getTimeStamp() << std::endl;
+        //  //numRead = nr;
+
+        //  std::cout << "Received " << nr << " samples from " << eventNodeId << std::endl;
     }
 }
 

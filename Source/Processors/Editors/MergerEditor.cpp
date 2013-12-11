@@ -114,6 +114,8 @@ void MergerEditor::buttonEvent(Button* button)
         processor->switchIO(1);
 
     }
+
+    getEditorViewport()->makeEditorVisible(this, false);
 }
 
 void MergerEditor::mouseDown(const MouseEvent& e)

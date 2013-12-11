@@ -58,12 +58,15 @@ void Merger::setMergerSourceNode(GenericProcessor* sn)
     {
         std::cout << "Setting source node A." << std::endl;
         sourceNodeA = sn;
-        sn->setDestNode(this);
     }
     else
     {
         sourceNodeB = sn;
         std::cout << "Setting source node B." << std::endl;
+    }
+
+    if (sn != nullptr)
+    {
         sn->setDestNode(this);
     }
 }
@@ -86,7 +89,7 @@ void Merger::switchIO(int sourceNum)
         //std::cout << "Source node: " << getSourceNode() << std::endl;
     }
 
-    getEditorViewport()->makeEditorVisible((GenericEditor*) getEditor(), false);
+   // getEditorViewport()->makeEditorVisible((GenericEditor*) getEditor(), false);
 
 }
 

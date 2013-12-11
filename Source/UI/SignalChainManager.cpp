@@ -220,12 +220,17 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
 
         if (editorArray.size() > 0)
         {
-            GenericProcessor* p = (GenericProcessor*) editorArray[0]->getProcessor();
-            merger = (p->isMerger() && p->stillHasSource());
+            // take the next processor in the array
+            GenericProcessor* p2 = (GenericProcessor*) editorArray[0]->getProcessor();
+            merger = (p2->isMerger() && p2->stillHasSource());
             if (merger)
             {
                 std::cout << "We've got a merger!" << std::endl;
-                //p->switchSource();
+                //p2->switchIO(0);
+                p2->setMergerSourceNode(p->getSourceNode());
+                MergerEditor* me = (MergerEditor*) editorArray[0];
+                me->switchSource();
+               // p2->setMergerSourceNode(nullptr);
             }
         }
 
@@ -358,7 +363,7 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
         GenericProcessor* currentProcessor = (GenericProcessor*) editorToAdd->getProcessor();
         GenericProcessor* source = currentProcessor->getSourceNode();
 
-        if (source != 0)
+        if (source != nullptr)
         {
             std::cout << "Source: " << source->getName() << std::endl;
 
@@ -406,8 +411,8 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
             {
                 std::cout << "It's a merger!" << std::endl;
 
-                if (dest->getSourceNode() != currentProcessor)
-                    editorToAdd->switchSource();
+                //if (dest->getSourceNode() != currentProcessor)
+                //    editorToAdd->switchIO();
 
             }
 

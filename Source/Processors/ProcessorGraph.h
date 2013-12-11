@@ -104,6 +104,8 @@ private:
 
     void clearConnections();
 
+    void connectProcessors(GenericProcessor* source, GenericProcessor* dest);
+    void connectProcessorToAudioAndRecordNodes(GenericProcessor* source);
 
 };
 
