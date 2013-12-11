@@ -137,7 +137,7 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 
 	sendSampleCount = false; // disable updating the continuous buffer sample counts,
 							 // since this processor only sends events
-
+	shutdown = false;
 }
 
 void NetworkEvents::setNewListeningPort(int port)
@@ -152,6 +152,7 @@ void NetworkEvents::setNewListeningPort(int port)
 
 NetworkEvents::~NetworkEvents()
 {
+	shutdown = true;
 	disable();
 }
 
@@ -159,14 +160,17 @@ bool NetworkEvents::disable()
 {
 	if (threadRunning)
 	{
+		zmq_close(responder);
 		zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
-		zmqcontext = getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
+
+		if (!shutdown)
+			zmqcontext = getProcessorGraph()->createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
 	}
 	return true;
 }
 
-AudioProcessorEditor* NetworkEvents::createEditor()
-{
+AudioProcessorEditor* NetworkEvents::createEditor(
+){
     editor = new NetworkEventsEditor(this, true);
 
     return editor;

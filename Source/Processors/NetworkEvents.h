@@ -110,6 +110,7 @@ private:
     float threshold;
     float bufferZone;
     bool state;
+    bool shutdown;
 	Time timer;
  	std::queue<StringTS> networkMessagesQueue;
 	

@@ -76,8 +76,8 @@ ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 ProcessorGraph::~ProcessorGraph() 
 {
 	
-    if (zmqcontext != NULL)
-		zmq_ctx_destroy (zmqcontext);
+    //if (zmqcontext != NULL)
+	//	zmq_ctx_destroy (zmqcontext);
 
 }
 
