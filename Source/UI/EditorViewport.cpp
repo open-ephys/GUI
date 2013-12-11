@@ -655,12 +655,30 @@ void EditorViewport::mouseDown(const MouseEvent& e)
     for (int i = 0; i < editorArray.size(); i++)
     {
 
-        if (e.eventComponent == editorArray[i] && e.y < 22)
-            // event must take place along title bar
+        if (e.eventComponent == editorArray[i])
+           
             // || e.eventComponent->getParentComponent() == editorArray[i] ||
             //    e.eventComponent->getParentComponent()->getParentComponent() ==
             //            editorArray[i])
         {
+
+            if (e.getNumberOfClicks() == 2) // double-clicks toggle collapse state
+            {
+                if (editorArray[i]->getCollapsedState())
+                {
+                    editorArray[i]->switchCollapsedState();
+                } else {
+                    if (e.y < 22)
+                    {
+                        editorArray[i]->switchCollapsedState();
+                    }
+                }
+                return;
+            }
+
+            // make sure uncollapsed editors don't accept clicks outside their title bar
+            if (!editorArray[i]->getCollapsedState() && e.y > 22)
+                return;
 
             clickInEditor = true;
             editorArray[i]->select();

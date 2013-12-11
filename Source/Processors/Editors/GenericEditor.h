@@ -242,6 +242,14 @@ public:
 
     /** Syncs parametereditor colors with parameter values */
     void updateParameterButtons(int parameterIndex = -1);
+
+    /** Checks to see whether or not an editor is collapsed */
+    bool getCollapsedState();
+
+    /**  Collapses an editor if it's open, and opens it if it's collpased*/
+    void switchCollapsedState();
+
+
 protected:
 
     /** A pointer to the button that opens the drawer for the ChannelSelector. */
@@ -277,11 +285,13 @@ private:
 
     bool isSelected;
     bool isEnabled;
+    bool isCollapsed;
 
     /**Used to determine if an editor is a splitter or Merger to avoid calling on CHannelSelector*/
     bool isSplitOrMerge;
 
     int tNum;
+    int originalWidth;
 
     /**initializing function Used to share constructor functions*/
     void constructorInitialize(GenericProcessor* owner, bool useDefaultParameterEditors);

@@ -37,7 +37,7 @@ GenericEditor::GenericEditor(GenericProcessor* owner, bool useDefaultParameterEd
     : AudioProcessorEditor(owner),
       desiredWidth(150), isFading(false), accumulator(0.0), acquisitionIsActive(false),
       drawerButton(0), channelSelector(0),drawerWidth(170),
-      isSelected(false),  isEnabled(true), tNum(-1)
+      isSelected(false),  isEnabled(true), isCollapsed(false), tNum(-1)
 {
     constructorInitialize(owner, useDefaultParameterEditors);
 }
@@ -176,11 +176,14 @@ void GenericEditor::refreshColors()
 
 void GenericEditor::resized()
 {
-    if (drawerButton != 0)
-        drawerButton->setBounds(getWidth()-14, 40, 10, getHeight()-60);
+    if (!isCollapsed)
+    {
+        if (drawerButton != 0)
+            drawerButton->setBounds(getWidth()-14, 40, 10, getHeight()-60);
 
-    if (channelSelector != 0)
-        channelSelector->setBounds(desiredWidth - drawerWidth, 30, channelSelector->getDesiredWidth(), getHeight()-45);
+        if (channelSelector != 0)
+            channelSelector->setBounds(desiredWidth - drawerWidth, 30, channelSelector->getDesiredWidth(), getHeight()-45);
+    }
 }
 
 
@@ -305,11 +308,17 @@ void GenericEditor::paint(Graphics& g)
         g.setColour(Colours::lightgrey);
 
     // draw colored background
-    g.fillRect(1,1,getWidth()-(2+offset),getHeight()-2);
-
-    // draw gray workspace
-    g.setGradientFill(backgroundGradient);
-    g.fillRect(1,22,getWidth()-2, getHeight()-29);
+    if (!isCollapsed)
+    {
+        g.fillRect(1,1,getWidth()-(2+offset),getHeight()-2);
+        // draw gray workspace
+        g.setGradientFill(backgroundGradient);
+        g.fillRect(1,22,getWidth()-2, getHeight()-29);
+    }
+    else
+    {
+        g.fillAll();
+    }
 
     g.setFont(titleFont);
     g.setFont(14);
@@ -324,8 +333,14 @@ void GenericEditor::paint(Graphics& g)
     }
 
     // draw title
-    g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
-
+    if (!isCollapsed)
+    {
+        g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
+    } else {
+        g.addTransform(AffineTransform::rotation(-M_PI/2.0));
+        g.drawText(name, -getHeight()+6, 5, 500, 15, Justification::left, false);
+        g.addTransform(AffineTransform::rotation(M_PI/2.0));
+    }
 
     if (isSelected)
     {
@@ -529,6 +544,36 @@ void GenericEditor::setChannelSelectionState(int chan, bool p, bool r, bool a)
         channelSelector->setRecordStatus(chan+1, r);
         channelSelector->setAudioStatus(chan+1, a);
     }
+}
+
+bool GenericEditor::getCollapsedState()
+{
+    return isCollapsed;
+}
+
+void GenericEditor::switchCollapsedState()
+{
+    if (isCollapsed)
+    {
+        // open it up
+        desiredWidth = originalWidth;
+        isCollapsed = false;
+
+    } else {
+        originalWidth = desiredWidth;
+        desiredWidth = 25;
+        isCollapsed = true;
+    }
+
+    for (int i = 0; i < getNumChildComponents(); i++)
+    {
+        Component* c = getChildComponent(i);
+        c->setVisible(!isCollapsed);
+    }
+
+    channelSelector->setVisible(false); // either way, we don't want the CS in there
+
+    getEditorViewport()->refreshEditors();
 }
 
 void GenericEditor::saveEditorParameters(XmlElement* xml)

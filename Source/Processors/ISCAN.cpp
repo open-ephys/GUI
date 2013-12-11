@@ -49,7 +49,7 @@ ISCANnode::~ISCANnode()
 	if (connected) {
 		int iscan_track_off_code = 129;
 		serialPort.writeByte(iscan_track_off_code);
-		Sleep(100);
+		SLEEPY_TIME
 		serialPort.close();
 	}
 	
