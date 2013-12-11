@@ -97,15 +97,14 @@ void DataViewport::destroyTab(int index)
     int newIndex = tabArray.indexOf(index);
 
     tabArray.remove(newIndex);
-    editorArray.remove(newIndex);
-
+    editorArray.remove(newIndex); // do this after the editor has been refreshed
+    
     removeTab(newIndex);
 
     if (tabArray.size() == 0)
         setVisible(false);
 
     setCurrentTabIndex(tabArray.size()-1);
-
 }
 
 void DataViewport::disableConnectionToEditorViewport()
@@ -127,7 +126,7 @@ void DataViewport::currentTabChanged(int newIndex, const String& newTabName)
 
     if (!shutdown)
     {
-        getEditorViewport()->makeEditorVisible(editorArray[newIndex]);
+        //getEditorViewport()->makeEditorVisible(editorArray[newIndex]);
         getTopLevelComponent()->repaint();
     }
 }
