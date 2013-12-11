@@ -366,7 +366,7 @@ void RecordNode::getChannelNamesAndRecordingStatus(StringArray &names, Array<boo
 	names.clear();
 	recording.clear();
 
-	for (int k=0;k<	channelPointers.size();k++)
+	for (int k = 0; k < channelPointers.size(); k++)
 	{
 		if (channelPointers[k] == nullptr)
 		{

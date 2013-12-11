@@ -80,19 +80,22 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
     
     if (openBoard(libraryFilePath))
     {
+
+        // upload bitfile and restore default settings
+        initializeBoard();
+
+        // automatically find connected headstages
+        scanPorts(); // things would appear to run more smoothly if this were done after the editor has been created
+
+
         // probably better to do this with a thread, but a timer works for now:
-        startTimer(10); // initialize the board in the background
+       // startTimer(10); // initialize the board in the background
     }
 
 }
 
 void RHD2000Thread::timerCallback()
 {
-     // upload bitfile and restore default settings
-    initializeBoard();
-
-    // automatically find connected headstages
-    scanPorts(); // things would appear to run more smoothly if this were done after the editor has been created
 
     stopTimer();
 

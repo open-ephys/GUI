@@ -1420,6 +1420,8 @@ const String EditorViewport::loadState(File fileToLoad)
                     splitPoints.add(p);
                 }
 
+                signalChainManager->updateVisibleEditors(editorArray[0], 0, 0, UPDATE);
+
             }
             else if (processor->hasTagName("SWITCH"))
             {
@@ -1453,6 +1455,8 @@ const String EditorViewport::loadState(File fileToLoad)
                     }
                 }
 
+                signalChainManager->updateVisibleEditors(editorArray[0], 0, 0, UPDATE);
+
             }
 
         }
@@ -1480,6 +1484,9 @@ const String EditorViewport::loadState(File fileToLoad)
         signalChainManager->updateVisibleEditors(editorArray[0], 0, 0, UPDATE);
 
     refreshEditors();
+
+    getProcessorGraph()->restoreParameters();
+
 
     String error = "Opened ";
     error += currentFile.getFileName();
