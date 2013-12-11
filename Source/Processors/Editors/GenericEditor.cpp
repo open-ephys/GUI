@@ -598,7 +598,7 @@ void GenericEditor::saveEditorParameters(XmlElement* xml)
 void GenericEditor::loadEditorParameters(XmlElement* xml)
 {
 
-    bool isCollapsed = xml->getBoolAttribute("isCollapsed");
+    bool isCollapsed = xml->getBoolAttribute("isCollapsed", false);
 
     if (isCollapsed)
     {
