@@ -481,7 +481,7 @@ void ChannelMappingEditor::channelChanged(int chan)
 	}
 }
 
-void ChannelMappingEditor::saveEditorParameters(XmlElement* xml)
+void ChannelMappingEditor::saveCustomParameters(XmlElement* xml)
 {
 	xml->setAttribute("Type", "ChannelMappingEditor");
 
@@ -506,7 +506,7 @@ void ChannelMappingEditor::saveEditorParameters(XmlElement* xml)
 
 }
 
-void ChannelMappingEditor::loadEditorParameters(XmlElement* xml)
+void ChannelMappingEditor::loadCustomParameters(XmlElement* xml)
 {
 	setConfigured(true);
 	forEachXmlChildElementWithTagName(*xml,	settingXml, "SETTING")

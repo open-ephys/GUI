@@ -50,9 +50,9 @@ public:
 
     void setFile(String file);
 
-    void saveEditorParameters(XmlElement*);
+    void saveCustomParameters(XmlElement*);
 
-    void loadEditorParameters(XmlElement*);
+    void loadCustomParameters(XmlElement*);
 
 private:
 

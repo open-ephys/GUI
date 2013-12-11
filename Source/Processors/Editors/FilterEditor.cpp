@@ -177,7 +177,7 @@ void FilterEditor::buttonEvent(Button* button)
 }
 
 
-void FilterEditor::saveEditorParameters(XmlElement* xml)
+void FilterEditor::saveCustomParameters(XmlElement* xml)
 {
 
     xml->setAttribute("Type", "FilterEditor");
@@ -187,7 +187,7 @@ void FilterEditor::saveEditorParameters(XmlElement* xml)
     textLabelValues->setAttribute("LowCut",lastLowCutString);
 }
 
-void FilterEditor::loadEditorParameters(XmlElement* xml)
+void FilterEditor::loadCustomParameters(XmlElement* xml)
 {
 
     forEachXmlChildElement(*xml, xmlNode)

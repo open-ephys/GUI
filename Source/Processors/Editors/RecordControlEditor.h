@@ -45,8 +45,8 @@ public:
     void comboBoxChanged(ComboBox* comboBox);
     void updateSettings();
     void buttonEvent(Button* button);
-    void loadEditorParameters(XmlElement*);
-    void saveEditorParameters(XmlElement*);
+    void loadCustomParameters(XmlElement*);
+    void saveCustomParameters(XmlElement*);
 
 private:
 	int lastId;

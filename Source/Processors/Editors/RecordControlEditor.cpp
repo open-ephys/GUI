@@ -164,7 +164,7 @@ void RecordControlEditor::updateSettings()
 	
 }
 
-void RecordControlEditor::saveEditorParameters(XmlElement* xml)
+void RecordControlEditor::saveCustomParameters(XmlElement* xml)
 {
     
     XmlElement* info = xml->createNewChildElement("PARAMETERS");
@@ -182,7 +182,7 @@ void RecordControlEditor::saveEditorParameters(XmlElement* xml)
 	}
 }
 
-void RecordControlEditor::loadEditorParameters(XmlElement* xml)
+void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 {
      
     forEachXmlChildElement(*xml, xmlNode)

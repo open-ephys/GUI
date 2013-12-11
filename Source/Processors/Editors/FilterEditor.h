@@ -48,8 +48,8 @@ public:
 
     void labelTextChanged(Label* label);
 
-    void saveEditorParameters(XmlElement* xml);
-    void loadEditorParameters(XmlElement* xml);
+    void saveCustomParameters(XmlElement* xml);
+    void loadCustomParameters(XmlElement* xml);
 
     void setDefaults(double lowCut, double highCut);
 

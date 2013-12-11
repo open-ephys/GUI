@@ -98,7 +98,7 @@ void FileReaderEditor::buttonEvent(Button* button)
     }
 }
 
-void FileReaderEditor::saveEditorParameters(XmlElement* xml)
+void FileReaderEditor::saveCustomParameters(XmlElement* xml)
 {
 
     // XmlElement* fileName = xml->createNewChildElement("FILENAME");
@@ -106,7 +106,7 @@ void FileReaderEditor::saveEditorParameters(XmlElement* xml)
 
 }
 
-void FileReaderEditor::loadEditorParameters(XmlElement* xml)
+void FileReaderEditor::loadCustomParameters(XmlElement* xml)
 {
 
     // forEachXmlChildElement(*xml, xmlNode)

@@ -235,10 +235,16 @@ public:
     void setChannelSelectionState(int chan, bool p, bool r, bool a);
 
     /** Writes editor state to xml */
-    virtual void saveEditorParameters(XmlElement* xml);
+    void saveEditorParameters(XmlElement* xml);
 
     /** Writes editor state to xml */
-    virtual void loadEditorParameters(XmlElement* xml);
+    void loadEditorParameters(XmlElement* xml);
+
+    /** Writes editor state to xml */
+    virtual void saveCustomParameters(XmlElement* xml) { }
+
+    /** Writes editor state to xml */
+    virtual void loadCustomParameters(XmlElement* xml) { }
 
     /** Syncs parametereditor colors with parameter values */
     void updateParameterButtons(int parameterIndex = -1);

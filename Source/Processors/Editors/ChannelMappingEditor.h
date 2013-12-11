@@ -54,8 +54,8 @@ public:
 
     void createElectrodeButtons(int numNeeded);
 
-    void saveEditorParameters(XmlElement* xml);
-    void loadEditorParameters(XmlElement* xml);
+    void saveCustomParameters(XmlElement* xml);
+    void loadCustomParameters(XmlElement* xml);
 
     void channelChanged(int chan);
 

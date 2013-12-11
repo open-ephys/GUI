@@ -585,14 +585,23 @@ void GenericEditor::switchCollapsedState()
 void GenericEditor::saveEditorParameters(XmlElement* xml)
 {
 
-    //xml->setAttribute("Attribute", "WHAT");
+    xml->setAttribute("isCollapsed", isCollapsed);
+
+    saveCustomParameters(xml);
 
 }
 
 void GenericEditor::loadEditorParameters(XmlElement* xml)
 {
 
-    //xml->setAttribute("Attribute", "WHAT");
+    bool isCollapsed = xml->getBoolAttribute("isCollapsed");
+
+    if (isCollapsed)
+    {
+        switchCollapsedState();
+    }
+
+    loadCustomParameters(xml);
 
 }
 
