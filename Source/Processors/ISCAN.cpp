@@ -26,6 +26,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Editors/ISCANeditor.h"
 #include "../UI/UIComponent.h"
 
+#if JUCE_WINDOWS
+#define SLEEPY_TIME Sleep(100);
+#else
+#define SLEEPY_TIME usleep(100000);
+#endif
 
 /*********************************************/
 ISCANnode::ISCANnode()
@@ -85,11 +90,11 @@ bool ISCANnode::connect(int selectedDevice)
 		int iscan_track_off_code = 129;
 
 		serialPort.writeByte(iscan_track_off_code);
-		Sleep(100);
+		SLEEPY_TIME
 		serialPort.flush();
-		Sleep(100);
+		SLEEPY_TIME
 		serialPort.writeByte(iscan_track_on_code);
-		Sleep(100);
+		SLEEPY_TIME
 		int avail = serialPort.available();
 		if (avail > 0)
 		{

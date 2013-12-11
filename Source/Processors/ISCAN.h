@@ -27,7 +27,7 @@
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "GenericProcessor.h"
 #include "NetworkEvents.h"
-#include "Serial\ofSerial.h"
+#include "Serial/ofSerial.h"
 #include <list>
 #include <queue>
 

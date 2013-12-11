@@ -27,7 +27,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
-#include "../Serial\ofSerial.h"
+#include "../Serial/ofSerial.h"
 
 class ISCANnode;
 
