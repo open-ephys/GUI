@@ -553,27 +553,33 @@ bool GenericEditor::getCollapsedState()
 
 void GenericEditor::switchCollapsedState()
 {
-    if (isCollapsed)
+
+    if (!getProcessor()->isMerger() && !getProcessor()->isSplitter())
     {
-        // open it up
-        desiredWidth = originalWidth;
-        isCollapsed = false;
 
-    } else {
-        originalWidth = desiredWidth;
-        desiredWidth = 25;
-        isCollapsed = true;
+        if (isCollapsed)
+        {
+            // open it up
+            desiredWidth = originalWidth;
+            isCollapsed = false;
+
+        } else {
+            originalWidth = desiredWidth;
+            desiredWidth = 25;
+            isCollapsed = true;
+        }
+
+        for (int i = 0; i < getNumChildComponents(); i++)
+        {
+            Component* c = getChildComponent(i);
+            c->setVisible(!isCollapsed);
+        }
+
+        if (channelSelector != nullptr)
+            channelSelector->setVisible(false); // either way, we don't want the CS in there
+
+        getEditorViewport()->refreshEditors();
     }
-
-    for (int i = 0; i < getNumChildComponents(); i++)
-    {
-        Component* c = getChildComponent(i);
-        c->setVisible(!isCollapsed);
-    }
-
-    channelSelector->setVisible(false); // either way, we don't want the CS in there
-
-    getEditorViewport()->refreshEditors();
 }
 
 void GenericEditor::saveEditorParameters(XmlElement* xml)
