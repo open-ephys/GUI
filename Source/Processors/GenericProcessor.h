@@ -470,7 +470,8 @@ public:
         SPIKE = 4,
         EEG = 5,
         CONTINUOUS = 6,
-		NETWORK = 7
+		NETWORK = 7,
+		EYE_POSITION = 8
     };
 
     enum eventChannelTypes

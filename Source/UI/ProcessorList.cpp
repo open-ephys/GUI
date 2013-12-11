@@ -57,6 +57,7 @@ ProcessorList::ProcessorList()
     sources->addSubItem(new ProcessorListItem("Rhythm FPGA"));
     sources->addSubItem(new ProcessorListItem("File Reader"));
 	sources->addSubItem(new ProcessorListItem("Network Events"));
+	sources->addSubItem(new ProcessorListItem("Eye Tracking"));
 
     //sources->addSubItem(new ProcessorListItem("Event Generator"));
 

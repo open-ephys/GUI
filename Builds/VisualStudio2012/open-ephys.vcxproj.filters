@@ -415,6 +415,9 @@
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\ISCAN.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\NetworkSink.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
@@ -528,6 +531,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ISCANeditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
@@ -1977,6 +1983,9 @@
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\ISCAN.h">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\NetworkSink.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
@@ -2096,6 +2105,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\EventNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ISCANeditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>

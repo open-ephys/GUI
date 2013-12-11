@@ -231,6 +231,8 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <FILE id="j7I63a" name="ISCAN.cpp" compile="1" resource="0" file="Source/Processors/ISCAN.cpp"/>
+        <FILE id="pWGQob" name="ISCAN.h" compile="0" resource="0" file="Source/Processors/ISCAN.h"/>
         <FILE id="FjX8gm" name="NetworkSink.cpp" compile="1" resource="0" file="Source/Processors/NetworkSink.cpp"/>
         <FILE id="KjnOa0" name="NetworkSink.h" compile="0" resource="0" file="Source/Processors/NetworkSink.h"/>
         <FILE id="yiWfQb" name="NetworkSinkProcotol.pb.cc" compile="1" resource="0"
@@ -359,6 +361,8 @@
         <FILE id="hGnGAjh" name="EventNode.cpp" compile="1" resource="0" file="Source/Processors/EventNode.cpp"/>
         <FILE id="dUtRN6" name="EventNode.h" compile="0" resource="0" file="Source/Processors/EventNode.h"/>
         <GROUP id="AqvwO6w" name="Editors">
+          <FILE id="sDiTsI" name="ISCANeditor.h" compile="0" resource="0" file="Source/Processors/Editors/ISCANeditor.h"/>
+          <FILE id="Gf682N" name="ISCANeditor.cpp" compile="1" resource="0" file="Source/Processors/Editors/ISCANeditor.cpp"/>
           <FILE id="mNa0Na" name="NetworkEventsEditor.cpp" compile="1" resource="0"
                 file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
           <FILE id="CxVQoP" name="NetworkEventsEditor.h" compile="0" resource="0"

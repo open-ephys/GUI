@@ -63,6 +63,7 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/ISCAN_d4969b61.o \
   $(OBJDIR)/NetworkSink_28a35cdc.o \
   $(OBJDIR)/NetworkSinkProcotol.pb_4af1b0cd.o \
   $(OBJDIR)/AdvancerNode_12999801.o \
@@ -101,6 +102,7 @@ OBJECTS := \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
+  $(OBJDIR)/ISCANeditor_2fa05bc5.o \
   $(OBJDIR)/NetworkEventsEditor_fd22826.o \
   $(OBJDIR)/AdvancerEditor_6d27d95.o \
   $(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o \
@@ -296,6 +298,11 @@ $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	@echo "Compiling AudioComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/ISCAN_d4969b61.o: ../../Source/Processors/ISCAN.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ISCAN.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/NetworkSink_28a35cdc.o: ../../Source/Processors/NetworkSink.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling NetworkSink.cpp"
@@ -484,6 +491,11 @@ $(OBJDIR)/AudioNode_94606ff3.o: ../../Source/Processors/AudioNode.cpp
 $(OBJDIR)/EventNode_95c842b7.o: ../../Source/Processors/EventNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling EventNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ISCANeditor_2fa05bc5.o: ../../Source/Processors/Editors/ISCANeditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ISCANeditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/NetworkEventsEditor.cpp

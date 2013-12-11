@@ -41,6 +41,7 @@
 #include "SignalGenerator.h"
 #include "SourceNode.h"
 #include "EventDetector.h"
+#include "ISCAN.h"
 #include "NetworkEvents.h"
 #include "NetworkSink.h"
 #include "PeriStimulusTimeHistogramNode.h"
@@ -514,7 +515,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new network events source." << std::endl;
 			processor = new NetworkEvents(zmqcontext);
-        } 
+        } else if (subProcessorType.equalsIgnoreCase("Eye Tracking"))
+        {
+            std::cout << "Creating a ISCAN source." << std::endl;
+            processor = new ISCANnode();
+        }
 
 
         sendActionMessage("New source node created.");
@@ -629,7 +634,7 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a PSTH sink." << std::endl;
             processor = new PeriStimulusTimeHistogramNode();
-        }else if (subProcessorType.equalsIgnoreCase("Network Sink"))
+        } else if (subProcessorType.equalsIgnoreCase("Network Sink"))
         {
             std::cout << "Creating a Network sink." << std::endl;
             processor = new NetworkSinkNode(zmqcontext);

@@ -71,7 +71,11 @@ void ofSerial::enumerateWin32Ports()
             {
 
                 sprintf(portNamesFriendly[nPorts], "%s", dataBuf);
-                portNamesShort[nPorts][0] = 0;
+				portNamesShort[nPorts][0] = '\\';
+				portNamesShort[nPorts][1] = '\\';
+                portNamesShort[nPorts][2] = '.';
+				portNamesShort[nPorts][3] = '\\';
+				portNamesShort[nPorts][4] = 0;
 
                 // turn blahblahblah(COM4) into COM4
 
@@ -86,7 +90,8 @@ void ofSerial::enumerateWin32Ports()
                     if (end)
                     {
                         *end = 0;   // get rid of the )...
-                        strcpy(portNamesShort[nPorts], begin);
+                        strcpy(4+portNamesShort[nPorts], begin);
+						
                     }
                     if (nPorts++ > MAX_SERIAL_PORTS)
                         break;
