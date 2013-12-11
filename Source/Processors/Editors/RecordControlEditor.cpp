@@ -95,6 +95,7 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
     eventsBySink->setBounds(10, 110, 140, 18);
     eventsBySink->addListener(this);
     eventsBySink->setClickingTogglesState(true);
+	eventsBySink->setToggleState(true,true);
     addAndMakeVisible(eventsBySink);
 	lastId = 0;
 }

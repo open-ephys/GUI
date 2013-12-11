@@ -31,6 +31,7 @@
 #include "GenericProcessor.h"
 #include "Visualization/SpikeObject.h"
 #include "TrialCircularBuffer.h"
+#include "ISCAN.h"
 #include <queue>
 #include <vector>
 
@@ -79,7 +80,7 @@ public:
 	void startRecording();
 
 	TrialCircularBuffer *trialCircularBuffer;
-	bool saveTTLs, saveNetworkEvents ;
+	bool saveTTLs, saveNetworkEvents,saveEyeTracking ;
 	int spikeSavingMode;
 	
 private:
@@ -93,6 +94,7 @@ private:
 	void dumpTimestampEventToDisk(int64 softwareTS,int64 hardwareTS);
 	void dumpTTLeventToDisk(int channel,bool risingEdge, int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, int samplePosition );
 	void dumpStartStopRecordEventToDisk(int64 ts, bool startRecord);
+	void dumpEyeTrackingEventToDisk(EyePosition pos);
 
 	bool isRecording;
     int displayBufferSize;

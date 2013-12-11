@@ -25,7 +25,7 @@
 #include "RecordNode.h"
 #include "Editors/PeriStimulusTimeHistogramEditor.h"
 #include "Channel.h"
-
+#include "ISCAN.h"
 #include <stdio.h>
 
 
@@ -35,7 +35,7 @@ PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
 	trialCircularBuffer  = nullptr;
 	eventFile = nullptr;
 	isRecording = false;
-	saveTTLs = saveNetworkEvents = true;
+	saveEyeTracking = saveTTLs = saveNetworkEvents = true;
 	spikeSavingMode = 2;
 	syncCounter = 0;
 }
@@ -224,6 +224,30 @@ void PeriStimulusTimeHistogramNode::dumpTTLeventToDisk(int channel, bool risingE
 	diskWriteLock->exit();
 }
 
+void PeriStimulusTimeHistogramNode::dumpEyeTrackingEventToDisk(EyePosition pos)
+{
+	diskWriteLock->enter();
+
+	uint8 eventType = EYE_POSITION;
+
+	// write event type
+	fwrite(&eventType, 1,1, eventFile); 
+	// write event size
+	int16 eventSize = 8 + 8 + 8 + 8; //  x,y,pupil,timestamp
+    fwrite(&eventSize, 2,1, eventFile);
+	// write event data
+	// 1. eye x position
+	fwrite(&pos.x, 8,1, eventFile);
+	// 2. eye y position
+	fwrite(&pos.y, 8,1, eventFile);
+	// 3. eye pupil
+	fwrite(&pos.pupil, 8,1, eventFile);
+	// 4. software timestamp
+	fwrite(&pos.timestamp, 8,1, eventFile);
+
+	diskWriteLock->exit();
+}
+
 void PeriStimulusTimeHistogramNode::dumpTimestampEventToDisk(int64 softwareTS,int64 hardwareTS)
 {
 	diskWriteLock->enter();
@@ -279,6 +303,21 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			dumpNetworkEventToDisk(s.getString(),s.timestamp);
 		}
 
+	}
+	if (eventType == EYE_POSITION)
+	{
+		if (saveEyeTracking && isRecording)
+		{
+			EyePosition pos;
+	        const uint8* dataptr = event.getRawData();
+			memcpy(&pos.x, dataptr+4,8);
+			memcpy(&pos.y, dataptr+4+8,8);
+			memcpy(&pos.pupil, dataptr+4+8+8,8);
+			memcpy(&pos.timestamp, dataptr+4+8+8+8,8);
+
+			dumpEyeTrackingEventToDisk(pos);
+		
+		}
 	}
 	if (eventType == TIMESTAMP)
     {
