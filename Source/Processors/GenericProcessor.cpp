@@ -656,6 +656,8 @@ void GenericProcessor::saveCustomChannelParametersToXml(XmlElement* channelInfo,
 void GenericProcessor::loadFromXml()
 {
 
+    update(); // make sure settings are updated
+
     std::cout << "Loading parameters for " << name << std::endl;
 
     if (!paramsWereLoaded)
