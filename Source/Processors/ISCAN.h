@@ -34,7 +34,7 @@
 class EyePosition
 {
 public:
-	float x,y,pupil;
+	double x,y,pupil;
 	int64 timestamp;
 };
 class ISCANnode : public GenericProcessor

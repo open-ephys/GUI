@@ -210,7 +210,7 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 			if (lineTerminationFound)
 			{
 				EyePosition e;
-				if (sscanf(serialBuffer.c_str(),"%f %f %f", &e.x, &e.y, &e.pupil) == 3)
+				if (sscanf(serialBuffer.c_str(),"%lf %lf %lf", &e.x, &e.y, &e.pupil) == 3)
 				{
 					// post new eye position message.
 					packetCounter++;
