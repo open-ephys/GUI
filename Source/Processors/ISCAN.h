@@ -37,7 +37,7 @@ public:
 	float x,y,pupil;
 	int64 timestamp;
 };
-class ISCANnode : public GenericProcessor,  public Thread
+class ISCANnode : public GenericProcessor
 {
 public:
     ISCANnode();
@@ -48,7 +48,6 @@ public:
 
 	bool isSource();
 	bool disable();
-	void run();
 	bool connect(int deviceID);
 	StringArray getDeviceNames();
 
@@ -66,6 +65,9 @@ public:
 	 String device;
 
 private:
+	void postEyePositionToMidiBuffer(EyePosition p, MidiBuffer& events);
+
+
  	ofSerial serialPort;
 	std::vector<ofSerialDeviceInfo> devices;
 	bool connected;

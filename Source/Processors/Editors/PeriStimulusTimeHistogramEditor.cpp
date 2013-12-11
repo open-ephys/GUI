@@ -179,9 +179,11 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			
 			m.addItem(1,"TTL",true, processor->saveTTLs);
 			m.addItem(2,"Network Events",true, processor->saveNetworkEvents);
-			m.addItem(3,"Sorted Spikes: TS only ",true, processor->spikeSavingMode == 1);
-			m.addItem(4,"Sorted Spikes: TS+waveform",true, processor->spikeSavingMode == 2);
-			m.addItem(5,"All Spikes: TS+waveform",true, processor->spikeSavingMode == 3);
+			m.addItem(3,"Eye Tracking",true, processor->saveEyeTracking);
+			
+			m.addItem(4,"Sorted Spikes: TS only ",true, processor->spikeSavingMode == 1);
+			m.addItem(5,"Sorted Spikes: TS+waveform",true, processor->spikeSavingMode == 2);
+			m.addItem(6,"All Spikes: TS+waveform",true, processor->spikeSavingMode == 3);
 			
 			const int result = m.show();
 
@@ -191,19 +193,22 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			} else if (result == 2)
 			{
 				processor->saveNetworkEvents = !processor->saveNetworkEvents;
-			} else if (result == 3)
+			}  else if (result == 3)
+			{
+				processor->saveEyeTracking = !processor->saveEyeTracking;
+			}	else if (result == 4)
 			{
 				if (processor->spikeSavingMode == 1)
 					processor->spikeSavingMode = 0;
 				else
 					processor->spikeSavingMode = 1;
-			} else if (result == 4)
+			} else if (result == 5)
 			{
 				if (processor->spikeSavingMode == 2)
 					processor->spikeSavingMode = 0;
 				else
 					processor->spikeSavingMode = 2;
-			} else if (result == 5)
+			} else if (result == 6)
 			{
 				if (processor->spikeSavingMode == 3)
 					processor->spikeSavingMode = 0;

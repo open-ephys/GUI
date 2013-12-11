@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*********************************************/
 ISCANnode::ISCANnode()
-	: GenericProcessor("Eye Tracking"), Thread("ISCANThread")
+	: GenericProcessor("Eye Tracking")
 
 {
 	sendSampleCount = false; // disable updating the continuous buffer sample counts,
@@ -46,9 +46,12 @@ ISCANnode::ISCANnode()
 
 ISCANnode::~ISCANnode()
 {
-	if (connected)
+	if (connected) {
+		int iscan_track_off_code = 129;
+		serialPort.writeByte(iscan_track_off_code);
+		Sleep(100);
 		serialPort.close();
-
+	}
 	
 }
 
@@ -143,6 +146,25 @@ void ISCANnode::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& event
 }
 
 
+
+void ISCANnode::postEyePositionToMidiBuffer(EyePosition p, MidiBuffer& events)
+{
+	uint8* eyePositionSerialized = new uint8[8+8+8+8]; 
+	memcpy(eyePositionSerialized, &p.x, 8);	
+	memcpy(eyePositionSerialized+8, &p.y, 8);	
+	memcpy(eyePositionSerialized+8+8, &p.pupil, 8);	
+	memcpy(eyePositionSerialized+8+8+8, &p.timestamp, 8);	
+	addEvent(events, 
+			 (uint8) EYE_POSITION,
+			 0,
+			 0,
+			 (uint8) GENERIC_EVENT,
+			 (uint8) 8+8+8+8+8, //x,y,p+ts
+			 eyePositionSerialized);
+
+	delete eyePositionSerialized;
+}
+
 void ISCANnode::process(AudioSampleBuffer& buffer,
 							MidiBuffer& events,
 							int& nSamples)
@@ -191,13 +213,16 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 				if (sscanf(serialBuffer.c_str(),"%f %f %f", &e.x, &e.y, &e.pupil) == 3)
 				{
 					// post new eye position message.
+					packetCounter++;
 					if (prevEyePosition.x != e.x || prevEyePosition.y != e.y  || prevEyePosition.pupil != e.pupil)
 					{
 						// send midi message
 						int64 timestamp = software_ts+ packetCounter * 1.0/eyeSamplingRateHz * timer.getHighResolutionTicksPerSecond();
+						prevEyePosition.timestamp = timestamp;
 						prevEyePosition.x = e.x;
 						prevEyePosition.y = e.y;
 						prevEyePosition.pupil = e.pupil;
+						postEyePositionToMidiBuffer(prevEyePosition, events);
 
 					}
 				} 
@@ -213,14 +238,6 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 	 nSamples = -10; // make sure this is not processed;
 	
 }
-
-void ISCANnode::run() {
-
-}
-
-
-
-
 
 
 bool ISCANnode::isReady()
