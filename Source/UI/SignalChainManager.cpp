@@ -368,13 +368,13 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
             std::cout << "Source: " << source->getName() << std::endl;
 
             // need to switch the splitter somehow
-            // if (action == ACTIVATE || action == UPDATE)
-            // {
-            //  if (source->isSplitter())
-            //  {
-            //      source->setPathToProcessor(currentProcessor);
-            //  }
-            // }
+            if (action == ACTIVATE || action == UPDATE)
+            {
+             if (source->isSplitter())
+             {
+                 source->setPathToProcessor(currentProcessor);
+             }
+            }
 
             editorToAdd = (GenericEditor*) source->getEditor();
 
@@ -411,8 +411,10 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
             {
                 std::cout << "It's a merger!" << std::endl;
 
-                //if (dest->getSourceNode() != currentProcessor)
-                //    editorToAdd->switchIO();
+                editorToAdd->switchIO(0);
+
+                if (dest->getSourceNode() != currentProcessor)
+                    editorToAdd->switchIO(1);
 
             }
 

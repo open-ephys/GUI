@@ -137,6 +137,8 @@ void SplitterEditor::switchDest(int dest)
         processor->switchIO(1);
 
     }
+
+    getEditorViewport()->makeEditorVisible(this, false);
 }
 
 void SplitterEditor::switchIO(int dest)

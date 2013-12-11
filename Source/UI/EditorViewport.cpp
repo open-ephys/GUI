@@ -135,13 +135,18 @@ void EditorViewport::paint(Graphics& g)
     int insertionX = tabSize + borderSize;
     g.setColour(Colours::darkgrey);
 
-    int x = insertionX + 19;
+    int x = insertionX + 15;
     int y = borderSize + 2;
     //int w = 30;
     //int h = getHeight() - 2*(borderSize+2);
 
-    g.drawImageAt(sourceDropImage, x, y);
-
+    if (editorArray.size() > 0)
+    {
+        if (!editorArray[0]->getProcessor()->isSource())
+            g.drawImageAt(sourceDropImage, x, y);
+    } else {
+        g.drawImageAt(sourceDropImage, x, y);
+    }
 }
 
 bool EditorViewport::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
@@ -311,6 +316,8 @@ void EditorViewport::makeEditorVisible(GenericEditor* editor, bool highlight, bo
     if (highlight)
         editor->highlight();
 
+    repaint();
+
 }
 
 void EditorViewport::deleteNode(GenericEditor* editor)
@@ -331,6 +338,8 @@ void EditorViewport::deleteNode(GenericEditor* editor)
         indexOfMovingComponent = -1;
 
         somethingIsBeingDraggedOver = false;
+
+        repaint();
 
     }
 }
@@ -1217,7 +1226,7 @@ const String EditorViewport::saveState(File fileToUse)
 
                 editor = (GenericEditor*) nextProcessor->getEditor();
 
-                if ((nextProcessor->isSplitter() || nextProcessor->isMerger())
+                if ((nextProcessor->isSplitter())// || nextProcessor->isMerger())
                     && nextProcessor->saveOrder < 0)
                 {
                     splitPoints.add(nextProcessor);
