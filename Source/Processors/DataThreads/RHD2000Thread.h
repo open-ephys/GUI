@@ -50,7 +50,7 @@ class SourceNode;
 
 */
 
-class RHD2000Thread : public DataThread
+class RHD2000Thread : public DataThread, public Timer
 
 {
 public:
@@ -121,7 +121,7 @@ private:
 
     String libraryFilePath;
 
-
+    void timerCallback();
 
     bool startAcquisition();
     bool stopAcquisition();

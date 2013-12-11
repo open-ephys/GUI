@@ -153,7 +153,11 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
 		button->setBounds(10+(column++)*(width), 30+row*(height), width, 15);
 		button->setRadioGroupId(0);
 		
-		addAndMakeVisible(button);
+        if (!getCollapsedState())
+            addAndMakeVisible(button);
+        else
+            addChildComponent(button);
+
 		button->addListener(this);
 		if (reorderActive)
 		{

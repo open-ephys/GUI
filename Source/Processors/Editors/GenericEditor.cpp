@@ -335,7 +335,11 @@ void GenericEditor::paint(Graphics& g)
     // draw title
     if (!isCollapsed)
     {
-        g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
+        if (!getProcessor()->isMerger() && !getProcessor()->isSplitter())
+            g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
+        else
+            g.drawText(name, 6, 5, 500, 15, Justification::left, false);
+
     } else {
         g.addTransform(AffineTransform::rotation(-M_PI/2.0));
         g.drawText(name, -getHeight()+6, 5, 500, 15, Justification::left, false);

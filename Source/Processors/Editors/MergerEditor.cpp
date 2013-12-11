@@ -57,7 +57,7 @@ MergerEditor::MergerEditor(GenericProcessor* parentNode, bool useDefaultParamete
     : GenericEditor(parentNode, useDefaultParameterEditors)
 
 {
-    desiredWidth = 90;
+    desiredWidth = 85;
 
     pipelineSelectorA = new ImageButton("Pipeline A");
 
