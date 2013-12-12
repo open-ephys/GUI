@@ -33,6 +33,9 @@
 
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265359
+#endif 
 GenericEditor::GenericEditor(GenericProcessor* owner, bool useDefaultParameterEditors=true)
     : AudioProcessorEditor(owner),
       desiredWidth(150), isFading(false), accumulator(0.0), acquisitionIsActive(false),
