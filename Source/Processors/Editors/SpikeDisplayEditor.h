@@ -61,7 +61,12 @@ public:
 
     Visualizer* createNewCanvas();
 
+    void saveCustomParameters(XmlElement* xml);
+    void loadCustomParameters(XmlElement* xml);
+
 private:
+	ToggleButton* saveSpikesToDiskButton;
+
 
     UtilityButton* panUpBtn;
     UtilityButton* panDownBtn;

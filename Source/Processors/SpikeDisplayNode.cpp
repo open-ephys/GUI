@@ -36,7 +36,7 @@ SpikeDisplayNode::SpikeDisplayNode()
  
 
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
-
+	saveSpikesToDisk = true;
     recordingNumber = -1;
 
 }
@@ -170,12 +170,12 @@ void SpikeDisplayNode::setParameter(int param, float val)
 {
     //std::cout<<"SpikeDisplayNode got Param:"<< param<< " with value:"<<val<<std::endl;
 
-    if (param == 0) // stop recording
+    if (param == 0 && saveSpikesToDisk) // stop recording
     {
         isRecording = false;
         signalFilesShouldClose = true;
 
-    } else if (param == 1) // start recording
+    } else if (param == 1 && saveSpikesToDisk) // start recording
     {
         isRecording = true;
 
@@ -466,6 +466,25 @@ void SpikeDisplayNode::closeFile(int i)
 
 }
 
+bool SpikeDisplayNode::getSaveSpikesStatus()
+{
+	return saveSpikesToDisk;
+}
+
+void SpikeDisplayNode::toggleSaveSpikes(bool newState)
+{
+	if (saveSpikesToDisk && isRecording && newState == false)
+	{
+		// make sure to close files...
+		stopRecording();
+	} else if (!saveSpikesToDisk && isRecording && newState == true)
+	{
+		startRecording();
+	}
+	saveSpikesToDisk = newState;
+
+}
+
 void SpikeDisplayNode::writeSpike(const SpikeObject& s, int i)
 {
 
@@ -534,3 +553,5 @@ String SpikeDisplayNode::generateHeader(int electrodeNum)
 
     return header;
 }
+
+

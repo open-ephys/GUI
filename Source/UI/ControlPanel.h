@@ -336,9 +336,10 @@ public:
     /** Informs the Control Panel that recording has stopped.*/
     void stopRecording();
 
+	ScopedPointer<RecordButton> recordButton;
 private:
     ScopedPointer<PlayButton> playButton;
-    ScopedPointer<RecordButton> recordButton;
+    
     ScopedPointer<Clock> masterClock;
     ScopedPointer<CPUMeter> cpuMeter;
     ScopedPointer<DiskSpaceMeter> diskMeter;

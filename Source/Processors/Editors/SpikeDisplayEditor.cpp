@@ -41,6 +41,12 @@ SpikeDisplayEditor::SpikeDisplayEditor(GenericProcessor* parentNode)
 
     tabText = "Spikes";
 
+	saveSpikesToDiskButton = new ToggleButton("Save Spikes To Disk");//, Font("Small Text", 13, Font::plain));
+	saveSpikesToDiskButton->setBounds(30, 50, 110, 18);
+	saveSpikesToDiskButton->addListener(this);
+	saveSpikesToDiskButton->setToggleState(true,false);
+	saveSpikesToDiskButton->setClickingTogglesState(true);
+	addAndMakeVisible(saveSpikesToDiskButton);
 
 
 }
@@ -213,6 +219,11 @@ void SpikeDisplayEditor::stopRecording()
 
 void SpikeDisplayEditor::buttonCallback(Button* button)
 {
+	if (button == saveSpikesToDiskButton)
+	{
+		SpikeDisplayNode *p = (SpikeDisplayNode *)getProcessor();
+		p->toggleSaveSpikes(saveSpikesToDiskButton->getToggleState());
+	}
     //std::cout<<"Got event from component:"<<button<<std::endl;
 
     // int pIdx = 0;
@@ -283,4 +294,27 @@ void SpikeDisplayEditor::buttonCallback(Button* button)
     //     allSubChansBtn->setToggleState(allChansToggled, false);
 
     // }
+}
+
+void SpikeDisplayEditor::saveCustomParameters(XmlElement* parentElement)
+{
+	SpikeDisplayNode *p = (SpikeDisplayNode *)getProcessor();
+	XmlElement* xmlNode = parentElement->createNewChildElement("SPIKE_DISPLAY");
+	xmlNode->setAttribute("saveSpikes", p->getSaveSpikesStatus());
+}
+
+
+
+void SpikeDisplayEditor::loadCustomParameters(XmlElement* xml)
+{
+	if (xml != nullptr)
+	{
+		forEachXmlChildElement(*xml, xmlNode)
+		{
+			if (xmlNode->hasTagName("SPIKE_DISPLAY"))
+			{
+				saveSpikesToDiskButton->setToggleState( xmlNode->getBoolAttribute("saveSpikes"),true);
+			}
+		}
+	}
 }

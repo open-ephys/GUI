@@ -78,7 +78,9 @@ public:
     void removeSpikePlots();
 
     bool checkThreshold(int, float, SpikeObject&);
-
+	void toggleSaveSpikes(bool newState);
+	bool getSaveSpikesStatus();
+	
 private:
 
     struct Electrode
@@ -121,6 +123,8 @@ private:
 
     uint16 recordingNumber;
     
+	bool saveSpikesToDisk;
+
     CriticalSection* diskWriteLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeDisplayNode);

@@ -314,7 +314,7 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 			getProcessorGraph()->getRecordNode()->setDirectoryName(input[1]);
 		}
         const MessageManagerLock mmLock;
-		getControlPanel()->startRecording();
+		getControlPanel()->recordButton->setToggleState(true,true);
 		return String("OK");      
 	//	getControlPanel()->placeMessageInQueue("StartRecord");
 	} if (input[0] == "SetSessionName")
@@ -324,7 +324,7 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 	{
 		const MessageManagerLock mmLock;
 		//getControlPanel()->placeMessageInQueue("StopRecord");
-		getControlPanel()->stopRecording();
+		getControlPanel()->recordButton->setToggleState(false,true);
   		return String("OK");      
 	} else if (input[0] == "ProcessorCommunication")
 	{

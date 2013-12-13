@@ -183,7 +183,6 @@ private:
     UtilityButton* plusButton;
 	UtilityButton* removeElectrodeButton;
     UtilityButton* audioMonitorButton;
-
     ThresholdSlider* thresholdSlider;
 
    Array<String> advancerNames ;
