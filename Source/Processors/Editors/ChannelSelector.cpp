@@ -838,7 +838,7 @@ void ChannelSelectorRegion::mouseWheelMove(const MouseEvent& event,
 {
 
     std::cout << "Got wheel move: " << wheel.deltaY << std::endl;
-    channelSelector->shiftChannelsVertical(wheel.deltaY);
+    channelSelector->shiftChannelsVertical(-wheel.deltaY);
 }
 
 void ChannelSelectorRegion::paint(Graphics& g)

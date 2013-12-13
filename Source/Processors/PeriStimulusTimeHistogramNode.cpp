@@ -211,11 +211,13 @@ void PeriStimulusTimeHistogramNode::dumpTTLeventToDisk(int channel, bool risingE
 	// write event type
 	fwrite(&eventType, 1,1, eventFile); 
 	// write event size
-	int16 eventSize = 1 + 8 + 8; // rising/falling(1) + software ts (8) + hardware ts (8)
+	int16 eventSize = 1 + 2 + 8 + 8; // rising/falling(1) + software ts (8) + hardware ts (8)
     fwrite(&eventSize, 2,1, eventFile);
 	// write event data
 	// 1. rising/falling edge
 	fwrite(&risingEdge, 1, 1, eventFile);
+	// 2. channel
+	fwrite(&channel, 2,1,eventFile);
 	// 2. software ts
 	fwrite(&ttl_timestamp_software, 8,1, eventFile);
 	// 3. hardware ts
@@ -434,8 +436,9 @@ void PeriStimulusTimeHistogramNode::openFile(String filename)
         // create and write header
         std::cout << "Writing header." << std::endl;
         String header = generateHeader();
-        std::cout << "File ID: " << eventFile << ", number of bytes: " << header.getNumBytesAsUTF8() << std::endl;
-        fwrite(header.toUTF8(), 1, header.getNumBytesAsUTF8(), eventFile);
+		int headerSize = header.getNumBytesAsUTF8();
+        std::cout << "File ID: " << eventFile << ", number of bytes: " << headerSize << std::endl;
+        fwrite(header.toUTF8(), header.getNumBytesAsUTF8(), 1, eventFile);
         std::cout << "Wrote header." << std::endl;
     }
     else
