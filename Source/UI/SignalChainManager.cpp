@@ -189,8 +189,9 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
         GenericProcessor* p = (GenericProcessor*) editorArray[index]->getProcessor();
         
        // GenericProcessor* source = p->getSourceNode();
-        if (p->getSourceNode()->isSplitter())
-            p->getSourceNode()->setSplitterDestNode(nullptr);
+        if (p->getSourceNode() != nullptr)
+			if (p->getSourceNode()->isSplitter())
+				p->getSourceNode()->setSplitterDestNode(nullptr);
 
         // if the processor to be removed is a merger,
         // we need to inform the other source that its merger has disappeared
