@@ -714,12 +714,7 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new network events source." << std::endl;
 			processor = new NetworkEvents(zmqcontext);
-        } else if (subProcessorType.equalsIgnoreCase("Eye Tracking"))
-        {
-            std::cout << "Creating a ISCAN source." << std::endl;
-            processor = new ISCANnode();
-        }
-
+        } 
 
         sendActionMessage("New source node created.");
 
@@ -765,7 +760,12 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a new channel mapping node." << std::endl;
             processor = new ChannelMappingNode();
+        } else if (subProcessorType.equalsIgnoreCase("Eye Tracking"))
+        {
+            std::cout << "Creating a ISCAN source." << std::endl;
+            processor = new ISCANnode();
         }
+
 
         sendActionMessage("New filter node created.");
 

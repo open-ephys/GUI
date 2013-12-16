@@ -93,6 +93,12 @@ public:
         return 0;
     }
 
+    /** Returns the number of ADC channels of the data source.*/
+    virtual int getNumADCchannels()
+    {
+        return 0;
+    }
+
     /** Changes the names of channels, if the thread needs custom names. */
     virtual void updateChannelNames() { }
 

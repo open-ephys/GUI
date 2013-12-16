@@ -50,6 +50,7 @@ public:
 	bool disable();
 	bool connect(int deviceID);
 	StringArray getDeviceNames();
+	StringArray getAnalogDeviceNames();
 
 	bool isReady();
 	float getDefaultSampleRate();

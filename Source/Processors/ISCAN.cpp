@@ -69,6 +69,19 @@ AudioProcessorEditor* ISCANnode::createEditor()
 
 }
 
+
+StringArray ISCANnode::getAnalogDeviceNames()
+{
+	StringArray names;
+	for (int k=0;k<channels.size();k++)
+	{
+		if (channels[k]->isADCchannel)
+			names.add(channels[k]->getName());
+	}
+
+	return names;
+}
+
 StringArray ISCANnode::getDeviceNames()
 {
 	StringArray names;
@@ -272,7 +285,7 @@ void ISCANnode::enabledState(bool t)
 
 bool ISCANnode::isSource()
 {
-	return true;
+	return false;
 }
 
 void ISCANnode::saveCustomParametersToXml(XmlElement* parentElement)

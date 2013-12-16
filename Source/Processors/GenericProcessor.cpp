@@ -329,10 +329,16 @@ void GenericProcessor::update()
 
         settings.numOutputs = getDefaultNumOutputs();
         settings.sampleRate = getDefaultSampleRate();
-
-        for (int i = 0; i < getNumOutputs(); i++)
+		int numChan = getNumOutputs();
+		int numADC_Chan = getDefaultADCoutputs();
+        for (int i = 0; i < numChan; i++)
         {
-            Channel* ch = new Channel(this, i);
+            Channel* ch = new Channel(this, i );
+			if (i >= numChan-numADC_Chan) {
+				ch->isADCchannel = true;
+				ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+			}
+
             ch->sampleRate = getDefaultSampleRate();
             ch->bitVolts = getDefaultBitVolts();
 

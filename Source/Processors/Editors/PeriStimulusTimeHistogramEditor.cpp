@@ -30,6 +30,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
 	: VisualizerEditor(parentNode, useDefaultParameterEditors) ,periStimulusTimeHistogramCanvas(nullptr)
 {
+	showSortedUnits = true;
+	showLFP = true;
+	showCompactView = false;
+	showSmooth = true;
+	showAutoRescale = true;
+	showMatchRange = false;
+	TTLchannelTrialAlignment = -1;
+	smoothingMS = 10;
+
+
 	tabText = "PSTH";
 	desiredWidth = 300;
 
@@ -50,92 +60,49 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	clearDisplay = new UtilityButton("Clear all",Font("Default", 15, Font::plain));
 	clearDisplay->addListener(this);
 	clearDisplay->setColour(Label::textColourId, Colours::white);
-	clearDisplay->setBounds(160,60,110,20);
+	clearDisplay->setBounds(180,60,90,20);
 	addAndMakeVisible(clearDisplay);
 
 
+	visualizationOptions =  new UtilityButton("Visualization Options",Font("Default", 15, Font::plain));
+	visualizationOptions->addListener(this);
+	visualizationOptions->setColour(Label::textColourId, Colours::white);
+	visualizationOptions->setBounds(10,60,160,20);
+	addAndMakeVisible(visualizationOptions);
 
-	autoRescale = new ToggleButton("Auto Rescale");//, Font("Small Text", 13, Font::plain));
-	autoRescale->setBounds(10, 105, 110, 18);
-	autoRescale->addListener(this);
-	autoRescale->setToggleState(true,false);
-	autoRescale->setClickingTogglesState(true);
-	addAndMakeVisible(autoRescale);
+	hardwareTrigger = new Label("hardwareTrigger","TTL Trial Alignment:");
+	hardwareTrigger->setFont(Font("Default", 14, Font::plain));
+	hardwareTrigger->setEditable(false);
+	hardwareTrigger->setJustificationType(Justification::centredLeft);
+	hardwareTrigger->setBounds(10,90,120,20);
+	addAndMakeVisible(hardwareTrigger);
 
-	smoothPSTH = new ToggleButton("Smooth PSTH");//, Font("Small Text", 13, Font::plain));
-	smoothPSTH->setBounds(135, 105, 130, 18);
-	smoothPSTH->addListener(this);
-	smoothPSTH->setToggleState(true,false);
-	smoothPSTH->setClickingTogglesState(true);
-	addAndMakeVisible(smoothPSTH);
-
-
-
-	matchRangeButton = new ToggleButton("Match Range");//, Font("Small Text", 13, Font::plain));
-	matchRangeButton->setBounds(135, 80, 130, 18);
-	matchRangeButton->addListener(this);
-	matchRangeButton->setToggleState(false,false);
-	matchRangeButton->setClickingTogglesState(true);
-	addAndMakeVisible(matchRangeButton);
-
-
-	lfp = new ToggleButton("LFP");//, Font("Small Text", 13, Font::plain));
-	lfp->setBounds(10, 55, 60, 18);
-	lfp->addListener(this);
-	lfp->setToggleState(true,false);
-	lfp->setClickingTogglesState(true);
-	addAndMakeVisible(lfp);
-
-	compactView = new ToggleButton("CompactView");//, Font("Small Text", 13, Font::plain));
-	compactView->setBounds(10, 80, 120, 18);
-	compactView->addListener(this);
-	compactView->setToggleState(false,false);
-	compactView->setClickingTogglesState(true);
-	addAndMakeVisible(compactView);
-	
-
-	spikes = new ToggleButton("Units");//, Font("Small Text", 13, Font::plain));
-	spikes->setBounds(70, 55, 60, 18);
-	spikes->addListener(this);
-	spikes->setToggleState(true,false);
-	spikes->setClickingTogglesState(true);
-	addAndMakeVisible(spikes);
-
-
-
-	smoothMS = new Label("Smooth MS", "10");
-	smoothMS->setBounds(245,105,40,18);
-	smoothMS->setFont(Font("Default", 15, Font::plain));
-	smoothMS->setColour(Label::textColourId, Colours::white);
-	smoothMS->setColour(Label::backgroundColourId, Colours::grey);
-	smoothMS->setEditable(true);
-	smoothMS->addListener(this);
-	addAndMakeVisible(smoothMS);
-
-
-
-
-}
-
-
-void PeriStimulusTimeHistogramEditor::labelTextChanged(Label* label)
-{
-	Value val = label->getTextValue();
-	double requestedValue = MAX(1, double(val.getValue())); // minimum 1 ms smoothing
-	if (periStimulusTimeHistogramCanvas == nullptr)
-		return;
-
-	if (label == smoothMS)
+	hardwareTrialAlignment = new ComboBox("Hardware Trial Alignment");
+	hardwareTrialAlignment->setEditableText(false);
+	hardwareTrialAlignment->setJustificationType(Justification::centredLeft);
+	hardwareTrialAlignment->addListener(this);
+	hardwareTrialAlignment->setBounds(130,90,70,20);
+	hardwareTrialAlignment->addItem("Not set",1);
+	for (int k=0;k<8;k++)
 	{
-		periStimulusTimeHistogramCanvas->setSmoothing(	requestedValue);
+		hardwareTrialAlignment->addItem("TTL "+String(k+1),k+2);
 	}
+	if (TTLchannelTrialAlignment == -1)
+		hardwareTrialAlignment->setSelectedId(1, true);
+	else 
+		hardwareTrialAlignment->setSelectedId(TTLchannelTrialAlignment+2, true);
+
+	addAndMakeVisible(hardwareTrialAlignment);
 
 
 }
 
-void PeriStimulusTimeHistogramEditor::setAutoRescale(bool state)
+void PeriStimulusTimeHistogramEditor::comboBoxChanged(ComboBox* comboBox)
 {
-	autoRescale->setToggleState(state,false);
+	if (comboBox == hardwareTrialAlignment)
+	{
+
+	}
 }
 
 void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
@@ -152,26 +119,60 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			processor->trialCircularBuffer->clearAll();
 			repaint();
 		}
-	} else if (button == compactView)
-	{
-		periStimulusTimeHistogramCanvas->setCompactView(compactView->getToggleState());
-	}
-	if (button == lfp)
-	{
-		periStimulusTimeHistogramCanvas->setLFPvisibility(lfp->getToggleState());
-	} else if (button == matchRangeButton)
-	{
-		periStimulusTimeHistogramCanvas->setMatchRange(matchRangeButton->getToggleState());
-	} else if (button == spikes)
-	{
-		periStimulusTimeHistogramCanvas->setSpikesVisibility(spikes->getToggleState());
-	} else if (button == smoothPSTH)
-	{
-		periStimulusTimeHistogramCanvas->setSmoothPSTH(smoothPSTH->getToggleState());
-	} else if (button == autoRescale)
-	{
-		periStimulusTimeHistogramCanvas->setAutoRescale(autoRescale->getToggleState());
-	}  else if (button == saveOptions)
+	} else if (button == visualizationOptions)
+		{
+			PopupMenu m;
+			m.addItem(1,"Sorted Units",true, showSortedUnits);
+			m.addItem(2,"LFP",true, showLFP);
+			m.addItem(3,"Compact View",true, showCompactView);
+			
+			PopupMenu smoothingSubMenu;
+			int SmoothingFactors[8] = {0,1,2,5,10,20,50,100};
+			for (int k=0;k<8;k++) {
+				String s;
+				if (SmoothingFactors[k] == 0)
+					s = "No Smoothing";
+				else
+					s = String(SmoothingFactors[k]) + " ms";
+
+				smoothingSubMenu.addItem(40+k,s,true, smoothingMS == SmoothingFactors[k]);
+			}
+
+			m.addSubMenu("Smooth Curves", smoothingSubMenu);
+			m.addItem(5,"Auto Rescale",true, showAutoRescale);
+			m.addItem(6,"Match range",false, showMatchRange);
+			m.addItem(7,"Raster Plots",false, false);
+			m.addItem(8,"Bar Graph",false, false);
+			m.addItem(9,"2D Heat map",false, false);
+			const int result = m.show();
+			switch (result)
+			{
+			case 1:
+				showSortedUnits=!showSortedUnits;
+				periStimulusTimeHistogramCanvas->setSpikesVisibility(showSortedUnits);
+				break;
+			case 2:
+				showLFP=!showLFP;
+				periStimulusTimeHistogramCanvas->setLFPvisibility(showLFP);
+				break;
+			case 3:
+				showCompactView=!showCompactView;
+				periStimulusTimeHistogramCanvas->setCompactView(showCompactView);
+				break;
+			case 5:
+				showAutoRescale=!showAutoRescale;
+				periStimulusTimeHistogramCanvas->setAutoRescale(showAutoRescale);
+				break;
+			case 6:
+				showMatchRange=!showMatchRange;
+				periStimulusTimeHistogramCanvas->setMatchRange(showMatchRange);
+				break;
+			} 
+			if (result >= 40 && result <= 47)
+			{
+				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40]);
+			}
+	} else if (button == saveOptions)
 	{
 
 			PopupMenu m;
@@ -601,7 +602,7 @@ void PeriStimulusTimeHistogramDisplay::setAutoRescale(bool state)
 {
 	// draw n by m grid
 	PeriStimulusTimeHistogramEditor* ed = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-	ed->setAutoRescale(state);
+	ed->showAutoRescale = state;
 	
 	for (int k=0;k<psthPlots.size();k++)
 	{

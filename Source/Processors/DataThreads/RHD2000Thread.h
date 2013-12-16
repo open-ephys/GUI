@@ -78,6 +78,7 @@ public:
     void scanPorts();
 
     int getNumEventChannels();
+	int getNumADCchannels();
 
     void assignAudioOut(int dacChannel, int dataChannel);
     void enableAdcs(bool);

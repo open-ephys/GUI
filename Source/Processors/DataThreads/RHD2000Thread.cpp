@@ -526,6 +526,16 @@ void RHD2000Thread::setNumChannels(int hsNum, int numChannels)
     numChannelsPerDataStream.set(hsNum, numChannels);
 }
 
+
+int RHD2000Thread::getNumADCchannels()
+{
+	if (acquireAdcChannels)
+        return 8;
+	else 
+		return 0;
+}
+
+
 int RHD2000Thread::getNumChannels()
 {
 

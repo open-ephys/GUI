@@ -170,6 +170,14 @@ float SourceNode::getDefaultSampleRate()
         return 44100.0;
 }
 
+int SourceNode::getDefaultADCoutputs()
+{
+    if (dataThread != 0)
+        return dataThread->getNumADCchannels();
+    else
+        return 0;
+}
+
 int SourceNode::getDefaultNumOutputs()
 {
     if (dataThread != 0)

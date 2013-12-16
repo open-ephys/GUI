@@ -31,22 +31,69 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
 {
 	desiredWidth = 220;
 
+	communication = new ToggleButton("Serial Communication");//,Font("Default", 15, Font::plain));
+	communication->addListener(this);
+	communication->setColour(Label::textColourId, Colours::white);
+	communication->setBounds(10,30,160,20);
+	communication->setToggleState(true, false);
+	addAndMakeVisible(communication);
+
     urlLabel = new Label("Device:", "Device:");
-    urlLabel->setBounds(20,30,60,25);
+    urlLabel->setBounds(20,60,60,25);
     addAndMakeVisible(urlLabel);
+	urlLabel->setVisible(true);
 
 	deviceList = new ComboBox("SerialDevices");
 	deviceList->setEditableText(false);
 	deviceList->setJustificationType(Justification::centredLeft);
 	deviceList->addListener(this);
-	deviceList->setBounds(80,30,130,20);
+	deviceList->setBounds(80,60,130,20);
 	addAndMakeVisible(deviceList);
 	refreshDevices();
+	deviceList->setVisible(true);
+
+
+	devXlbl = new Label("X Channel:", "X Channel:");
+    devXlbl->setBounds(20,60,80,25);
+    addAndMakeVisible(devXlbl);
+	devXlbl->setVisible(false);
+
+	devYlbl = new Label("Y Channel:", "Y Channel:");
+    devYlbl->setBounds(20,90,80,25);
+    addAndMakeVisible(devYlbl);
+	devYlbl->setVisible(false);
+
+
+
+	devX = new ComboBox("DeviceX");
+	devX->setEditableText(false);
+	devX->setJustificationType(Justification::centredLeft);
+	devX->addListener(this);
+	devX->setBounds(90,60,110,20);
+	addAndMakeVisible(devX);
+	devX->setVisible(false);
+
+	devY = new ComboBox("DeviceX");
+	devY->setEditableText(false);
+	devY->setJustificationType(Justification::centredLeft);
+	devY->addListener(this);
+	devY->setBounds(90,90,110,20);
+	addAndMakeVisible(devY);
+	devY->setVisible(false);
 
     setEnabledState(false);
 
 }
 
+void ISCANeditor::refreshAnalogDevices()
+{
+	ISCANnode *processor  = (ISCANnode*) getProcessor();
+	StringArray analogDevices = processor->getAnalogDeviceNames();
+	devX->clear();
+	devY->clear();
+	devX->addItemList(analogDevices,1);
+	devY->addItemList(analogDevices,1);
+}
 
 void ISCANeditor::refreshDevices()
 {
@@ -59,7 +106,35 @@ void ISCANeditor::refreshDevices()
 void ISCANeditor::buttonEvent(Button* button)
 {
 	ISCANnode *processor  = (ISCANnode*) getProcessor();
+	if (button == communication)
+	{
+		if (communication->getToggleState())
+		{
+			communication->setButtonText("Serial Communication");
+			urlLabel->setVisible(true);
+  		   refreshDevices();
+			deviceList->setVisible(true);
 
+			devXlbl->setVisible(false);
+			devYlbl->setVisible(false);
+			devX->setVisible(false);
+			devY->setVisible(false);
+
+		}
+		else 
+		{
+			communication->setButtonText("Analog Communication");
+			urlLabel->setVisible(false);
+			deviceList->setVisible(false);
+
+			devXlbl->setVisible(true);
+			devYlbl->setVisible(true);
+			devX->setVisible(true);
+			devY->setVisible(true);
+			refreshAnalogDevices();
+
+		}
+	}
 }
 
 void ISCANeditor::comboBoxChanged(ComboBox* comboBox)

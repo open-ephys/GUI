@@ -49,7 +49,7 @@ function [data, timestamps, info] = load_open_ephys_data(filename)
 %
 %     <http://www.gnu.org/licenses/>.
 %
-filename = 'C:\Users\shayo\Documents\GitHub\GUI\Builds\VisualStudio2012\Debug64\bin\2013-12-02_13-59-34\all_channels.events';
+filename = 'C:\Users\shayo\Documents\GitHub\GUI\Builds\VisualStudio2012\Debug64\bin\2013-12-10_13-03-06\all_channels.events';
 filetype = filename(max(strfind(filename,'.'))+1:end); % parse filetype
 
 fid = fopen(filename);
@@ -89,6 +89,12 @@ NETWORK = 7;
 
 timestampCounter = 1;
 fseek(fid,NUM_HEADER_BYTES,-1)
+afSpikeTimeHardware = [];
+afSpikeTimeSoftware= [];
+
+TimstampSoftware = [];
+TimestampHardware = [];
+SessionStartInd = [];
 while (1)
     index=index+1;
     eventTy= fread(fid, 1, 'uint8=>uint8');
@@ -102,11 +108,15 @@ while (1)
             startStop = fread(fid,1,'uint8=>bool'); % start = 1
             recordNumber = fread(fid,1,'uint16=>uint16');
             softwareTS = fread(fid,1,'int64=>int64');
-
+           
+            SessionStartInd = [SessionStartInd,length(TimstampSoftware)];
+           
         case TIMESTAMP
             TimstampSoftware(timestampCounter) = fread(fid,1,'int64=>int64');
             TimestampHardware(timestampCounter) = fread(fid,1,'int64=>int64');
             timestampCounter=timestampCounter+1;
+            
+             
         case TTL
             risingEdge = fread(fid,1,'uint8=>bool'); % start = 1
             softwareTS = fread(fid,1,'int64=>int64');
@@ -122,6 +132,7 @@ while (1)
             if (eventSize(index) > 8+8+2+2+2+2)
                 fread(fid,numPts*numChannels,'uint16=>uint16');
             end
+    
         case NETWORK
              str = fread(fid,eventSize(index)-8,'char=>char')'; % start = 1
              softwareTS = fread(fid,1,'int64=>int64');
@@ -136,4 +147,11 @@ fclose(fid);
 
 
 figure;
-plot(TimstampSoftware,TimestampHardware,'.');
+plot(TimstampSoftware-TimstampSoftware(1),TimestampHardware-TimestampHardware(1),'.');
+% robust fit has trouble with very large values.
+% so we remove the offset and then regress
+[SyncCoeff]=robustfit(TimstampSoftware(:)-TimstampSoftware(1),TimestampHardware(:)-TimestampHardware(1))
+
+% Software to hardware mapping jitter:
+JitterMS = 1e3*(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1)) -  (TimestampHardware-TimestampHardware(1))) / header.sampleRate;
+mean(JitterMS)
