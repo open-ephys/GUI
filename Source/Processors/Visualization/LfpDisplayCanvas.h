@@ -276,6 +276,7 @@ protected:
 
     bool isEnabled;
     bool inputInverted;
+    bool canBeInverted;
 
 };
 

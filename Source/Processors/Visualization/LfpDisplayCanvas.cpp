@@ -1021,7 +1021,7 @@ void LfpDisplay::setEnabledState(bool state, int chan)
 LfpChannelDisplay::LfpChannelDisplay(LfpDisplayCanvas* c, LfpDisplay* d, int channelNumber) :
     canvas(c), display(d), isSelected(false), chan(channelNumber), 
     channelOverlap(300), channelHeight(40), range(1000.0f),
-    isEnabled(true), inputInverted(false)
+    isEnabled(true), inputInverted(false), canBeInverted(true)
 {
 
 
@@ -1254,14 +1254,22 @@ int LfpChannelDisplay::getChannelOverlap()
 
 void LfpChannelDisplay::setInputInverted(bool isInverted)
 {
-    inputInverted = isInverted;
+    if (canBeInverted)
+    {
+        inputInverted = isInverted;
 
-    setChannelHeight(channelHeight);
+        setChannelHeight(channelHeight);
+    }
 }
 
 void LfpChannelDisplay::setName(String name_)
 {
     name = name_;
+
+    if (name.startsWith("ADC")) // don't allow flipping of ADC channels
+    {
+        canBeInverted = false;
+    }
 }
 
 // -------------------------------
