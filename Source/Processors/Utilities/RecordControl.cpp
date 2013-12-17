@@ -38,10 +38,52 @@ RecordControl::~RecordControl()
 
 }
 
+StringArray RecordControl::getChannelNames()
+{
+	return names;
+}
+
 void RecordControl::updateSettings()
 {
-	//const MessageManagerLock mmLock;
-	//editor->updateSettings();
+    if (recordNode == 0)
+        recordNode = getProcessorGraph()->getRecordNode();
+
+	int numExistingNames = names.size();
+	int numNewNames = getNumInputs();
+	if (numNewNames >= numExistingNames)
+	{
+		// keep existing changes.
+		StringArray oldnames = names;
+		names.clear();
+		for (int k=0;k<getNumInputs();k++)
+		{
+			if (k < numExistingNames)
+			{
+				channels[k]->setName(oldnames[k]);
+				recordNode->updateChannelName(k, oldnames[k]);
+				names.add(oldnames[k]);
+			}
+			else
+				names.add(channels[k]->getName());
+		}
+	} else
+	{
+		// just chop off , but keep names.
+		// keep existing changes.
+		StringArray oldnames = names;
+		names.clear();
+		for (int k=0;k<getNumInputs();k++)
+		{
+				channels[k]->setName(oldnames[k]);
+				recordNode->updateChannelName(k, oldnames[k]);
+				names.add(oldnames[k]);
+		}
+	}
+
+	const MessageManagerLock mmLock;
+	RecordControlEditor *ed = (RecordControlEditor *)getEditor();
+	if (ed != nullptr)
+		ed->updateNames();
 }
 
 AudioProcessorEditor* RecordControl::createEditor()
@@ -52,6 +94,8 @@ AudioProcessorEditor* RecordControl::createEditor()
 
 void RecordControl::setParameter(int parameterIndex, float newValue)
 {
+	int x = getNumInputs();
+
     if (parameterIndex == 0)
     {
         updateTriggerChannel((int) newValue);
@@ -70,6 +114,22 @@ void RecordControl::setParameter(int parameterIndex, float newValue)
         
 		eventsSavedBySink = newValue > 0;
         }
+}
+
+void RecordControl::modifyChannelName(int ch, String newname)
+{
+    if (recordNode == 0)
+        recordNode = getProcessorGraph()->getRecordNode();
+
+	channels[ch]->setName(newname);
+	recordNode->updateChannelName(ch, newname);
+	names.clear();
+	for (int k=0;k<getNumInputs();k++)
+	{
+		names.add(channels[k]->getName());
+	}
+
+
 }
 
 void RecordControl::updateTriggerChannel(int newChannel)

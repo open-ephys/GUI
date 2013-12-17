@@ -588,7 +588,7 @@ void RHD2000Thread::updateChannelNames()
         {
             chNum++;
 
-            sn->channels[chNum]->setName(String(chNum));
+            sn->channels[chNum]->setName("CH"+String(chNum));
         }
     }
 

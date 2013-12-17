@@ -255,6 +255,11 @@ void RecordNode::updateChannelName(int channelIndex, String newname)
 	{
 		channelPointers[channelIndex]->name = newname;
 		updateFileName(channelPointers[channelIndex]);
+	} else
+	{
+		// keep name and do the change when the pointer actually points to something... ?
+		modifiedChannelNames.add(newname);
+		modifiedChannelInd.add(channelIndex);
 	}
 }
 
@@ -279,6 +284,16 @@ void RecordNode::createNewDirectory()
 
 void RecordNode::createNewFiles()
 {
+	// apply name changes that were not invoked because channelPointers were not allcoated yet.
+	for (int k=0;k<modifiedChannelNames.size();k++)
+	{
+		if (modifiedChannelInd[k] >= 0 && modifiedChannelInd[k] <channelPointers.size())
+			channelPointers[modifiedChannelInd[k]]->setName(modifiedChannelNames[k]);
+	}
+	modifiedChannelNames.clear();
+	modifiedChannelInd.clear();
+
+
     for (int i = 0; i < channelPointers.size(); i++)
     {
         updateFileName(channelPointers[i]);

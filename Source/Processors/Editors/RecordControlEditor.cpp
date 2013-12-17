@@ -120,8 +120,10 @@ void RecordControlEditor::comboBoxChanged(ComboBox* comboBox)
 		 if (ID == 0)
 			{
 	            // name change
-				getProcessor()->getProcessorGraph()->getRecordNode()->updateChannelName(lastId-1,comboBox->getText());
-				updateSettings();
+				//getProcessor()->getProcessorGraph()->getRecordNode()->updateChannelName(lastId-1,comboBox->getText());
+				RecordControl *p = (RecordControl *) getProcessor();
+				p->modifyChannelName(lastId-1, comboBox->getText());
+				updateNames();
 				comboBox->setSelectedId(lastId,dontSendNotification);
         }
 		else
@@ -147,21 +149,12 @@ void RecordControlEditor::buttonEvent(Button* button)
 	}
 }
 
-void RecordControlEditor::updateSettings()
+void RecordControlEditor::updateNames()
 {
-    //availableChans->clear();
-    //GenericProcessor* processor = getProcessor();
-    
-	// update number of recorded channels...
-		const MessageManagerLock mmLock;
-	Array<bool> isRecording;
-	((RecordControl *)getProcessor())->getProcessorGraph()->getRecordNode()->getChannelNamesAndRecordingStatus(channelNames, isRecording);
+	RecordControl *p = (RecordControl *) getProcessor();
+	StringArray names = p->getChannelNames();
 	chanRenameCombo->clear();
-	for (int k=0;k<channelNames.size();k++)
-	{
-		chanRenameCombo->addItem(channelNames[k],k+1);
-	}
-	
+	chanRenameCombo->addItemList(names,1);
 }
 
 void RecordControlEditor::saveCustomParameters(XmlElement* xml)

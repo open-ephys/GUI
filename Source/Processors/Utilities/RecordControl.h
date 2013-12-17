@@ -50,16 +50,17 @@ public:
     bool enable();
     
     bool createNewFilesOnTrigger;
-    
+    StringArray getChannelNames();
     bool isUtility() {return true;}
 	void updateSettings();
-
+	void modifyChannelName(int ch, String newname);
     AudioProcessorEditor* createEditor();
 
 private:
     int triggerChannel;
     bool eventsSavedBySink,firstTime;
-    
+    StringArray names;
+
     RecordNode* recordNode;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RecordControl);
