@@ -80,6 +80,10 @@ class Electrode
 	public:
 		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
         ~Electrode();
+
+
+		void resizeWaveform(int numPre, int numPost);
+
 		String name;
 
         int numChannels;
@@ -259,6 +263,11 @@ public:
 	void setElectrodeAdvancerOffset(int i, double v);
 	double getAdvancerPosition(int advancerID);
 	double getSelectedElectrodeDepth();
+
+	int getNumPreSamples();
+	int getNumPostSamples();
+	void setNumPreSamples(int numSamples);
+	void setNumPostSamples(int numSamples);
 
 	Array<Electrode*> getElectrodes();
 

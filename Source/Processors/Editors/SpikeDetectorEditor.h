@@ -181,6 +181,7 @@ private:
     TriangleButton* upButton;
     TriangleButton* downButton;
     UtilityButton* plusButton;
+	UtilityButton* configButton;
 	UtilityButton* removeElectrodeButton;
     UtilityButton* audioMonitorButton;
     ThresholdSlider* thresholdSlider;

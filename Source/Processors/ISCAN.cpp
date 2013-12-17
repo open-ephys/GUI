@@ -149,6 +149,10 @@ bool ISCANnode::connect(int selectedDevice)
 	return connected;
 }
 
+void ISCANnode::updateSettings()
+{
+
+}
 
 void ISCANnode::setParameter(int parameterIndex, float newValue)
 {
@@ -382,6 +386,10 @@ void ISCANnode::loadCustomParametersFromXml()
 		{
 			if (mainNode->hasTagName("ISCAN"))
 			{
+
+				serialCommunication = mainNode->getBoolAttribute("serialCommunication");
+				analogXchannel = mainNode->getIntAttribute("analogXchannel");
+				analogYchannel = mainNode->getIntAttribute("analogYchannel");
 				device = mainNode->getStringAttribute("device");
 			}
 		}

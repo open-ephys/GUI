@@ -706,11 +706,11 @@ WaveAxes::WaveAxes(int channel) : GenericAxes(channel),
     thresholdColour = Colours::red;
 
     font = Font("Small Text",10,Font::plain);
-
+	int numSamples = 40;
     for (int n = 0; n < bufferSize; n++)
     {
         SpikeObject so;
-        generateEmptySpike(&so, 4);
+        generateEmptySpike(&so, 4,numSamples);
 
         spikeBuffer.add(so);
     }
@@ -892,11 +892,11 @@ void WaveAxes::clear()
 
     spikeBuffer.clear();
     spikeIndex = 0;
-
+	int numSamples = 40;
     for (int n = 0; n < bufferSize; n++)
     {
         SpikeObject so;
-        generateEmptySpike(&so, 4);
+        generateEmptySpike(&so, 4,numSamples);
 
         spikeBuffer.add(so);
     }

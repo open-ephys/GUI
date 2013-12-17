@@ -311,14 +311,15 @@ void generateSimulatedSpike(SpikeObject* s, uint64_t timestamp, int noise)
     }
 
 }
-void generateEmptySpike(SpikeObject* s, int nChannels)
+
+void generateEmptySpike(SpikeObject* s, int nChannels, int numSamples)
 {
 
     s->eventType = SPIKE_EVENT_CODE;
     s->timestamp = 0;
     s->source = 0;
     s->nChannels = 1;
-    s->nSamples = 40;
+    s->nSamples = numSamples;
 	s->electrodeID = 0;
 	s->samplingFrequencyHz = 30000;
 	s->sortedId = 0;

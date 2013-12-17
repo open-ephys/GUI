@@ -48,6 +48,38 @@ SpikeDetector::SpikeDetector()
 	PCAbeforeBoxes = true;
 }
 
+int SpikeDetector::getNumPreSamples()
+{
+	return numPreSamples;
+}
+
+int SpikeDetector::getNumPostSamples()
+{
+	return numPostSamples;
+}
+
+
+void SpikeDetector::setNumPreSamples(int numSamples)
+{
+	// we need to update all electrodes, and also inform other modules that this has happened....
+	numPreSamples = numSamples;
+
+	for (int k=0;k<electrodes.size();k++)
+	{
+		electrodes[k]->resizeWaveform(numPreSamples,numPostSamples);
+	}
+	
+}
+
+void SpikeDetector::setNumPostSamples(int numSamples)
+{
+	numPostSamples = numSamples;
+	for (int k=0;k<electrodes.size();k++)
+	{
+		electrodes[k]->resizeWaveform(numPreSamples,numPostSamples);
+	}
+}
+
 
 int SpikeDetector::getUniqueProbeID(String type)
 {
@@ -185,6 +217,18 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
 	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
 
     isMonitored = false;
+}
+
+void Electrode::resizeWaveform(int numPre, int numPost)
+{
+	// update electrode and all sorted units....
+	// we can't keep pca space anymore, so we discard of all pca units (?)
+    prePeakSamples = numPre;
+    postPeakSamples = numPost;
+
+	//spikePlot = nullptr;
+	spikeSort->resizeWaveform(prePeakSamples+postPeakSamples);
+
 }
 
 void SpikeDetector::setElectrodeAdvancerOffset(int i, double v)
@@ -980,10 +1024,13 @@ double SpikeDetector::getAdvancerPosition(int advancerID)
 	Array<GenericProcessor*> p = g->getListOfProcessors();
 	for (int k=0;k<p.size();k++)
 	{
-		if (p[k]->getName() == "Advancers")
+		if (p[k] != nullptr)
 		{
-			AdvancerNode *node = (AdvancerNode*)p[k];
-			return node->getAdvancerPosition(advancerID);
+			if (p[k]->getName() == "Advancers")
+			{
+				AdvancerNode *node = (AdvancerNode*)p[k];
+				return node->getAdvancerPosition(advancerID);
+			}
 		}
 	}
 	return 0.0;

@@ -66,6 +66,8 @@ public:
 	void setSamplingRate(int sampleRate);
 	void setXchannel(int ch);
 	void setYchannel(int ch);
+	
+	void updateSettings();
 
 	 String device;
 
