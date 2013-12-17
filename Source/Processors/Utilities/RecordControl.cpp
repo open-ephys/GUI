@@ -149,6 +149,19 @@ bool RecordControl::enable()
     return true;
 }
 
+void RecordControl::startRecording() 
+{ 
+	RecordControlEditor *ed = (RecordControlEditor *)getEditor();
+	ed->disableButtons();
+}
+
+
+void RecordControl::stopRecording() 
+{ 
+	RecordControlEditor *ed = (RecordControlEditor *)getEditor();
+	ed->enableButtons();
+}
+
 void RecordControl::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)

@@ -57,6 +57,10 @@ public:
     AudioProcessorEditor* createEditor();
 
 private:
+	
+	void startRecording() ;
+	void stopRecording() ;
+
     int triggerChannel;
     bool eventsSavedBySink,firstTime;
     StringArray names;

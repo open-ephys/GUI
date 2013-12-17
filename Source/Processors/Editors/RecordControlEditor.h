@@ -47,7 +47,8 @@ public:
     void buttonEvent(Button* button);
     void loadCustomParameters(XmlElement*);
     void saveCustomParameters(XmlElement*);
-
+	void disableButtons();
+	void enableButtons();
 private:
 	int lastId;
 	StringArray channelNames;

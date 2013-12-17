@@ -90,7 +90,7 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
 	sampleRate->setEditableText(false);
 	sampleRate->setJustificationType(Justification::centredLeft);
 	sampleRate->addListener(this);
-	sampleRate->setBounds(110,85,90,20);
+	sampleRate->setBounds(110,110,90,20);
 	addAndMakeVisible(sampleRate);
 	sampleRate->addItem("50 Hz",1);
 	sampleRate->addItem("60 Hz",2);
@@ -113,8 +113,8 @@ void ISCANeditor::refreshAnalogDevices()
 	devY->clear();
 	for (int k=0;k<channelNumbers.size();k++)
 	{
-		devX->addItemList(analogDevices, channelNumbers[k]);
-		devY->addItemList(analogDevices, channelNumbers[k]);
+		devX->addItem(analogDevices[k], channelNumbers[k]);
+		devY->addItem(analogDevices[k], channelNumbers[k]);
 	}
 }
 
@@ -179,11 +179,11 @@ void ISCANeditor::comboBoxChanged(ComboBox* comboBox)
 	} else if (comboBox == devX)
 	{
 		int xChannel = devX->getSelectedId();
-		processor->setYchannel(xChannel);
+		processor->setXchannel(xChannel);
 	} else if (comboBox == devY)
 	{
 		int yChannel = devY->getSelectedId();
-		processor->setXchannel(yChannel);
+		processor->setYchannel(yChannel);
 	} else if (comboBox == sampleRate)
 	{
 		int selectedID = sampleRate->getSelectedId();
