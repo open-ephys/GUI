@@ -51,8 +51,8 @@ public:
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;
-    ScopedPointer<Label> urlLabel, devXlbl,devYlbl;
-	ScopedPointer<ComboBox> deviceList, devX,devY;
+    ScopedPointer<Label> urlLabel, devXlbl,devYlbl,sampleLbl;
+	ScopedPointer<ComboBox> deviceList, devX,devY,sampleRate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANeditor);
 

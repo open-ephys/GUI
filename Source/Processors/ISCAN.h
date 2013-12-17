@@ -35,7 +35,7 @@ class EyePosition
 {
 public:
 	double x,y,pupil;
-	int64 timestamp;
+	int64 software_timestamp,hardware_timestamp;
 };
 class ISCANnode : public GenericProcessor
 {
@@ -50,7 +50,7 @@ public:
 	bool disable();
 	bool connect(int deviceID);
 	StringArray getDeviceNames();
-	StringArray getAnalogDeviceNames();
+	StringArray getAnalogDeviceNames(Array<int> &channelNumbers);
 
 	bool isReady();
 	float getDefaultSampleRate();
@@ -61,14 +61,19 @@ public:
 	void postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& events);
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	void loadCustomParametersFromXml();
-
+	void setSerialCommunication(bool state);
+	void process_serialCommunication(MidiBuffer& events);
+	void setSamplingRate(int sampleRate);
+	void setXchannel(int ch);
+	void setYchannel(int ch);
 
 	 String device;
 
 private:
+	int sampleCounter;
 	void postEyePositionToMidiBuffer(EyePosition p, MidiBuffer& events);
-
-
+	bool serialCommunication;
+	int analogXchannel, analogYchannel,analogPupilchannel;
  	ofSerial serialPort;
 	std::vector<ofSerialDeviceInfo> devices;
 	bool connected;
@@ -78,8 +83,13 @@ private:
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);
 	int eyeSamplingRateHz;
 	int64 software_ts;
+	int64 numTicksPerSec;
 	bool firstTime;
 	int packetCounter;
+	float offsetX, offsetY, gainX, gainY;
+	int64 hardware_timestamp,software_timestamp;
+	
+
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANnode);
 
 };
