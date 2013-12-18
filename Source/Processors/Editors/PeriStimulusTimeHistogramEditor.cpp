@@ -666,7 +666,8 @@ void PeriStimulusTimeHistogramDisplay::focusOnPlot(int plotID)
 		}
 		psthPlots[plotIndex]->toggleFullScreen(true);
 		// make sure its rectangular...?
-		int newSize = MIN(canvas->screenWidth,canvas->screenHeight);
+		int newSize = MIN(canvas->screenWidth,canvas->screenHeight)-30;
+		setBounds(0,0,newSize,newSize);
 		psthPlots[plotIndex]->setBounds(0,0,newSize,newSize);
 		psthPlots[plotIndex]->repaint();
 	}
