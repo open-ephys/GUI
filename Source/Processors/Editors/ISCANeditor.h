@@ -45,13 +45,14 @@ class ISCANeditor : public GenericEditor,  public ComboBox::Listener
 public:
     ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~ISCANeditor();
-
+	void refreshAnalogDevices();
     void buttonEvent(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
 private:
 	void refreshDevices();
-    ScopedPointer<Label> urlLabel;
-	ScopedPointer<ComboBox> deviceList;
+	ScopedPointer<ToggleButton> communication;
+    ScopedPointer<Label> urlLabel, devXlbl,devYlbl,sampleLbl;
+	ScopedPointer<ComboBox> deviceList, devX,devY,sampleRate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANeditor);
 

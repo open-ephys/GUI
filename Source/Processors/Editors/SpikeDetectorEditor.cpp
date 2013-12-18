@@ -45,15 +45,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 
     desiredWidth = 300;
 
-  //  electrodeTypes = new ComboBox("Electrode Types");
-
     SpikeDetector* processor = (SpikeDetector*) getProcessor();
-	/*
-    for (int i = 0; i < processor->electrodeTypes.size(); i++)
-    {
-        String type = processor->electrodeTypes[i];
-        electrodeTypes->addItem(type += "s", i+1);
-    }*/
 
 	 advancerList = new ComboBox("Advancers");
     advancerList->addListener(this);
@@ -66,9 +58,8 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     depthOffsetLabel->setBounds(140,115,80,20);
 	depthOffsetLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(depthOffsetLabel);
-    
- 	 
-    advancerLabel = new Label("Depth Offset","ADVANCER:");
+
+	advancerLabel = new Label("Depth Offset","ADVANCER:");
 	advancerLabel->setFont(Font("Default", 10, Font::plain));
     advancerLabel->setEditable(false);
     advancerLabel->setBounds(10,80,80,20);
@@ -114,10 +105,10 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     plusButton->setBounds(15,27,14,14);
     addAndMakeVisible(plusButton);
 
-    audioMonitorButton = new UtilityButton("MONITOR", titleFont);
+    audioMonitorButton = new UtilityButton("MONITOR", Font("Default", 12, Font::plain));
     audioMonitorButton->addListener(this);
     audioMonitorButton->setRadius(3.0f);
-    audioMonitorButton->setBounds(70,60,75,20);
+    audioMonitorButton->setBounds(80,65,75,15);
     audioMonitorButton->setClickingTogglesState(true);
     addAndMakeVisible(audioMonitorButton);
 
@@ -126,7 +117,13 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     removeElectrodeButton->setBounds(15,45,14,14);
     addAndMakeVisible(removeElectrodeButton);
     
-    thresholdSlider = new ThresholdSlider(font);
+   
+    configButton = new UtilityButton("CONFIG",Font("Default", 12, Font::plain));
+    configButton->addListener(this);
+    configButton->setBounds(10,65,60,15);
+    addAndMakeVisible(configButton);
+
+	thresholdSlider = new ThresholdSlider(font);
     thresholdSlider->setBounds(200,35,75,75);
     addAndMakeVisible(thresholdSlider);
     thresholdSlider->addListener(this);
@@ -148,12 +145,10 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     addChildComponent(channelSelector);
     channelSelector->setVisible(false);
 
-    
 	channelSelector->activateButtons();
 	channelSelector->setRadioStatus(true);
     channelSelector->paramButtonsToggledByDefault(false);
-//   getEditorViewport()->makeEditorVisible(this, true, true);
-		 updateAdvancerList();
+	updateAdvancerList();
 
 }
 
@@ -174,7 +169,7 @@ SpikeDetectorEditor::~SpikeDetectorEditor()
         removeChildComponent(electrodeButtons[i]);
     }
 
-    deleteAllChildren();
+   // deleteAllChildren();
 	 
 
 }
@@ -209,7 +204,8 @@ void SpikeDetectorEditor::sliderEvent(Slider* slider)
 void SpikeDetectorEditor::buttonEvent(Button* button)
 {
 	VisualizerEditor::buttonEvent(button);
-
+	   SpikeDetector* processor = (SpikeDetector*) getProcessor();
+	
     if (electrodeButtons.contains((cElectrodeButton*) button))
     {
 	
@@ -256,7 +252,39 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 
         return;
 
-    }
+    } else if (button == configButton)
+	{
+		PopupMenu configMenu;
+		PopupMenu waveSizeMenu;
+		PopupMenu waveSizePreMenu;
+		PopupMenu waveSizePostMenu;
+
+		waveSizePreMenu.addItem(1,"8",true,processor->getNumPreSamples() == 8);
+		waveSizePreMenu.addItem(2,"16",true,processor->getNumPreSamples() == 16);
+		waveSizePostMenu.addItem(3,"32",true,processor->getNumPostSamples() == 32);
+		waveSizePostMenu.addItem(4,"64",true,processor->getNumPostSamples() == 64);
+
+		waveSizeMenu.addSubMenu("Pre samples",waveSizePreMenu);
+		waveSizeMenu.addSubMenu("Post samples",waveSizePostMenu);
+		configMenu.addSubMenu("Waveform size",waveSizeMenu,true);
+		const int result = configMenu.show();
+		switch (result)
+		{
+		case 1:
+			processor->setNumPreSamples(8);
+			break;
+		case 2:
+			processor->setNumPreSamples(16);
+			break;
+		case 3:
+			processor->setNumPostSamples(32);
+			break;
+		case 4:
+			processor->setNumPostSamples(64);
+			break;
+		}
+
+	}
     else if (button == plusButton)
     {
         // std::cout << "Plus button pressed!" << std::endl;
@@ -332,8 +360,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
                 break;
         }
 
-	    SpikeDetector* processor = (SpikeDetector*) getProcessor();
-		processor->addProbes(ProbeType,numProbes, nElectrodes,nChansPerElectrode, firstElectrodeOffset,interelectrodeDistance);
+	 	processor->addProbes(ProbeType,numProbes, nElectrodes,nChansPerElectrode, firstElectrodeOffset,interelectrodeDistance);
 		refreshElectrodeList();
 		
         return;

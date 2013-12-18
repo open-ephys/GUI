@@ -114,7 +114,7 @@ void SourceNode::updateSettings()
     {
 
         inputBuffer = dataThread->getBufferAddress();
-        dataThread->updateChannelNames();
+        //dataThread->updateChannelNames();
         std::cout << "Input buffer address is " << inputBuffer << std::endl;
     }
 
@@ -168,6 +168,14 @@ float SourceNode::getDefaultSampleRate()
         return dataThread->getSampleRate();
     else
         return 44100.0;
+}
+
+int SourceNode::getDefaultADCoutputs()
+{
+    if (dataThread != 0)
+        return dataThread->getNumADCchannels();
+    else
+        return 0;
 }
 
 int SourceNode::getDefaultNumOutputs()

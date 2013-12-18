@@ -173,17 +173,18 @@ private:
     
 
   //  ComboBox* electrodeTypes;
-    ComboBox* electrodeList;
-	ComboBox* advancerList;
-	Label *advancerLabel, *depthOffsetLabel, *depthOffsetEdit;
-    Label *numElectrodes;
-    Label *thresholdLabel;
-    TriangleButton* upButton;
-    TriangleButton* downButton;
-    UtilityButton* plusButton;
-	UtilityButton* removeElectrodeButton;
-    UtilityButton* audioMonitorButton;
-    ThresholdSlider* thresholdSlider;
+    ScopedPointer<ComboBox> electrodeList;
+	ScopedPointer<ComboBox> advancerList;
+	ScopedPointer<Label> advancerLabel, depthOffsetLabel, depthOffsetEdit;
+    ScopedPointer<Label> numElectrodes;
+    ScopedPointer<Label> thresholdLabel;
+    ScopedPointer<TriangleButton> upButton;
+    ScopedPointer<TriangleButton> downButton;
+    ScopedPointer<UtilityButton> plusButton;
+	ScopedPointer<UtilityButton> configButton;
+	ScopedPointer<UtilityButton> removeElectrodeButton;
+    ScopedPointer<UtilityButton> audioMonitorButton;
+    ScopedPointer<ThresholdSlider> thresholdSlider;
 
    Array<String> advancerNames ;
    Array<int> advancerIDs;

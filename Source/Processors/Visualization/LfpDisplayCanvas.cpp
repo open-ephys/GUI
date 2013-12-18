@@ -210,10 +210,11 @@ void LfpDisplayCanvas::update()
     {
 
         String chName = processor->channels[i]->getName();
-
-        //std::cout << chName << std::endl;
-
         lfpDisplay->channelInfo[i]->setName(chName);
+		if (processor->channels[i]->isADCchannel)
+	    {
+		    lfpDisplay->channelInfo[i]->setCanBeInverted(false);
+		}
 
     }
 
@@ -1252,6 +1253,11 @@ int LfpChannelDisplay::getChannelOverlap()
     return channelOverlap;
 }
 
+void LfpChannelDisplay::setCanBeInverted(bool _canBeInverted)
+{
+	canBeInverted = _canBeInverted;
+}
+
 void LfpChannelDisplay::setInputInverted(bool isInverted)
 {
     if (canBeInverted)
@@ -1266,10 +1272,7 @@ void LfpChannelDisplay::setName(String name_)
 {
     name = name_;
 
-    if (name.startsWith("ADC")) // don't allow flipping of ADC channels
-    {
-        canBeInverted = false;
-    }
+ 
 }
 
 // -------------------------------
@@ -1327,7 +1330,7 @@ void LfpChannelDisplayInfo::paint(Graphics& g)
     g.setColour(lineColour);
 
     g.setFont(channelFont);
-    g.setFont(channelHeightFloat*0.3);
+    g.setFont(fabs(channelHeightFloat*0.3));
 
     g.drawText(name, 10, center-channelHeight/2, 200, channelHeight, Justification::left, false);
 

@@ -57,8 +57,6 @@ ProcessorList::ProcessorList()
     sources->addSubItem(new ProcessorListItem("Rhythm FPGA"));
     sources->addSubItem(new ProcessorListItem("File Reader"));
 	sources->addSubItem(new ProcessorListItem("Network Events"));
-	sources->addSubItem(new ProcessorListItem("Eye Tracking"));
-
     //sources->addSubItem(new ProcessorListItem("Event Generator"));
 
     ProcessorListItem* filters = new ProcessorListItem("Filters");
@@ -68,6 +66,8 @@ ProcessorList::ProcessorList()
     filters->addSubItem(new ProcessorListItem("Phase Detector"));
     //filters->addSubItem(new ProcessorListItem("Digital Ref"));
     filters->addSubItem(new ProcessorListItem("Channel Map"));
+	filters->addSubItem(new ProcessorListItem("Eye Tracking"));
+
 
     ProcessorListItem* sinks = new ProcessorListItem("Sinks");
     sinks->addSubItem(new ProcessorListItem("LFP Viewer"));

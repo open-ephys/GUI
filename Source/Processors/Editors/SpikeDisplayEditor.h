@@ -58,6 +58,8 @@ public:
 
     // void updateSettings();
     // void updateVisualizer();
+	void setUpdateNeeded();
+	bool updateNeeded();
 
     Visualizer* createNewCanvas();
 

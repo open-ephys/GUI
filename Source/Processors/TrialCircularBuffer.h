@@ -64,6 +64,8 @@ class Condition
        double postSec, preSec;
        bool visible;
 	   int conditionID;
+	   float posX, posY; // some conditions might be displayed according to their spatial location
+	   int conditionGroup; // conditions may be groupped to allow better visualization.
 };
 
 
@@ -75,30 +77,32 @@ public:
 	int trialID;
 	int outcome;
 	int type;
-	int64 startTS, alignTS, endTS;
+	int64 startTS, alignTS, endTS, alignTS_hardware;
 	bool trialInProgress; 
+	bool hardwareAlignment;
 };
 
 class SmartSpikeCircularBuffer 
 {
 public:
-	SmartSpikeCircularBuffer(float maxTrialTimeSeconds, int maxTrialsInMemory);
+	SmartSpikeCircularBuffer(float maxTrialTimeSeconds, int maxTrialsInMemory, int _sampleRateHz);
 	// contains spike times, but also pointers for trial onsets so we don't need to search
 	// the entire array 
-	void addSpikeToBuffer(int64 spikeTimeSoftware);
+	void addSpikeToBuffer(int64 spikeTimeSoftware,int64 spikeTimeHardware);
 	std::vector<int64> getAlignedSpikes(Trial *trial, float preSecs, float postSecs);
 	void addTrialStartToBuffer(Trial *t);
 
 	int queryTrialStart(int trialID);
 private:
 	std::vector<int64> spikeTimesSoftware;
+	std::vector<int64> spikeTimesHardware;
 	std::vector<int> trialID;
 	std::vector<int> pointers;
 	int maxTrialsInMemory;
 	int bufferSize;
 	int bufferIndex;
 	int trialIndex;
-
+	int sampleRateHz;
 	int numTrialsStored;
 	int numSpikesStored;
 };
@@ -154,9 +158,9 @@ private:
 class UnitPSTHs 
 {
 public:
-	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, uint8 R, uint8 G, uint8 B);
+	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, int sampleRateHz,uint8 R, uint8 G, uint8 B);
 	void updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial *trial);
-	void addSpikeToBuffer(int64 spikeTimestampSoftware);
+	void addSpikeToBuffer(int64 spikeTimestampSoftware,int64 spikeTimestampHardware);
 	void addTrialStartToSmartBuffer(Trial *t);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
@@ -215,7 +219,7 @@ public:
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
 	
-	void addTTLevent(int channel,int64 ttl_timestamp_software);
+	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware);
 	void addDefaultTTLConditions();
 	void addCondition(std::vector<String> input);
 	void lockConditions();
@@ -230,10 +234,12 @@ public:
 	void channelChange(int electrodeID, int channelindex, int newchannel);
 	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
 	void addNewElectrode(Electrode *electrode);
-	void removeElectrode(Electrode *electrode);
+	void removeElectrode(int electrodeID);
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
+	void setHardwareTriggerAlignmentChannel(int k);
 
+	int samplingRateHz;
 	bool firstTime;
 	 double postSec, preSec;
      int numTTLchannels ;
@@ -249,6 +255,7 @@ public:
 	String designName;
 	bool addDefaultTTLconditions;
 
+	int hardwareTriggerAlignmentChannel;
 	float ttlSupressionTimeSec;
 	float ttlTrialLengthSec;
 

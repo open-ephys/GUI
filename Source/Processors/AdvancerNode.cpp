@@ -301,7 +301,76 @@ AdvancerContainer AdvancerNode::createStandardCannulaContainer()
 	return c;
 }
 
+int AdvancerNode::addContainerUsingXmlFile(File xmlfile)
+{
+	AdvancerContainer container;
+    XmlDocument doc(xmlfile);
+    XmlElement* xml = doc.getDocumentElement();
 
+    if (xml == 0 || ! xml->hasTagName("CONTAINER"))
+    {
+        delete xml;
+		return -1;
+    }
+
+	container.type = xml->getStringAttribute("type");
+	container.name = xml->getStringAttribute("name");
+	int numAdvancerLocations = xml->getIntAttribute("numAdvancerLocations");
+	int numModelPolygons = xml->getIntAttribute("numModelPolygons");
+
+	container.ID = getContainerCount("CustomGrid");
+
+
+	container.model.resize(numModelPolygons);
+
+	
+	container.center.x = container.center.y = 0;
+	
+
+	int modelCounter =0 ;
+	forEachXmlChildElement(*xml, element)
+    {
+		  if (element->hasTagName("POLYGON"))
+		  {
+			  uint8 colorR = element->getIntAttribute("colorR");
+			  uint8 colorG = element->getIntAttribute("colorG");
+			  uint8 colorB = element->getIntAttribute("colorB");
+			  int numModelPoints = element->getIntAttribute("numPoints");
+			  container.model[modelCounter].points.clear();
+			  container.model[modelCounter].color[0] = colorR;
+			  container.model[modelCounter].color[1] = colorG;
+			  container.model[modelCounter].color[2] = colorB;
+			  forEachXmlChildElement(*element, subNode)
+			  {
+				  if (subNode->hasTagName("POLYGON_POINT"))
+				  {
+					  float x = subNode->getDoubleAttribute("x");
+					  float y = subNode->getDoubleAttribute("y");
+					  Point2D p;
+					  p.x = x;
+					  p.y = y;
+					  container.model[modelCounter].points.push_back(p);
+				  }
+			  }
+			modelCounter++;
+		  }
+		  if (element->hasTagName("ADVANCER_LOCATION"))
+		  {
+			  float x = element->getDoubleAttribute("x");
+			  float y = element->getDoubleAttribute("y");
+			  float rad = element->getDoubleAttribute("rad");
+			  container.advancerLocations.push_back(Circle(x,y,rad));
+		  }
+	}
+
+	lock.enter();
+	int i=addContainer(container);
+	lock.exit();
+
+    delete xml;
+
+	return i;
+}
 
 int AdvancerNode::addContainer(String type, String parameters)
 {

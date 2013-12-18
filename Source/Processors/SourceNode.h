@@ -59,6 +59,7 @@ public:
     float getDefaultSampleRate();
     int getDefaultNumOutputs();
     float getDefaultBitVolts();
+	int getDefaultADCoutputs();
 
     AudioProcessorEditor* createEditor();
     bool hasEditor() const

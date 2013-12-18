@@ -80,6 +80,10 @@ class Electrode
 	public:
 		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
         ~Electrode();
+
+
+		void resizeWaveform(int numPre, int numPost);
+
 		String name;
 
         int numChannels;
@@ -219,12 +223,14 @@ public:
 	/** returns a channel's detection threshold */
     double getChannelThreshold(int electrodeNum, int channelNum);
 	
-	/** sync PSTH : inform of a new electrode added / removed */
-	void updatePSTHsink(Electrode* newElectrode, bool addRemove); 
+	/** sync PSTH : inform of a new electrode added  */
+	void updateSinks(Electrode* newElectrode); 
+	/** sync PSTH : inform of an electrode removal */
+	void updateSinks(int electrodeID); 
 	/** sync PSTH : inform of a channel swap */
-	void updatePSTHsink(int electrodeID, int channelindex, int newchannel);
+	void updateSinks(int electrodeID, int channelindex, int newchannel);
 	/** sync PSTH: inform of a new unit added / removed */
-	void updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
+	void updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
 
 	/** used to generate messages over the network and to inform PSTH sink */
 	void addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b);
@@ -259,6 +265,11 @@ public:
 	void setElectrodeAdvancerOffset(int i, double v);
 	double getAdvancerPosition(int advancerID);
 	double getSelectedElectrodeDepth();
+
+	int getNumPreSamples();
+	int getNumPostSamples();
+	void setNumPreSamples(int numSamples);
+	void setNumPostSamples(int numSamples);
 
 	Array<Electrode*> getElectrodes();
 

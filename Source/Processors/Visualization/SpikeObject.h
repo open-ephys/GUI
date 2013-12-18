@@ -29,7 +29,7 @@
 #include <math.h>
 
 #define MAX_NUMBER_OF_SPIKE_CHANNELS 4
-#define MAX_NUMBER_OF_SPIKE_CHANNEL_SAMPLES 60
+#define MAX_NUMBER_OF_SPIKE_CHANNEL_SAMPLES 80
 #define CHECK_BUFFER_VALIDITY true
 #define SPIKE_EVENT_CODE 4;
 #define MAX_SPIKE_BUFFER_LEN 512 // max length of spike buffer in bytes
@@ -106,7 +106,7 @@ void generateSimulatedSpike(SpikeObject* s, uint64_t timestamp, int noise);
 // std::ostream& operator<<(std::ostream &strm, const SpikeObject s);
 
 /** Helper function for zeroing out a spike object with a specified number of channels */
-void generateEmptySpike(SpikeObject* s, int nChannels);
+void generateEmptySpike(SpikeObject* s, int nChannels, int numSamples);
 
 void printSpike(SpikeObject* s);
 

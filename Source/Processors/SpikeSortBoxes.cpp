@@ -201,6 +201,11 @@ BoxUnit::BoxUnit(int ID)
 	addBox(B);
 }
 
+void BoxUnit::resizeWaveform(int newlength)
+{
+	WaveformStat.resizeWaveform(newlength);
+}
+
 BoxUnit::BoxUnit(Box B, int ID)
 {
 	UnitID = ID;
@@ -462,10 +467,14 @@ std::vector<double> RunningStats::getStandardDeviation(int index)
 }
 
 
+void RunningStats::resizeWaveform(int newlength)
+{
+	numSamples = 0; // this should ensure that update reallocates upon the next update.
+}
+
 void RunningStats::update(SpikeObject *so)
 {
-	double samplingRateHz = 30000;
-	double ts = so->timestamp/samplingRateHz;
+	double ts = so->timestamp/so->samplingFrequencyHz;
 	if (numSamples == 0)
 	{
 		LastSpikeTime = ts;
@@ -577,16 +586,46 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	 numChannels = numch;
 	 waveformLength = WaveFormLength;
 
-	 pc1 = new float[numch * WaveFormLength];
-	 pc2 = new float[numch * WaveFormLength];
+	 pc1 = new float[numChannels * waveformLength];
+	 pc2 = new float[numChannels * waveformLength];
     for (int n = 0; n < bufferSize; n++)
     {
         SpikeObject so;
-        generateEmptySpike(&so, 4);
+        generateEmptySpike(&so, 4,waveformLength);
 
         spikeBuffer.add(so);
     }
   }
+
+  	void SpikeSortBoxes::resizeWaveform(int numSamples)
+	{
+		StartCriticalSection();
+		waveformLength = numSamples;
+		delete pc1;
+		delete pc2;
+		pc1 = new float[numChannels * waveformLength];
+		pc2 = new float[numChannels * waveformLength];
+        spikeBuffer.clear();
+	    for (int n = 0; n < bufferSize; n++)
+	    {
+		    SpikeObject so;
+	        generateEmptySpike(&so, 4,waveformLength);
+	        spikeBuffer.add(so);
+	    }
+		bPCAcomputed = false;
+		spikeBufferIndex = 0;
+		for (int k=0;k<pcaUnits.size();k++)
+		{
+			pcaUnits[k].resizeWaveform(waveformLength);
+		}
+		for (int k=0;k<boxUnits.size();k++)
+		{
+			boxUnits[k].resizeWaveform(waveformLength);
+		}
+  	    EndCriticalSection();
+	}
+
+
 
   void SpikeSortBoxes::loadCustomParametersFromXml(XmlElement *electrodeNode)
   {
@@ -1597,6 +1636,9 @@ bool PCAUnit::isWaveFormInsidePolygon(SpikeObject *so)
 	return poly.isPointInside(PointD(so->pcProj[0],so->pcProj[1]));
 }
 
+void PCAUnit::resizeWaveform(int newlength)
+{
+}
 
 /***************************/
 

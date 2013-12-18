@@ -289,6 +289,14 @@ void GenericProcessor::update()
 {
 
     std::cout << getName() << " updating settings." << std::endl;
+	// SO patched here to keep original channel names
+
+	int oldNumChannels = channels.size();
+	StringArray oldNames;
+	for (int k=0;k<oldNumChannels;k++)
+	{
+		oldNames.add(channels[k]->getName());
+	}
 
     clearSettings();
 
@@ -326,13 +334,25 @@ void GenericProcessor::update()
     }
     else
     {
-
         settings.numOutputs = getDefaultNumOutputs();
         settings.sampleRate = getDefaultSampleRate();
-
-        for (int i = 0; i < getNumOutputs(); i++)
+		
+		int numChan = getNumOutputs();
+		int numADC_Chan = getDefaultADCoutputs();
+        for (int i = 0; i < numChan; i++)
         {
-            Channel* ch = new Channel(this, i);
+            Channel* ch = new Channel(this, i );
+
+			if (i < oldNumChannels)
+				ch->setName(oldNames[i]);
+
+			else if (i >= numChan-numADC_Chan) 
+				ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+
+			if (i >= numChan-numADC_Chan) {
+				ch->isADCchannel = true;
+			}
+
             ch->sampleRate = getDefaultSampleRate();
             ch->bitVolts = getDefaultBitVolts();
 

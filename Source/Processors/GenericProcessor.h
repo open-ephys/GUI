@@ -277,6 +277,11 @@ public:
         return 2;
     }
 
+	  virtual int getDefaultADCoutputs()
+    {
+        return 0;
+    }
+
     /** Returns the default number of volts per bit, in case a processor is a source, of the processor gain otherwise. (assumes data comes from a 16bit source)*/
     virtual float getDefaultBitVolts()
     {

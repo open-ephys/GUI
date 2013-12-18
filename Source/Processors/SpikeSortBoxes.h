@@ -93,6 +93,7 @@ class RunningStats
 public:
 	RunningStats();
 	~RunningStats();
+	void resizeWaveform(int newlength);
 	void reset();
 	Histogram getHistogram();
 	std::vector<double> getMean(int index);
@@ -137,7 +138,7 @@ public:
 	int getUnitID();
 	void updateWaveform(SpikeObject *so);
 	static void setDefaultColors(uint8_t col[3], int ID);
-
+	void resizeWaveform(int newlength);
 public:
 	int UnitID;
 	std::vector<Box> lstBoxes;
@@ -207,6 +208,7 @@ public:
 	int getUnitID();
 	bool isWaveFormInsidePolygon(SpikeObject *so);
 	bool isPointInsidePolygon(PointD p);
+	void resizeWaveform(int newlength);
 public:
 	int UnitID;
 	cPolygon poly;
@@ -225,6 +227,10 @@ class SpikeSortBoxes
 public:
 	SpikeSortBoxes(PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength);
 	~SpikeSortBoxes();
+
+	void resizeWaveform(int numSamples);
+	
+	
 	void projectOnPrincipalComponents(SpikeObject *so);
 	bool sortSpike(SpikeObject *so, bool PCAfirst);
 	void RePCA();

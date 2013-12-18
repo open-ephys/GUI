@@ -99,9 +99,9 @@ public:
 
     void startRecording() { } // unused
     void stopRecording() { } // unused
-    
+  
     SpikeDisplayNode* processor;
-
+	bool updateNeeded;
 private:
 
     ScopedPointer<SpikeDisplay> spikeDisplay;
@@ -113,7 +113,7 @@ private:
     SpikeObject spike;
 
     int scrollBarThickness;
-
+  
 	ScopedPointer<SpikeThresholdCoordinator> thresholdCoordinator;
 	ScopedPointer<UtilityButton> lockThresholdsButton;
 

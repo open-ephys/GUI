@@ -526,6 +526,16 @@ void RHD2000Thread::setNumChannels(int hsNum, int numChannels)
     numChannelsPerDataStream.set(hsNum, numChannels);
 }
 
+
+int RHD2000Thread::getNumADCchannels()
+{
+	if (acquireAdcChannels)
+        return 8;
+	else 
+		return 0;
+}
+
+
 int RHD2000Thread::getNumChannels()
 {
 
@@ -578,7 +588,7 @@ void RHD2000Thread::updateChannelNames()
         {
             chNum++;
 
-            sn->channels[chNum]->setName(String(chNum));
+            sn->channels[chNum]->setName("CH"+String(chNum));
         }
     }
 

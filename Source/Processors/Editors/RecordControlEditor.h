@@ -43,11 +43,12 @@ public:
     RecordControlEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     ~RecordControlEditor();
     void comboBoxChanged(ComboBox* comboBox);
-    void updateSettings();
+    void updateNames();
     void buttonEvent(Button* button);
     void loadCustomParameters(XmlElement*);
     void saveCustomParameters(XmlElement*);
-
+	void disableButtons();
+	void enableButtons();
 private:
 	int lastId;
 	StringArray channelNames;

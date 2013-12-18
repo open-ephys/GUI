@@ -67,6 +67,7 @@ void ContainersPlot::buttonClicked(juce::Button *button)
 
 void ContainersPlot::drawPolygon(Graphics &g,Polygon2D *p, float x0, float y0)
 {
+	int height = getHeight();
 
 	g.setColour(juce::Colour(p->color[0],p->color[1],p->color[2]));
 	for (int k=0;k<p->points.size()-1;k++)
@@ -76,7 +77,7 @@ void ContainersPlot::drawPolygon(Graphics &g,Polygon2D *p, float x0, float y0)
 		float y1 = (y0+p->points[k].y-minY)/(maxY-minY) * scale;
 		float y2 = (y0+p->points[k+1].y-minY)/(maxY-minY) * scale;
 
-		g.drawLine(x1,y1,x2,y2,2);
+		g.drawLine(x1,height-y1,x2,height-y2,2);
 	}
 }
 
@@ -147,6 +148,7 @@ ContainerPlot::ContainerPlot(AdvancerCanvas *cv,AdvancerEditor* ed,AdvancerNode*
 
 void ContainerPlot::drawPolygon(Graphics &g,Polygon2D *p)
 {
+	int height = getHeight();
 
 	g.setColour(juce::Colour(p->color[0],p->color[1],p->color[2]));
 	for (int k=0;k<p->points.size()-1;k++)
@@ -156,7 +158,7 @@ void ContainerPlot::drawPolygon(Graphics &g,Polygon2D *p)
 		float y1 = (p->points[k].y-minY)/(maxY-minY) * scale;
 		float y2 = (p->points[k+1].y-minY)/(maxY-minY) * scale;
 
-		g.drawLine(x1,y1,x2,y2);
+		g.drawLine(x1,height-y1,x2,height-y2);
 	}
 }
 
@@ -174,6 +176,7 @@ void ContainerPlot::resized()
 void ContainerPlot::mouseDown(const juce::MouseEvent& event)
 {
 	// if we clicked inside an advancer location, switch the current advancer to this new position
+	int height = getHeight();
 
 	int selectedContainer = editor->getSelectedContainer()-1;
 	int selectedAdvancer =  editor->getSelectedAdvancer()-1;
@@ -192,8 +195,8 @@ void ContainerPlot::mouseDown(const juce::MouseEvent& event)
 
 		float x0 = ((x-rad)-minX)/(maxX-minX) * scale;
 		float x1 = ((x+rad)-minX)/(maxX-minX) * scale;
-		float y0 = ((y-rad)-minY)/(maxY-minY) * scale;
-		float y1 = ((y+rad)-minY)/(maxY-minY) * scale;
+		float y0 = height-((y-rad)-minY)/(maxY-minY) * scale;
+		float y1 = height-((y+rad)-minY)/(maxY-minY) * scale;
 		float xc = (x0+x1)/2;
 		float yc = (y0+y1)/2;
 
@@ -214,6 +217,8 @@ void ContainerPlot::mouseDown(const juce::MouseEvent& event)
 
 void ContainerPlot::paint(Graphics &g)
 {
+	int height = getHeight();
+
 	g.fillAll(Colours::grey);
 	
 	g.setColour(Colours::lightgrey);
@@ -274,8 +279,8 @@ void ContainerPlot::paint(Graphics &g)
 		float x0 = ((x-rad)-minX)/(maxX-minX) * scale;
 		float x1 = ((x+rad)-minX)/(maxX-minX) * scale;
 
-		float y0 = ((y-rad)-minY)/(maxY-minY) * scale;
-		float y1 = ((y+rad)-minY)/(maxY-minY) * scale;
+		float y0 = height-((y-rad)-minY)/(maxY-minY) * scale;
+		float y1 = height-((y+rad)-minY)/(maxY-minY) * scale;
 
 		if (advancerInThisLocation)
 		{
@@ -588,7 +593,7 @@ void AdvancerEditor::buttonEvent(Button* button)
 		hyperDriveMenu.addItem(4,"64ch drive");
 
 		gridMenu.addItem(5, "Circular grid");
-		gridMenu.addItem(6, "Custom grid [Load from file]",false);
+		gridMenu.addItem(6, "Custom grid [Load from file]");
 
 		containerMenu.addItem(1,"Cannula");
 		containerMenu.addSubMenu("Hyperdrive", hyperDriveMenu);
@@ -619,6 +624,23 @@ void AdvancerEditor::buttonEvent(Button* button)
 			int newContainer = processor->addContainer("StandardGrid","");
 			updateFromProcessor();
 			setActiveContainer(newContainer);
+		} else if (result == 6)
+		{
+			// load custom grid.
+                FileChooser fc("Choose a grid file to load...",
+                               File::getCurrentWorkingDirectory(),
+                               "*.xml",
+                               true);
+                if (fc.browseForFileToOpen())
+                {
+                    File currentFile = fc.getResult();
+					int newContainer = processor->addContainerUsingXmlFile(currentFile);
+					if (newContainer >= 0)
+					{
+						updateFromProcessor();
+						setActiveContainer(newContainer);
+					}
+				}
 		}
 
 	} else if (button == removeContainer)

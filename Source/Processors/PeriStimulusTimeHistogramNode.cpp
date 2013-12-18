@@ -235,7 +235,7 @@ void PeriStimulusTimeHistogramNode::dumpEyeTrackingEventToDisk(EyePosition pos)
 	// write event type
 	fwrite(&eventType, 1,1, eventFile); 
 	// write event size
-	int16 eventSize = 8 + 8 + 8 + 8; //  x,y,pupil,timestamp
+	int16 eventSize = 8 + 8 + 8 + 8 + 8; //  x,y,pupil,timestamp
     fwrite(&eventSize, 2,1, eventFile);
 	// write event data
 	// 1. eye x position
@@ -245,7 +245,9 @@ void PeriStimulusTimeHistogramNode::dumpEyeTrackingEventToDisk(EyePosition pos)
 	// 3. eye pupil
 	fwrite(&pos.pupil, 8,1, eventFile);
 	// 4. software timestamp
-	fwrite(&pos.timestamp, 8,1, eventFile);
+	fwrite(&pos.software_timestamp, 8,1, eventFile);
+	// 5. hardware timestamp
+	fwrite(&pos.hardware_timestamp, 8,1, eventFile);
 
 	diskWriteLock->exit();
 }
@@ -315,10 +317,9 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			memcpy(&pos.x, dataptr+4,8);
 			memcpy(&pos.y, dataptr+4+8,8);
 			memcpy(&pos.pupil, dataptr+4+8+8,8);
-			memcpy(&pos.timestamp, dataptr+4+8+8+8,8);
-
+			memcpy(&pos.software_timestamp, dataptr+4+8+8+8,8);
+			memcpy(&pos.hardware_timestamp, dataptr+4+8+8+8+8,8);
 			dumpEyeTrackingEventToDisk(pos);
-		
 		}
 	}
 	if (eventType == TIMESTAMP)
@@ -352,7 +353,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		   memcpy(&ttl_timestamp_software, dataptr+4, 8);
 		   memcpy(&ttl_timestamp_hardware, dataptr+12, 8);
 		   if (ttl_raise)
-				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software);
+				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software,ttl_timestamp_hardware);
 		   if (isRecording && saveTTLs)
 			   dumpTTLeventToDisk(channel,ttl_raise,ttl_timestamp_software,ttl_timestamp_hardware,samplePosition );
 	}

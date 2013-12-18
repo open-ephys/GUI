@@ -248,6 +248,8 @@ public:
 
     void setInputInverted(bool);
 
+	void setCanBeInverted(bool);
+
     void setEnabledState(bool);
     bool getEnabledState() {return isEnabled;}
 

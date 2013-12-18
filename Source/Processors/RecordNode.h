@@ -235,6 +235,8 @@ private:
     bool appendTrialNum;
     int trialNum;
 
+	Array<String> modifiedChannelNames;
+	Array<int> modifiedChannelInd;
 	/** used to set the directory name remotely using the network events module **/
 	String directoryName;
 	bool eventsSavedBySink;

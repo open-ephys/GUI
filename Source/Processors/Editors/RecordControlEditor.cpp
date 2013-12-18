@@ -120,8 +120,10 @@ void RecordControlEditor::comboBoxChanged(ComboBox* comboBox)
 		 if (ID == 0)
 			{
 	            // name change
-				getProcessor()->getProcessorGraph()->getRecordNode()->updateChannelName(lastId-1,comboBox->getText());
-				updateSettings();
+				//getProcessor()->getProcessorGraph()->getRecordNode()->updateChannelName(lastId-1,comboBox->getText());
+				RecordControl *p = (RecordControl *) getProcessor();
+				p->modifyChannelName(lastId-1, comboBox->getText());
+				updateNames();
 				comboBox->setSelectedId(lastId,dontSendNotification);
         }
 		else
@@ -147,22 +149,30 @@ void RecordControlEditor::buttonEvent(Button* button)
 	}
 }
 
-void RecordControlEditor::updateSettings()
+void RecordControlEditor::updateNames()
 {
-    //availableChans->clear();
-    //GenericProcessor* processor = getProcessor();
-    
-	// update number of recorded channels...
-		const MessageManagerLock mmLock;
-	Array<bool> isRecording;
-	((RecordControl *)getProcessor())->getProcessorGraph()->getRecordNode()->getChannelNamesAndRecordingStatus(channelNames, isRecording);
+	RecordControl *p = (RecordControl *) getProcessor();
+	StringArray names = p->getChannelNames();
 	chanRenameCombo->clear();
-	for (int k=0;k<channelNames.size();k++)
-	{
-		chanRenameCombo->addItem(channelNames[k],k+1);
-	}
-	
+	chanRenameCombo->addItemList(names,1);
 }
+
+void RecordControlEditor::disableButtons()
+{
+	chanRenameCombo->setEnabled(false);
+	newFileToggleButton->setEnabled(false);
+	eventsBySink->setEnabled(false);
+	availableChans->setEnabled(false);
+}
+
+void RecordControlEditor::enableButtons()
+{
+	newFileToggleButton->setEnabled(true);
+	chanRenameCombo->setEnabled(true);
+	eventsBySink->setEnabled(true);
+	availableChans->setEnabled(true);
+}
+
 
 void RecordControlEditor::saveCustomParameters(XmlElement* xml)
 {
@@ -174,17 +184,20 @@ void RecordControlEditor::saveCustomParameters(XmlElement* xml)
     info->setAttribute("FileSaveOption",newFileToggleButton->getToggleState());
 	info->setAttribute("EventSaveOption",eventsBySink->getToggleState());
 
-	info->setAttribute("numChannels",channelNames.size());
-    for (int k=0;k<channelNames.size();k++)
+	RecordControl *p = (RecordControl *) getProcessor();
+	StringArray names = p->getChannelNames();
+
+	info->setAttribute("numChannels",names.size());
+    for (int k=0;k<names.size();k++)
 	{
 		XmlElement* ch = xml->createNewChildElement("CHANNEL_NAME");
-		ch->setAttribute("Name",channelNames[k]);
+		ch->setAttribute("Name",names[k]);
 	}
 }
 
 void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 {
-     
+     RecordControl *p = (RecordControl *) getProcessor();
     forEachXmlChildElement(*xml, xmlNode)
     {
         
@@ -195,17 +208,16 @@ void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 			eventsBySink->setToggleState(xmlNode->getBoolAttribute("EventSaveOption"), true);
 
 			int numCh = xmlNode->getIntAttribute("numChannels");
-			channelNames.clear();
 			int ch = 0;
 		    forEachXmlChildElement(*xml, xmlSubNode)
 			{
 				  if (xmlSubNode->hasTagName("CHANNEL_NAME"))
 				  {
 					  String chName = xmlSubNode->getStringAttribute("Name");
-					  channelNames.add(chName);
+					  p->modifyChannelName(ch++, chName);
 				  }
 			}
         }
-
     }
+	updateNames();
 }
