@@ -668,6 +668,17 @@ void GenericProcessor::loadFromXml()
             // use parametersAsXml to restore state
             loadCustomParametersFromXml();
 
+            // load editor parameters
+            forEachXmlChildElement(*parametersAsXml, xmlNode)
+            {
+
+                if (xmlNode->hasTagName("EDITOR"))
+                {
+                    getEditor()->loadEditorParameters(xmlNode);
+                }
+
+            }
+
             forEachXmlChildElement(*parametersAsXml, xmlNode)
             {
                 if (xmlNode->hasTagName("CHANNEL"))
@@ -680,10 +691,6 @@ void GenericProcessor::loadFromXml()
 
                     loadChannelParametersFromXml(xmlNode, true);
 
-                }
-                else if (xmlNode->hasTagName("EDITOR"))
-                {
-                    getEditor()->loadEditorParameters(xmlNode);
                 }
 
             }

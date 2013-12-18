@@ -143,7 +143,7 @@ void ChannelSelector::shiftChannelsVertical(float amount)
         offsetUD = jmax(offsetUD, float(parameterButtons.size())/8*-10.68f);
     }
 
-    std::cout << "offsetUD = " << offsetUD << std::endl;
+    //std::cout << "offsetUD = " << offsetUD << std::endl;
 
     refreshButtonBoundaries();
 
@@ -837,7 +837,7 @@ void ChannelSelectorRegion::mouseWheelMove(const MouseEvent& event,
                                            const MouseWheelDetails& wheel)
 {
 
-    std::cout << "Got wheel move: " << wheel.deltaY << std::endl;
+   // std::cout << "Got wheel move: " << wheel.deltaY << std::endl;
     channelSelector->shiftChannelsVertical(-wheel.deltaY);
 }
 
