@@ -80,10 +80,14 @@ public:
     bool checkThreshold(int, float, SpikeObject&);
 	void toggleSaveSpikes(bool newState);
 	bool getSaveSpikesStatus();
-	
+	void syncWithSpikeDetector();
+	void lockElectrodes();
+	void unlockElectrodes();
+
+
 private:
 
-    struct Electrode
+    struct dispElectrode
     {
         String name;
 		int id;
@@ -101,7 +105,9 @@ private:
 
     };
 
-    Array<Electrode> electrodes;
+	CriticalSection lock;
+
+    Array<dispElectrode> electrodes;
 
     int displayBufferSize;
     bool redrawRequested;

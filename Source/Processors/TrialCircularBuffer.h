@@ -234,7 +234,7 @@ public:
 	void channelChange(int electrodeID, int channelindex, int newchannel);
 	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
 	void addNewElectrode(Electrode *electrode);
-	void removeElectrode(Electrode *electrode);
+	void removeElectrode(int electrodeID);
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
 	void setHardwareTriggerAlignmentChannel(int k);

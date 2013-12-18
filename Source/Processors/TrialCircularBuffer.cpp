@@ -1204,10 +1204,9 @@ void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
 }
 
 
-void TrialCircularBuffer::removeElectrode(Electrode *electrode)
+void TrialCircularBuffer::removeElectrode(int electrodeID)
 {
 	lockPSTH();
-	int electrodeID = electrode->electrodeID;
 	for (int e =0;e<electrodesPSTH.size();e++)
 	{
 		if (electrodesPSTH[e].electrodeID == electrodeID)

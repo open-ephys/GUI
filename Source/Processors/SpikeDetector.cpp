@@ -26,6 +26,7 @@
 #include "SpikeSortBoxes.h"
 #include "Visualization/SpikeDetectCanvas.h"
 #include "Channel.h"
+#include "SpikeDisplayNode.h"
 #include "PeriStimulusTimeHistogramNode.h"
 class spikeSorter;
 
@@ -256,18 +257,19 @@ void SpikeDetector::addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g,
 {
 	String eventlog = "NewUnit "+String(electrodeID) + " "+String(newUnitID)+" "+String(r)+" "+String(g)+" "+String(b);
 	addNetworkEventToQueue(StringTS(eventlog));
-	updatePSTHsink( electrodeID,  newUnitID, r,g,b,true);
+	updateSinks( electrodeID,  newUnitID, r,g,b,true);
 }
 
 void SpikeDetector::removeUnit(int electrodeID, int unitID)
 {
 	String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
 	addNetworkEventToQueue(StringTS(eventlog));
-	updatePSTHsink( electrodeID,  unitID, 0,0,0,false);
+	updateSinks( electrodeID,  unitID, 0,0,0,false);
 }
 
-void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove)
+void SpikeDetector::updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove)
 {
+	// inform sinks about a new unit
 	ProcessorGraph *gr = getProcessorGraph();
 	Array<GenericProcessor*> p = gr->getListOfProcessors();
 	for (int k=0;k<p.size();k++)
@@ -286,14 +288,14 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int unitID, uint8 r, uint8 g
 					// remove electrode
 					node->trialCircularBuffer->removeUnit(electrodeID,unitID);
 				}
-				break;
 			}
 		}
 	}
 }
 
-void SpikeDetector::updatePSTHsink(int electrodeID, int channelindex, int newchannel)
+void SpikeDetector::updateSinks(int electrodeID, int channelindex, int newchannel)
 {
+	// inform sinks about a channel change
 	ProcessorGraph *g = getProcessorGraph();
 	Array<GenericProcessor*> p = g->getListOfProcessors();
 	for (int k=0;k<p.size();k++)
@@ -306,32 +308,62 @@ void SpikeDetector::updatePSTHsink(int electrodeID, int channelindex, int newcha
 				node->trialCircularBuffer->channelChange(electrodeID, channelindex,newchannel);
 			}
 		}
+		if (p[k]->getName() == "Spike Viewer")
+		{
+			SpikeDisplayNode* node = (SpikeDisplayNode*)p[k];
+			node->syncWithSpikeDetector();
+		}
 	}
 }
 
 
-void SpikeDetector::updatePSTHsink(Electrode* electrode, bool addRemove)
+void SpikeDetector::updateSinks(Electrode* electrode)
 {
+	// inform sinks about an electrode add 
 	ProcessorGraph *g = getProcessorGraph();
 	Array<GenericProcessor*> p = g->getListOfProcessors();
 	for (int k=0;k<p.size();k++)
 	{
+		String s = p[k]->getName();
 		if (p[k]->getName() == "PSTH")
 		{
 			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
 			if (node->trialCircularBuffer != nullptr)
 			{
-				if (addRemove) 
-				{
 					// add electrode
 					node->trialCircularBuffer->addNewElectrode(electrode);
-				} else
-				{
-					// remove electrode
-					node->trialCircularBuffer->removeElectrode(electrode);
-				}
 			}
-			break;
+		}
+		if (p[k]->getName() == "Spike Viewer")
+		{
+			SpikeDisplayNode* node = (SpikeDisplayNode*)p[k];
+			node->syncWithSpikeDetector();
+		}
+	}
+}
+
+
+void SpikeDetector::updateSinks(int electrodeID)
+{
+	// inform sinks about an electrode removal
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		String s = p[k]->getName();
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			if (node->trialCircularBuffer != nullptr)
+			{
+				// remove electrode
+				node->trialCircularBuffer->removeElectrode(electrodeID);
+			}
+		}
+		if (p[k]->getName() == "Spike Viewer")
+		{
+			SpikeDisplayNode* node = (SpikeDisplayNode*)p[k];
+			node->syncWithSpikeDetector();
 		}
 	}
 }
@@ -340,9 +372,9 @@ void SpikeDetector::addElectrode(Electrode* newElectrode)
 {
 	mut.enter();
     resetElectrode(newElectrode);
-	// inform PSTH sink, if it exists, about this new electrode.
-	updatePSTHsink(newElectrode, true);
     electrodes.add(newElectrode);
+	// inform PSTH sink, if it exists, about this new electrode.
+	updateSinks(newElectrode);
 	mut.exit();
 }
 
@@ -385,8 +417,8 @@ bool SpikeDetector::addElectrode(int nChans, String name, double Depth)
 	addNetworkEventToQueue(StringTS(eventlog));
 
     resetElectrode(newElectrode);
-	updatePSTHsink(newElectrode, true);
     electrodes.add(newElectrode);
+	updateSinks(newElectrode);
 	setCurrentElectrodeIndex(electrodes.size()-1);
 	mut.exit();
     return true;
@@ -432,9 +464,11 @@ bool SpikeDetector::removeElectrode(int index)
 	String eventlog = "RemoveElectrode " + String(electrodes[index]->electrodeID);
 	addNetworkEventToQueue(StringTS(eventlog));
 	
-	updatePSTHsink(electrodes[index], false);
-
+	int idToRemove = electrodes[index]->electrodeID;
     electrodes.remove(index);
+
+	updateSinks(idToRemove);
+
 	if (electrodes.size() > 0)
 		currentElectrode = electrodes.size()-1;
 	else
@@ -463,7 +497,7 @@ void SpikeDetector::setChannel(int electrodeIndex, int channelNum, int newChanne
 	String eventlog = "ChanelElectrodeChannel " + String(electrodes[electrodeIndex]->electrodeID) + " " + String(channelNum) + " " + String(newChannel);
 	addNetworkEventToQueue(StringTS(eventlog));
 	
-	updatePSTHsink(electrodes[electrodeIndex]->electrodeID, channelNum,newChannel);
+	updateSinks(electrodes[electrodeIndex]->electrodeID, channelNum,newChannel);
 
     *(electrodes[electrodeIndex]->channels+channelNum) = newChannel;
 	mut.exit();

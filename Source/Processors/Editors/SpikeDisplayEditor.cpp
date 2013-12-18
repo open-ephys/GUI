@@ -217,12 +217,24 @@ void SpikeDisplayEditor::stopRecording()
 
 // }
 
-void SpikeDisplayEditor::updateNeeded()
+bool SpikeDisplayEditor::updateNeeded()
+{
+	SpikeDisplayCanvas* sdc = (SpikeDisplayCanvas*) canvas.get();
+	if (sdc != nullptr) 
+	{
+		return sdc->updateNeeded;
+	}
+	return true;
+ }
+
+void SpikeDisplayEditor::setUpdateNeeded()
 {
 	 SpikeDisplayCanvas* sdc = (SpikeDisplayCanvas*) canvas.get();
-	 if (sdc != nullptr)
+	 if (sdc != nullptr) {
 		 sdc->updateNeeded = true;
-   
+		 sdc->repaint();
+	 }
+   repaint();
 }
 
 void SpikeDisplayEditor::buttonCallback(Button* button)

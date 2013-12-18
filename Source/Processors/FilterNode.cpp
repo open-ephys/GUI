@@ -126,9 +126,15 @@ AudioProcessorEditor* FilterNode::createEditor()
 
 void FilterNode::updateSettings()
 {
-
-    if (getNumInputs() < 1024 && getNumInputs() != filters.size())
+	int id = nodeId;
+	int numInputs = getNumInputs();
+	int numfilt = filters.size();
+    if (numInputs < 1024 && numInputs != numfilt)
     {
+		// SO fixed this. I think values were never restored correctly because you cleared lowCuts.
+	    Array<double> oldlowCuts, oldhighCuts;
+		oldlowCuts = lowCuts;
+		oldhighCuts = highCuts;
 
         filters.clear();
         lowCuts.clear();
@@ -156,10 +162,10 @@ void FilterNode::updateSettings()
 
             float lc, hc;
 
-            if (lowCuts.size() > n)
+            if (oldlowCuts.size() > n)
             {
-                lc = lowCuts[n];
-                hc = highCuts[n];
+                lc = oldlowCuts[n];
+                hc = oldhighCuts[n];
             } else {
                 lc = defaultLowCut;
                 hc = defaultHighCut;

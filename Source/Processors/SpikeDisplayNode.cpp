@@ -25,7 +25,8 @@
 #include "RecordNode.h"
 #include "Visualization/SpikeDisplayCanvas.h"
 #include "Channel.h"
-
+#include "SpikeDetector.h"
+#include "Editors/SpikeDisplayEditor.h"
 #include <stdio.h>
 
 
@@ -55,34 +56,62 @@ AudioProcessorEditor* SpikeDisplayNode::createEditor()
 
 }
 
+void SpikeDisplayNode::lockElectrodes()
+{
+	lock.enter();
+}
+
+void SpikeDisplayNode::unlockElectrodes()
+{
+	lock.exit();
+}
+
+void SpikeDisplayNode::syncWithSpikeDetector()
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Spike Detector")
+		{
+			SpikeDetector *node = (SpikeDetector*)p[k];
+			Array<Electrode*> spikeDetectorElectrodes = node->getElectrodes();
+			lockElectrodes();
+
+			electrodes.clear();
+			for (int k=0;k<spikeDetectorElectrodes.size();k++)
+			{
+				dispElectrode elec;
+				elec.numChannels = spikeDetectorElectrodes[k]->numChannels;
+				elec.id = spikeDetectorElectrodes[k]->electrodeID;
+				elec.name = spikeDetectorElectrodes[k]->name;
+				elec.currentSpikeIndex = 0;
+				elec.mostRecentSpikes.ensureStorageAllocated(displayBufferSize);
+				for (int j = 0; j < elec.numChannels; j++)
+				{
+					elec.displayThresholds.add(0);
+					elec.detectorThresholds.add(0);
+				}
+				electrodes.add(elec);
+			}
+			unlockElectrodes();
+
+			SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
+			ed->setUpdateNeeded();
+			
+
+		}
+	}
+}
+
 void SpikeDisplayNode::updateSettings()
 {
     //std::cout << "Setting num inputs on SpikeDisplayNode to " << getNumInputs() << std::endl;
 
-    electrodes.clear();
-	// Old syncrhonization code
-	/*
-    for (int i = 0; i < eventChannels.size(); i++)
-    {
-        if ((eventChannels[i]->eventType < 999) && (eventChannels[i]->eventType > SPIKE_BASE_CODE))
-        {
-
-            Electrode elec;
-            elec.numChannels = eventChannels[i]->eventType - 100;
-            elec.name = eventChannels[i]->name;
-            elec.currentSpikeIndex = 0;
-            elec.mostRecentSpikes.ensureStorageAllocated(displayBufferSize);
-
-            for (int j = 0; j < elec.numChannels; j++)
-            {
-                elec.displayThresholds.add(0);
-                elec.detectorThresholds.add(0);
-            }
-            
-            electrodes.add(elec);
-        }
-    }
-	*/
+ 	// This code is needed when loading an xml file with electrodes and opening the viewer before clicking play.
+	// At this point, no events have been sent yet, but electrodes do exist.
+	// try to sync things with spike detector.
+	syncWithSpikeDetector();
 
     recordNode = getProcessorGraph()->getRecordNode();
     diskWriteLock = recordNode->getLock();
@@ -134,7 +163,7 @@ String SpikeDisplayNode::getNameForElectrode(int i)
 
 void SpikeDisplayNode::addSpikePlotForElectrode(SpikePlot* sp, int i)
 {
-    Electrode& e = electrodes.getReference(i);
+    dispElectrode& e = electrodes.getReference(i);
     e.spikePlot = sp;
 
 }
@@ -143,7 +172,7 @@ void SpikeDisplayNode::removeSpikePlots()
 {
     for (int i = 0; i < getNumElectrodes(); i++)
     {
-        Electrode& e = electrodes.getReference(i);
+        dispElectrode& e = electrodes.getReference(i);
         e.spikePlot = nullptr;
     }
 }
@@ -219,13 +248,17 @@ void SpikeDisplayNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, in
         signalFilesShouldClose = false;
     }
 
-    if (redrawRequested)
+	SpikeDisplayEditor*ed = (SpikeDisplayEditor*) getEditor();
+	
+	if (redrawRequested && !ed->updateNeeded())
     {
+		lockElectrodes();
+ 
         // update incoming thresholds
         for (int i = 0; i < getNumElectrodes(); i++)
         {
 
-            Electrode& e = electrodes.getReference(i);
+            dispElectrode& e = electrodes.getReference(i);
 
             // update thresholds
             for (int j = 0; j < e.numChannels; j++)
@@ -245,7 +278,7 @@ void SpikeDisplayNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, in
             }
 
         }
-
+		unlockElectrodes();
         redrawRequested = false;
     }
 
@@ -255,6 +288,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 {
 
     //std::cout << "Received event of type " << eventType << std::endl;
+	/*
 	if (eventType == NETWORK)
 	{
 		StringTS s(event);
@@ -282,7 +316,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 			if (!found)
 			{
 				// add electrode
-				Electrode elec;
+				dispElectrode elec;
 				elec.numChannels = numChannels;
 				elec.id = electrodeID;
 				elec.name = name;
@@ -296,12 +330,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 				 electrodes.add(elec);
 				 SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
 				 ed->updateNeeded();
-				 /*
- 				 if (ed->canvas != nullptr) 
-				 {
-					// const MessageManagerLock mmLock;
-					ed->canvas->updateNeeded = true;
-				 }*/
+				 
 			}
 		}
 		if (inputs[0] == "RemoveElectrode")
@@ -315,12 +344,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 					electrodes.remove(k);
 					SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
 					ed->updateNeeded();
-					/*
-					if (ed->canvas != nullptr) 
-					{
-						//const MessageManagerLock mmLock;
-						ed->canvas->update();
-					}*/
+					
 					break;
 				}
 			}
@@ -328,7 +352,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 		}
 
 
-	}
+	}*/
     if (eventType == SPIKE)
     {
 
@@ -347,7 +371,7 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
                 int electrodeNum = newSpike.source;
 				if (electrodeNum < electrodes.size() )
 				{
-					Electrode& e = electrodes.getReference(electrodeNum);
+					dispElectrode& e = electrodes.getReference(electrodeNum);
 					// std::cout << electrodeNum << std::endl;
 
 					bool aboveThreshold = false;
@@ -420,7 +444,7 @@ void SpikeDisplayNode::openFile(int i)
     diskWriteLock->enter();
     //const MessageManagerLock mmLock;
 
-    Electrode& e = electrodes.getReference(i);
+    dispElectrode& e = electrodes.getReference(i);
 
     FILE* file;
     
@@ -457,7 +481,7 @@ void SpikeDisplayNode::openFile(int i)
 void SpikeDisplayNode::closeFile(int i)
 {
 
-    Electrode& e = electrodes.getReference(i);
+    dispElectrode& e = electrodes.getReference(i);
 
     std::cout << "CLOSING FILE for " << e.name << std::endl;
     

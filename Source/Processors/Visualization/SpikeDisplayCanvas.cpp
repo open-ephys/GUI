@@ -56,6 +56,7 @@ SpikeDisplayCanvas::SpikeDisplayCanvas(SpikeDisplayNode* n) :
 
 }
 
+
 SpikeDisplayCanvas::~SpikeDisplayCanvas()
 {
     processor->removeSpikePlots();
@@ -79,7 +80,7 @@ void SpikeDisplayCanvas::update()
 {
 
     std::cout << "Updating SpikeDisplayCanvas" << std::endl;
-
+	processor->lockElectrodes();
     int nPlots = processor->getNumElectrodes();
     spikeDisplay->removePlots();
     processor->removeSpikePlots();
@@ -90,7 +91,7 @@ void SpikeDisplayCanvas::update()
                                    processor->getNameForElectrode(i));
         processor->addSpikePlotForElectrode(sp, i);
     }
-
+	processor->unlockElectrodes();
     spikeDisplay->resized();
     spikeDisplay->repaint();
 	updateNeeded = false;
@@ -119,7 +120,10 @@ void SpikeDisplayCanvas::paint(Graphics& g)
 {
 
     g.fillAll(Colours::darkgrey);
-
+	if (updateNeeded)
+	{
+		update();
+	}
 }
 
 void SpikeDisplayCanvas::refresh()
