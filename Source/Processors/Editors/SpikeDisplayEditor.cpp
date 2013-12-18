@@ -217,6 +217,14 @@ void SpikeDisplayEditor::stopRecording()
 
 // }
 
+void SpikeDisplayEditor::updateNeeded()
+{
+	 SpikeDisplayCanvas* sdc = (SpikeDisplayCanvas*) canvas.get();
+	 if (sdc != nullptr)
+		 sdc->updateNeeded = true;
+   
+}
+
 void SpikeDisplayEditor::buttonCallback(Button* button)
 {
 	if (button == saveSpikesToDiskButton)

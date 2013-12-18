@@ -58,6 +58,7 @@ public:
 
     // void updateSettings();
     // void updateVisualizer();
+	void updateNeeded();
 
     Visualizer* createNewCanvas();
 

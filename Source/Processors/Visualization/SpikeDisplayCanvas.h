@@ -101,7 +101,7 @@ public:
     void stopRecording() { } // unused
     
     SpikeDisplayNode* processor;
-
+	bool updateNeeded;
 private:
 
     ScopedPointer<SpikeDisplay> spikeDisplay;

@@ -295,11 +295,13 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 				}
 				 electrodes.add(elec);
 				 SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
+				 ed->updateNeeded();
+				 /*
  				 if (ed->canvas != nullptr) 
 				 {
-					 const MessageManagerLock mmLock;
-					ed->canvas->update();
-				 }
+					// const MessageManagerLock mmLock;
+					ed->canvas->updateNeeded = true;
+				 }*/
 			}
 		}
 		if (inputs[0] == "RemoveElectrode")
@@ -312,11 +314,13 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 				{
 					electrodes.remove(k);
 					SpikeDisplayEditor *ed = (SpikeDisplayEditor *)getEditor() ;
+					ed->updateNeeded();
+					/*
 					if (ed->canvas != nullptr) 
 					{
-						const MessageManagerLock mmLock;
+						//const MessageManagerLock mmLock;
 						ed->canvas->update();
-					}
+					}*/
 					break;
 				}
 			}
@@ -341,37 +345,39 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
             if (isValid)
             {
                 int electrodeNum = newSpike.source;
+				if (electrodeNum < electrodes.size() )
+				{
+					Electrode& e = electrodes.getReference(electrodeNum);
+					// std::cout << electrodeNum << std::endl;
 
-                Electrode& e = electrodes.getReference(electrodeNum);
-               // std::cout << electrodeNum << std::endl;
+					bool aboveThreshold = false;
 
-                 bool aboveThreshold = false;
+					// update threshold / check threshold
+					for (int i = 0; i < e.numChannels; i++)
+					{
+						e.detectorThresholds.set(i, float(newSpike.threshold[i])); // / float(newSpike.gain[i]));
 
-                // update threshold / check threshold
-                for (int i = 0; i < e.numChannels; i++)
-                {
-                    e.detectorThresholds.set(i, float(newSpike.threshold[i])); // / float(newSpike.gain[i]));
+						aboveThreshold = aboveThreshold | checkThreshold(i, e.displayThresholds[i], newSpike);   
+					}
 
-                    aboveThreshold = aboveThreshold | checkThreshold(i, e.displayThresholds[i], newSpike);   
-                }
+					if (aboveThreshold)
+					{
 
-                if (aboveThreshold)
-                {
+						// add to buffer
+						if (e.currentSpikeIndex < displayBufferSize)
+						{
+							//  std::cout << "Adding spike " << e.currentSpikeIndex + 1 << std::endl;
+							e.mostRecentSpikes.set(e.currentSpikeIndex, newSpike);
+							e.currentSpikeIndex++;
+						}
 
-                    // add to buffer
-                    if (e.currentSpikeIndex < displayBufferSize)
-                    {
-                      //  std::cout << "Adding spike " << e.currentSpikeIndex + 1 << std::endl;
-                        e.mostRecentSpikes.set(e.currentSpikeIndex, newSpike);
-                        e.currentSpikeIndex++;
-                    }
-                    
-                    // save spike
-                    if (isRecording)
-                    {
-                        writeSpike(newSpike, electrodeNum);
-                    }
-                }
+						// save spike
+						if (isRecording)
+						{
+							writeSpike(newSpike, electrodeNum);
+						}
+					}
+				}
 
             }
         

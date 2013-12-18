@@ -52,7 +52,6 @@ SpikeDisplayCanvas::SpikeDisplayCanvas(SpikeDisplayNode* n) :
     addAndMakeVisible(viewport);
 
     setWantsKeyboardFocus(true);
-
     update();
 
 }
@@ -94,6 +93,7 @@ void SpikeDisplayCanvas::update()
 
     spikeDisplay->resized();
     spikeDisplay->repaint();
+	updateNeeded = false;
 }
 
 
@@ -124,6 +124,10 @@ void SpikeDisplayCanvas::paint(Graphics& g)
 
 void SpikeDisplayCanvas::refresh()
 {
+	if (updateNeeded)
+	{
+		update();
+	}
     processSpikeEvents();
 
     repaint();
