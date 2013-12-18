@@ -124,7 +124,7 @@ public:
 	int removeContainer(int containerIndex);
 	int removeAdvancer(int containerIndex, int advancerIndex);
 	void updateAdvancerLocation(int selectedContainer, int selectedAdvancer, int newLocation);
-
+	int addContainerUsingXmlFile(File xmlfile);
 	std::vector<AdvancerContainer> advancerContainers;
 	CriticalSection lock;
 

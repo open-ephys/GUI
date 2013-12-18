@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONTAINER type="Grid" name="Generic Circular" numAdvancerLocations="33" numModelPolygons="1"> 
+        <POLYGON colorR="200" colorG="200" colorB="200" numPoints="21">
+          <POLYGON_POINT x="8.300000" y="0.000000"/>
+          <POLYGON_POINT x="7.893769" y="2.564841"/>
+          <POLYGON_POINT x="6.714841" y="4.878618"/>
+          <POLYGON_POINT x="4.878618" y="6.714841"/>
+          <POLYGON_POINT x="2.564841" y="7.893769"/>
+          <POLYGON_POINT x="0.000000" y="8.300000"/>
+          <POLYGON_POINT x="-2.564841" y="7.893769"/>
+          <POLYGON_POINT x="-4.878618" y="6.714841"/>
+          <POLYGON_POINT x="-6.714841" y="4.878618"/>
+          <POLYGON_POINT x="-7.893769" y="2.564841"/>
+          <POLYGON_POINT x="-8.300000" y="0.000000"/>
+          <POLYGON_POINT x="-7.893769" y="-2.564841"/>
+          <POLYGON_POINT x="-6.714841" y="-4.878618"/>
+          <POLYGON_POINT x="-4.878618" y="-6.714841"/>
+          <POLYGON_POINT x="-2.564841" y="-7.893769"/>
+          <POLYGON_POINT x="-0.000000" y="-8.300000"/>
+          <POLYGON_POINT x="2.564841" y="-7.893769"/>
+          <POLYGON_POINT x="4.878618" y="-6.714841"/>
+          <POLYGON_POINT x="6.714841" y="-4.878618"/>
+          <POLYGON_POINT x="7.893769" y="-2.564841"/>
+          <POLYGON_POINT x="8.300000" y="-0.000000"/>
+        </POLYGON>
+
+        <ADVANCER_LOCATION x="-1.034107" y="-6.169957" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.034107" y="-5.145677" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.034107" y="-4.121398" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-0.009828" y="-6.169957" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-0.009828" y="-5.145677" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-0.009828" y="-4.121398" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.014452" y="-6.169957" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.014452" y="-5.145677" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.014452" y="-4.121398" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-2.019655" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-2.019655" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-2.019655" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-2.019655" y="0.000000" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.009828" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.009828" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.009828" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="-1.009828" y="0.000000" rad="0.375000"/>
+        <ADVANCER_LOCATION x="0.000000" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="0.000000" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="0.000000" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="0.000000" y="0.000000" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.009828" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.009828" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.009828" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="1.009828" y="0.000000" rad="0.375000"/>
+        <ADVANCER_LOCATION x="2.019655" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="2.019655" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="2.019655" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="2.019655" y="0.000000" rad="0.375000"/>
+        <ADVANCER_LOCATION x="3.029483" y="-3.029483" rad="0.375000"/>
+        <ADVANCER_LOCATION x="3.029483" y="-2.019655" rad="0.375000"/>
+        <ADVANCER_LOCATION x="3.029483" y="-1.009828" rad="0.375000"/>
+        <ADVANCER_LOCATION x="3.029483" y="0.000000" rad="0.375000"/>
+  
+</CONTAINER>
