@@ -151,7 +151,8 @@ bool ISCANnode::connect(int selectedDevice)
 
 void ISCANnode::updateSettings()
 {
-
+	ISCANeditor*ed=(ISCANeditor*)getEditor();
+	ed->refreshAnalogDevices();
 }
 
 void ISCANnode::setParameter(int parameterIndex, float newValue)

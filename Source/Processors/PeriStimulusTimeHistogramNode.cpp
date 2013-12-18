@@ -246,7 +246,7 @@ void PeriStimulusTimeHistogramNode::dumpEyeTrackingEventToDisk(EyePosition pos)
 	fwrite(&pos.pupil, 8,1, eventFile);
 	// 4. software timestamp
 	fwrite(&pos.software_timestamp, 8,1, eventFile);
-	// 5. software timestamp
+	// 5. hardware timestamp
 	fwrite(&pos.hardware_timestamp, 8,1, eventFile);
 
 	diskWriteLock->exit();

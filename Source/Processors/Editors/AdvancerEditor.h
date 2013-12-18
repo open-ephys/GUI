@@ -134,11 +134,11 @@ private:
 	void setActiveAdvancer(int newAdvancerIndex) ;
 
 	int selectedContainer;
-	ComboBox* advancerCombobox;
-	ComboBox* containerCombobox;
-	Label *containerLabel, *advancerLabel, *depthLabel, *depthEditLabel;
-	UtilityButton *addContainer, *removeContainer;
-	UtilityButton *addAdvancer, *removeAdvancer;
+	ScopedPointer<ComboBox> advancerCombobox;
+	ScopedPointer<ComboBox> containerCombobox;
+	ScopedPointer<Label> containerLabel, advancerLabel, depthLabel, depthEditLabel;
+	ScopedPointer<UtilityButton> addContainer, removeContainer;
+	ScopedPointer<UtilityButton> addAdvancer, removeAdvancer;
 	
 	AdvancerCanvas* advancerCanvas;
 	

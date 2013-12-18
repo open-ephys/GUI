@@ -169,7 +169,7 @@ SpikeDetectorEditor::~SpikeDetectorEditor()
         removeChildComponent(electrodeButtons[i]);
     }
 
-    deleteAllChildren();
+   // deleteAllChildren();
 	 
 
 }

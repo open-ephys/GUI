@@ -64,6 +64,8 @@ class Condition
        double postSec, preSec;
        bool visible;
 	   int conditionID;
+	   float posX, posY; // some conditions might be displayed according to their spatial location
+	   int conditionGroup; // conditions may be groupped to allow better visualization.
 };
 
 

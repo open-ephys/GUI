@@ -208,9 +208,9 @@ public:
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
-	ComboBox *hardwareTrialAlignment;
-	UtilityButton *visibleConditions, *saveOptions, *clearDisplay,*visualizationOptions;
-	Label *hardwareTrigger;
+	ScopedPointer<ComboBox> hardwareTrialAlignment;
+	ScopedPointer<UtilityButton> visibleConditions, saveOptions, clearDisplay,visualizationOptions;
+	ScopedPointer<Label> hardwareTrigger;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 
 };

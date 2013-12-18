@@ -206,6 +206,9 @@ Condition::Condition(const Condition &c)
 	   postSec = c.postSec;
 	   preSec = c.preSec;
 	   visible = c.visible;
+	   posX = c.posX;
+	   posY = c.posY;
+	   conditionGroup = c.conditionGroup;
 	   conditionID = c.conditionID;
 }
 
@@ -234,6 +237,26 @@ Condition::Condition(std::vector<String> items, int ID)
 			 bOutcomes = false;
 			 k++;
 			 name = items[k];
+			 k++;
+			 continue;
+		 }
+		  if (lower_item == "group")
+		 {
+			 bTrialTypes = false;
+			 bOutcomes = false;
+			 k++;
+			 conditionGroup = items[k].getIntValue();
+			 k++;
+			 continue;
+		 }
+		if (lower_item == "spatialposition")
+		 {
+			 bTrialTypes = false;
+			 bOutcomes = false;
+			 k++;
+			 posX = items[k].getFloatValue();
+			 k++;
+			 posY = items[k].getFloatValue();
 			 k++;
 			 continue;
 		 }

@@ -309,6 +309,7 @@ int AdvancerNode::addContainerUsingXmlFile(File xmlfile)
 
     if (xml == 0 || ! xml->hasTagName("CONTAINER"))
     {
+        delete xml;
 		return -1;
     }
 
@@ -365,6 +366,9 @@ int AdvancerNode::addContainerUsingXmlFile(File xmlfile)
 	lock.enter();
 	int i=addContainer(container);
 	lock.exit();
+
+    delete xml;
+
 	return i;
 }
 
