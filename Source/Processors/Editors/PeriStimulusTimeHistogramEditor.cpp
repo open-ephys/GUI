@@ -666,9 +666,9 @@ void PeriStimulusTimeHistogramDisplay::focusOnPlot(int plotID)
 		}
 		psthPlots[plotIndex]->toggleFullScreen(true);
 		// make sure its rectangular...?
-		int newSize = MIN(canvas->screenWidth,canvas->screenHeight)-30;
+		int newSize = MIN(canvas->screenWidth,canvas->screenHeight);
 		setBounds(0,0,newSize,newSize);
-		psthPlots[plotIndex]->setBounds(0,0,newSize,newSize);
+		psthPlots[plotIndex]->setBounds(0,0,newSize-30,newSize-30);
 		psthPlots[plotIndex]->repaint();
 	}
 	
@@ -1314,7 +1314,7 @@ void XYPlot::paintSpikes(Graphics &g)
 	int numSamplePoints = plotWidth/subsample;
 	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
 	{
-		if (interpolatedConditions[cond].size() == 0)
+		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			continue;
 
 			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
@@ -1396,7 +1396,7 @@ void XYPlot::paintLFP(Graphics &g)
 	int numSamplePoints = plotWidth/subsample;
 	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
 	{
-		if (interpolatedConditions[cond].size() == 0)
+		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			continue;
 
 			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],

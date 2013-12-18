@@ -52,6 +52,7 @@ public:
 	StringTS(String S, int64 ts_software);
 	StringTS(const StringTS &s);
 	StringTS(unsigned char *buf, int _len, int64 ts_software);
+	StringTS& operator=(const StringTS &rhs);
 	~StringTS();
 
 	juce::uint8 *str;

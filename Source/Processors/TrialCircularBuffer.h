@@ -130,7 +130,7 @@ public:
 class ConditionPSTH
 {
 public:
-	ConditionPSTH(int ID, float _maxTrialTimeSec, float _preSecs, float _postSecs);
+	ConditionPSTH(int ID, float _maxTrialTimeSec, float _preSecs, float _postSecs,bool vis);
 	ConditionPSTH(const ConditionPSTH& c);
 	void clear();
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
@@ -220,7 +220,7 @@ public:
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
 	
 	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware);
-	void addDefaultTTLConditions();
+	void addDefaultTTLConditions(Array<bool> visibility);
 	void addCondition(std::vector<String> input);
 	void lockConditions();
 	void unlockConditions();

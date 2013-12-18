@@ -37,12 +37,6 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
 	inDrawingPolygonMode = false;
     scrollBarThickness = viewport->getScrollBarThickness();
 
-	/*
-    clearButton = new UtilityButton("Clear plots", Font("Small Text", 13, Font::plain));
-    clearButton->setRadius(3.0f);
-    clearButton->addListener(this);
-    addAndMakeVisible(clearButton);
-	*/
 
 
     addUnitButton = new UtilityButton("Add box unit", Font("Small Text", 13, Font::plain));
@@ -86,7 +80,7 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
 
 SpikeDetectCanvas::~SpikeDetectCanvas()
 {
-//    processor->removeSpikePlots();
+
 }
 
 void SpikeDetectCanvas::beginAnimation()
@@ -456,6 +450,8 @@ void SpikeHistogramPlot::getSelectedUnitAndbox(int &unitID, int &boxID)
 
 SpikeHistogramPlot::~SpikeHistogramPlot()
 {
+	pAxes.clear();
+    wAxes.clear();
 
 }
 

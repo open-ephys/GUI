@@ -48,8 +48,8 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 
 
 /******************************/
-ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post) : conditionID(ID), preSecs(pre), 
-	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1),preSec(pre),postSec(post)
+ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post, bool vis) : conditionID(ID), preSecs(pre), 
+	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1),preSec(pre),postSec(post),visible(vis)
 {
 	// allocate data for 1 ms resolution bins to cover trials 
 	xmin = -pre;
@@ -69,7 +69,6 @@ ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float po
 		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
 		avgResponse[k] = 0;
 	}
-	visible = true;
 }
 
 ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
@@ -929,12 +928,17 @@ void TrialCircularBuffer::unlockConditions()
 	conditionMutex.exit();
 }
 
-void TrialCircularBuffer::addDefaultTTLConditions()
+void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 {
 	  int numExistingConditions = conditions.size();
 	  for (int channel = 0; channel < numTTLchannels; channel++)
 	  {
-		  StringTS simulatedConditionString = String("addcondition name ttl"+String(channel+1)+" trialtypes "+String(TTL_TRIAL_OFFSET+channel)+" visible 0");
+		  StringTS simulatedConditionString;
+		  if (visibility[channel])
+			simulatedConditionString = StringTS("addcondition name ttl"+String(channel+1)+" trialtypes "+String(TTL_TRIAL_OFFSET+channel)+" visible 1");
+		  else
+		    simulatedConditionString = StringTS("addcondition name ttl"+String(channel+1)+" trialtypes "+String(TTL_TRIAL_OFFSET+channel)+" visible 0");
+
 		   std::vector<String> input = simulatedConditionString.splitString(' ');
  		  Condition newcondition(input,numExistingConditions+1+channel);
 		  lockConditions();
@@ -951,12 +955,12 @@ void TrialCircularBuffer::addDefaultTTLConditions()
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
 			  }
 		  }
 		  unlockPSTH();
@@ -996,6 +1000,18 @@ void TrialCircularBuffer::clearAll()
 void TrialCircularBuffer::clearDesign()
 {
 	lockConditions();
+	// keep ttl visibility status
+	Array<bool> ttlVisible;
+	if (conditions.size() > 0)
+	{
+		for (int k=0;k<numTTLchannels;k++)
+			ttlVisible.add(conditions[k].visible);
+	} else
+	{
+		for (int k=0;k<numTTLchannels;k++)
+			ttlVisible.add(false);
+	}
+
 	conditions.clear();
 	conditionCounter = 0;
 	PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
@@ -1017,7 +1033,7 @@ void TrialCircularBuffer::clearDesign()
 	}
 	unlockPSTH();
 	if (addDefaultTTLconditions)
-		addDefaultTTLConditions();
+		addDefaultTTLConditions(ttlVisible);
 }
 
 
@@ -1086,7 +1102,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 			// add all known conditions
 			for (int c=0;c<conditions.size();c++)
 			{
-				channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
+				channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
 			}
 			electrodePSTH.channelsPSTHs.push_back(channelPSTH);
 		  }
@@ -1102,7 +1118,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1115,7 +1131,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2]);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1139,7 +1155,7 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 		// add all known conditions
 		for (int c=0;c<conditions.size();c++)
 		{
-			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec));
+			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
 		}
 		e.channelsPSTHs.push_back(channelPSTH);	
 	}
@@ -1170,7 +1186,7 @@ void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8
 	UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,r,g,b);
 	for (int k=0;k<conditions.size();k++)
 	{
-		unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec));
+		unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 	}
 	for (int k=0;k<electrodesPSTH.size();k++) {
 		if (electrodesPSTH[k].electrodeID == electrodeID) {
@@ -1306,12 +1322,12 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
 			  }
 		  }
 		  unlockPSTH();
@@ -1450,7 +1466,12 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
 	if (firstTime) {
-		addDefaultTTLConditions();
+
+		Array<bool> ttlVisible;
+		for (int k=0;k<numTTLchannels;k++)
+			ttlVisible.add(false);
+
+		addDefaultTTLConditions(ttlVisible);
 		firstTime = false;
 	}
 	// first, update LFP circular buffers

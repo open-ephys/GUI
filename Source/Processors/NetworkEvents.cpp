@@ -79,12 +79,23 @@ StringTS::StringTS(MidiMessage &event)
 	memcpy(str,dataptr+4,len);
 }
 
+StringTS& StringTS::operator=(const StringTS &rhs)
+{
+	delete(str);
+	len = rhs.len;
+	str = new uint8[len];
+	memcpy(str,rhs.str,len);
+	timestamp = rhs.timestamp;
+
+	return *this;  
+}
 
 String StringTS::getString()
 {
 
 	return String((const char*)str,len);
 }
+
 StringTS::StringTS(String S)
 {
 	Time t;
