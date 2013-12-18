@@ -191,6 +191,10 @@ void RHD2000Editor::saveCustomParameters(XmlElement* xml)
      xml->setAttribute("LowCut", bandwidthInterface->getLowerBandwidth());
      xml->setAttribute("HighCut", bandwidthInterface->getUpperBandwidth());
      xml->setAttribute("ADCsOn", adcButton->getToggleState());
+     xml->setAttribute("AudioOutputL", electrodeButtons[0]->getChannelNum());
+     xml->setAttribute("AudioOutputR", electrodeButtons[1]->getChannelNum());
+     xml->setAttribute("NoiseSlicer", audioInterface->getNoiseSlicerLevel());
+
 }
 
 void RHD2000Editor::loadCustomParameters(XmlElement* xml)
@@ -200,6 +204,11 @@ void RHD2000Editor::loadCustomParameters(XmlElement* xml)
     bandwidthInterface->setLowerBandwidth(xml->getDoubleAttribute("LowCut"));
     bandwidthInterface->setUpperBandwidth(xml->getDoubleAttribute("HighCut"));
     adcButton->setToggleState(xml->getBoolAttribute("ADCsOn"), true);
+    electrodeButtons[0]->setChannelNum(xml->getIntAttribute("AudioOutputL"));
+    board->assignAudioOut(0, xml->getIntAttribute("AudioOutputL"));
+    electrodeButtons[1]->setChannelNum(xml->getIntAttribute("AudioOutputR"));
+    board->assignAudioOut(1, xml->getIntAttribute("AudioOutputR"));
+    audioInterface->setNoiseSlicerLevel(xml->getIntAttribute("NoiseSlicer"));
 
 }
 
