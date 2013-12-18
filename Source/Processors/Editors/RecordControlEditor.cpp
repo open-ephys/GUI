@@ -213,7 +213,7 @@ void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 			{
 				  if (xmlSubNode->hasTagName("CHANNEL_NAME"))
 				  {
-					  String chName = xmlSubNode->getStringAttribute("Name");
+					  String chName = xmlSubNode->getStringAttribute("Name", "Name");
 					  p->modifyChannelName(ch++, chName);
 				  }
 			}

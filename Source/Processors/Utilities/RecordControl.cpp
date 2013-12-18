@@ -121,13 +121,17 @@ void RecordControl::modifyChannelName(int ch, String newname)
     if (recordNode == 0)
         recordNode = getProcessorGraph()->getRecordNode();
 
-	channels[ch]->setName(newname);
-	recordNode->updateChannelName(ch, newname);
-	names.clear();
-	for (int k=0;k<getNumInputs();k++)
-	{
-		names.add(channels[k]->getName());
-	}
+    if (ch < getNumInputs())
+    {
+    	channels[ch]->setName(newname);
+    	recordNode->updateChannelName(ch, newname);
+
+    	names.clear();
+    	for (int k = 0; k < getNumInputs(); k++)
+    	{
+    		names.add(channels[k]->getName());
+    	}
+    }
 
 
 }
