@@ -365,14 +365,14 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 	//simulateDesignAndTrials(events);
 
 	//std::cout << *buffer.getSampleData(0, 0) << std::endl;
-	
+	lock.enter();
 	 while (!networkMessagesQueue.empty()) {
 			 StringTS msg = networkMessagesQueue.front();
 			 postTimestamppedStringToMidiBuffer(msg, events);
 			 getUIComponent()->getLogWindow()->addLineToLog(msg);
 		     networkMessagesQueue.pop();
 	 }
-
+	 lock.exit();
 	 nSamples = -10; // make sure this is not processed;
 	
 }
@@ -409,8 +409,9 @@ void NetworkEvents::run() {
 
 		StringTS Msg(buffer, result, timestamp_software);
 		if (result > 0) {
+			lock.enter();
 			networkMessagesQueue.push(Msg);
-		    
+		    lock.exit();
 			// handle special messages
 			String response = handleSpecialMessages(Msg);
 	

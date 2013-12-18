@@ -114,7 +114,7 @@ private:
 	Time timer;
  	std::queue<StringTS> networkMessagesQueue;
 	
-
+	CriticalSection lock;
 	std::queue<StringTS> simulation;
 	int64 simulationStartTime;
 	bool firstTime ;
