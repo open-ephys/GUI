@@ -585,6 +585,8 @@ void GenericEditor::switchCollapsedState()
         if (channelSelector != nullptr)
             channelSelector->setVisible(false); // either way, we don't want the CS in there
 
+        collapsedStateChanged();
+
         getEditorViewport()->refreshEditors();
     }
 }

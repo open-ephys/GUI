@@ -65,6 +65,9 @@ public:
 
 	void mouseDoubleClick(const MouseEvent &e);
 
+    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel);
+
+    void collapsedStateChanged();
 
 private:
 
@@ -73,6 +76,8 @@ private:
 	void setChannelPosition(int position, int channel);
 	void checkUnusedChannels();
 	void setConfigured(bool state);
+
+    void refreshButtonLocations();
 
 	OwnedArray<ElectrodeButton> electrodeButtons;
 	OwnedArray<ElectrodeButton> referenceButtons;
@@ -97,6 +102,8 @@ private:
 	int draggingChannel;
 	int lastHoverButton;
 	bool isConfigured;
+
+    float scrollDistance;
 	
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelMappingEditor);

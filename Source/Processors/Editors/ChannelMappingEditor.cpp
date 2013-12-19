@@ -35,6 +35,8 @@ ChannelMappingEditor::ChannelMappingEditor(GenericProcessor* parentNode, bool us
 {
 	desiredWidth = 340;
 
+    scrollDistance = 0;
+
 	selectAllButton = new ElectrodeEditorButton("Select All",Font("Small Text",14,Font::plain));
 	selectAllButton->addListener(this);
 	addAndMakeVisible(selectAllButton);
@@ -107,12 +109,14 @@ void ChannelMappingEditor::updateSettings()
 void ChannelMappingEditor::createElectrodeButtons(int numNeeded)
 {
 	createElectrodeButtons(numNeeded,true);
+
+    refreshButtonLocations();
 }
 
 void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevious)
 {
 	int startButton;
-	int row, column;
+
 	if (clearPrevious)
 	{
 		electrodeButtons.clear();
@@ -129,34 +133,27 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
 		modifyButton->setToggleState(false,false);
 		reorderActive = false;
 		channelSelector->activateButtons();
-		row = 0;
-	    column = 0;
+
 	}
 	else
 	{
 		startButton = previousChannelCount;
 		if (startButton > numNeeded) return;
-		row=startButton/16;
-		column=startButton%16;
+		//row = startButton/16;
+		//column = startButton % 16;
 	}
-
-	int width = 20;
-	int height = 15;
-
-	
 
 	for (int i = startButton; i < numNeeded; i++)
 	{
 		ElectrodeButton* button = new ElectrodeButton(i+1);
 		electrodeButtons.add(button);
 
-		button->setBounds(10+(column++)*(width), 30+row*(height), width, 15);
 		button->setRadioGroupId(0);
 		
-        if (!getCollapsedState())
-            addAndMakeVisible(button);
-        else
-            addChildComponent(button);
+        // if (!getCollapsedState())
+        //     addAndMakeVisible(button);
+        // else
+        addChildComponent(button); // determine visibility in refreshButtonLocations()
 
 		button->addListener(this);
 		if (reorderActive)
@@ -181,12 +178,6 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
 		channelArray.add(i+1);
 		enabledChannelArray.add(true);
 
-		if (column % 16 == 0)
-		{
-			column = 0;
-			row++;
-		}
-
 	}
 
 	if (clearPrevious)
@@ -203,6 +194,37 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
 	channelSelector->setRadioStatus(true);
 }
 
+void ChannelMappingEditor::refreshButtonLocations()
+{
+    int width = 19;
+    int height = 15;
+    int row = (int) -scrollDistance;
+    int column = 0;
+
+    for (int i = 0; i < electrodeButtons.size(); i++)
+    {
+
+        ElectrodeButton* button = electrodeButtons[i];
+
+        button->setBounds(10+(column++)*(width), 30+row*(height), width, 15);
+
+        if (row <= 4 && row >= 0 && !getCollapsedState())
+            button->setVisible(true);
+        else
+            button->setVisible(false);
+
+        if (column % 16 == 0)
+        {
+            column = 0;
+            row++;
+        }
+    }
+}
+
+void ChannelMappingEditor::collapsedStateChanged()
+{
+    refreshButtonLocations();
+}
 
 void ChannelMappingEditor::buttonEvent(Button* button)
 {
@@ -585,6 +607,8 @@ void ChannelMappingEditor::loadCustomParameters(XmlElement* xml)
 		}
 	}
 
+    refreshButtonLocations();
+
 }
 
 void ChannelMappingEditor::mouseDrag(const MouseEvent &e)
@@ -752,6 +776,24 @@ void ChannelMappingEditor::mouseDoubleClick(const MouseEvent &e)
 	}
 }
 
+void ChannelMappingEditor::mouseWheelMove(const MouseEvent& event,
+                                           const MouseWheelDetails& wheel)
+{
+
+    float maxScrollDistance = ceil(float(electrodeButtons.size() - 80) / 16.0f);
+
+   // std::cout << "Got wheel move: " << wheel.deltaY << std::endl;
+   // channelSelector->shiftChannelsVertical(-wheel.deltaY);
+    scrollDistance -= wheel.deltaY*2;
+
+    if (scrollDistance > maxScrollDistance)
+        scrollDistance = maxScrollDistance;
+
+    if (scrollDistance < 0)
+        scrollDistance = 0;
+
+    refreshButtonLocations();
+}
 
 void ChannelMappingEditor::checkUnusedChannels()
 {
@@ -781,3 +823,4 @@ void ChannelMappingEditor::setConfigured(bool state)
 	resetButton->setToggleState(!state,false);
 	getProcessor()->setParameter(4,state?1:0);
 }
+

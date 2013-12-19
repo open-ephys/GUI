@@ -255,6 +255,9 @@ public:
     /**  Collapses an editor if it's open, and opens it if it's collpased*/
     void switchCollapsedState();
 
+     /**  Notifies the editor that the collapsed state changed, for non-standard function. */
+    virtual void collapsedStateChanged() {}
+
 
 protected:
 

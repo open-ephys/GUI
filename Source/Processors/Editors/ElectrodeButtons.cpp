@@ -48,6 +48,9 @@ void ElectrodeButton::paintButton(juce::Graphics& g, bool isMouseOver, bool isBu
 		g.setColour(Colours::grey);
 	}
 
+    if (chan > 99)
+        g.setFont(8);
+
     if (chan >= 0)
 		g.drawText(getButtonText(),0,0,getWidth(),getHeight(),Justification::centred,true);
 }
