@@ -65,7 +65,7 @@ void SpikeDetector::setNumPreSamples(int numSamples)
 	// we need to update all electrodes, and also inform other modules that this has happened....
 	numPreSamples = numSamples;
 
-	for (int k=0;k<electrodes.size();k++)
+	for (int k = 0; k < electrodes.size(); k++)
 	{
 		electrodes[k]->resizeWaveform(numPreSamples,numPostSamples);
 	}
@@ -75,7 +75,7 @@ void SpikeDetector::setNumPreSamples(int numSamples)
 void SpikeDetector::setNumPostSamples(int numSamples)
 {
 	numPostSamples = numSamples;
-	for (int k=0;k<electrodes.size();k++)
+	for (int k = 0; k < electrodes.size(); k++)
 	{
 		electrodes[k]->resizeWaveform(numPreSamples,numPostSamples);
 	}
@@ -160,7 +160,7 @@ void SpikeDetector::updateSettings()
     } */
 
 	// instead, we pass things now in this new form:
-	for (int k=0;k<electrodes.size();k++)
+	for (int k = 0; k < electrodes.size(); k++)
 	{
 		String eventlog = "NewElectrode "+String(electrodes[k]->electrodeID) + " "+String(electrodes[k]->numChannels)+" ";
 		for (int j=0;j<electrodes[k]->numChannels;j++)
@@ -606,17 +606,17 @@ bool SpikeDetector::disable()
     {
         resetElectrode(electrodes[n]);
     }
-	editor->disable();
+	//editor->disable();
 	mut.exit();
     return true;
 }
 
 Electrode* SpikeDetector::getActiveElectrode()
 {
-if (electrodes.size() == 0)
-	return nullptr;
+    if (electrodes.size() == 0)
+    	return nullptr;
 
-return electrodes[currentElectrode];
+    return electrodes[currentElectrode];
 }
 
 

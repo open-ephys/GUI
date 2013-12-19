@@ -328,7 +328,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 				ProbeType = "Tetrode";
                 nChansPerElectrode = 4;
 				nElectrodes = 1;
-				firstElectrodeOffset =0 ;
+				firstElectrodeOffset = 0;
                 break;
             case 4:
 				ProbeType = "Depth Probe";
@@ -612,7 +612,7 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
 
         
 
-		if (i== 0) {
+		if (i == 0) {
 			activeChannels.add(processor->getChannel(ID,i));
 			thresholds.add(processor->getChannelThreshold(ID,i));
 		}
@@ -624,7 +624,7 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
 		addAndMakeVisible(button);
         button->addListener(this);
 
-        if (column%2 == 0)
+        if (column % 2 == 0)
         {
             column = 0;
             row++;
@@ -639,7 +639,7 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
 	thresholdSlider->setEnabled(true);
 	thresholdSlider->setValue(processor->getChannelThreshold(ID,0),dontSendNotification);
 	repaint();
-	if (spikeDetectorCanvas!=nullptr)
+	if (spikeDetectorCanvas != nullptr)
 		spikeDetectorCanvas->update();
 }
 
