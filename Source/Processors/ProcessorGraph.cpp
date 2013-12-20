@@ -207,7 +207,12 @@ void ProcessorGraph::clearSignalChain()
 
 void ProcessorGraph::changeListenerCallback(ChangeBroadcaster* source)
 {
+    refreshColors();
 
+}
+
+void ProcessorGraph::refreshColors()
+{
     for (int i = 0; i < getNumNodes(); i++)
     {
         Node* node = getNode(i);
@@ -224,7 +229,6 @@ void ProcessorGraph::changeListenerCallback(ChangeBroadcaster* source)
             e->refreshColors();
         }
     }
-
 }
 
 void ProcessorGraph::restoreParameters()

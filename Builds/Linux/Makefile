@@ -98,7 +98,6 @@ OBJECTS := \
   $(OBJDIR)/SpikeDisplayCanvas_b208ff6e.o \
   $(OBJDIR)/DataWindow_83ce6754.o \
   $(OBJDIR)/LfpDisplayCanvas_4a58e87e.o \
-  $(OBJDIR)/OpenGLCanvas_3c775a41.o \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
@@ -471,11 +470,6 @@ $(OBJDIR)/DataWindow_83ce6754.o: ../../Source/Processors/Visualization/DataWindo
 $(OBJDIR)/LfpDisplayCanvas_4a58e87e.o: ../../Source/Processors/Visualization/LfpDisplayCanvas.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling LfpDisplayCanvas.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/OpenGLCanvas_3c775a41.o: ../../Source/Processors/Visualization/OpenGLCanvas.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling OpenGLCanvas.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/SpikeDetector_300d85e7.o: ../../Source/Processors/SpikeDetector.cpp

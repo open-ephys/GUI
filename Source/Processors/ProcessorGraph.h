@@ -86,6 +86,8 @@ public:
     
     void setRecordState(bool);
 
+    void refreshColors();
+
 	void* createZmqContext();
 
 private:

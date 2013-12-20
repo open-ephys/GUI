@@ -66,19 +66,19 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\bin\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">open-ephys</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LibraryPath);../../Resources/ZeroMQ/lib_x86;../../Resources/Google Protocols/vsprojects/Debug</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LibraryPath);../../Resources/ZeroMQ/lib_x86</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\bin\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">open-ephys</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(LibraryPath);../../Resources/ZeroMQ/lib_x86;../../Resources/Google Protocols/vsprojects/Release</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(LibraryPath);../../Resources/ZeroMQ/lib_x86</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug64|x64'">.\Debug64\bin\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug64|x64'">open-ephys</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug64|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug64|x64'">$(LibraryPath);../../Resources/ZeroMQ/lib_x64;../../Resources/Google Protocols/vsprojects/x64/Debug</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug64|x64'">$(LibraryPath);../../Resources/ZeroMQ/lib_x64</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">.\Release64\bin\</OutDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">open-ephys</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">$(LibraryPath);../../Resources/ZeroMQ/lib_x64;../../Resources/Google Protocols/vsprojects/x64/Release</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release64|x64'">$(LibraryPath);../../Resources/ZeroMQ/lib_x64</LibraryPath>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -92,7 +92,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;../../Resources/Google Protocols/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;NOMINMAX;JUCER_VS2012_78A501F=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -116,9 +116,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x86;../../Resources/Google Protocols/vsprojects/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -138,7 +138,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;../../Resources/Google Protocols/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NOMINMAX;JUCER_VS2012_78A501F=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -163,9 +163,9 @@
       <TargetMachine>MachineX86</TargetMachine>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x86;../../Resources/Google Protocols/vsprojects/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -186,7 +186,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;../../Resources/Google Protocols/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;NOMINMAX;JUCER_VS2012_78A501F=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -208,9 +208,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\open-ephys.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x64;../../Resources/Google Protocols/vsprojects/x64/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -230,7 +230,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;../../Resources/Google Protocols/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NOMINMAX;JUCER_VS2012_78A501F=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -254,9 +254,9 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x64;../../Resources/Google Protocols/vsprojects/x64/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../Resources/ZeroMQ/lib_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setupapi.lib;opengl32.lib;glu32.lib;libzmq-v110-mt-3_2_2.lib;;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -322,7 +322,6 @@
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDisplayCanvas.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\DataWindow.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\LfpDisplayCanvas.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Visualization\OpenGLCanvas.cpp"/>
     <ClCompile Include="..\..\Source\Processors\SpikeDetector.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AudioNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp"/>
@@ -1535,7 +1534,6 @@
     <ClInclude Include="..\..\Source\Processors\Visualization\Visualizer.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\DataWindow.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\LfpDisplayCanvas.h"/>
-    <ClInclude Include="..\..\Source\Processors\Visualization\OpenGLCanvas.h"/>
     <ClInclude Include="..\..\Source\Processors\SpikeDetector.h"/>
     <ClInclude Include="..\..\Source\Processors\AudioNode.h"/>
     <ClInclude Include="..\..\Source\Processors\EventNode.h"/>

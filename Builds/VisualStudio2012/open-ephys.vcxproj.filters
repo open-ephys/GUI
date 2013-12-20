@@ -520,9 +520,6 @@
     <ClCompile Include="..\..\Source\Processors\Visualization\LfpDisplayCanvas.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Visualization\OpenGLCanvas.cpp">
-      <Filter>open-ephys\Source\Processors\Visualization</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\SpikeDetector.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
@@ -2092,9 +2089,6 @@
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Visualization\LfpDisplayCanvas.h">
-      <Filter>open-ephys\Source\Processors\Visualization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Visualization\OpenGLCanvas.h">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\SpikeDetector.h">

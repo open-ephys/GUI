@@ -24,7 +24,6 @@
 #include "EditorViewport.h"
 
 
-
 #include "SignalChainManager.h"
 #include "EditorViewportButtons.h"
 
@@ -1292,6 +1291,7 @@ const String EditorViewport::saveState(File fileToUse)
     }
 
     getControlPanel()->saveStateToXml(xml); // save the control panel settings
+    getProcessorList()->saveStateToXml(xml);
     getUIComponent()->saveStateToXml(xml);  // save the UI settings
 
     if (! xml->writeToFile(currentFile, String::empty))
@@ -1478,6 +1478,7 @@ const String EditorViewport::loadState(File fileToLoad)
     getProcessorGraph()->restoreParameters();
 
     getControlPanel()->loadStateFromXml(xml); // save the control panel settings
+    getProcessorList()->loadStateFromXml(xml);
     getUIComponent()->loadStateFromXml(xml);  // save the UI settings
 
     if (editorArray.size() > 0)

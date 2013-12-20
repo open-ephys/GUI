@@ -25,7 +25,6 @@
 #define __PROCESSORLIST_H_C3A661E9__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
-#include "../Processors/Visualization/OpenGLCanvas.h"
 #include "../AccessClass.h"
 
 class ProcessorListItem;
@@ -68,7 +67,20 @@ public:
     /** Returns the open/closed state of the ProcessorList.*/
     bool isOpen();
 
+    /** Draws the ProcessorList. */
     void paint(Graphics& g);
+
+    /** Gets the colors of the different types of processors.*/
+    Array<Colour> getColours();
+
+    /** Sets the colors of the different types of processors.*/
+    void setColours(Array<Colour>);
+
+    /** Saves the ProcessorList state. */
+    void saveStateToXml(XmlElement*);
+
+    /** Loads the ProcessorList state. */
+    void loadStateFromXml(XmlElement*);
 
 private:
 

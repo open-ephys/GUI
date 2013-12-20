@@ -35,9 +35,6 @@
 #include "../Processors/ProcessorGraph.h"
 #include "../Audio/AudioComponent.h"
 #include "../MainWindow.h"
-#include "../Processors/Visualization/OpenGLCanvas.h"
-
-//#include "../OpenGL.h"
 
 class MainWindow;
 class ProcessorList;

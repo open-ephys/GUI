@@ -117,6 +117,8 @@ ProcessorList::~ProcessorList()
 
 }
 
+
+
 bool ProcessorList::isOpen()
 {
     return baseItem->isOpen();
@@ -521,6 +523,113 @@ void ProcessorList::mouseDrag(const MouseEvent& e)
 
 }
 
+void ProcessorList::saveStateToXml(XmlElement* xml)
+{
+    XmlElement* processorListState = xml->createNewChildElement("PROCESSORLIST");
+
+    for (int i = 0; i < 5; i++)
+    {
+        XmlElement* colorState = processorListState->createNewChildElement("COLOR");
+
+        int id;
+
+        switch (i)
+        {
+            case 0:
+                id = PROCESSOR_COLOR;
+                break;
+            case 1:
+                id = SOURCE_COLOR;
+                break;
+            case 2:
+                id = FILTER_COLOR;
+                break;
+            case 3:
+                id = SINK_COLOR;
+                break;
+            case 4:
+                id = UTILITY_COLOR;
+                break;
+            default:
+                // do nothing
+            ;
+        }
+
+        Colour c = findColour(id);
+
+        colorState->setAttribute("ID", (int) id);
+        colorState->setAttribute("R", (int) c.getRed());
+        colorState->setAttribute("G", (int) c.getGreen());
+        colorState->setAttribute("B", (int) c.getBlue());
+
+    }
+}
+
+void ProcessorList::loadStateFromXml(XmlElement* xml)
+{
+    forEachXmlChildElement(*xml, xmlNode)
+    {
+        if (xmlNode->hasTagName("PROCESSORLIST"))
+        {
+            forEachXmlChildElement(*xmlNode, colorNode)
+            {
+                setColour(colorNode->getIntAttribute("ID"), 
+                          Colour(
+                            colorNode->getIntAttribute("R"),
+                            colorNode->getIntAttribute("G"),
+                            colorNode->getIntAttribute("B")));
+            }
+        }
+    }
+
+    repaint();
+
+    getProcessorGraph()->refreshColors();
+}
+
+Array<Colour> ProcessorList::getColours()
+{
+    Array<Colour> c;
+
+    c.add(findColour(PROCESSOR_COLOR));
+    c.add(findColour(SOURCE_COLOR));
+    c.add(findColour(FILTER_COLOR));
+    c.add(findColour(SINK_COLOR));
+    c.add(findColour(UTILITY_COLOR));
+
+}
+
+void ProcessorList::setColours(Array<Colour> c)
+{
+    for (int i = 0; i < c.size(); i++)
+    {
+        switch (i)
+        {
+            case 0:
+                setColour(PROCESSOR_COLOR, c[i]);
+                break;
+            case 1:
+                setColour(SOURCE_COLOR, c[i]);
+                break;
+            case 2:
+                setColour(FILTER_COLOR, c[i]);
+                break;
+            case 3:
+                setColour(SINK_COLOR, c[i]);
+                break;
+            case 4:
+                setColour(UTILITY_COLOR, c[i]);
+                break;
+            default:
+                ;// do nothing
+        }
+    }
+
+    
+}
+
+// ===================================================================
+
 ProcessorListItem::ProcessorListItem(const String& name_)
     : selected(false), open(true), name(name_)
 {
@@ -612,6 +721,7 @@ void ProcessorListItem::setParentName(const String& name)
         colorId = UTILITY_COLOR;
     }
 }
+
 
 // Blue slate:
 // if (parentName.equalsIgnoreCase("Processors"))

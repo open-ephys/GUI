@@ -32,7 +32,6 @@
 #include "CustomLookAndFeel.h"
 #include "../AccessClass.h"
 #include "../Processors/Editors/GenericEditor.h" // for UtilityButton
-#include "../Processors/Visualization/OpenGLCanvas.h"
 #include <queue>
 
 /**
