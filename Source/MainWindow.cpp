@@ -122,6 +122,21 @@ void MainWindow::saveWindowBounds()
 
     xml->addChildElement(bounds);
 
+    XmlElement* recentDirectories = new XmlElement("RECENTDIRECTORYNAMES");
+
+    UIComponent* ui = (UIComponent*) getContentComponent();
+
+    StringArray dirs = ui->getRecentlyUsedFilenames();
+
+    for (int i = 0; i < dirs.size(); i++)
+    {
+        XmlElement* directory = new XmlElement("DIRECTORY");
+        directory->setAttribute("name", dirs[i]);
+        recentDirectories->addChildElement(directory);
+    }
+
+    xml->addChildElement(recentDirectories);
+
     String error;
 
     if (! xml->writeToFile(file, String::empty))
@@ -160,6 +175,9 @@ void MainWindow::loadWindowBounds()
         forEachXmlChildElement(*xml, e)
         {
 
+            if (e->hasTagName("BOUNDS"))
+            {
+
             int x = e->getIntAttribute("x");
             int y = e->getIntAttribute("y");
             int w = e->getIntAttribute("w");
@@ -175,6 +193,25 @@ void MainWindow::loadWindowBounds()
 #endif
             getContentComponent()->setBounds(0,0,w-10,h-33);
             //setFullScreen(fs);
+            } else if (e->hasTagName("RECENTDIRECTORYNAMES"))
+            {
+
+                StringArray filenames;
+
+                forEachXmlChildElement(*e, directory)
+                {
+                
+                    if (directory->hasTagName("DIRECTORY"))
+                    {
+                        filenames.add(directory->getStringAttribute("name"));
+                    }
+                }
+
+                UIComponent* ui = (UIComponent*) getContentComponent();
+                ui->setRecentlyUsedFilenames(filenames);
+
+            }
+
 
         }
 

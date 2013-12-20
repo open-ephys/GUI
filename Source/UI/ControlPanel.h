@@ -336,6 +336,12 @@ public:
     /** Informs the Control Panel that recording has stopped.*/
     void stopRecording();
 
+    /** Returns a list of recently used directories for saving data. */
+    StringArray getRecentlyUsedFilenames();
+
+    /** Sets the list of recently used directories for saving data. */
+    void setRecentlyUsedFilenames(const StringArray& filenames);
+
 	ScopedPointer<RecordButton> recordButton;
 private:
     ScopedPointer<PlayButton> playButton;

@@ -869,3 +869,15 @@ void ControlPanel::loadStateFromXml(XmlElement* xml)
     getProcessorGraph()->getAudioNode()->updateBufferSize();
 
 }
+
+
+StringArray ControlPanel::getRecentlyUsedFilenames()
+{
+    return filenameComponent->getRecentlyUsedFilenames();
+}
+
+
+void ControlPanel::setRecentlyUsedFilenames(const StringArray& filenames)
+{
+    filenameComponent->setRecentlyUsedFilenames(filenames);
+}

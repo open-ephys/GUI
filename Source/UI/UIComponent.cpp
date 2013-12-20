@@ -502,6 +502,16 @@ void UIComponent::loadStateFromXml(XmlElement* xml)
     }
 }
 
+StringArray UIComponent::getRecentlyUsedFilenames()
+{
+    return controlPanel->getRecentlyUsedFilenames();
+}
+
+void UIComponent::setRecentlyUsedFilenames(const StringArray& filenames)
+{
+    controlPanel->setRecentlyUsedFilenames(filenames);
+}
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 EditorViewportButton::EditorViewportButton(UIComponent* ui) : UI(ui)

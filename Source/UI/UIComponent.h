@@ -162,6 +162,10 @@ public:
     /** Load settings. */
     void loadStateFromXml(XmlElement*);
 
+    StringArray getRecentlyUsedFilenames();
+
+    void setRecentlyUsedFilenames(const StringArray& filenames);
+
 private:
 
     ScopedPointer<DataViewport> dataViewport;
