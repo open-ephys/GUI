@@ -40,7 +40,7 @@ GenericEditor::GenericEditor(GenericProcessor* owner, bool useDefaultParameterEd
     : AudioProcessorEditor(owner),
       desiredWidth(150), isFading(false), accumulator(0.0), acquisitionIsActive(false),
       drawerButton(0), channelSelector(0),drawerWidth(170),
-      isSelected(false),  isEnabled(true), isCollapsed(false), tNum(-1)
+      isSelected(false),  isEnabled(true), isCollapsed(false), tNum(-1), drawerOpen(false)
 {
     constructorInitialize(owner, useDefaultParameterEditors);
 }
@@ -410,6 +410,7 @@ bool GenericEditor::checkDrawerButton(Button* button)
             drawerWidth = channelSelector->getDesiredWidth() + 20;
 
             desiredWidth += drawerWidth;
+            drawerOpen = true;
 
         }
         else
@@ -418,6 +419,7 @@ bool GenericEditor::checkDrawerButton(Button* button)
             channelSelector->setVisible(false);
 
             desiredWidth -= drawerWidth;
+            drawerOpen = false;
         }
 
         getEditorViewport()->makeEditorVisible(this);
@@ -583,7 +585,10 @@ void GenericEditor::switchCollapsedState()
         }
 
         if (channelSelector != nullptr)
-            channelSelector->setVisible(false); // either way, we don't want the CS in there
+        {
+            if (!drawerOpen)
+                channelSelector->setVisible(false);
+        }
 
         collapsedStateChanged();
 

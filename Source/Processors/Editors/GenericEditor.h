@@ -267,6 +267,9 @@ protected:
     /** Determines the width of the ChannelSelector drawer when opened. */
     int drawerWidth;
 
+    /** Saves the open/closed state of the ChannelSelector drawer. */
+    bool drawerOpen;
+
 
     /** Can be overridden to customize the layout of ParameterEditors. */
     //Ideally this would be virtual, but since it's run in the construct and because virtual functions don't get overriden in the constructor, it's not.
