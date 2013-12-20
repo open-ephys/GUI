@@ -122,7 +122,7 @@ bool ProcessorList::isOpen()
     return baseItem->isOpen();
 }
 
-void ProcessorList::paintCanvas(Graphics& g)
+void ProcessorList::paint(Graphics& g)
 {
 
     drawItems(g);
@@ -273,7 +273,7 @@ void ProcessorList::clearSelectionState()
 
 ProcessorListItem* ProcessorList::getListItemForYPos(int y)
 {
-    int bottom = (yBuffer + itemHeight) - getScrollAmount();
+    int bottom = (yBuffer + itemHeight); // - getScrollAmount();
 
     //std::cout << "Bottom: " << bottom << std::endl;
     //std::cout << "Y coordinate: " << y << std::endl;
@@ -354,7 +354,7 @@ void ProcessorList::toggleState()
     repaint();
 }
 
-void ProcessorList::mouseDownInCanvas(const MouseEvent& e)
+void ProcessorList::mouseDown(const MouseEvent& e)
 {
 
     isDragging = false;
@@ -365,15 +365,15 @@ void ProcessorList::mouseDownInCanvas(const MouseEvent& e)
 
     //std::cout << xcoord << " " << ycoord << std::endl;
 
-    ProcessorListItem* fli = getListItemForYPos(ycoord);
+    ProcessorListItem* listItem = getListItemForYPos(ycoord);
 
-    if (fli != 0)
+    if (listItem != 0)
     {
         //std::cout << "Selecting: " << fli->getName() << std::endl;
-        if (!fli->hasSubItems())
+        if (!listItem->hasSubItems())
         {
             clearSelectionState();
-            fli->setSelected(true);
+            listItem->setSelected(true);
         }
 
     }
@@ -382,26 +382,26 @@ void ProcessorList::mouseDownInCanvas(const MouseEvent& e)
         //std::cout << "No selection." << std::endl;
     }
 
-    if (fli != 0)
+    if (listItem != 0)
     {
-        if (xcoord < getWidth() - getScrollBarWidth())
+        if (xcoord < getWidth())
         {
             if (e.mods.isRightButtonDown() || e.mods.isCtrlDown())
             {
 
-                if (fli->getName().equalsIgnoreCase("Sources"))
+                if (listItem->getName().equalsIgnoreCase("Sources"))
                 {
                     currentColor = SOURCE_COLOR;
                 }
-                else if (fli->getName().equalsIgnoreCase("Filters"))
+                else if (listItem->getName().equalsIgnoreCase("Filters"))
                 {
                     currentColor = FILTER_COLOR;
                 }
-                else if (fli->getName().equalsIgnoreCase("Utilities"))
+                else if (listItem->getName().equalsIgnoreCase("Utilities"))
                 {
                     currentColor = UTILITY_COLOR;
                 }
-                else if (fli->getName().equalsIgnoreCase("Sinks"))
+                else if (listItem->getName().equalsIgnoreCase("Sinks"))
                 {
                     currentColor = SINK_COLOR;
                 }
@@ -435,13 +435,13 @@ void ProcessorList::mouseDownInCanvas(const MouseEvent& e)
             }
             else
             {
-                fli->reverseOpenState();
+                listItem->reverseOpenState();
             }
         }
 
-        if (fli == baseItem)
+        if (listItem == baseItem)
         {
-            if (fli->isOpen())
+            if (listItem->isOpen())
             {
                 getUIComponent()->childComponentChanged();
             }
@@ -467,24 +467,24 @@ void ProcessorList::changeListenerCallback(ChangeBroadcaster* source)
 
 }
 
-void ProcessorList::mouseDragInCanvas(const MouseEvent& e)
+void ProcessorList::mouseDrag(const MouseEvent& e)
 {
 
-    if (e.getMouseDownX() < getWidth()-getScrollBarWidth() && !(isDragging))
+    if (e.getMouseDownX() < getWidth() && !(isDragging))
     {
 
-        ProcessorListItem* fli = getListItemForYPos(e.getMouseDownY());
+        ProcessorListItem* listItem = getListItemForYPos(e.getMouseDownY());
 
-        if (fli != 0)
+        if (listItem != 0)
         {
 
-            if (!fli->hasSubItems())
+            if (!listItem->hasSubItems())
             {
                 isDragging = true;
 
-                String b = fli->getParentName();
+                String b = listItem->getParentName();
                 b += "/";
-                b += fli->getName();
+                b += listItem->getName();
 
                 const String dragDescription = b;
 
@@ -502,11 +502,11 @@ void ProcessorList::mouseDragInCanvas(const MouseEvent& e)
                         Image dragImage(Image::ARGB, 100, 15, true);
 
                         Graphics g(dragImage);
-                        g.setColour(findColour(fli->colorId));
+                        g.setColour(findColour(listItem->colorId));
                         g.fillAll();
                         g.setColour(Colours::white);
                         g.setFont(14);
-                        g.drawSingleLineText(fli->getName(),10,12);//,75,15,Justification::centredRight,true);
+                        g.drawSingleLineText(listItem->getName(),10,12);//,75,15,Justification::centredRight,true);
 
                         dragImage.multiplyAllAlphas(0.6f);
 
