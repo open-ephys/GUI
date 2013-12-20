@@ -48,6 +48,7 @@ public:
 	void refreshAnalogDevices();
     void buttonEvent(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
+    void collapsedStateChanged();
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;

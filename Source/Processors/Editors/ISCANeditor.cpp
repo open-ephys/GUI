@@ -126,6 +126,11 @@ void ISCANeditor::refreshDevices()
 	deviceList->addItemList(devices,1);
 }
 
+void ISCANeditor::collapsedStateChanged()
+{
+    buttonEvent(communication);
+}
+
 void ISCANeditor::buttonEvent(Button* button)
 {
 	ISCANnode *processor  = (ISCANnode*) getProcessor();
