@@ -518,25 +518,27 @@ void SignalChainManager::updateVisibleEditors(GenericEditor* activeEditor,
             GenericEditor* source = signalChainArray[n]->getEditor();
             GenericProcessor* p = source->getProcessor();
 
-            p->update();
+          //  p->update();
 
-            if (p->isSplitter())
-            {
-                splitters.add(p);
-            }
+          //  GenericProcessor* dest = p->getDestNode();
 
-            GenericProcessor* dest = p->getDestNode();
-
-            while (dest != 0)
+            while (p != 0)
             {
                 // iterate through processors
-                dest->update();
-                dest = dest->getDestNode();
+                p->update();
 
-                if (dest == 0 && splitters.size() > 0)
+                if (p->isSplitter())
                 {
-                    splitters.getFirst()->switchIO();
-                    dest = splitters[0]->getDestNode();
+                    splitters.add(p);
+                }
+
+                p = p->getDestNode();
+
+                if (p == 0 && splitters.size() > 0)
+                {
+                    splitters.getFirst()->switchIO(); // switch the signal chain
+                    p = splitters[0]->getDestNode();
+                    splitters.getFirst()->switchIO(); // switch it back
                     splitters.remove(0);
                 }
             }

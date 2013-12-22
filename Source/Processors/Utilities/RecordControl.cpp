@@ -50,38 +50,45 @@ void RecordControl::updateSettings()
 
 	int numExistingNames = names.size();
 	int numNewNames = getNumInputs();
-	if (numNewNames >= numExistingNames)
-	{
-		// keep existing changes.
-		StringArray oldnames = names;
-		names.clear();
-		for (int k=0;k<getNumInputs();k++)
-		{
-			if (k < numExistingNames)
-			{
-				channels[k]->setName(oldnames[k]);
-				recordNode->updateChannelName(k, oldnames[k]);
-				names.add(oldnames[k]);
-			}
-			else
-				names.add(channels[k]->getName());
-		}
-	} else
-	{
-		// just chop off , but keep names.
-		// keep existing changes.
-		StringArray oldnames = names;
-		names.clear();
-		for (int k=0;k<getNumInputs();k++)
-		{
-				channels[k]->setName(oldnames[k]);
-				recordNode->updateChannelName(k, oldnames[k]);
-				names.add(oldnames[k]);
-		}
-	}
+
+    names.clear();
+    for (int k = 0; k < getNumInputs(); k++)
+    {
+        names.add(channels[k]->getName());
+    }
+
+	// if (numNewNames >= numExistingNames)
+	// {
+	// 	// keep existing changes.
+	// 	StringArray oldnames = names;
+	// 	names.clear();
+	// 	for (int k = 0; k < getNumInputs(); k++)
+	// 	{
+	// 		if (k < numExistingNames)
+	// 		{
+	// 			channels[k]->setName(oldnames[k]);
+	// 			recordNode->updateChannelName(k, oldnames[k]);
+	// 			names.add(oldnames[k]);
+	// 		}
+	// 		else
+	// 			names.add(channels[k]->getName());
+	// 	}
+	// } else
+	// {
+	// 	// just chop off , but keep names.
+	// 	// keep existing changes.
+	// 	StringArray oldnames = names;
+	// 	names.clear();
+	// 	for (int k = 0; k < getNumInputs();k++)
+	// 	{
+	// 			channels[k]->setName(oldnames[k]);
+	// 			recordNode->updateChannelName(k, oldnames[k]);
+	// 			names.add(oldnames[k]);
+	// 	}
+	// }
 
 	const MessageManagerLock mmLock;
-	RecordControlEditor *ed = (RecordControlEditor *)getEditor();
+	RecordControlEditor *ed = (RecordControlEditor*) getEditor();
 	if (ed != nullptr)
 		ed->updateNames();
 }

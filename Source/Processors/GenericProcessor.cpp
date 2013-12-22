@@ -293,7 +293,7 @@ void GenericProcessor::update()
 
 	int oldNumChannels = channels.size();
 	StringArray oldNames;
-	for (int k=0;k<oldNumChannels;k++)
+	for (int k = 0; k < oldNumChannels; k++)
 	{
 		oldNames.add(channels[k]->getName());
 	}
@@ -343,18 +343,29 @@ void GenericProcessor::update()
         {
             Channel* ch = new Channel(this, i );
 
-			if (i < oldNumChannels)
-				ch->setName(oldNames[i]);
+			//if (i < oldNumChannels)
+			//	ch->setName(oldNames[i]);
 
-			else if (i >= numChan-numADC_Chan) 
-				ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+			//else if (i >= numChan-numADC_Chan) 
+			//	ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
 
-			if (i >= numChan-numADC_Chan) {
-				ch->isADCchannel = true;
-			}
+			//if (i >= numChan-numADC_Chan) {
+			//	ch->isADCchannel = true;
+			//}
+
+            if (i >= numChan-numADC_Chan) 
+              ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+
+            if (i >= numChan-numADC_Chan)
+              ch->isADCchannel = true;
+            
 
             ch->sampleRate = getDefaultSampleRate();
-            ch->bitVolts = getDefaultBitVolts();
+
+          //  if (ch->isADCchannel)
+                ch->bitVolts = getDefaultBitVolts();
+          //  else
+          //      ch->bitVolts = getDefaultAdcBitVolts(); // should implement this
 
              if (i < recordStatus.size())
             {

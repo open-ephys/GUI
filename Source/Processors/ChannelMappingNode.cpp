@@ -73,8 +73,8 @@ void ChannelMappingNode::updateSettings()
 		previousChannelCount = getNumInputs();
 		if (editorIsConfigured)
 		{
-			j=0;
-			for (int i=0; i < getNumInputs(); i++)
+			j = 0;
+			for (int i = 0; i < getNumInputs(); i++)
 			{
 				if (enabledChannelArray[i])
 				{
@@ -85,13 +85,13 @@ void ChannelMappingNode::updateSettings()
 					channels.remove(j);
 				}
 			}
-			settings.numOutputs=j;
+			settings.numOutputs = j;
 		}
 	}
 	else
 	{
-		j=0;
-		for (int i=0; i < getNumInputs(); i++)
+		j = 0;
+		for (int i = 0; i < getNumInputs(); i++)
 		{
 			if (enabledChannelArray[i])
 			{
