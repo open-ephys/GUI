@@ -596,7 +596,7 @@ Array<Colour> ProcessorList::getColours()
     c.add(findColour(FILTER_COLOR));
     c.add(findColour(SINK_COLOR));
     c.add(findColour(UTILITY_COLOR));
-
+	return c;
 }
 
 void ProcessorList::setColours(Array<Colour> c)
