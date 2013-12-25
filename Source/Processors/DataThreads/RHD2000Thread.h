@@ -74,6 +74,8 @@ public:
     double setLowerBandwidth(double lower);
     
     int setNoiseSlicerLevel(int level);
+	void setFastTTLSettle(bool state, int channel);
+	void setTTLoutputMode(bool state);
 
     void scanPorts();
 

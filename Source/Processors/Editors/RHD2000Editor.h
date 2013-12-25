@@ -46,7 +46,7 @@ class UtilityButton;
 */
 
 
-class RHD2000Editor : public GenericEditor
+class RHD2000Editor : public GenericEditor, public ComboBox::Listener
 
 {
 public:
@@ -56,7 +56,8 @@ public:
     void buttonEvent(Button* button);
 
     void scanPorts();
-
+	   void comboBoxChanged(ComboBox* comboBox);
+ 
     void startAcquisition();
     void stopAcquisition();
 
@@ -75,10 +76,12 @@ private:
 
     ScopedPointer<AudioInterface> audioInterface;
 
-    ScopedPointer<UtilityButton> rescanButton;
+    ScopedPointer<UtilityButton> rescanButton,dacTTLButton;
     ScopedPointer<UtilityButton> adcButton;
+	ScopedPointer<ComboBox> ttlSettleCombo;
 
-    ScopedPointer<Label> audioLabel;
+
+    ScopedPointer<Label> audioLabel,ttlSettleLabel;
 
     RHD2000Thread* board;
 

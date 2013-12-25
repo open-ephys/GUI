@@ -1067,6 +1067,14 @@ void Rhd2000EvalBoard::setDacGain(int gain)
     dev->UpdateWireIns();
 }
 
+// determine whether a voltage crossing on the DAC channels results in a ttl pulse on the digital lines out
+// (useful for real time spike detection)
+void Rhd2000EvalBoard::setDACthresholdTTLstate(bool state)
+{
+   dev->SetWireInValue(WireInResetRun, (state ? 0x08 : 0x00), 0x8);
+   dev->UpdateWireIns();
+}
+
 // Suppress the noise on DAC channels 0 and 1 (the audio channels) between
 // +16*noiseSuppress and -16*noiseSuppress LSBs.  (noiseSuppress = 0-127).
 void Rhd2000EvalBoard::setAudioNoiseSuppress(int noiseSuppress)
@@ -1123,6 +1131,27 @@ void Rhd2000EvalBoard::selectDacDataStream(int dacChannel, int stream)
             dev->SetWireInValue(WireInDacSource8, stream << 5, 0x01e0);
             break;
     }
+    dev->UpdateWireIns();
+}
+
+void Rhd2000EvalBoard::setFastSettleByTTL(bool state)
+{
+
+    dev->SetWireInValue(WireInResetRun, (state ? 0x16 : 0x00), 0x16);
+
+    dev->UpdateWireIns();
+}
+
+void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
+{
+  if (channel < 0 || channel > 7)
+    {
+        cerr << "Error in Rhd2000EvalBoard::setFastSettleByTTLchannel: channel out of range." << endl;
+        return;
+    }
+// the WireInTTLSettleChannel is also used by DAC, so keep the values of 10 used bits
+ // and shift the channel value 10 bits to the left
+	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x03ff);
     dev->UpdateWireIns();
 }
 

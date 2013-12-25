@@ -145,9 +145,13 @@ public:
 
     void enableDac(int dacChannel, bool enabled);
     void setDacGain(int gain);
-    void setAudioNoiseSuppress(int noiseSuppress);
+	void setDACthresholdTTLstate(bool state);
+	void setAudioNoiseSuppress(int noiseSuppress);
     void selectDacDataStream(int dacChannel, int stream);
     void selectDacDataChannel(int dacChannel, int dataChannel);
+
+	void setFastSettleByTTL(bool state);
+	void setFastSettleByTTLchannel(int channel);
 
     void flush();
     bool readDataBlock(Rhd2000DataBlock* dataBlock);
@@ -200,6 +204,7 @@ private:
         WireInDacSource8 = 0x1d,
         WireInDacManual1 = 0x1e,
         WireInDacManual2 = 0x1f,
+		WireInTTLSettleChannel   = 0x16,
 
         TrigInDcmProg = 0x40,
         TrigInSpiStart = 0x41,

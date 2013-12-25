@@ -662,6 +662,17 @@ double RHD2000Thread::setLowerBandwidth(double lower)
     return actualLowerBandwidth;
 }
 
+void RHD2000Thread::setTTLoutputMode(bool state)
+{
+	evalBoard->setDACthresholdTTLstate(state);
+}
+
+void RHD2000Thread::setFastTTLSettle(bool state, int channel)
+{
+	evalBoard->setFastSettleByTTL(state);
+	evalBoard->setFastSettleByTTLchannel(channel);
+}
+
 int RHD2000Thread::setNoiseSlicerLevel(int level)
 {
     desiredNoiseSlicerLevel = level;
@@ -752,6 +763,7 @@ void RHD2000Thread::enableAdcs(bool t)
     dataBuffer->resize(getNumChannels(), 10000);
 
 }
+
 
 void RHD2000Thread::setSampleRate(int sampleRateIndex, bool isTemporary)
 {

@@ -55,7 +55,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     depthOffsetLabel = new Label("Depth Offset","Depth Offset");
 	depthOffsetLabel->setFont(Font("Default", 10, Font::plain));
     depthOffsetLabel->setEditable(false);
-    depthOffsetLabel->setBounds(140,115,80,20);
+    depthOffsetLabel->setBounds(125,115,80,20);
 	depthOffsetLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(depthOffsetLabel);
 
@@ -124,7 +124,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     addAndMakeVisible(configButton);
 
 	thresholdSlider = new ThresholdSlider(font);
-    thresholdSlider->setBounds(200,35,75,75);
+    thresholdSlider->setBounds(210,25,75,75);
     addAndMakeVisible(thresholdSlider);
     thresholdSlider->addListener(this);
     thresholdSlider->setActive(false);
@@ -134,7 +134,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     thresholdLabel = new Label("Name","Threshold");
     font.setHeight(10);
     thresholdLabel->setFont(font);
-    thresholdLabel->setBounds(202, 105, 95, 15);
+    thresholdLabel->setBounds(208, 95, 95, 15);
     thresholdLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(thresholdLabel);
 

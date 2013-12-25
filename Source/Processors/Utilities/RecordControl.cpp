@@ -50,6 +50,7 @@ void RecordControl::updateSettings()
 
 	int numExistingNames = names.size();
 	int numNewNames = getNumInputs();
+	StringArray oldnames = names;
 
     names.clear();
     for (int k = 0; k < getNumInputs(); k++)
@@ -60,7 +61,6 @@ void RecordControl::updateSettings()
 	if (numNewNames >= numExistingNames)
 	{
 		// keep existing changes.
-		StringArray oldnames = names;
 		names.clear();
 		for (int k = 0; k < getNumInputs(); k++)
 		{

@@ -34,7 +34,7 @@ RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
                             )
     : GenericEditor(parentNode, useDefaultParameterEditors), board(board_)
 {
-    desiredWidth = 260;
+    desiredWidth = 330;
 
     // add headstage-specific controls (currently just an enable/disable button)
     for (int i = 0; i < 4; i++)
@@ -105,6 +105,32 @@ RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
     adcButton->setTooltip("Enable/disable ADC channels");
     addAndMakeVisible(adcButton);
 
+    ttlSettleLabel = new Label("TTL Settle","TTL Settle");
+	ttlSettleLabel->setFont( Font("Small Text", 11, Font::plain));
+    ttlSettleLabel->setBounds(240,80,100,20);
+    ttlSettleLabel->setColour(Label::textColourId, Colours::darkgrey);
+    addAndMakeVisible(ttlSettleLabel);
+
+    
+	ttlSettleCombo = new ComboBox("FastSettleComboBox");
+    ttlSettleCombo->setBounds(250,100,60,18);
+    ttlSettleCombo->addListener(this);
+	ttlSettleCombo->addItem("-",1);
+	for (int k=0; k<8; k++)
+	{
+		ttlSettleCombo->addItem("TTL"+String(1+k),2+k);
+	}
+	ttlSettleCombo->setSelectedId(1,true);
+    addAndMakeVisible(ttlSettleCombo);
+
+	dacTTLButton = new UtilityButton("DAC TTL", Font("Small Text", 13, Font::plain));
+    dacTTLButton->setRadius(3.0f);
+    dacTTLButton->setBounds(250,40,65,18);
+    dacTTLButton->addListener(this);
+    dacTTLButton->setClickingTogglesState(true);
+    dacTTLButton->setTooltip("Enable/disable DAC Threshold TTL Output");
+    addAndMakeVisible(dacTTLButton);
+
 
 }
 
@@ -117,6 +143,22 @@ void RHD2000Editor::scanPorts()
 {
     rescanButton->triggerClick();
 }
+
+void RHD2000Editor::comboBoxChanged(ComboBox* comboBox)
+{
+	if (comboBox == ttlSettleCombo)
+	{
+		int selectedChannel = ttlSettleCombo->getSelectedId();
+		if (selectedChannel == 1)
+		{
+			board->setFastTTLSettle(false,0);
+		} else
+		{
+			board->setFastTTLSettle(true,selectedChannel-2);
+		}
+	}
+}
+ 
 
 void RHD2000Editor::buttonEvent(Button* button)
 {
@@ -143,7 +185,10 @@ void RHD2000Editor::buttonEvent(Button* button)
     {
         board->enableAdcs(button->getToggleState());
         getEditorViewport()->makeEditorVisible(this, false, true);
-    }
+    } else if (button == dacTTLButton)
+	{
+		board->setTTLoutputMode(dacTTLButton->getToggleState());
+	}
 
 }
 
@@ -194,7 +239,10 @@ void RHD2000Editor::saveCustomParameters(XmlElement* xml)
      xml->setAttribute("AudioOutputL", electrodeButtons[0]->getChannelNum());
      xml->setAttribute("AudioOutputR", electrodeButtons[1]->getChannelNum());
      xml->setAttribute("NoiseSlicer", audioInterface->getNoiseSlicerLevel());
+	 xml->setAttribute("TTLFastSettle", ttlSettleCombo->getSelectedId());
+	 xml->setAttribute("DAC_TTL", dacTTLButton->getToggleState());
 
+	 
 }
 
 void RHD2000Editor::loadCustomParameters(XmlElement* xml)
@@ -209,6 +257,8 @@ void RHD2000Editor::loadCustomParameters(XmlElement* xml)
     electrodeButtons[1]->setChannelNum(xml->getIntAttribute("AudioOutputR"));
     board->assignAudioOut(1, xml->getIntAttribute("AudioOutputR"));
     audioInterface->setNoiseSlicerLevel(xml->getIntAttribute("NoiseSlicer"));
+	ttlSettleCombo->setSelectedId(xml->getIntAttribute("TTLFastSettle"), true);
+	dacTTLButton->setToggleState(xml->getBoolAttribute("DAC_TTL"),true);
 
 }
 
