@@ -1151,7 +1151,7 @@ void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
     }
 // the WireInTTLSettleChannel is also used by DAC, so keep the values of 10 used bits
  // and shift the channel value 10 bits to the left
-	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x03ff);
+	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x3c00);
     dev->UpdateWireIns();
 }
 
