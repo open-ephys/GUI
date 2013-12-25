@@ -96,14 +96,17 @@ public:
     bool isRunning() const;
     unsigned int numWordsInFifo() const;
     static unsigned int fifoCapacityInWords();
-
+	void setDacThreshold(int dacChannel, int threshold, bool trigPolarity);
+	void enableDacHighpassFilter(bool enable);
+	void setDacHighpassFilter(double cutoff);
     void setCableDelay(BoardPort port, int delay);
     void setCableLengthMeters(BoardPort port, double lengthInMeters);
     void setCableLengthFeet(BoardPort port, double lengthInFeet);
     double estimateCableLengthMeters(int delay) const;
     double estimateCableLengthFeet(int delay) const;
-
+	void setTtlMode(int mode);
     void setDspSettle(bool enabled);
+	int getBoardMode();
 
     enum BoardDataSource
     {
@@ -145,7 +148,6 @@ public:
 
     void enableDac(int dacChannel, bool enabled);
     void setDacGain(int gain);
-	void setDACthresholdTTLstate(bool state);
 	void setAudioNoiseSuppress(int noiseSuppress);
     void selectDacDataStream(int dacChannel, int stream);
     void selectDacDataChannel(int dacChannel, int dataChannel);
@@ -205,16 +207,19 @@ private:
         WireInDacManual1 = 0x1e,
         WireInDacManual2 = 0x1f,
 		WireInTTLSettleChannel   = 0x16,
-
+        WireInMultiUse = 0x1f,
         TrigInDcmProg = 0x40,
         TrigInSpiStart = 0x41,
         TrigInRamWrite = 0x42,
+        TrigInDacThresh = 0x43,
+        TrigInDacHpf = 0x44,
 
         WireOutNumWordsLsb = 0x20,
         WireOutNumWordsMsb = 0x21,
         WireOutSpiRunning = 0x22,
         WireOutTtlIn = 0x23,
         WireOutDataClkLocked = 0x24,
+        WireOutBoardMode = 0x25,
         WireOutBoardId = 0x3e,
         WireOutBoardVersion = 0x3f,
 

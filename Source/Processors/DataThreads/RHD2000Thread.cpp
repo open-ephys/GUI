@@ -664,7 +664,7 @@ double RHD2000Thread::setLowerBandwidth(double lower)
 
 void RHD2000Thread::setTTLoutputMode(bool state)
 {
-	evalBoard->setDACthresholdTTLstate(state);
+	evalBoard->setTtlMode(state);
 }
 
 void RHD2000Thread::setFastTTLSettle(bool state, int channel)
