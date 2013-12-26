@@ -145,11 +145,7 @@ void ChannelMappingNode::process(AudioSampleBuffer& buffer,
 	// use copy constructor to set the data to refer to
 	channelBuffer = buffer;
 
-	//new buffer may have a different number of channels than at input
-	//AvoidRellocating set to true to avoid the huge cpu time needed to rellocate. That extra bit of memory is not a real problem.
-	buffer.setSize(settings.numOutputs,channelBuffer.getNumSamples(),false,false,true); 
 	buffer.clear();
-
 
 	while (j < settings.numOutputs)
 	{
