@@ -181,48 +181,5 @@ void ChannelMappingNode::process(AudioSampleBuffer& buffer,
 
 	}
 
-#if 0
-	for (int i = 0; i < buffer.getNumChannels(); i++)
-	{
-		realChan = channelArray[i];
-		if ((realChan < channelBuffer.getNumChannels()) && (enabledChannelArray[realChan]))
-		{
-			buffer.addFrom(j, // destChannel
-				0, // destStartSample
-				channelBuffer, // source
-				realChan, // sourceChannel
-				0, // sourceStartSample
-				nSamples, // numSamples
-				1.0f // gain to apply to source (positive for original signal)
-				);
-			j++;
-		}
-
-	}
-
-	j=0;
-	// now do the referencing
-	for (int i = 0; i < buffer.getNumChannels(); i++)
-	{
-		realChan = channelArray[i];
-		if ((realChan < channelBuffer.getNumChannels()) && (enabledChannelArray[realChan]))
-		{
-			if ((referenceArray[realChan] > -1) && referenceChannels[referenceArray[realChan]] > -1)
-			{
-
-				buffer.addFrom(j, // destChannel
-					0, // destStartSample
-					channelBuffer, // source
-					referenceChannels[referenceArray[realChan]], // sourceChannel
-					0, // sourceStartSample
-					nSamples, // numSamples
-					-1.0f // gain to apply to source (negative for reference)
-					);
-			}
-			j++;
-		}
-	}
-#endif
-
 }
 
