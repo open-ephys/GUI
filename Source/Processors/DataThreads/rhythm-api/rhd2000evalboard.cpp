@@ -48,9 +48,11 @@ Rhd2000EvalBoard::Rhd2000EvalBoard()
         dataStreamEnabled[i] = 0;
     }
 	dacChannelAssignment = new int[8];
+	dacChannelThreshold = new float[8];
 	for (int k=0;k<8;k++)
 	{
 		dacChannelAssignment[k] = -1;
+		dacChannelThreshold[k] =0;
 	}
 }
 
@@ -1274,7 +1276,16 @@ void Rhd2000EvalBoard::setDacThresholdVoltage(int dacChannel, float voltage_thre
 
 }
 
-void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigPolarity)
+void Rhd2000EvalBoard::getDacInformation(int *ch, float *th)
+{
+	for (int k=0;k<8;k++)
+	{
+		ch[k] = dacChannelAssignment[k];
+		th[k] = dacChannelThreshold[k];
+	}
+}
+
+void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigPolarityPositive)
 {
     if (dacChannel < 0 || dacChannel > 7) {
         cerr << "Error in Rhd2000EvalBoard::setDacThreshold: dacChannel out of range." << endl;
@@ -1285,6 +1296,7 @@ void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigP
         cerr << "Error in Rhd2000EvalBoard::setDacThreshold: threshold out of range." << endl;
         return;
     }
+	dacChannelThreshold[dacChannel] = trigPolarityPositive? -(float)(threshold-32768)*0.195 : (float)(threshold-32768)*0.195;
 
     // Set threshold level.
     dev->SetWireInValue(WireInMultiUse, threshold);
@@ -1292,7 +1304,7 @@ void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigP
     dev->ActivateTriggerIn(TrigInDacThresh, dacChannel);
 
     // Set threshold polarity.
-    dev->SetWireInValue(WireInMultiUse, (trigPolarity ? 1 : 0));
+    dev->SetWireInValue(WireInMultiUse, (trigPolarityPositive ? 1 : 0));
     dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInDacThresh, dacChannel + 8);
 }

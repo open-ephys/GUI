@@ -32,6 +32,8 @@
 #include "NetworkEvents.h"
 #include "Visualization/SpikeObject.h"
 #include "AdvancerNode.h"
+#include "SourceNode.h"
+#include "DataThreads/RHD2000Thread.h"
 #include <algorithm>    // std::sort
 #include <queue>
 #include <stdlib.h>
@@ -325,6 +327,8 @@ private:
     void resetElectrode(Electrode*);
 	CriticalSection mut;
 	bool autoDACassignment;
+	RHD2000Thread* getRhythmAccess();
+
 
 
    void addWaveformToSpikeObject(SpikeObject* s,

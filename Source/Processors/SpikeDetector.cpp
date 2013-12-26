@@ -27,8 +27,6 @@
 #include "Visualization/SpikeDetectCanvas.h"
 #include "Channel.h"
 #include "SpikeDisplayNode.h"
-#include "SourceNode.h"
-#include "DataThreads/RHD2000Thread.h"
 #include "PeriStimulusTimeHistogramNode.h"
 class spikeSorter;
 
@@ -280,24 +278,37 @@ void SpikeDetector::removeUnit(int electrodeID, int unitID)
 	
 }
 
+RHD2000Thread* SpikeDetector::getRhythmAccess()
+{
+
+	ProcessorGraph *gr = getProcessorGraph();
+	Array<GenericProcessor*> p = gr->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Rhythm FPGA")
+		{
+			SourceNode* src = (SourceNode* )p[k];
+			return (RHD2000Thread*)src->getThread();
+		}
+	}
+	return nullptr;
+}
+
 void SpikeDetector::updateDACthreshold(int dacChannel, float threshold)
 {
-	SourceNode* src =(SourceNode* ) getSourceNode();
-	if (src->getName() == "Rhythm FPGA")
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
 	{
-		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
 		th->setDACthreshold(dacChannel,threshold);
 	}
-
 }
 
 Array<int> SpikeDetector::getDACassignments()
 {
 	Array<int> dacChannels ;
-	SourceNode* src =(SourceNode* ) getSourceNode();
-	if (src->getName() == "Rhythm FPGA")
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
 	{
-		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
 		dacChannels = th->getDACchannels();
 	}
 	return dacChannels;
@@ -305,10 +316,9 @@ Array<int> SpikeDetector::getDACassignments()
 
 int SpikeDetector::getDACassignment(int dacchannel)
 {
-	SourceNode* src =(SourceNode* ) getSourceNode();
-	if (src->getName() == "Rhythm FPGA")
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
 	{
-		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
 		Array<int> dacChannels = th->getDACchannels();
 		return dacChannels[dacchannel];
 	}
@@ -320,10 +330,9 @@ void SpikeDetector::assignDACtoChannel(int dacOutput, int channel)
 {
 	// inform sinks about a new unit
 	//getSourceNode()
-	SourceNode* src =(SourceNode* ) getSourceNode();
-	if (src->getName() == "Rhythm FPGA")
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
 	{
-		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
 		th->setDACchannel(dacOutput, channel);
 	}
 }

@@ -145,7 +145,9 @@ private:
     double cableLengthPortA, cableLengthPortB, cableLengthPortC, cableLengthPortD;
 
     int audioOutputL, audioOutputR;
-
+	int *dacChannels;
+	float *dacThresholds;
+	bool *dacChannelsToUpdate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Thread);
 };

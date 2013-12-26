@@ -108,6 +108,7 @@ public:
 	void setTtlMode(int mode);
     void setDspSettle(bool enabled);
 	int getBoardMode();
+	void getDacInformation(int *ch, float *th);
 
     enum BoardDataSource
     {
@@ -171,6 +172,7 @@ private:
     int numDataStreams; // total number of data streams currently enabled
     int dataStreamEnabled[MAX_NUM_DATA_STREAMS]; // 0 (disabled) or 1 (enabled)
 	int *dacChannelAssignment;
+	float *dacChannelThreshold;
 
     // Buffer for reading bytes from USB interface
     unsigned char usbBuffer[USB_BUFFER_SIZE];
