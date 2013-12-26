@@ -107,7 +107,7 @@ RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
 
     ttlSettleLabel = new Label("TTL Settle","TTL Settle");
 	ttlSettleLabel->setFont( Font("Small Text", 11, Font::plain));
-    ttlSettleLabel->setBounds(240,80,100,20);
+    ttlSettleLabel->setBounds(245,80,100,20);
     ttlSettleLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(ttlSettleLabel);
 
@@ -125,11 +125,29 @@ RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
 
 	dacTTLButton = new UtilityButton("DAC TTL", Font("Small Text", 13, Font::plain));
     dacTTLButton->setRadius(3.0f);
-    dacTTLButton->setBounds(250,40,65,18);
+    dacTTLButton->setBounds(250,25,65,18);
     dacTTLButton->addListener(this);
     dacTTLButton->setClickingTogglesState(true);
     dacTTLButton->setTooltip("Enable/disable DAC Threshold TTL Output");
     addAndMakeVisible(dacTTLButton);
+
+    dacHPFlabel = new Label("DAC HPF","DAC HPF");
+	dacHPFlabel->setFont( Font("Small Text", 11, Font::plain));
+    dacHPFlabel->setBounds(250,42,100,20);
+    dacHPFlabel->setColour(Label::textColourId, Colours::darkgrey);
+    addAndMakeVisible(dacHPFlabel);
+
+	dacHPFcombo = new ComboBox("dacHPFCombo");
+    dacHPFcombo->setBounds(250,60,60,18);
+    dacHPFcombo->addListener(this);
+	dacHPFcombo->addItem("OFF",1);
+	int HPFvalues[10] = {50,100,200,300,400,500,600,700,800,900};
+	for (int k=0; k<10; k++)
+	{
+		dacHPFcombo->addItem(String(HPFvalues[k])+" Hz",2+k);
+	}
+	dacHPFcombo->setSelectedId(1,true);
+    addAndMakeVisible(dacHPFcombo);
 
 
 }
@@ -155,6 +173,17 @@ void RHD2000Editor::comboBoxChanged(ComboBox* comboBox)
 		} else
 		{
 			board->setFastTTLSettle(true,selectedChannel-2);
+		}
+	} else if (comboBox == dacHPFcombo)
+	{
+		int selection = dacHPFcombo->getSelectedId();
+		if (selection == 1)
+		{
+			board->setDAChpf(100,false);
+		} else 
+		{
+			int HPFvalues[10] = {50,100,200,300,400,500,600,700,800,900};
+			board->setDAChpf(HPFvalues[selection-2],true);
 		}
 	}
 }

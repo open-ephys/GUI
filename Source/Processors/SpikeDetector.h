@@ -95,7 +95,7 @@ class Electrode
 
 		int electrodeID;
         int* channels;
-        double* thresholds;
+	    double* thresholds;
         bool* isActive;
 		SpikeHistogramPlot* spikePlot;
 		SpikeSortBoxes* spikeSort;
@@ -265,11 +265,16 @@ public:
 	void setElectrodeAdvancerOffset(int i, double v);
 	double getAdvancerPosition(int advancerID);
 	double getSelectedElectrodeDepth();
-
+	bool getAutoDacAssignmentStatus();
+	void seteAutoDacAssignment(bool status);
 	int getNumPreSamples();
 	int getNumPostSamples();
 	void setNumPreSamples(int numSamples);
 	void setNumPostSamples(int numSamples);
+	int getDACassignment(int channel);
+	void assignDACtoChannel(int dacOutput, int channel);
+	Array<int> getDACassignments();
+	void updateDACthreshold(int dacChannel, float threshold);
 
 	Array<Electrode*> getElectrodes();
 
@@ -319,8 +324,9 @@ private:
  
     void resetElectrode(Electrode*);
 	CriticalSection mut;
+	bool autoDACassignment;
 
-	private:
+
    void addWaveformToSpikeObject(SpikeObject* s,
                                   int& peakIndex,
                                   int& electrodeNumber,

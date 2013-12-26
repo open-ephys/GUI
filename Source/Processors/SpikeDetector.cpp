@@ -27,6 +27,8 @@
 #include "Visualization/SpikeDetectCanvas.h"
 #include "Channel.h"
 #include "SpikeDisplayNode.h"
+#include "SourceNode.h"
+#include "DataThreads/RHD2000Thread.h"
 #include "PeriStimulusTimeHistogramNode.h"
 class spikeSorter;
 
@@ -47,6 +49,7 @@ SpikeDetector::SpikeDetector()
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
 	channelBuffers=nullptr;
 	PCAbeforeBoxes = true;
+	autoDACassignment = true;
 }
 
 int SpikeDetector::getNumPreSamples()
@@ -59,6 +62,15 @@ int SpikeDetector::getNumPostSamples()
 	return numPostSamples;
 }
 
+bool SpikeDetector::getAutoDacAssignmentStatus()
+{
+	return autoDACassignment;
+}
+
+void SpikeDetector::seteAutoDacAssignment(bool status)
+{
+	autoDACassignment = status;
+}
 
 void SpikeDetector::setNumPreSamples(int numSamples)
 {
@@ -265,7 +277,57 @@ void SpikeDetector::removeUnit(int electrodeID, int unitID)
 	String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
 	addNetworkEventToQueue(StringTS(eventlog));
 	updateSinks( electrodeID,  unitID, 0,0,0,false);
+	
 }
+
+void SpikeDetector::updateDACthreshold(int dacChannel, float threshold)
+{
+	SourceNode* src =(SourceNode* ) getSourceNode();
+	if (src->getName() == "Rhythm FPGA")
+	{
+		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
+		th->setDACthreshold(dacChannel,threshold);
+	}
+
+}
+
+Array<int> SpikeDetector::getDACassignments()
+{
+	Array<int> dacChannels ;
+	SourceNode* src =(SourceNode* ) getSourceNode();
+	if (src->getName() == "Rhythm FPGA")
+	{
+		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
+		dacChannels = th->getDACchannels();
+	}
+	return dacChannels;
+}
+
+int SpikeDetector::getDACassignment(int dacchannel)
+{
+	SourceNode* src =(SourceNode* ) getSourceNode();
+	if (src->getName() == "Rhythm FPGA")
+	{
+		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
+		Array<int> dacChannels = th->getDACchannels();
+		return dacChannels[dacchannel];
+	}
+	
+	return -1; // not assigned
+}
+
+void SpikeDetector::assignDACtoChannel(int dacOutput, int channel)
+{
+	// inform sinks about a new unit
+	//getSourceNode()
+	SourceNode* src =(SourceNode* ) getSourceNode();
+	if (src->getName() == "Rhythm FPGA")
+	{
+		RHD2000Thread* th = (RHD2000Thread*)src->getThread();
+		th->setDACchannel(dacOutput, channel);
+	}
+}
+
 
 void SpikeDetector::updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove)
 {
@@ -1103,6 +1165,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode()-1);
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
+	mainNode->setAttribute("autoDACassignment",	autoDACassignment);
 
 
     XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
@@ -1162,6 +1225,9 @@ void SpikeDetector::loadCustomParametersFromXml()
 				currentElectrode = mainNode->getIntAttribute("activeElectrode");
 				numPreSamples = mainNode->getIntAttribute("numPreSamples");
 				numPostSamples = mainNode->getIntAttribute("numPostSamples");
+				autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
+				mainNode->setAttribute("autoDACassignment",	autoDACassignment);
+
 				forEachXmlChildElement(*mainNode, xmlNode)
 				{
 

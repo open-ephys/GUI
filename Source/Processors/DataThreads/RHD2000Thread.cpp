@@ -119,6 +119,34 @@ RHD2000Thread::~RHD2000Thread()
 
 }
 
+void RHD2000Thread::setDACthreshold(int dacOutput, float threshold)
+{
+	evalBoard->setDacThresholdVoltage(dacOutput,threshold);
+}
+
+void RHD2000Thread::setDACchannel(int dacOutput, int channel)
+{
+	if (channel < 0)
+	{
+		evalBoard->enableDac(dacOutput, false);
+	}
+	else
+	{
+		evalBoard->selectDacDataChannel(dacOutput,channel);
+		evalBoard->enableDac(dacOutput, true);
+	}
+}
+
+Array<int> RHD2000Thread::getDACchannels()
+{
+	Array<int> dacChannels;
+	for (int k=0; k<8; k++)
+	{
+		dacChannels.add(evalBoard->gecDacDataChannel(k));
+	}
+	return dacChannels;
+
+}
 bool RHD2000Thread::openBoard(String pathToLibrary)
 {
     int return_code = evalBoard->open(pathToLibrary.getCharPointer());
@@ -665,6 +693,12 @@ double RHD2000Thread::setLowerBandwidth(double lower)
 void RHD2000Thread::setTTLoutputMode(bool state)
 {
 	evalBoard->setTtlMode(state);
+}
+
+void RHD2000Thread::setDAChpf(float cutoff, bool enabled)
+{
+	evalBoard->setDacHighpassFilter(cutoff);
+	evalBoard->enableDacHighpassFilter(enabled);
 }
 
 void RHD2000Thread::setFastTTLSettle(bool state, int channel)

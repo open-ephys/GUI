@@ -96,6 +96,7 @@ public:
     bool isRunning() const;
     unsigned int numWordsInFifo() const;
     static unsigned int fifoCapacityInWords();
+	void setDacThresholdVoltage(int dacChannel, float voltage_threshold);
 	void setDacThreshold(int dacChannel, int threshold, bool trigPolarity);
 	void enableDacHighpassFilter(bool enable);
 	void setDacHighpassFilter(double cutoff);
@@ -152,6 +153,8 @@ public:
     void selectDacDataStream(int dacChannel, int stream);
     void selectDacDataChannel(int dacChannel, int dataChannel);
 
+	int gecDacDataChannel(int dacChannel);
+
 	void setFastSettleByTTL(bool state);
 	void setFastSettleByTTLchannel(int channel);
 
@@ -167,6 +170,7 @@ private:
     AmplifierSampleRate sampleRate;
     int numDataStreams; // total number of data streams currently enabled
     int dataStreamEnabled[MAX_NUM_DATA_STREAMS]; // 0 (disabled) or 1 (enabled)
+	int *dacChannelAssignment;
 
     // Buffer for reading bytes from USB interface
     unsigned char usbBuffer[USB_BUFFER_SIZE];

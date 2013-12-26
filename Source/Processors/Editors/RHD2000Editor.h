@@ -78,10 +78,10 @@ private:
 
     ScopedPointer<UtilityButton> rescanButton,dacTTLButton;
     ScopedPointer<UtilityButton> adcButton;
-	ScopedPointer<ComboBox> ttlSettleCombo;
+	ScopedPointer<ComboBox> ttlSettleCombo,dacHPFcombo;
 
 
-    ScopedPointer<Label> audioLabel,ttlSettleLabel;
+    ScopedPointer<Label> audioLabel,ttlSettleLabel,dacHPFlabel ;
 
     RHD2000Thread* board;
 

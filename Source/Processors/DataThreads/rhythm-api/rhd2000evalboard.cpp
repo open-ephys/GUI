@@ -47,6 +47,11 @@ Rhd2000EvalBoard::Rhd2000EvalBoard()
     {
         dataStreamEnabled[i] = 0;
     }
+	dacChannelAssignment = new int[8];
+	for (int k=0;k<8;k++)
+	{
+		dacChannelAssignment[k] = -1;
+	}
 }
 
 //Destructor: Deletes the device to avoid memory leak
@@ -281,7 +286,8 @@ void Rhd2000EvalBoard::initialize()
     setDacGain(0);
     setAudioNoiseSuppress(0);
 
-    setTtlMode(1);          // Digital outputs 0-7 are DAC comparators; 8-15 under manual control
+    setTtlMode(0);          // If 1 then Digital outputs 0-7 are DAC comparators; 8-15 under manual control
+							// by default, set to 0 (all are under manual control).
 
     setDacThreshold(0, 32768, true);
     setDacThreshold(1, 32768, true);
@@ -1157,6 +1163,13 @@ void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
     dev->UpdateWireIns();
 }
 
+int Rhd2000EvalBoard::gecDacDataChannel(int dacChannel)
+{
+	if (dacChannel < 0 || dacChannel > 7)
+		return -1;
+	return dacChannelAssignment[dacChannel];
+}
+
 // Assign a particular amplifier channel (0-31) to a DAC channel (0-7).
 void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
 {
@@ -1171,6 +1184,7 @@ void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
         cerr << "Error in Rhd2000EvalBoard::selectDacDataChannel: dataChannel out of range." << endl;
         return;
     }
+	dacChannelAssignment[dacChannel] = dataChannel;
 
     switch (dacChannel)
     {
@@ -1252,6 +1266,13 @@ void Rhd2000EvalBoard::setDacHighpassFilter(double cutoff)
 // To convert threshold in voltage to this range, use the following:
 //     int threshLevel = ((double) threshold / 0.195) + 32768;
 //    evalBoard->setDacThreshold(0, threshLevel, threshold >= 0);
+
+void Rhd2000EvalBoard::setDacThresholdVoltage(int dacChannel, float voltage_threshold)
+{
+     int threshLevel = (voltage_threshold / 0.195) + 32768;
+    setDacThreshold(0, abs(threshLevel), voltage_threshold >= 0);
+
+}
 
 void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigPolarity)
 {
