@@ -64,12 +64,14 @@ public:
     void saveCustomChannelParametersToXml(XmlElement* channelInfo, int channelNumber, bool isEventChannel);
 
     void loadCustomChannelParametersFromXml(XmlElement* channelInfo, bool isEventChannel);
-
+	
+	void setApplyOnADC(bool state);
 private:
 
     Array<double> lowCuts, highCuts;
     OwnedArray<Dsp::Filter> filters;
 
+	bool applyOnADC;
     double defaultLowCut;
     double defaultHighCut;
 
