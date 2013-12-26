@@ -270,8 +270,7 @@ void RHD2000Editor::saveCustomParameters(XmlElement* xml)
      xml->setAttribute("NoiseSlicer", audioInterface->getNoiseSlicerLevel());
 	 xml->setAttribute("TTLFastSettle", ttlSettleCombo->getSelectedId());
 	 xml->setAttribute("DAC_TTL", dacTTLButton->getToggleState());
-
-	 
+	 xml->setAttribute("DAC_HPF", dacHPFcombo->getSelectedId());	 
 }
 
 void RHD2000Editor::loadCustomParameters(XmlElement* xml)
@@ -286,9 +285,9 @@ void RHD2000Editor::loadCustomParameters(XmlElement* xml)
     electrodeButtons[1]->setChannelNum(xml->getIntAttribute("AudioOutputR"));
     board->assignAudioOut(1, xml->getIntAttribute("AudioOutputR"));
     audioInterface->setNoiseSlicerLevel(xml->getIntAttribute("NoiseSlicer"));
-	ttlSettleCombo->setSelectedId(xml->getIntAttribute("TTLFastSettle"), true);
+	ttlSettleCombo->setSelectedId(xml->getIntAttribute("TTLFastSettle"));
 	dacTTLButton->setToggleState(xml->getBoolAttribute("DAC_TTL"),true);
-
+	dacHPFcombo->setSelectedId(xml->getIntAttribute("DAC_HPF"));
 }
 
 
