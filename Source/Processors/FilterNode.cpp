@@ -300,6 +300,7 @@ void FilterNode::saveCustomChannelParametersToXml(XmlElement* channelInfo, int c
         XmlElement* channelParams = channelInfo->createNewChildElement("PARAMETERS");
         channelParams->setAttribute("highcut",highCuts[channelNumber]);
         channelParams->setAttribute("lowcut",lowCuts[channelNumber]);
+        channelParams->setAttribute("shouldFilter",shouldFilterChannel[channelNumber]);
     }
 
 }
@@ -317,6 +318,7 @@ void FilterNode::loadCustomChannelParametersFromXml(XmlElement* channelInfo, boo
             {
                 highCuts.set(channelNum, subNode->getDoubleAttribute("highcut",defaultHighCut));
                 lowCuts.set(channelNum, subNode->getDoubleAttribute("lowcut",defaultLowCut));
+                shouldFilterChannel.set(channelNum, subNode->getBoolAttribute("shouldFilter",true));
 
                 setFilterParameters(lowCuts[channelNum],
                                     highCuts[channelNum],

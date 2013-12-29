@@ -174,15 +174,26 @@ void FilterEditor::channelChanged(int chan)
 
 void FilterEditor::buttonEvent(Button* button)
 {
-    //std::cout << button->getRadioGroupId() << " " << button->getName() << std::endl;
 
     if (button == applyFilterOnADC)
     {
         FilterNode* fn = (FilterNode*) getProcessor();
-        //applyFilterOnADC->setToggleState(!applyFilterOnADC->getToggleState(),false);
         fn->setApplyOnADC(applyFilterOnADC->getToggleState());
-    }
 
+    } else if (button == applyFilterOnChan)
+    {
+        FilterNode* fn = (FilterNode*) getProcessor();
+
+        Array<int> chans = getActiveChannels();
+
+        for (int n = 0; n < chans.size(); n++)
+        {
+            float newValue = button->getToggleState() ? 1.0 : 0.0;
+
+            fn->setCurrentChannel(n);
+            fn->setParameter(2, newValue);
+        }
+    }
 }
 
 
