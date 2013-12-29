@@ -64,6 +64,7 @@ private:
     ScopedPointer<Label> highCutValue;
     ScopedPointer<Label> lowCutValue;
 	ScopedPointer<UtilityButton> applyFilterOnADC;
+    ScopedPointer<UtilityButton> applyFilterOnChan;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterEditor);
 

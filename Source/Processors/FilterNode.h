@@ -70,6 +70,7 @@ private:
 
     Array<double> lowCuts, highCuts;
     OwnedArray<Dsp::Filter> filters;
+    Array<bool> shouldFilterChannel;
 
 	bool applyOnADC;
     double defaultLowCut;
