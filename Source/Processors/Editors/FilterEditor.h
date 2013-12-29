@@ -44,8 +44,8 @@ class FilterEditor : public GenericEditor,
 public:
     FilterEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~FilterEditor();
+
     void buttonEvent(Button* button);
-	void buttonClicked(Button *button);
     void labelTextChanged(Label* label);
 
     void saveCustomParameters(XmlElement* xml);

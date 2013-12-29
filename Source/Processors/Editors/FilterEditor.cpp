@@ -78,16 +78,6 @@ FilterEditor::~FilterEditor()
     
 }   
 
-void FilterEditor::buttonClicked(Button *button)
-{
-	if (button == applyFilterOnADC)
-	{
-		    FilterNode* fn = (FilterNode*) getProcessor();
-			applyFilterOnADC->setToggleState(!applyFilterOnADC->getToggleState(),false);
-			fn->setApplyOnADC(applyFilterOnADC->getToggleState());
-	}
-}
-
 void FilterEditor::setDefaults(double lowCut, double highCut)
 {
     lastHighCutString = String(roundFloatToInt(highCut));
@@ -165,30 +155,12 @@ void FilterEditor::buttonEvent(Button* button)
 {
     //std::cout << button->getRadioGroupId() << " " << button->getName() << std::endl;
 
-    //if (!checkDrawerButton(button) && !checkChannelSelectors(button)) {
-
-    // String value = button->getName();
-    // float val;
-
-    // val = value.getFloatValue();
-
-    // Array<int> chans = getActiveChannels();
-
-    // GenericProcessor* p = (GenericProcessor*) getAudioProcessor();
-
-    // for (int n = 0; n < chans.size(); n++)
-    // {
-
-    //     p->setCurrentChannel(chans[n]);
-
-    //     if (button->getRadioGroupId() == 1)
-    //         getAudioProcessor()->setParameter(0,val);
-    //     else
-    //         getAudioProcessor()->setParameter(1,val*1000.0f);
-
-    // }
-    //std::cout << button->getRadioGroupId() << " " << val << std::endl;
-    //	}
+    if (button == applyFilterOnADC)
+    {
+        FilterNode* fn = (FilterNode*) getProcessor();
+        applyFilterOnADC->setToggleState(!applyFilterOnADC->getToggleState(),false);
+        fn->setApplyOnADC(applyFilterOnADC->getToggleState());
+    }
 
 }
 
