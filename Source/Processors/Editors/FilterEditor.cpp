@@ -134,7 +134,7 @@ void FilterEditor::labelTextChanged(Label* label)
 
         if (label == highCutValue)
         {
-            double minVal = fn->getLowCutValueForChannel(n);
+            double minVal = fn->getLowCutValueForChannel(chans[n]);
 
             if (requestedValue > minVal)
             {
@@ -147,7 +147,7 @@ void FilterEditor::labelTextChanged(Label* label)
         }
         else
         {
-            double maxVal = fn->getHighCutValueForChannel(n);
+            double maxVal = fn->getHighCutValueForChannel(chans[n]);
 
             if (requestedValue < maxVal)
             {
