@@ -139,6 +139,7 @@ void FilterNode::updateSettings()
         filters.clear();
         lowCuts.clear();
         highCuts.clear();
+        shouldFilterChannel.clear();
 
         for (int n = 0; n < getNumInputs(); n++)
         {
@@ -160,6 +161,8 @@ void FilterNode::updateSettings()
 
             // restore defaults
 
+            shouldFilterChannel.add(true);
+
             float lc, hc;
 
             if (oldlowCuts.size() > n)
@@ -179,6 +182,8 @@ void FilterNode::updateSettings()
 
     }
 
+    setApplyOnADC(applyOnADC);
+
 }
 
 double FilterNode::getLowCutValueForChannel(int chan)
@@ -189,6 +194,11 @@ double FilterNode::getLowCutValueForChannel(int chan)
 double FilterNode::getHighCutValueForChannel(int chan)
 {
     return highCuts[chan];
+}
+
+bool FilterNode::getBypassStatusForChannel(int chan)
+{
+    return shouldFilterChannel[chan];
 }
 
 void FilterNode::setFilterParameters(double lowCut, double highCut, int chan)
@@ -208,52 +218,41 @@ void FilterNode::setFilterParameters(double lowCut, double highCut, int chan)
 void FilterNode::setParameter(int parameterIndex, float newValue)
 {
 
-    if (newValue <= 0.01 || newValue >= 10000.0f)
-        return;
-
-    //std::cout << "Setting channel " << currentChannel;// << std::endl;
-
-    if (parameterIndex == 0)
+    if (parameterIndex < 2) // change filter settings
     {
-       // std::cout << " low cut to " << newValue << std::endl;
-        lowCuts.set(currentChannel,newValue);
-    }
-    else
-    {
-        //std::cout << " high cut to " << newValue << std::endl;
-        highCuts.set(currentChannel,newValue);
-    }
 
-    //std::cout << newValue << std::endl;
+        if (newValue <= 0.01 || newValue >= 10000.0f)
+            return;
 
-    setFilterParameters(lowCuts[currentChannel],
+        //std::cout << "Setting channel " << currentChannel;// << std::endl;
+
+        if (parameterIndex == 0)
+        {
+           // std::cout << " low cut to " << newValue << std::endl;
+            lowCuts.set(currentChannel,newValue);
+        }
+        else if (parameterIndex == 1)
+        {
+            //std::cout << " high cut to " << newValue << std::endl;
+            highCuts.set(currentChannel,newValue);
+        }
+
+          setFilterParameters(lowCuts[currentChannel],
                         highCuts[currentChannel],
                         currentChannel);
 
+        editor->updateParameterButtons(parameterIndex);
 
-    // Deprecated code:
-    //if (parameterIndex)
-    //
-    // Parameter& p =  parameters.getReference(parameterIndex);
-
-    // p.setValue(newValue, currentChannel);
-
-    // Parameter& p1 =  parameters.getReference(0);
-    // Parameter& p2 =  parameters.getReference(1);
-
-    // std::cout << float(p1[currentChannel]) << " ";
-    // std::cout << float(p2[currentChannel]) << std::endl;
-
-    // if (parameterIndex == 0) {
-    // 	parameters[0].setValue(newValue, currentChannel);
-    // 	setFilterParameters(newValue, parameters[0][currentChannel], currentChannel);
-    // } else {
-    // 	parameters[1].setValue(newValue, currentChannel);
-    // 	setFilterParameters(lowCuts[currentChannel], newValue, currentChannel);
-    // }
-
-    editor->updateParameterButtons(parameterIndex);
-
+    } else // change channel bypass state
+    {
+        if (newValue == 0)
+        {
+            shouldFilterChannel.set(currentChannel, false);
+        } else {
+            shouldFilterChannel.set(currentChannel, true);
+        }
+        
+    }
 }
 
 void FilterNode::process(AudioSampleBuffer& buffer,
@@ -263,7 +262,7 @@ void FilterNode::process(AudioSampleBuffer& buffer,
 
     for (int n = 0; n < getNumOutputs(); n++)
     {
-		if (!channels[n]->isADCchannel || applyOnADC)
+		if (shouldFilterChannel[n])
 		{
 			float* ptr = buffer.getSampleData(n);
 			filters[n]->process(nSamples, &ptr);
@@ -274,7 +273,19 @@ void FilterNode::process(AudioSampleBuffer& buffer,
 
 void FilterNode::setApplyOnADC(bool state)
 {
-	applyOnADC = state;
+
+    for (int n = 0; n < channels.size(); n++)
+    {
+        if (channels[n]->isADCchannel)
+        {
+            setCurrentChannel(n);
+
+            if (state)
+                setParameter(2,1.0);
+            else
+                setParameter(2,0.0);
+        }
+    }
 }
 
 void FilterNode::saveCustomChannelParametersToXml(XmlElement* channelInfo, int channelNumber, bool isEventChannel)
@@ -289,6 +300,7 @@ void FilterNode::saveCustomChannelParametersToXml(XmlElement* channelInfo, int c
         XmlElement* channelParams = channelInfo->createNewChildElement("PARAMETERS");
         channelParams->setAttribute("highcut",highCuts[channelNumber]);
         channelParams->setAttribute("lowcut",lowCuts[channelNumber]);
+        channelParams->setAttribute("shouldFilter",shouldFilterChannel[channelNumber]);
     }
 
 }
@@ -306,6 +318,7 @@ void FilterNode::loadCustomChannelParametersFromXml(XmlElement* channelInfo, boo
             {
                 highCuts.set(channelNum, subNode->getDoubleAttribute("highcut",defaultHighCut));
                 lowCuts.set(channelNum, subNode->getDoubleAttribute("lowcut",defaultLowCut));
+                shouldFilterChannel.set(channelNum, subNode->getBoolAttribute("shouldFilter",true));
 
                 setFilterParameters(lowCuts[channelNum],
                                     highCuts[channelNum],

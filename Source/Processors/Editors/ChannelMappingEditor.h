@@ -52,7 +52,7 @@ public:
 
     void updateSettings();
 
-    void createElectrodeButtons(int numNeeded);
+    void createElectrodeButtons(int numNeeded, bool clearPrevious = true);
 
     void saveCustomParameters(XmlElement* xml);
     void loadCustomParameters(XmlElement* xml);
@@ -71,7 +71,6 @@ public:
 
 private:
 
-	void createElectrodeButtons(int numNeeded, bool clearPrevious);
 	void setChannelReference(ElectrodeButton *button);
 	void setChannelPosition(int position, int channel);
 	void checkUnusedChannels();

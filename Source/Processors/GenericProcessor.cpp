@@ -343,10 +343,13 @@ void GenericProcessor::update()
         {
             Channel* ch = new Channel(this, i );
 
-			if (i < oldNumChannels)
-				ch->setName(oldNames[i]);
-			else if (i >= numChan-numADC_Chan) 
-				ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+			// if (i < oldNumChannels)
+			// 	ch->setName(oldNames[i]);
+			//else if (i >= numChan-numADC_Chan) 
+			//	ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
+
+            if (i >= numChan-numADC_Chan) 
+              ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
 
             if (i >= numChan-numADC_Chan)
               ch->isADCchannel = true;

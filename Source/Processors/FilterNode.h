@@ -58,6 +58,7 @@ public:
 
     double getLowCutValueForChannel(int chan);
     double getHighCutValueForChannel(int chan);
+    bool getBypassStatusForChannel(int chan);
 
     void updateSettings();
 
@@ -70,6 +71,7 @@ private:
 
     Array<double> lowCuts, highCuts;
     OwnedArray<Dsp::Filter> filters;
+    Array<bool> shouldFilterChannel;
 
 	bool applyOnADC;
     double defaultLowCut;

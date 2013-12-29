@@ -595,8 +595,12 @@ void ChannelSelector::buttonClicked(Button* button)
             }
 
         }
-        else
+        else // parameter type
         {
+
+            GenericEditor* editor = (GenericEditor*) getParentComponent();
+            editor->channelChanged(b->getChannel()-1);
+
             // do nothing
             if (radioStatus) // if radio buttons are active
             {

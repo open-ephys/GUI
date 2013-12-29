@@ -36,40 +36,51 @@ FilterEditor::FilterEditor(GenericProcessor* parentNode, bool useDefaultParamete
     lastHighCutString = " ";
 
     highCutLabel = new Label("high cut label", "High cut:");
-    highCutLabel->setBounds(35,70,80,20);
+    highCutLabel->setBounds(10,65,80,20);
     highCutLabel->setFont(Font("Small Text", 12, Font::plain));
     highCutLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(highCutLabel);
 
     lowCutLabel = new Label("low cut label", "Low cut:");
-    lowCutLabel->setBounds(35,25,80,20);
+    lowCutLabel->setBounds(10,25,80,20);
     lowCutLabel->setFont(Font("Small Text", 12, Font::plain));
     lowCutLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(lowCutLabel);
 
     lowCutValue = new Label("low cut value", lastLowCutString);
-    lowCutValue->setBounds(40,45,60,20);
+    lowCutValue->setBounds(15,42,60,18);
     lowCutValue->setFont(Font("Default", 15, Font::plain));
     lowCutValue->setColour(Label::textColourId, Colours::white);
     lowCutValue->setColour(Label::backgroundColourId, Colours::grey);
     lowCutValue->setEditable(true);
     lowCutValue->addListener(this);
+    lowCutValue->setTooltip("Set the low cut for the selected channels");
     addAndMakeVisible(lowCutValue);
 
     highCutValue = new Label("high cut label", lastHighCutString);
-    highCutValue->setBounds(40,90,60,20);
+    highCutValue->setBounds(15,82,60,18);
     highCutValue->setFont(Font("Default", 15, Font::plain));
     highCutValue->setColour(Label::textColourId, Colours::white);
     highCutValue->setColour(Label::backgroundColourId, Colours::grey);
     highCutValue->setEditable(true);
     highCutValue->addListener(this);
+    highCutValue->setTooltip("Set the high cut for the selected channels");
     addAndMakeVisible(highCutValue);
 
-
-	applyFilterOnADC = new UtilityButton("Apply To ADC",Font("Default", 12, Font::plain));
+	applyFilterOnADC = new UtilityButton("+ADCs",Font("Default", 10, Font::plain));
     applyFilterOnADC->addListener(this);
-    applyFilterOnADC->setBounds(20,115,100,14);
+    applyFilterOnADC->setBounds(90,70,40,18);
+    applyFilterOnADC->setClickingTogglesState(true);
+    applyFilterOnADC->setTooltip("When this button is off, ADC channels will not be filtered");
     addAndMakeVisible(applyFilterOnADC);
+
+    applyFilterOnChan = new UtilityButton("+CH",Font("Default", 10, Font::plain));
+    applyFilterOnChan->addListener(this);
+    applyFilterOnChan->setBounds(95,95,30,18);
+    applyFilterOnChan->setClickingTogglesState(true);
+    applyFilterOnChan->setToggleState(true, false);
+    applyFilterOnChan->setTooltip("When this button is off, selected channels will not be filtered");
+    addAndMakeVisible(applyFilterOnChan);
  
 }
 
@@ -77,16 +88,6 @@ FilterEditor::~FilterEditor()
 {
     
 }   
-
-void FilterEditor::buttonClicked(Button *button)
-{
-	if (button == applyFilterOnADC)
-	{
-		    FilterNode* fn = (FilterNode*) getProcessor();
-			applyFilterOnADC->setToggleState(!applyFilterOnADC->getToggleState(),false);
-			fn->setApplyOnADC(applyFilterOnADC->getToggleState());
-	}
-}
 
 void FilterEditor::setDefaults(double lowCut, double highCut)
 {
@@ -133,11 +134,11 @@ void FilterEditor::labelTextChanged(Label* label)
 
         if (label == highCutValue)
         {
-            double minVal = fn->getLowCutValueForChannel(n);
+            double minVal = fn->getLowCutValueForChannel(chans[n]);
 
             if (requestedValue > minVal)
             {
-                fn->setCurrentChannel(n);
+                fn->setCurrentChannel(chans[n]);
                 fn->setParameter(1, requestedValue);
             }
 
@@ -146,11 +147,11 @@ void FilterEditor::labelTextChanged(Label* label)
         }
         else
         {
-            double maxVal = fn->getHighCutValueForChannel(n);
+            double maxVal = fn->getHighCutValueForChannel(chans[n]);
 
             if (requestedValue < maxVal)
             {
-                fn->setCurrentChannel(n);
+                fn->setCurrentChannel(chans[n]);
                 fn->setParameter(0, requestedValue);
             }
 
@@ -161,35 +162,38 @@ void FilterEditor::labelTextChanged(Label* label)
 
 }
 
+void FilterEditor::channelChanged(int chan)
+{
+    FilterNode* fn = (FilterNode*) getProcessor();
+
+    highCutValue->setText(String(fn->getHighCutValueForChannel(chan)), dontSendNotification);
+    lowCutValue->setText(String(fn->getLowCutValueForChannel(chan)), dontSendNotification);
+    applyFilterOnChan->setToggleState(fn->getBypassStatusForChannel(chan), false);
+
+}
+
 void FilterEditor::buttonEvent(Button* button)
 {
-    //std::cout << button->getRadioGroupId() << " " << button->getName() << std::endl;
 
-    //if (!checkDrawerButton(button) && !checkChannelSelectors(button)) {
+    if (button == applyFilterOnADC)
+    {
+        FilterNode* fn = (FilterNode*) getProcessor();
+        fn->setApplyOnADC(applyFilterOnADC->getToggleState());
 
-    // String value = button->getName();
-    // float val;
+    } else if (button == applyFilterOnChan)
+    {
+        FilterNode* fn = (FilterNode*) getProcessor();
 
-    // val = value.getFloatValue();
+        Array<int> chans = getActiveChannels();
 
-    // Array<int> chans = getActiveChannels();
+        for (int n = 0; n < chans.size(); n++)
+        {
+            float newValue = button->getToggleState() ? 1.0 : 0.0;
 
-    // GenericProcessor* p = (GenericProcessor*) getAudioProcessor();
-
-    // for (int n = 0; n < chans.size(); n++)
-    // {
-
-    //     p->setCurrentChannel(chans[n]);
-
-    //     if (button->getRadioGroupId() == 1)
-    //         getAudioProcessor()->setParameter(0,val);
-    //     else
-    //         getAudioProcessor()->setParameter(1,val*1000.0f);
-
-    // }
-    //std::cout << button->getRadioGroupId() << " " << val << std::endl;
-    //	}
-
+            fn->setCurrentChannel(chans[n]);
+            fn->setParameter(2, newValue);
+        }
+    }
 }
 
 
