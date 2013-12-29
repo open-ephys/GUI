@@ -162,6 +162,16 @@ void FilterEditor::labelTextChanged(Label* label)
 
 }
 
+void FilterEditor::channelChanged(int chan)
+{
+    FilterNode* fn = (FilterNode*) getProcessor();
+
+    highCutValue->setText(String(fn->getHighCutValueForChannel(chan)), dontSendNotification);
+    lowCutValue->setText(String(fn->getLowCutValueForChannel(chan)), dontSendNotification);
+    applyFilterOnChan->setToggleState(fn->getBypassStatusForChannel(chan), false);
+
+}
+
 void FilterEditor::buttonEvent(Button* button)
 {
     //std::cout << button->getRadioGroupId() << " " << button->getName() << std::endl;

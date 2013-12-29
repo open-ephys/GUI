@@ -53,6 +53,8 @@ public:
 
     void setDefaults(double lowCut, double highCut);
 
+    void channelChanged(int chan);
+
 private:
 
     String lastHighCutString;

@@ -196,6 +196,11 @@ double FilterNode::getHighCutValueForChannel(int chan)
     return highCuts[chan];
 }
 
+bool FilterNode::getBypassStatusForChannel(int chan)
+{
+    return shouldFilterChannel[chan];
+}
+
 void FilterNode::setFilterParameters(double lowCut, double highCut, int chan)
 {
 

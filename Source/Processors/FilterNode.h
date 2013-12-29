@@ -58,6 +58,7 @@ public:
 
     double getLowCutValueForChannel(int chan);
     double getHighCutValueForChannel(int chan);
+    bool getBypassStatusForChannel(int chan);
 
     void updateSettings();
 
