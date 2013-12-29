@@ -98,19 +98,12 @@ void ChannelMappingEditor::updateSettings()
 		{
 			checkUnusedChannels();
 		}
-	}
-	else if (getProcessor()->getNumInputs() != previousChannelCount)
+
+	} else if (getProcessor()->getNumInputs() != previousChannelCount)
 	{
 		createElectrodeButtons(getProcessor()->getNumInputs());
 		previousChannelCount = getProcessor()->getNumInputs();
 	}
-}
-
-void ChannelMappingEditor::createElectrodeButtons(int numNeeded)
-{
-	createElectrodeButtons(numNeeded,true);
-
-    refreshButtonLocations();
 }
 
 void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevious)
@@ -192,6 +185,8 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
 		}
 	}
 	channelSelector->setRadioStatus(true);
+
+    refreshButtonLocations();
 }
 
 void ChannelMappingEditor::refreshButtonLocations()
@@ -253,7 +248,7 @@ void ChannelMappingEditor::buttonEvent(Button* button)
 			channelSelector->activateButtons();
 			reorderActive = false;
 			selectedReference = 0;
-			for (int i=0; i < referenceButtons.size(); i++)
+			for (int i = 0; i < referenceButtons.size(); i++)
 			{
 				referenceButtons[i]->setEnabled(true);
 			}
