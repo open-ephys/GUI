@@ -78,6 +78,9 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
 	libraryFilePath += File::separatorString;
 	libraryFilePath += okLIB_NAME;
     
+	dacChannels = nullptr;
+	dacThresholds = nullptr;
+	dacChannelsToUpdate = nullptr;
     if (openBoard(libraryFilePath))
     {
 
@@ -90,8 +93,13 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
 
         // probably better to do this with a thread, but a timer works for now:
        // startTimer(10); // initialize the board in the background
+	dacChannels = new int[8];
+	dacThresholds = new float[8];
+	dacChannelsToUpdate = new bool[8];
+	for (int k=0;k<8;k++)
+		dacChannelsToUpdate[k] = true;
+	evalBoard->getDacInformation(dacChannels,dacThresholds);
     }
-
 }
 
 void RHD2000Thread::timerCallback()
@@ -117,8 +125,49 @@ RHD2000Thread::~RHD2000Thread()
 
     deleteAndZero(dataBlock);
 
+	delete dacChannels;
+	delete dacThresholds;
+	delete dacChannelsToUpdate;
+
 }
 
+void RHD2000Thread::setDACthreshold(int dacOutput, float threshold)
+{
+	dacThresholds[dacOutput]= threshold;
+	dacOutputShouldChange = true;
+	dacChannelsToUpdate[dacOutput] = true;
+
+//	evalBoard->setDacThresholdVoltage(dacOutput,threshold);
+}
+
+void RHD2000Thread::setDACchannel(int dacOutput, int channel)
+{
+	dacChannels[dacOutput] = channel;
+	dacOutputShouldChange = true;
+	dacChannelsToUpdate[dacOutput] = true;
+	/*
+	if (channel < 0)
+	{
+		evalBoard->enableDac(dacOutput, false);
+	}
+	else
+	{
+		evalBoard->selectDacDataChannel(dacOutput,channel);
+		evalBoard->enableDac(dacOutput, true);
+	}*/
+
+}
+
+Array<int> RHD2000Thread::getDACchannels()
+{
+	Array<int> dacChannels;
+	for (int k=0; k<8; k++)
+	{
+		dacChannels.add(evalBoard->gecDacDataChannel(k));
+	}
+	return dacChannels;
+
+}
 bool RHD2000Thread::openBoard(String pathToLibrary)
 {
     int return_code = evalBoard->open(pathToLibrary.getCharPointer());
@@ -662,6 +711,23 @@ double RHD2000Thread::setLowerBandwidth(double lower)
     return actualLowerBandwidth;
 }
 
+void RHD2000Thread::setTTLoutputMode(bool state)
+{
+	evalBoard->setTtlMode(state);
+}
+
+void RHD2000Thread::setDAChpf(float cutoff, bool enabled)
+{
+	evalBoard->setDacHighpassFilter(cutoff);
+	evalBoard->enableDacHighpassFilter(enabled);
+}
+
+void RHD2000Thread::setFastTTLSettle(bool state, int channel)
+{
+	evalBoard->setFastSettleByTTL(state);
+	evalBoard->setFastSettleByTTLchannel(channel);
+}
+
 int RHD2000Thread::setNoiseSlicerLevel(int level)
 {
     desiredNoiseSlicerLevel = level;
@@ -729,13 +795,12 @@ void RHD2000Thread::assignAudioOut(int dacChannel, int dataChannel)
     if (dacChannel == 0)
     {
         audioOutputR = dataChannel;
-
-
+		dacChannels[0] = dataChannel;
     }
     else if (dacChannel == 1)
     {
         audioOutputL = dataChannel;
-
+		dacChannels[1] = dataChannel;
     }
 
     dacOutputShouldChange = true; // set a flag and take care of setting wires
@@ -752,6 +817,7 @@ void RHD2000Thread::enableAdcs(bool t)
     dataBuffer->resize(getNumChannels(), 10000);
 
 }
+
 
 void RHD2000Thread::setSampleRate(int sampleRateIndex, bool isTemporary)
 {
@@ -1186,6 +1252,25 @@ bool RHD2000Thread::updateBuffer()
 
     if (dacOutputShouldChange)
     {
+		for (int k=0;k<8;k++)
+		{
+			if (dacChannelsToUpdate[k])
+			{
+				dacChannelsToUpdate[k] = false;
+				if (dacChannels[k] >= 0)
+				{
+					evalBoard->enableDac(k, true);
+					evalBoard->selectDacDataChannel(k, dacChannels[k]);
+					evalBoard->setDacThresholdVoltage(k,dacThresholds[k]);
+				}
+				else
+				{
+					evalBoard->enableDac(k, false);
+				}
+			}
+		}
+
+		/*
         if (audioOutputR >= 0)
         {
             evalBoard->enableDac(0, true);
@@ -1205,6 +1290,9 @@ bool RHD2000Thread::updateBuffer()
         {
             evalBoard->enableDac(1, false);
         }
+		*/
+
+
 
         dacOutputShouldChange = false;
     }

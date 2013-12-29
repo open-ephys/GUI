@@ -46,7 +46,7 @@ FilterNode::FilterNode()
     // highCutValues.add(9000.0f);
 
     // parameters.add(Parameter("high cut",highCutValues, 2, 1));
-
+	applyOnADC = false;
 }
 
 FilterNode::~FilterNode()
@@ -263,10 +263,18 @@ void FilterNode::process(AudioSampleBuffer& buffer,
 
     for (int n = 0; n < getNumOutputs(); n++)
     {
-        float* ptr = buffer.getSampleData(n);
-        filters[n]->process(nSamples, &ptr);
+		if (!channels[n]->isADCchannel || applyOnADC)
+		{
+			float* ptr = buffer.getSampleData(n);
+			filters[n]->process(nSamples, &ptr);
+		}
     }
 
+}
+
+void FilterNode::setApplyOnADC(bool state)
+{
+	applyOnADC = state;
 }
 
 void FilterNode::saveCustomChannelParametersToXml(XmlElement* channelInfo, int channelNumber, bool isEventChannel)

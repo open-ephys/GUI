@@ -36,19 +36,19 @@ FilterEditor::FilterEditor(GenericProcessor* parentNode, bool useDefaultParamete
     lastHighCutString = " ";
 
     highCutLabel = new Label("high cut label", "High cut:");
-    highCutLabel->setBounds(35,80,80,20);
+    highCutLabel->setBounds(35,70,80,20);
     highCutLabel->setFont(Font("Small Text", 12, Font::plain));
     highCutLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(highCutLabel);
 
     lowCutLabel = new Label("low cut label", "Low cut:");
-    lowCutLabel->setBounds(35,30,80,20);
+    lowCutLabel->setBounds(35,25,80,20);
     lowCutLabel->setFont(Font("Small Text", 12, Font::plain));
     lowCutLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(lowCutLabel);
 
     lowCutValue = new Label("low cut value", lastLowCutString);
-    lowCutValue->setBounds(40,50,60,20);
+    lowCutValue->setBounds(40,45,60,20);
     lowCutValue->setFont(Font("Default", 15, Font::plain));
     lowCutValue->setColour(Label::textColourId, Colours::white);
     lowCutValue->setColour(Label::backgroundColourId, Colours::grey);
@@ -57,7 +57,7 @@ FilterEditor::FilterEditor(GenericProcessor* parentNode, bool useDefaultParamete
     addAndMakeVisible(lowCutValue);
 
     highCutValue = new Label("high cut label", lastHighCutString);
-    highCutValue->setBounds(40,100,60,20);
+    highCutValue->setBounds(40,90,60,20);
     highCutValue->setFont(Font("Default", 15, Font::plain));
     highCutValue->setColour(Label::textColourId, Colours::white);
     highCutValue->setColour(Label::backgroundColourId, Colours::grey);
@@ -65,12 +65,28 @@ FilterEditor::FilterEditor(GenericProcessor* parentNode, bool useDefaultParamete
     highCutValue->addListener(this);
     addAndMakeVisible(highCutValue);
 
+
+	applyFilterOnADC = new UtilityButton("Apply To ADC",Font("Default", 12, Font::plain));
+    applyFilterOnADC->addListener(this);
+    applyFilterOnADC->setBounds(20,115,100,14);
+    addAndMakeVisible(applyFilterOnADC);
+ 
 }
 
 FilterEditor::~FilterEditor()
 {
     
 }   
+
+void FilterEditor::buttonClicked(Button *button)
+{
+	if (button == applyFilterOnADC)
+	{
+		    FilterNode* fn = (FilterNode*) getProcessor();
+			applyFilterOnADC->setToggleState(!applyFilterOnADC->getToggleState(),false);
+			fn->setApplyOnADC(applyFilterOnADC->getToggleState());
+	}
+}
 
 void FilterEditor::setDefaults(double lowCut, double highCut)
 {
@@ -185,6 +201,7 @@ void FilterEditor::saveCustomParameters(XmlElement* xml)
     XmlElement* textLabelValues = xml->createNewChildElement("VALUES");
     textLabelValues->setAttribute("HighCut",lastHighCutString);
     textLabelValues->setAttribute("LowCut",lastLowCutString);
+	textLabelValues->setAttribute("ApplyToADC",	applyFilterOnADC->getToggleState());
 }
 
 void FilterEditor::loadCustomParameters(XmlElement* xml)
@@ -196,6 +213,7 @@ void FilterEditor::loadCustomParameters(XmlElement* xml)
         {
             highCutValue->setText(xmlNode->getStringAttribute("HighCut"),dontSendNotification);
             lowCutValue->setText(xmlNode->getStringAttribute("LowCut"),dontSendNotification);
+			applyFilterOnADC->setToggleState(xmlNode->getBoolAttribute("ApplyToADC",false),true);
         }
     }
 }

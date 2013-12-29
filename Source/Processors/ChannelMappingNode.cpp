@@ -145,11 +145,7 @@ void ChannelMappingNode::process(AudioSampleBuffer& buffer,
 	// use copy constructor to set the data to refer to
 	channelBuffer = buffer;
 
-	//new buffer may have a different number of channels than at input
-	//AvoidRellocating set to true to avoid the huge cpu time needed to rellocate. That extra bit of memory is not a real problem.
-	buffer.setSize(settings.numOutputs,channelBuffer.getNumSamples(),false,false,true); 
 	buffer.clear();
-
 
 	while (j < settings.numOutputs)
 	{
@@ -184,49 +180,6 @@ void ChannelMappingNode::process(AudioSampleBuffer& buffer,
 		i++;
 
 	}
-
-#if 0
-	for (int i = 0; i < buffer.getNumChannels(); i++)
-	{
-		realChan = channelArray[i];
-		if ((realChan < channelBuffer.getNumChannels()) && (enabledChannelArray[realChan]))
-		{
-			buffer.addFrom(j, // destChannel
-				0, // destStartSample
-				channelBuffer, // source
-				realChan, // sourceChannel
-				0, // sourceStartSample
-				nSamples, // numSamples
-				1.0f // gain to apply to source (positive for original signal)
-				);
-			j++;
-		}
-
-	}
-
-	j=0;
-	// now do the referencing
-	for (int i = 0; i < buffer.getNumChannels(); i++)
-	{
-		realChan = channelArray[i];
-		if ((realChan < channelBuffer.getNumChannels()) && (enabledChannelArray[realChan]))
-		{
-			if ((referenceArray[realChan] > -1) && referenceChannels[referenceArray[realChan]] > -1)
-			{
-
-				buffer.addFrom(j, // destChannel
-					0, // destStartSample
-					channelBuffer, // source
-					referenceChannels[referenceArray[realChan]], // sourceChannel
-					0, // sourceStartSample
-					nSamples, // numSamples
-					-1.0f // gain to apply to source (negative for reference)
-					);
-			}
-			j++;
-		}
-	}
-#endif
 
 }
 

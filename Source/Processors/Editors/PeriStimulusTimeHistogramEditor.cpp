@@ -1314,7 +1314,7 @@ void XYPlot::paintSpikes(Graphics &g)
 	int numSamplePoints = plotWidth/subsample;
 	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
 	{
-		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
+		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
 			continue;
 
 			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],

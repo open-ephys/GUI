@@ -162,6 +162,7 @@ void Rhd2000Registers::setFastSettle(bool enabled)
     ampFastSettle = (enabled ? 1 : 0);
 }
 
+
 // Drive auxiliary digital output low
 void Rhd2000Registers::setDigOutLow()
 {

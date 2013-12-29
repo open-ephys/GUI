@@ -251,11 +251,11 @@ void RecordNode::setDirectoryName(String S)
 
 void RecordNode::updateChannelName(int channelIndex, String newname)
 {
-	if (channelPointers[channelIndex] != nullptr && channelIndex < channelPointers.size())
+/*	if (channelPointers[channelIndex] != nullptr && channelIndex < channelPointers.size())
 	{
 		channelPointers[channelIndex]->name = newname;
 		updateFileName(channelPointers[channelIndex]);
-	} else
+	} else*/
 	{
 		// keep name and do the change when the pointer actually points to something... ?
 		modifiedChannelNames.add(newname);

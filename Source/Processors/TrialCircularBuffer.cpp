@@ -172,6 +172,9 @@ void ConditionPSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> 
 
 	ymax = -1e10;
 	ymin = 1e10;
+	xmin = -preSec;
+	xmax = 0;
+
 	// Update average firing rate, up to when the trial ended. 
 	for (int k = 0; k < valid.size(); k++)
 	{
@@ -376,7 +379,7 @@ void ChannelPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 	float yMax = -1e10;
 	for (int k=0;k<conditionPSTHs.size();k++) 
 	{
-		if (conditionPSTHs[k].numTrials > 0)
+		if (conditionPSTHs[k].numTrials > 0 && conditionPSTHs[k].visible)
 		{
 			conditionPSTHs[k].getRange(xMin,xMax,yMin,yMax);
 			xmin = MIN(xmin, xMin);
@@ -440,11 +443,14 @@ void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 	ymin = 1e10;
 	float minX, maxX, maxY, minY;
 	for (int k=0;k<conditionPSTHs.size();k++) {
-		conditionPSTHs[k].getRange(minX, maxX, minY, maxY);
-		xmin = MIN(xmin, minX);
-		xmax = MAX(xmax, maxX);
-		ymax = MAX(ymax, maxY);
-		ymin = MIN(ymin, minY);
+		if (conditionPSTHs[k].visible)
+		{
+			conditionPSTHs[k].getRange(minX, maxX, minY, maxY);
+			xmin = MIN(xmin, minX);
+			xmax = MAX(xmax, maxX);
+			ymax = MAX(ymax, maxY);
+			ymin = MIN(ymin, minY);
+		}
 	}
 }
 
@@ -1280,7 +1286,8 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 			  }
 
 			  double trialLength = (currentTrial.endTS-currentTrial.alignTS)/numTicksPerSecond;
-		
+			  //processor->getUIComponent()->getLogWindow()->addLineToLog("Trial Length: "+String(trialLength*1000));
+	
 			  aliveTrials.push(Trial(currentTrial));
 		  }
 	  } else if (command == "trialtype")

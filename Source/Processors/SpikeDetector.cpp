@@ -47,6 +47,7 @@ SpikeDetector::SpikeDetector()
     spikeBuffer = new uint8_t[MAX_SPIKE_BUFFER_LEN]; // MAX_SPIKE_BUFFER_LEN defined in SpikeObject.h
 	channelBuffers=nullptr;
 	PCAbeforeBoxes = true;
+	autoDACassignment = true;
 }
 
 int SpikeDetector::getNumPreSamples()
@@ -59,6 +60,15 @@ int SpikeDetector::getNumPostSamples()
 	return numPostSamples;
 }
 
+bool SpikeDetector::getAutoDacAssignmentStatus()
+{
+	return autoDACassignment;
+}
+
+void SpikeDetector::seteAutoDacAssignment(bool status)
+{
+	autoDACassignment = status;
+}
 
 void SpikeDetector::setNumPreSamples(int numSamples)
 {
@@ -265,7 +275,68 @@ void SpikeDetector::removeUnit(int electrodeID, int unitID)
 	String eventlog = "RemoveUnit "+String(electrodeID) + " "+String(unitID);
 	addNetworkEventToQueue(StringTS(eventlog));
 	updateSinks( electrodeID,  unitID, 0,0,0,false);
+	
 }
+
+RHD2000Thread* SpikeDetector::getRhythmAccess()
+{
+
+	ProcessorGraph *gr = getProcessorGraph();
+	Array<GenericProcessor*> p = gr->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Rhythm FPGA")
+		{
+			SourceNode* src = (SourceNode* )p[k];
+			return (RHD2000Thread*)src->getThread();
+		}
+	}
+	return nullptr;
+}
+
+void SpikeDetector::updateDACthreshold(int dacChannel, float threshold)
+{
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
+	{
+		th->setDACthreshold(dacChannel,threshold);
+	}
+}
+
+Array<int> SpikeDetector::getDACassignments()
+{
+	Array<int> dacChannels ;
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
+	{
+		dacChannels = th->getDACchannels();
+	}
+	return dacChannels;
+}
+
+int SpikeDetector::getDACassignment(int dacchannel)
+{
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
+	{
+		Array<int> dacChannels = th->getDACchannels();
+		return dacChannels[dacchannel];
+	}
+	
+	return -1; // not assigned
+}
+
+void SpikeDetector::assignDACtoChannel(int dacOutput, int channel)
+{
+	// inform sinks about a new unit
+	//getSourceNode()
+	RHD2000Thread* th = getRhythmAccess();
+	if (th != nullptr)
+	{
+		th->setDACchannel(dacOutput, channel);
+	}
+}
+
 
 void SpikeDetector::updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove)
 {
@@ -1103,6 +1174,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode()-1);
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
+	mainNode->setAttribute("autoDACassignment",	autoDACassignment);
 
 
     XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
@@ -1162,6 +1234,9 @@ void SpikeDetector::loadCustomParametersFromXml()
 				currentElectrode = mainNode->getIntAttribute("activeElectrode");
 				numPreSamples = mainNode->getIntAttribute("numPreSamples");
 				numPostSamples = mainNode->getIntAttribute("numPostSamples");
+				autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
+				mainNode->setAttribute("autoDACassignment",	autoDACassignment);
+
 				forEachXmlChildElement(*mainNode, xmlNode)
 				{
 

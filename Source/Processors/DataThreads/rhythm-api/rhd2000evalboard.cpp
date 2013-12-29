@@ -47,6 +47,13 @@ Rhd2000EvalBoard::Rhd2000EvalBoard()
     {
         dataStreamEnabled[i] = 0;
     }
+	dacChannelAssignment = new int[8];
+	dacChannelThreshold = new float[8];
+	for (int k=0;k<8;k++)
+	{
+		dacChannelAssignment[k] = -1;
+		dacChannelThreshold[k] =0;
+	}
 }
 
 //Destructor: Deletes the device to avoid memory leak
@@ -280,6 +287,18 @@ void Rhd2000EvalBoard::initialize()
 
     setDacGain(0);
     setAudioNoiseSuppress(0);
+
+    setTtlMode(0);          // If 1 then Digital outputs 0-7 are DAC comparators; 8-15 under manual control
+							// by default, set to 0 (all are under manual control).
+
+    setDacThreshold(0, 32768, true);
+    setDacThreshold(1, 32768, true);
+    setDacThreshold(2, 32768, true);
+    setDacThreshold(3, 32768, true);
+    setDacThreshold(4, 32768, true);
+    setDacThreshold(5, 32768, true);
+    setDacThreshold(6, 32768, true);
+    setDacThreshold(7, 32768, true);
 }
 
 // Set the per-channel sampling rate of the RHD2000 chips connected to the FPGA.
@@ -1126,6 +1145,33 @@ void Rhd2000EvalBoard::selectDacDataStream(int dacChannel, int stream)
     dev->UpdateWireIns();
 }
 
+void Rhd2000EvalBoard::setFastSettleByTTL(bool state)
+{
+
+    dev->SetWireInValue(WireInResetRun, (state ? 0x10 : 0x00), 0x10);
+    dev->UpdateWireIns();
+}
+
+void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
+{
+  if (channel < 0 || channel > 7)
+    {
+        cerr << "Error in Rhd2000EvalBoard::setFastSettleByTTLchannel: channel out of range." << endl;
+        return;
+    }
+// the WireInTTLSettleChannel is also used by DAC, so keep the values of 10 used bits
+ // and shift the channel value 10 bits to the left
+	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x3c00);
+    dev->UpdateWireIns();
+}
+
+int Rhd2000EvalBoard::gecDacDataChannel(int dacChannel)
+{
+	if (dacChannel < 0 || dacChannel > 7)
+		return -1;
+	return dacChannelAssignment[dacChannel];
+}
+
 // Assign a particular amplifier channel (0-31) to a DAC channel (0-7).
 void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
 {
@@ -1140,6 +1186,7 @@ void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
         cerr << "Error in Rhd2000EvalBoard::selectDacDataChannel: dataChannel out of range." << endl;
         return;
     }
+	dacChannelAssignment[dacChannel] = dataChannel;
 
     switch (dacChannel)
     {
@@ -1168,6 +1215,112 @@ void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
             dev->SetWireInValue(WireInDacSource8, dataChannel << 0, 0x001f);
             break;
     }
+    dev->UpdateWireIns();
+}
+
+// Enable optional FPGA-implemented digital high-pass filters associated with DAC outputs
+// on USB interface board.. These one-pole filters can be used to record wideband neural data
+// while viewing only spikes without LFPs on the DAC outputs, for example.  This is useful when
+// using the low-latency FPGA thresholds to detect spikes and produce digital pulses on the TTL
+// outputs, for example.
+void Rhd2000EvalBoard::enableDacHighpassFilter(bool enable)
+{
+    dev->SetWireInValue(WireInMultiUse, enable ? 1 : 0);
+    dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInDacHpf, 0);
+}
+
+// Set cutoff frequency (in Hz) for optional FPGA-implemented digital high-pass filters
+// associated with DAC outputs on USB interface board.  These one-pole filters can be used
+// to record wideband neural data while viewing only spikes without LFPs on the DAC outputs,
+// for example.  This is useful when using the low-latency FPGA thresholds to detect spikes
+// and produce digital pulses on the TTL outputs, for example.
+void Rhd2000EvalBoard::setDacHighpassFilter(double cutoff)
+{
+    double b;
+    int filterCoefficient;
+    const double pi = 3.1415926535897;
+
+    // Note that the filter coefficient is a function of the amplifier sample rate, so this
+    // function should be called after the sample rate is changed.
+    b = 1.0 - exp(-2.0 * pi * cutoff / getSampleRate());
+
+    // In hardware, the filter coefficient is represented as a 16-bit number.
+    filterCoefficient = (int) floor(65536.0 * b + 0.5);
+
+    if (filterCoefficient < 1) {
+        filterCoefficient = 1;
+    } else if (filterCoefficient > 65535) {
+        filterCoefficient = 65535;
+    }
+
+    dev->SetWireInValue(WireInMultiUse, filterCoefficient);
+    dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInDacHpf, 1);
+}
+
+// Set thresholds for DAC channels; threshold output signals appear on TTL outputs 0-7.
+// The parameter 'threshold' corresponds to the RHD2000 chip ADC output value, and must fall
+// in the range of 0 to 65535, where the 'zero' level is 32768.
+// If trigPolarity is true, voltages equaling or rising above the threshold produce a high TTL output.
+// If trigPolarity is false, voltages equaling or falling below the threshold produce a high TTL output.
+//
+// To convert threshold in voltage to this range, use the following:
+//     int threshLevel = ((double) threshold / 0.195) + 32768;
+//    evalBoard->setDacThreshold(0, threshLevel, threshold >= 0);
+
+void Rhd2000EvalBoard::setDacThresholdVoltage(int dacChannel, float voltage_threshold)
+{
+     int threshLevel = (voltage_threshold / 0.195) + 32768;
+    setDacThreshold(0, abs(threshLevel), voltage_threshold >= 0);
+
+}
+
+void Rhd2000EvalBoard::getDacInformation(int *ch, float *th)
+{
+	for (int k=0;k<8;k++)
+	{
+		ch[k] = dacChannelAssignment[k];
+		th[k] = dacChannelThreshold[k];
+	}
+}
+
+void Rhd2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigPolarityPositive)
+{
+    if (dacChannel < 0 || dacChannel > 7) {
+        cerr << "Error in Rhd2000EvalBoard::setDacThreshold: dacChannel out of range." << endl;
+        return;
+    }
+
+    if (threshold < 0 || threshold > 65535) {
+        cerr << "Error in Rhd2000EvalBoard::setDacThreshold: threshold out of range." << endl;
+        return;
+    }
+	dacChannelThreshold[dacChannel] = trigPolarityPositive? -(float)(threshold-32768)*0.195 : (float)(threshold-32768)*0.195;
+
+    // Set threshold level.
+    dev->SetWireInValue(WireInMultiUse, threshold);
+    dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInDacThresh, dacChannel);
+
+    // Set threshold polarity.
+    dev->SetWireInValue(WireInMultiUse, (trigPolarityPositive ? 1 : 0));
+    dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInDacThresh, dacChannel + 8);
+}
+
+// Set the TTL output mode of the board.
+// mode = 0: All 16 TTL outputs are under manual control
+// mode = 1: Top 8 TTL outputs are under manual control;
+//           Bottom 8 TTL outputs are outputs of DAC comparators
+void Rhd2000EvalBoard::setTtlMode(int mode)
+{
+    if (mode < 0 || mode > 1) {
+        cerr << "Error in Rhd2000EvalBoard::setTtlMode: mode out of range." << endl;
+        return;
+    }
+
+    dev->SetWireInValue(WireInResetRun, mode << 3, 0x0008);
     dev->UpdateWireIns();
 }
 
@@ -1344,5 +1497,18 @@ string Rhd2000EvalBoard::opalKellyModelName(int model) const
         default:
             return("UNKNOWN");
     }
+}
+
+// Return 4-bit "board mode" input.
+int Rhd2000EvalBoard::getBoardMode()
+{
+    int mode;
+
+    dev->UpdateWireOuts();
+    mode = dev->GetWireOutValue(WireOutBoardMode);
+
+    cout << "Board mode: " << mode << endl << endl;
+
+    return mode;
 }
 

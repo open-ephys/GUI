@@ -74,6 +74,9 @@ public:
     double setLowerBandwidth(double lower);
     
     int setNoiseSlicerLevel(int level);
+	void setFastTTLSettle(bool state, int channel);
+	void setTTLoutputMode(bool state);
+	void setDAChpf(float cutoff, bool enabled);
 
     void scanPorts();
 
@@ -86,7 +89,9 @@ public:
     bool isAcquisitionActive();
 
     void updateChannelNames();
-
+	Array<int> getDACchannels();
+	void setDACchannel(int dacOutput, int channel);
+	void setDACthreshold(int dacOutput, float threshold);
 private:
 
     ScopedPointer<Rhd2000EvalBoard> evalBoard;
@@ -140,7 +145,9 @@ private:
     double cableLengthPortA, cableLengthPortB, cableLengthPortC, cableLengthPortD;
 
     int audioOutputL, audioOutputR;
-
+	int *dacChannels;
+	float *dacThresholds;
+	bool *dacChannelsToUpdate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Thread);
 };

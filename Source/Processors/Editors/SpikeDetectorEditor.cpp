@@ -55,7 +55,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     depthOffsetLabel = new Label("Depth Offset","Depth Offset");
 	depthOffsetLabel->setFont(Font("Default", 10, Font::plain));
     depthOffsetLabel->setEditable(false);
-    depthOffsetLabel->setBounds(140,115,80,20);
+    depthOffsetLabel->setBounds(125,115,80,20);
 	depthOffsetLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(depthOffsetLabel);
 
@@ -108,7 +108,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     audioMonitorButton = new UtilityButton("MONITOR", Font("Default", 12, Font::plain));
     audioMonitorButton->addListener(this);
     audioMonitorButton->setRadius(3.0f);
-    audioMonitorButton->setBounds(80,65,75,15);
+    audioMonitorButton->setBounds(80,65,65,15);
     audioMonitorButton->setClickingTogglesState(true);
     addAndMakeVisible(audioMonitorButton);
 
@@ -124,7 +124,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     addAndMakeVisible(configButton);
 
 	thresholdSlider = new ThresholdSlider(font);
-    thresholdSlider->setBounds(200,35,75,75);
+    thresholdSlider->setBounds(210,25,65,65);
     addAndMakeVisible(thresholdSlider);
     thresholdSlider->addListener(this);
     thresholdSlider->setActive(false);
@@ -134,7 +134,7 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
     thresholdLabel = new Label("Name","Threshold");
     font.setHeight(10);
     thresholdLabel->setFont(font);
-    thresholdLabel->setBounds(202, 105, 95, 15);
+    thresholdLabel->setBounds(208, 85, 95, 15);
     thresholdLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(thresholdLabel);
 
@@ -149,6 +149,24 @@ SpikeDetectorEditor::SpikeDetectorEditor(GenericProcessor* parentNode, bool useD
 	channelSelector->setRadioStatus(true);
     channelSelector->paramButtonsToggledByDefault(false);
 	updateAdvancerList();
+
+    dacAssignmentLabel= new Label("DAC output","DAC output");
+	dacAssignmentLabel->setFont(Font("Default", 10, Font::plain));
+    dacAssignmentLabel->setEditable(false);
+    dacAssignmentLabel->setBounds(210,115,80,20);
+	dacAssignmentLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(dacAssignmentLabel);
+
+	dacCombo = new ComboBox("DAC Assignment");
+    dacCombo->addListener(this);
+    dacCombo->setBounds(205,100,70,18);
+	dacCombo->addItem("-",1);
+	for (int k=0;k<8;k++)
+	{
+		dacCombo->addItem("DAC"+String(k+1),k+2);
+	}
+	dacCombo->setSelectedId(1);
+    addAndMakeVisible(dacCombo);
 
 }
 
@@ -193,6 +211,15 @@ void SpikeDetectorEditor::sliderEvent(Slider* slider)
         processor->setChannelThreshold(electrodeList->getSelectedItemIndex(),
                                        electrodeNum,
                                        slider->getValue());
+
+		//Array<int> dacChannels = processor->getDACassignments;
+		int dacChannel = dacCombo->getSelectedId()-2;
+		if (dacChannel >= 0)
+		{
+			// update dac threshold.
+			processor->updateDACthreshold(dacChannel, slider->getValue());
+		}
+
     }
 	repaint();
 	if (canvas!= nullptr)
@@ -231,6 +258,24 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
             thresholdSlider->setActive(true);
             thresholdSlider->setValue(processor->getChannelThreshold(electrodeList->getSelectedItemIndex(),
                                                                      electrodeButtons.indexOf((cElectrodeButton*) button)));
+
+
+			if (processor->getAutoDacAssignmentStatus())
+			{
+				processor->assignDACtoChannel(0, channelNum);
+			}
+			Array<int> dacAssignmentToChannels = processor->getDACassignments();
+			// search for channel[0]. If found, set the combo box accordingly...
+			dacCombo->setSelectedId(1,true);
+			for (int i=0;i<dacAssignmentToChannels.size();i++)
+			{
+				if (dacAssignmentToChannels[i] == channelNum)
+				{
+					dacCombo->setSelectedId(i+2,true);
+					break;
+				}
+			}
+
         }
     }
 
@@ -267,6 +312,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		waveSizeMenu.addSubMenu("Pre samples",waveSizePreMenu);
 		waveSizeMenu.addSubMenu("Post samples",waveSizePostMenu);
 		configMenu.addSubMenu("Waveform size",waveSizeMenu,true);
+		configMenu.addItem(5,"Auto assign DAC1 to current channel",true,processor->getAutoDacAssignmentStatus());
 		const int result = configMenu.show();
 		switch (result)
 		{
@@ -282,6 +328,9 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		case 4:
 			processor->setNumPostSamples(64);
 			break;
+		case 5:
+			processor->seteAutoDacAssignment(!processor->getAutoDacAssignmentStatus());
+			refreshElectrodeList();
 		}
 
 	}
@@ -430,6 +479,19 @@ void SpikeDetectorEditor::channelChanged(int chan)
             processor->setChannel(electrodeList->getSelectedItemIndex(),
                                   i,
                                   chan-1);
+
+			// if DAC is selected, update the mapping.
+			int dacchannel = dacCombo->getSelectedId()-2;
+			if (dacchannel >=0)
+			{	
+				processor->assignDACtoChannel(dacchannel, chan-1);
+			}
+			if (processor->getAutoDacAssignmentStatus())
+			{
+				processor->assignDACtoChannel(0,chan-1);
+				break;
+			}
+
         }
     }
 
@@ -447,28 +509,28 @@ void SpikeDetectorEditor::setSelectedElectrode(int i)
 
 void SpikeDetectorEditor::refreshElectrodeList(int selected)
 {
-    electrodeList->clear();
+	electrodeList->clear();
 
-    SpikeDetector* processor = (SpikeDetector*) getProcessor();
+	SpikeDetector* processor = (SpikeDetector*) getProcessor();
 
-    StringArray electrodeNames = processor->getElectrodeNames();
+	StringArray electrodeNames = processor->getElectrodeNames();
 
-    for (int i = 0; i < electrodeNames.size(); i++)
-    {
-        electrodeList->addItem(electrodeNames[i], electrodeList->getNumItems()+1);
-    }
+	for (int i = 0; i < electrodeNames.size(); i++)
+	{
+		electrodeList->addItem(electrodeNames[i], electrodeList->getNumItems()+1);
+	}
 
-    if (electrodeList->getNumItems() > 0)
-    {
+	if (electrodeList->getNumItems() > 0)
+	{
 		if (selected == 0)
 			selected = electrodeList->getNumItems();
 
-        electrodeList->setSelectedId(selected);
-//        electrodeList->setText(electrodeList->getItemText(electrodeList->getNumItems()-1));
-        lastId = electrodeList->getNumItems();
-        electrodeList->setEditableText(true);
+		electrodeList->setSelectedId(selected);
+		//        electrodeList->setText(electrodeList->getItemText(electrodeList->getNumItems()-1));
+		lastId = electrodeList->getNumItems();
+		electrodeList->setEditableText(true);
 
-        drawElectrodeButtons(selected-1);
+		drawElectrodeButtons(selected-1);
 		Electrode *e = processor->getElectrode( selected - 1);
 
 		int advancerIndex = 0;
@@ -476,14 +538,35 @@ void SpikeDetectorEditor::refreshElectrodeList(int selected)
 		{
 			if (advancerIDs[k] == e->advancerID)
 			{
-					advancerIndex = 1+k;
+				advancerIndex = 1+k;
 				break;
 			}
 		}
-	
-			advancerList->setSelectedId(advancerIndex);
+
+		advancerList->setSelectedId(advancerIndex);
 		depthOffsetEdit->setText(String(e->depthOffsetMM,4),dontSendNotification);
-    }
+
+		if (processor->getAutoDacAssignmentStatus())
+		{
+			processor->assignDACtoChannel(0, e->channels[0]);
+		}
+		Array<int> dacAssignmentToChannels = processor->getDACassignments();
+		// search for channel[0]. If found, set the combo box accordingly...
+		dacCombo->setSelectedId(1,true);
+		for (int i=0;i<dacAssignmentToChannels.size();i++)
+		{
+			if (dacAssignmentToChannels[i] == e->channels[0])
+			{
+				dacCombo->setSelectedId(i+2,true);
+				processor->updateDACthreshold(i+2, e->thresholds[0]);
+				break;
+			}
+		}
+
+
+
+
+	}
 	if (spikeDetectorCanvas != nullptr)
 		spikeDetectorCanvas->update();
 }
@@ -528,16 +611,41 @@ void SpikeDetectorEditor::labelTextChanged(Label* label)
 	}
 }
 
+
 void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 {
-    if (comboBox == electrodeList)
+      SpikeDetector* processor = (SpikeDetector*) getProcessor();
+
+    if (comboBox == dacCombo)
+	{
+		int selection = dacCombo->getSelectedId();
+		// modify the dac channel assignment...
+		if (selection > 1)
+		{
+			int selectedSubChannel = -1;
+			for (int i = 0; i < electrodeButtons.size(); i++)
+			{
+				if (electrodeButtons[i]->getToggleState())
+				{
+					selectedSubChannel = i;
+					break;
+				}
+			}
+			Electrode* e = processor->getActiveElectrode();
+			if (e != nullptr)
+			{
+				int dacchannel = selection-2;
+				processor->assignDACtoChannel(dacchannel, e->channels[selectedSubChannel]);
+			}
+		}
+
+	} else if (comboBox == electrodeList)
     {
 	     int ID = comboBox->getSelectedId();
 
         if (ID == 0)
         {
-            SpikeDetector* processor = (SpikeDetector*) getProcessor();
-
+      
             processor->setElectrodeName(lastId, comboBox->getText());
             refreshElectrodeList();
 
@@ -563,7 +671,21 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 			advancerList->setSelectedId(advancerIndex,false);
 			depthOffsetEdit->setText(String(e->depthOffsetMM,4),dontSendNotification);
 
-
+			if (processor->getAutoDacAssignmentStatus())
+			{
+				processor->assignDACtoChannel(0, e->channels[0]);
+			}
+			Array<int> dacAssignmentToChannels = processor->getDACassignments();
+			// search for channel[0]. If found, set the combo box accordingly...
+			dacCombo->setSelectedId(1,true);
+			for (int i=0;i<dacAssignmentToChannels.size();i++)
+			{
+				if (dacAssignmentToChannels[i] == e->channels[0])
+				{
+					dacCombo->setSelectedId(i+2,true);
+					break;
+				}
+			}
 
         }
 
