@@ -263,6 +263,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 			if (processor->getAutoDacAssignmentStatus())
 			{
 				processor->assignDACtoChannel(0, channelNum);
+				processor->assignDACtoChannel(1, channelNum);
 			}
 			Array<int> dacAssignmentToChannels = processor->getDACassignments();
 			// search for channel[0]. If found, set the combo box accordingly...
@@ -312,7 +313,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		waveSizeMenu.addSubMenu("Pre samples",waveSizePreMenu);
 		waveSizeMenu.addSubMenu("Post samples",waveSizePostMenu);
 		configMenu.addSubMenu("Waveform size",waveSizeMenu,true);
-		configMenu.addItem(5,"Auto assign DAC1 to current channel",true,processor->getAutoDacAssignmentStatus());
+		configMenu.addItem(5,"Current Channel => Audio",true,processor->getAutoDacAssignmentStatus());
 		const int result = configMenu.show();
 		switch (result)
 		{
@@ -489,6 +490,7 @@ void SpikeDetectorEditor::channelChanged(int chan)
 			if (processor->getAutoDacAssignmentStatus())
 			{
 				processor->assignDACtoChannel(0,chan-1);
+				processor->assignDACtoChannel(1,chan-1);
 				break;
 			}
 
@@ -549,6 +551,7 @@ void SpikeDetectorEditor::refreshElectrodeList(int selected)
 		if (processor->getAutoDacAssignmentStatus())
 		{
 			processor->assignDACtoChannel(0, e->channels[0]);
+			processor->assignDACtoChannel(1, e->channels[0]);
 		}
 		Array<int> dacAssignmentToChannels = processor->getDACassignments();
 		// search for channel[0]. If found, set the combo box accordingly...
@@ -674,6 +677,7 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 			if (processor->getAutoDacAssignmentStatus())
 			{
 				processor->assignDACtoChannel(0, e->channels[0]);
+				processor->assignDACtoChannel(1, e->channels[0]);
 			}
 			Array<int> dacAssignmentToChannels = processor->getDACassignments();
 			// search for channel[0]. If found, set the combo box accordingly...
