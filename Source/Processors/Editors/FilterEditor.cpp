@@ -138,7 +138,7 @@ void FilterEditor::labelTextChanged(Label* label)
 
             if (requestedValue > minVal)
             {
-                fn->setCurrentChannel(n);
+                fn->setCurrentChannel(chans[n]);
                 fn->setParameter(1, requestedValue);
             }
 
@@ -151,7 +151,7 @@ void FilterEditor::labelTextChanged(Label* label)
 
             if (requestedValue < maxVal)
             {
-                fn->setCurrentChannel(n);
+                fn->setCurrentChannel(chans[n]);
                 fn->setParameter(0, requestedValue);
             }
 
@@ -190,7 +190,7 @@ void FilterEditor::buttonEvent(Button* button)
         {
             float newValue = button->getToggleState() ? 1.0 : 0.0;
 
-            fn->setCurrentChannel(n);
+            fn->setCurrentChannel(chans[n]);
             fn->setParameter(2, newValue);
         }
     }
