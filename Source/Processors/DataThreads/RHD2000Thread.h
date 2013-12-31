@@ -116,6 +116,9 @@ private:
     bool acquireAuxChannels;
 
     bool fastSettleEnabled;
+    bool fastTTLSettleEnabled;
+    bool fastSettleTTLChannel;
+    bool ttlMode;
 
     bool dspEnabled;
     double actualDspCutoffFreq, desiredDspCutoffFreq;

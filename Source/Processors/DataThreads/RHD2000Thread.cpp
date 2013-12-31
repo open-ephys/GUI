@@ -44,6 +44,9 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
     acquireAdcChannels(false),
     acquireAuxChannels(true),
     fastSettleEnabled(false),
+    fastTTLSettleEnabled(false),
+    fastSettleTTLChannel(-1),
+    ttlMode(false),
     dspEnabled(true),
     desiredDspCutoffFreq(0.5f),
     desiredUpperBandwidth(7500.0f),
@@ -93,12 +96,17 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
 
         // probably better to do this with a thread, but a timer works for now:
        // startTimer(10); // initialize the board in the background
-	dacChannels = new int[8];
-	dacThresholds = new float[8];
-	dacChannelsToUpdate = new bool[8];
-	for (int k=0;k<8;k++)
-		dacChannelsToUpdate[k] = true;
-	evalBoard->getDacInformation(dacChannels,dacThresholds);
+	   dacChannels = new int[8];
+	   dacThresholds = new float[8];
+	   dacChannelsToUpdate = new bool[8];
+	   for (int k = 0; k < 8; k++)
+       {
+		    dacChannelsToUpdate[k] = true;
+            setDACthreshold(k, 65534);
+       }
+
+	    evalBoard->getDacInformation(dacChannels,dacThresholds);
+        
     }
 }
 
@@ -134,8 +142,8 @@ RHD2000Thread::~RHD2000Thread()
 void RHD2000Thread::setDACthreshold(int dacOutput, float threshold)
 {
 	dacThresholds[dacOutput]= threshold;
-	dacOutputShouldChange = true;
 	dacChannelsToUpdate[dacOutput] = true;
+    dacOutputShouldChange = true;
 
 //	evalBoard->setDacThresholdVoltage(dacOutput,threshold);
 }
@@ -143,8 +151,8 @@ void RHD2000Thread::setDACthreshold(int dacOutput, float threshold)
 void RHD2000Thread::setDACchannel(int dacOutput, int channel)
 {
 	dacChannels[dacOutput] = channel;
-	dacOutputShouldChange = true;
 	dacChannelsToUpdate[dacOutput] = true;
+    dacOutputShouldChange = true;
 	/*
 	if (channel < 0)
 	{
@@ -713,7 +721,9 @@ double RHD2000Thread::setLowerBandwidth(double lower)
 
 void RHD2000Thread::setTTLoutputMode(bool state)
 {
-	evalBoard->setTtlMode(state);
+    ttlMode = state;
+    dacOutputShouldChange = true;
+	
 }
 
 void RHD2000Thread::setDAChpf(float cutoff, bool enabled)
@@ -724,8 +734,9 @@ void RHD2000Thread::setDAChpf(float cutoff, bool enabled)
 
 void RHD2000Thread::setFastTTLSettle(bool state, int channel)
 {
-	evalBoard->setFastSettleByTTL(state);
-	evalBoard->setFastSettleByTTLchannel(channel);
+    fastTTLSettleEnabled = state;
+    fastSettleTTLChannel = channel;
+    dacOutputShouldChange = true;
 }
 
 int RHD2000Thread::setNoiseSlicerLevel(int level)
@@ -1261,7 +1272,7 @@ bool RHD2000Thread::updateBuffer()
 				{
 					evalBoard->enableDac(k, true);
 					evalBoard->selectDacDataChannel(k, dacChannels[k]);
-					evalBoard->setDacThresholdVoltage(k,dacThresholds[k]);
+					evalBoard->setDacThresholdVoltage(k, (int) dacThresholds[k]);
 				}
 				else
 				{
@@ -1269,6 +1280,10 @@ bool RHD2000Thread::updateBuffer()
 				}
 			}
 		}
+
+        evalBoard->setTtlMode(ttlMode);
+        evalBoard->setFastSettleByTTL(fastTTLSettleEnabled);
+        evalBoard->setFastSettleByTTLchannel(fastSettleTTLChannel);
 
 		/*
         if (audioOutputR >= 0)
