@@ -119,6 +119,8 @@ private:
     bool fastTTLSettleEnabled;
     bool fastSettleTTLChannel;
     bool ttlMode;
+	bool desiredDAChpfState;
+	double desiredDAChpf;
 
     bool dspEnabled;
     double actualDspCutoffFreq, desiredDspCutoffFreq;

@@ -153,17 +153,6 @@ void RHD2000Thread::setDACchannel(int dacOutput, int channel)
 	dacChannels[dacOutput] = channel;
 	dacChannelsToUpdate[dacOutput] = true;
     dacOutputShouldChange = true;
-	/*
-	if (channel < 0)
-	{
-		evalBoard->enableDac(dacOutput, false);
-	}
-	else
-	{
-		evalBoard->selectDacDataChannel(dacOutput,channel);
-		evalBoard->enableDac(dacOutput, true);
-	}*/
-
 }
 
 Array<int> RHD2000Thread::getDACchannels()
@@ -728,8 +717,9 @@ void RHD2000Thread::setTTLoutputMode(bool state)
 
 void RHD2000Thread::setDAChpf(float cutoff, bool enabled)
 {
-	evalBoard->setDacHighpassFilter(cutoff);
-	evalBoard->enableDacHighpassFilter(enabled);
+	dacOutputShouldChange = true;
+	desiredDAChpf = cutoff;
+	desiredDAChpfState = enabled;
 }
 
 void RHD2000Thread::setFastTTLSettle(bool state, int channel)
@@ -1284,30 +1274,8 @@ bool RHD2000Thread::updateBuffer()
         evalBoard->setTtlMode(ttlMode);
         evalBoard->setFastSettleByTTL(fastTTLSettleEnabled);
         evalBoard->setFastSettleByTTLchannel(fastSettleTTLChannel);
-
-		/*
-        if (audioOutputR >= 0)
-        {
-            evalBoard->enableDac(0, true);
-            evalBoard->selectDacDataChannel(0, audioOutputR);
-        }
-        else
-        {
-            evalBoard->enableDac(0, false);
-        }
-
-        if (audioOutputL >= 0)
-        {
-            evalBoard->enableDac(1, true);
-            evalBoard->selectDacDataChannel(1, audioOutputL);
-        }
-        else
-        {
-            evalBoard->enableDac(1, false);
-        }
-		*/
-
-
+	    evalBoard->setDacHighpassFilter(desiredDAChpf);
+		evalBoard->enableDacHighpassFilter(desiredDAChpfState);
 
         dacOutputShouldChange = false;
     }
