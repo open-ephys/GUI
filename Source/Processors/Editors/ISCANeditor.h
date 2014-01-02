@@ -28,6 +28,7 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
 #include "../Serial/ofSerial.h"
+#include "VisualizerEditor.h"
 
 class ISCANnode;
 
@@ -40,7 +41,43 @@ class ISCANnode;
 
 */
 
-class ISCANeditor : public GenericEditor,  public ComboBox::Listener
+class ISCANeditor;
+
+class ISCANcanvas : public Visualizer
+
+{
+public:
+    ISCANcanvas(ISCANeditor* ed,ISCANnode* n);
+    ~ISCANcanvas();
+
+    void paint(Graphics& g);
+
+  //  void refresh();
+
+	void beginAnimation() {}
+	void endAnimation() {}
+	
+    void setParameter(int, float) {}
+    void setParameter(int, int, int, float) {}
+	
+	void update() ;
+	void refreshState() ;
+	void refresh() ;
+
+	void resized() ;
+
+    void startRecording() { } // unused
+    void stopRecording() { } // unused
+    
+    ISCANnode* processor;
+	ISCANeditor* editor;
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANcanvas);
+
+};
+
+
+class ISCANeditor : public VisualizerEditor,  public ComboBox::Listener
 {
 public:
     ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
@@ -49,6 +86,7 @@ public:
     void buttonEvent(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
     void collapsedStateChanged();
+	Visualizer* createNewCanvas() ;
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;

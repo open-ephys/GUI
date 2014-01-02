@@ -25,8 +25,52 @@
 #include "../ISCAN.h"
 #include <stdio.h>
 
+ISCANcanvas::ISCANcanvas(ISCANeditor* ed, ISCANnode* n) :
+    processor(n), editor(ed)
+{
+    setWantsKeyboardFocus(true);
+   update();
+	 
+}
+
+
+
+ISCANcanvas::~ISCANcanvas()
+{
+}
+
+void ISCANcanvas::paint(Graphics &g)
+{
+
+
+}
+
+void ISCANcanvas::update()
+{
+	resized();
+	repaint();
+}
+
+
+void ISCANcanvas::resized()
+{
+}
+
+void ISCANcanvas::refresh()
+{
+	repaint();
+}
+
+void ISCANcanvas::refreshState()
+{
+    // called when the component's tab becomes visible again
+    resized();
+}
+
+
+/*************************************/
 ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
-    : GenericEditor(parentNode, useDefaultParameterEditors)
+	: VisualizerEditor(parentNode, useDefaultParameterEditors)
 
 {
 	desiredWidth = 220;
@@ -103,6 +147,15 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
     setEnabledState(false);
 
 }
+
+
+	Visualizer* ISCANeditor::createNewCanvas() 
+{
+   ISCANnode* processor = (ISCANnode*) getProcessor();
+   ISCANcanvas* canvas = new ISCANcanvas(this,processor);
+	return canvas;
+}
+
 
 void ISCANeditor::refreshAnalogDevices()
 {
