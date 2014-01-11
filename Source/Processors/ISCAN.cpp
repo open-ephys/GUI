@@ -124,6 +124,7 @@ bool ISCANnode::connect(int selectedDevice)
 	connected = serialPort.setup(devices[selectedDevice-1].getDeviceID(), 115200);
 	if (connected)
 	{
+		device = devices[selectedDevice-1].getDeviceName();
 		int maxComponents = 3;	//horizontal H1, vertical V1, pupil diameter D1
 		int maxReadQuantum = maxComponents * 7 + 2; // last entry is followed by a tab!
 		int lineTerminator = 10;
@@ -419,6 +420,19 @@ void ISCANnode::loadCustomParametersFromXml()
 				analogXchannel = mainNode->getIntAttribute("analogXchannel");
 				analogYchannel = mainNode->getIntAttribute("analogYchannel");
 				device = mainNode->getStringAttribute("device");
+				if (serialCommunication && device != "")
+				{
+					StringArray serialDevices = getDeviceNames();
+					for (int k=0;k<serialDevices.size();k++)
+					{
+						if (serialDevices[k] == device) {
+							ISCANeditor *ed = (ISCANeditor*) getEditor();
+							ed->setDevice(serialDevices,1+k);
+							connect(k+1);
+							break;
+						}
+					}
+				}
 			}
 		}
 	}

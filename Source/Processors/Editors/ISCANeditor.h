@@ -87,6 +87,7 @@ public:
 	void comboBoxChanged(ComboBox* comboBox);
     void collapsedStateChanged();
 	Visualizer* createNewCanvas() ;
+	void setDevice(StringArray devices,int k);
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;

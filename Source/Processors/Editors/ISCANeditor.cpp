@@ -156,6 +156,12 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
 	return canvas;
 }
 
+	void ISCANeditor::setDevice(StringArray devices, int k)
+	{
+		deviceList->clear();
+		deviceList->addItemList(devices,1);
+		deviceList->setSelectedId(k,true);
+	}
 
 void ISCANeditor::refreshAnalogDevices()
 {
