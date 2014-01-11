@@ -31,6 +31,9 @@ RecordControl::RecordControl()
       createNewFilesOnTrigger(false), triggerChannel(0), recordNode(0),eventsSavedBySink(true)
 {
 	firstTime=true;
+	eventNames.clear();
+	for (int k=0;k<8;k++)
+		eventNames.push_back("TTL "+String(k+1));
 }
 
 RecordControl::~RecordControl()
@@ -43,6 +46,11 @@ StringArray RecordControl::getChannelNames()
 	return names;
 }
 
+std::vector<String> RecordControl::getEventChannelNames()
+{
+	return eventNames;
+}
+
 void RecordControl::updateSettings()
 {
     if (recordNode == 0)
@@ -53,6 +61,7 @@ void RecordControl::updateSettings()
 	StringArray oldnames = names;
 
     names.clear();
+	
     for (int k = 0; k < getNumInputs(); k++)
     {
         names.add(channels[k]->getName());
@@ -121,6 +130,12 @@ void RecordControl::setParameter(int parameterIndex, float newValue)
         
 		eventsSavedBySink = newValue > 0;
         }
+}
+
+
+void RecordControl::modifyEventChannelName(int ch, String newname)
+{
+    	eventNames[ch] = newname;
 }
 
 void RecordControl::modifyChannelName(int ch, String newname)

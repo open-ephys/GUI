@@ -49,8 +49,9 @@ public:
     void saveCustomParameters(XmlElement*);
 	void disableButtons();
 	void enableButtons();
+	void updateEventNames();
 private:
-	int lastId;
+	int lastId,lastTTLid;
 	StringArray channelNames;
     ScopedPointer<ComboBox> availableChans,chanRenameCombo;
     ScopedPointer<Label> chanSel,chanRename;

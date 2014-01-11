@@ -54,8 +54,11 @@ public:
     bool isUtility() {return true;}
 	void updateSettings();
 	void modifyChannelName(int ch, String newname);
-    AudioProcessorEditor* createEditor();
+	void modifyEventChannelName(int ch, String newname);
 
+    AudioProcessorEditor* createEditor();
+	
+	std::vector<String> getEventChannelNames();
 private:
 	
 	void startRecording() ;
@@ -64,6 +67,7 @@ private:
     int triggerChannel;
     bool eventsSavedBySink,firstTime;
     StringArray names;
+	std::vector<String> eventNames;
 
     RecordNode* recordNode;
 

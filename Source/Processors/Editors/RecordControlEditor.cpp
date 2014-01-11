@@ -64,7 +64,7 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
 
     availableChans = new ComboBox("Event Channels");
 
-    availableChans->setEditableText(false);
+    availableChans->setEditableText(true);
     availableChans->setJustificationType(Justification::centredLeft);
     availableChans->addListener(this);
     availableChans->setBounds(100,60,120,20);
@@ -73,9 +73,9 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
     addAndMakeVisible(availableChans);
     
     availableChans->addItem("None",1);
-    for (int i = 0; i < 10 ; i++)
+    for (int i = 0; i < 8 ; i++)
     {
-        String channelName = "Channel ";
+        String channelName = "TTL ";
         channelName += i + 1;
         availableChans->addItem(channelName,i+2);
     }
@@ -97,7 +97,7 @@ RecordControlEditor::RecordControlEditor(GenericProcessor* parentNode, bool useD
     eventsBySink->setClickingTogglesState(true);
 	eventsBySink->setToggleState(true,true);
     addAndMakeVisible(eventsBySink);
-	lastId = 0;
+	lastTTLid = lastId = 0;
 }
 
 RecordControlEditor::~RecordControlEditor()
@@ -109,10 +109,28 @@ void RecordControlEditor::comboBoxChanged(ComboBox* comboBox)
 {
 	if (comboBox == availableChans)
 	{
+	     int ID = comboBox->getSelectedId();
+		 if (ID == 0)
+			{
+				// TTL name change
+				if (lastTTLid-2 >= 0)
+				{
+					RecordControl *p = (RecordControl *) getProcessor();
+					p->modifyEventChannelName(lastTTLid-2, comboBox->getText());
+					updateEventNames();
+					comboBox->setSelectedId(lastTTLid,dontSendNotification);
+				}
+
+		 } else
+		 {
+
 		if (comboBox->getSelectedId() > 1)
 	        getProcessor()->setParameter(0, (float) comboBox->getSelectedId()-2);
 	    else
 			getProcessor()->setParameter(0, -1);
+			lastTTLid = ID;
+		 }
+
 	} else if (comboBox == chanRenameCombo)
 	{
 
@@ -157,6 +175,16 @@ void RecordControlEditor::updateNames()
 	chanRenameCombo->addItemList(names,1);
 }
 
+void RecordControlEditor::updateEventNames()
+{
+	RecordControl *p = (RecordControl *) getProcessor();
+	std::vector<String> names = p->getEventChannelNames();
+	availableChans->clear();
+	availableChans->addItem("None",1);
+	for (int k=0;k<names.size();k++)
+		availableChans->addItem(names[k],2+k);
+}
+
 void RecordControlEditor::disableButtons()
 {
 	chanRenameCombo->setEnabled(false);
@@ -186,6 +214,7 @@ void RecordControlEditor::saveCustomParameters(XmlElement* xml)
 
 	RecordControl *p = (RecordControl *) getProcessor();
 	StringArray names = p->getChannelNames();
+	std::vector<String> eventNames = p->getEventChannelNames();
 
 	info->setAttribute("numChannels",names.size());
     for (int k=0;k<names.size();k++)
@@ -193,6 +222,13 @@ void RecordControlEditor::saveCustomParameters(XmlElement* xml)
 		XmlElement* ch = xml->createNewChildElement("CHANNEL_NAME");
 		ch->setAttribute("Name",names[k]);
 	}
+
+	for (int k=0;k<eventNames.size();k++)
+	{
+		XmlElement* ch = xml->createNewChildElement("EVENT_CHANNEL_NAME");
+		ch->setAttribute("Name",eventNames[k]);
+	}
+	
 }
 
 void RecordControlEditor::loadCustomParameters(XmlElement* xml)
@@ -209,6 +245,7 @@ void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 
 			int numCh = xmlNode->getIntAttribute("numChannels");
 			int ch = 0;
+			int eventch = 0;
 		    forEachXmlChildElement(*xml, xmlSubNode)
 			{
 				  if (xmlSubNode->hasTagName("CHANNEL_NAME"))
@@ -216,8 +253,14 @@ void RecordControlEditor::loadCustomParameters(XmlElement* xml)
 					  String chName = xmlSubNode->getStringAttribute("Name", "Name");
 					  p->modifyChannelName(ch++, chName);
 				  }
+				  if (xmlSubNode->hasTagName("EVENT_CHANNEL_NAME"))
+				  {
+					  String chName = xmlSubNode->getStringAttribute("Name", "Name");
+					  p->modifyEventChannelName(eventch++, chName);
+				  }
 			}
         }
     }
 	updateNames();
+	updateEventNames();
 }
