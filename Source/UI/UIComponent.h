@@ -180,12 +180,8 @@ private:
     ScopedPointer<ControlPanel> controlPanel;
     ScopedPointer<MessageCenter> messageCenter;
     ScopedPointer<InfoLabel> infoLabel;
-<<<<<<< HEAD
 	ScopedPointer<LogWindow> logWindow;
-=======
     ScopedPointer<GraphViewer> graphViewer;
->>>>>>> master
-
 	
     /** Pointer to the GUI's MainWindow, which owns the UIComponent. */
     MainWindow* mainWindow;

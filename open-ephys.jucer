@@ -227,6 +227,30 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <FILE id="EfiSON" name="ISCAN.cpp" compile="1" resource="0" file="Source/Processors/ISCAN.cpp"/>
+        <FILE id="g6IxtJ" name="ISCAN.h" compile="0" resource="0" file="Source/Processors/ISCAN.h"/>
+        <FILE id="XKaTgW" name="PeriStimulusTimeHistogramNode.cpp" compile="1"
+              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.cpp"/>
+        <FILE id="T2ALk8" name="PeriStimulusTimeHistogramNode.h" compile="0"
+              resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.h"/>
+        <FILE id="TltaEo" name="AdvancerNode.cpp" compile="1" resource="0"
+              file="Source/Processors/AdvancerNode.cpp"/>
+        <FILE id="FvmUUk" name="AdvancerNode.h" compile="0" resource="0" file="Source/Processors/AdvancerNode.h"/>
+        <FILE id="km1fhp" name="NetworkEvents.cpp" compile="1" resource="0"
+              file="Source/Processors/NetworkEvents.cpp"/>
+        <FILE id="ML6E2P" name="NetworkEvents.h" compile="0" resource="0" file="Source/Processors/NetworkEvents.h"/>
+        <FILE id="AH2Min" name="TrialCircularBuffer.cpp" compile="1" resource="0"
+              file="Source/Processors/TrialCircularBuffer.cpp"/>
+        <FILE id="PJCvBC" name="TrialCircularBuffer.h" compile="0" resource="0"
+              file="Source/Processors/TrialCircularBuffer.h"/>
+        <FILE id="dfjhUj" name="NetworkSink.cpp" compile="1" resource="0" file="Source/Processors/NetworkSink.cpp"/>
+        <FILE id="XZ0UxR" name="NetworkSink.h" compile="0" resource="0" file="Source/Processors/NetworkSink.h"/>
+        <FILE id="ouREYB" name="NetworkSinkProcotol.pb.cc" compile="1" resource="0"
+              file="Source/Processors/NetworkSinkProcotol.pb.cc"/>
+        <FILE id="jRQhVx" name="NetworkSinkProcotol.pb.h" compile="0" resource="0"
+              file="Source/Processors/NetworkSinkProcotol.pb.h"/>
+        <FILE id="Yj1umv" name="SerialInput.cpp" compile="1" resource="0" file="Source/Processors/SerialInput.cpp"/>
+        <FILE id="TSsuVv" name="SerialInput.h" compile="0" resource="0" file="Source/Processors/SerialInput.h"/>
         <FILE id="EaYxAN" name="SpikeSortBoxes.cpp" compile="1" resource="0"
               file="Source/Processors/SpikeSortBoxes.cpp"/>
         <FILE id="GbKVWT" name="SpikeSortBoxes.h" compile="0" resource="0"
@@ -324,6 +348,28 @@
         <FILE id="hGnGAjh" name="EventNode.cpp" compile="1" resource="0" file="Source/Processors/EventNode.cpp"/>
         <FILE id="dUtRN6" name="EventNode.h" compile="0" resource="0" file="Source/Processors/EventNode.h"/>
         <GROUP id="AqvwO6w" name="Editors">
+          <FILE id="JjlNGG" name="NetworkEventsEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
+          <FILE id="lUiYWT" name="NetworkEventsEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/NetworkEventsEditor.h"/>
+          <FILE id="yQ68uW" name="AdvancerEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/Editors/AdvancerEditor.cpp"/>
+          <FILE id="tRdvgP" name="AdvancerEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/AdvancerEditor.h"/>
+          <FILE id="WI2pEJ" name="ISCANeditor.cpp" compile="1" resource="0" file="Source/Processors/Editors/ISCANeditor.cpp"/>
+          <FILE id="JZnw0O" name="ISCANeditor.h" compile="0" resource="0" file="Source/Processors/Editors/ISCANeditor.h"/>
+          <FILE id="jQo6Ff" name="LfpTriggeredAverageEditor.cpp" compile="1"
+                resource="0" file="Source/Processors/Editors/LfpTriggeredAverageEditor.cpp"/>
+          <FILE id="RaQC38" name="LfpTriggeredAverageEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/LfpTriggeredAverageEditor.h"/>
+          <FILE id="zZS37c" name="PeriStimulusTimeHistogramEditor.cpp" compile="1"
+                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp"/>
+          <FILE id="WQDA9r" name="PeriStimulusTimeHistogramEditor.h" compile="0"
+                resource="0" file="Source/Processors/Editors/PeriStimulusTimeHistogramEditor.h"/>
+          <FILE id="D3eN0G" name="SerialInputEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/Editors/SerialInputEditor.cpp"/>
+          <FILE id="iG39Gh" name="SerialInputEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/SerialInputEditor.h"/>
           <FILE id="E2PXvz" name="ElectrodeButtons.cpp" compile="1" resource="0"
                 file="Source/Processors/Editors/ElectrodeButtons.cpp"/>
           <FILE id="yriJOG" name="ElectrodeButtons.h" compile="0" resource="0"
@@ -485,6 +531,8 @@
               file="Source/Processors/ProcessorGraph.h"/>
       </GROUP>
       <GROUP id="RNGb1yR" name="UI">
+        <FILE id="aHMWGl" name="GraphViewer.cpp" compile="1" resource="0" file="Source/UI/GraphViewer.cpp"/>
+        <FILE id="EOJ8RU" name="GraphViewer.h" compile="0" resource="0" file="Source/UI/GraphViewer.h"/>
         <FILE id="sWZ22HN" name="EditorViewportButtons.cpp" compile="1" resource="0"
               file="Source/UI/EditorViewportButtons.cpp"/>
         <FILE id="WwXnCHj" name="EditorViewportButtons.h" compile="0" resource="0"

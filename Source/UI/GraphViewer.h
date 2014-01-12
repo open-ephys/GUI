@@ -97,6 +97,7 @@ public:
     void addNode(GenericEditor* editor);
     void removeNode(GenericEditor* editor);
     void removeAllNodes();
+    void updateNodeLocations();;
 
     int nodesAtLevel(int lvl);
     int getHorizontalShift(GraphNode*);
@@ -106,7 +107,7 @@ private:
     void connectNodes(int, int, Graphics&);
     void checkLayout();
     
-    void updateNodeLocations();
+    
     int indexOfEditor(GenericEditor* editor);
     
     Font labelFont;

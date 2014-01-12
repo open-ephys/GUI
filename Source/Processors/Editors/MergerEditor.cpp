@@ -160,6 +160,8 @@ void MergerEditor::mouseDown(const MouseEvent& e)
             processor->setMergerSourceNode(availableProcessors[result-2]);
             availableProcessors[result-2]->setDestNode(getProcessor());
 
+            getGraphViewer()->updateNodeLocations();
+
             getEditorViewport()->makeEditorVisible(this, false, true);
         }
     }

@@ -829,11 +829,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             // processor->setDataViewport(getDataViewport());
             //processor->setUIComponent(UI);
         }
-        else if (subProcessorType.equalsIgnoreCase("LFP Trig. Avg."))
-        {
-            std::cout << "Creating an LfpTrigAvgNode." << std::endl;
-            processor = new LfpTriggeredAverageNode();
-        }                   
+        // else if (subProcessorType.equalsIgnoreCase("LFP Trig. Avg."))
+        // {
+        //     std::cout << "Creating an LfpTrigAvgNode." << std::endl;
+        //     processor = new LfpTriggeredAverageNode();
+        // }                   
         
         else if (subProcessorType.equalsIgnoreCase("Spike Viewer"))
         {

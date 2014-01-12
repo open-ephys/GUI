@@ -63,6 +63,14 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/ISCAN_d4969b61.o \
+  $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
+  $(OBJDIR)/AdvancerNode_12999801.o \
+  $(OBJDIR)/NetworkEvents_28b3b762.o \
+  $(OBJDIR)/TrialCircularBuffer_93e57770.o \
+  $(OBJDIR)/NetworkSink_28a35cdc.o \
+  $(OBJDIR)/NetworkSinkProcotol.pb_4af1b0cd.o \
+  $(OBJDIR)/SerialInput_855a46b1.o \
   $(OBJDIR)/SpikeSortBoxes_e42a3d04.o \
   $(OBJDIR)/FileReader_18023b0e.o \
   $(OBJDIR)/ChannelMappingNode_d9219b9c.o \
@@ -92,6 +100,12 @@ OBJECTS := \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
+  $(OBJDIR)/NetworkEventsEditor_fd22826.o \
+  $(OBJDIR)/AdvancerEditor_6d27d95.o \
+  $(OBJDIR)/ISCANeditor_2fa05bc5.o \
+  $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o \
+  $(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o \
+  $(OBJDIR)/SerialInputEditor_c00f31f5.o \
   $(OBJDIR)/ElectrodeButtons_a6064cc.o \
   $(OBJDIR)/ChannelMappingEditor_dd803b0.o \
   $(OBJDIR)/FileReaderEditor_16fd7744.o \
@@ -135,6 +149,7 @@ OBJECTS := \
   $(OBJDIR)/SourceNode_c2d6336c.o \
   $(OBJDIR)/GenericProcessor_733760aa.o \
   $(OBJDIR)/ProcessorGraph_68b34a0b.o \
+  $(OBJDIR)/GraphViewer_e43fd2ce.o \
   $(OBJDIR)/EditorViewportButtons_29af2a5c.o \
   $(OBJDIR)/SignalChainManager_d2b643f0.o \
   $(OBJDIR)/EditorViewport_1d991caf.o \
@@ -283,6 +298,46 @@ $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	@echo "Compiling AudioComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/ISCAN_d4969b61.o: ../../Source/Processors/ISCAN.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ISCAN.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o: ../../Source/Processors/PeriStimulusTimeHistogramNode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PeriStimulusTimeHistogramNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AdvancerNode_12999801.o: ../../Source/Processors/AdvancerNode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling AdvancerNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkEvents_28b3b762.o: ../../Source/Processors/NetworkEvents.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkEvents.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/TrialCircularBuffer_93e57770.o: ../../Source/Processors/TrialCircularBuffer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling TrialCircularBuffer.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkSink_28a35cdc.o: ../../Source/Processors/NetworkSink.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkSink.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkSinkProcotol.pb_4af1b0cd.o: ../../Source/Processors/NetworkSinkProcotol.pb.cc
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkSinkProcotol.pb.cc"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/SerialInput_855a46b1.o: ../../Source/Processors/SerialInput.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling SerialInput.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/SpikeSortBoxes_e42a3d04.o: ../../Source/Processors/SpikeSortBoxes.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SpikeSortBoxes.cpp"
@@ -426,6 +481,36 @@ $(OBJDIR)/AudioNode_94606ff3.o: ../../Source/Processors/AudioNode.cpp
 $(OBJDIR)/EventNode_95c842b7.o: ../../Source/Processors/EventNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling EventNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/NetworkEventsEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NetworkEventsEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AdvancerEditor_6d27d95.o: ../../Source/Processors/Editors/AdvancerEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling AdvancerEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ISCANeditor_2fa05bc5.o: ../../Source/Processors/Editors/ISCANeditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ISCANeditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o: ../../Source/Processors/Editors/LfpTriggeredAverageEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling LfpTriggeredAverageEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o: ../../Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PeriStimulusTimeHistogramEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/SerialInputEditor_c00f31f5.o: ../../Source/Processors/Editors/SerialInputEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling SerialInputEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ElectrodeButtons_a6064cc.o: ../../Source/Processors/Editors/ElectrodeButtons.cpp
@@ -641,6 +726,11 @@ $(OBJDIR)/GenericProcessor_733760aa.o: ../../Source/Processors/GenericProcessor.
 $(OBJDIR)/ProcessorGraph_68b34a0b.o: ../../Source/Processors/ProcessorGraph.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ProcessorGraph.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/GraphViewer_e43fd2ce.o: ../../Source/UI/GraphViewer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling GraphViewer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/EditorViewportButtons_29af2a5c.o: ../../Source/UI/EditorViewportButtons.cpp
