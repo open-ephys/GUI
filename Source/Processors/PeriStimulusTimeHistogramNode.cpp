@@ -478,6 +478,7 @@ void PeriStimulusTimeHistogramNode::startRecording()
 			{
 				StringTS s = networkEventsHistory.front();
 				dumpNetworkEventToDisk(s.getString(),s.timestamp);
+				networkEventsHistory.pop();
 			}
 		}
 
