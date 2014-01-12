@@ -180,6 +180,7 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			
 			m.addItem(1,"TTL",true, processor->saveTTLs);
 			m.addItem(2,"Network Events",true, processor->saveNetworkEvents);
+			m.addItem(7,"Network Events [when recording is off]",true, processor->saveNetworkEventsWhenNotRecording);
 			m.addItem(3,"Eye Tracking",true, processor->saveEyeTracking);
 			
 			m.addItem(4,"Sorted Spikes: TS only ",true, processor->spikeSavingMode == 1);
@@ -215,6 +216,9 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 					processor->spikeSavingMode = 0;
 				else
 					processor->spikeSavingMode = 3;
+			} else if (result == 7)
+			{
+				processor->saveNetworkEventsWhenNotRecording = !processor->saveNetworkEventsWhenNotRecording;
 			}
 			
 		} else if (button == visibleConditions)

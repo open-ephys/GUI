@@ -82,6 +82,7 @@ public:
 	TrialCircularBuffer *trialCircularBuffer;
 	bool saveTTLs, saveNetworkEvents,saveEyeTracking ;
 	int spikeSavingMode;
+	bool saveNetworkEventsWhenNotRecording;
 	
 private:
 
@@ -102,7 +103,7 @@ private:
 	int syncCounter;
 	int64 hardware_timestamp,software_timestamp;
 
-
+	std::queue<StringTS> networkEventsHistory;
     RecordNode* recordNode;
     uint16 recordingNumber;
     CriticalSection* diskWriteLock;

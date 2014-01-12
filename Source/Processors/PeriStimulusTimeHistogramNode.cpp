@@ -36,6 +36,7 @@ PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
 	eventFile = nullptr;
 	isRecording = false;
 	saveEyeTracking = saveTTLs = saveNetworkEvents = true;
+	saveNetworkEventsWhenNotRecording = false;
 	spikeSavingMode = 2;
 	syncCounter = 0;
 }
@@ -305,6 +306,9 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		if (isRecording && saveNetworkEvents)
 		{
 			dumpNetworkEventToDisk(s.getString(),s.timestamp);
+		} else if (!isRecording && saveNetworkEvents && saveNetworkEventsWhenNotRecording)
+		{
+			networkEventsHistory.push(s);
 		}
 
 	}
@@ -466,6 +470,17 @@ void PeriStimulusTimeHistogramNode::startRecording()
         String baseDirectory = dataDirectory.getFullPathName();
 		String eventChannelFilename = baseDirectory + dataDirectory.separatorString + "all_channels.events";
         openFile(eventChannelFilename);
+
+		// dump network events that arrived when we weren't recording
+		if (saveNetworkEventsWhenNotRecording)
+		{
+			while (networkEventsHistory.size() > 0)
+			{
+				StringTS s = networkEventsHistory.front();
+				dumpNetworkEventToDisk(s.getString(),s.timestamp);
+			}
+		}
+
 		recordingNumber = recordNode->getRecordingNumber();
 		Time t;
 		dumpStartStopRecordEventToDisk(t.getHighResolutionTicks(), true);
