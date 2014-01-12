@@ -476,7 +476,8 @@ public:
         EEG = 5,
         CONTINUOUS = 6,
 		NETWORK = 7,
-		EYE_POSITION = 8
+		EYE_POSITION = 8,
+        SERIAL = 9
     };
 
     enum eventChannelTypes

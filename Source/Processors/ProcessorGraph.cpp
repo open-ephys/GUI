@@ -52,6 +52,7 @@
 #include "ArduinoOutput.h"
 #include "FPGAOutput.h"
 #include "PulsePalOutput.h"
+#include "SerialInput.h"
 #include "Utilities/RecordControl.h"
 #include "Utilities/Splitter.h"
 #include "Utilities/Merger.h"
@@ -141,8 +142,7 @@ void ProcessorGraph::updatePointers()
 }
 
 void* ProcessorGraph::createNewProcessor(String& description, int id)//,
-// GenericProcessor* source,
-// GenericProcessor* dest)
+
 {
 
     GenericProcessor* processor = createProcessorFromDescription(description);
@@ -719,6 +719,13 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             std::cout << "Creating a new network events source." << std::endl;
 			processor = new NetworkEvents(zmqcontext);
         } 
+        else if (subProcessorType.equalsIgnoreCase("Serial Port"))
+        {
+            processor = new SerialInput();
+            std::cout << "Creating a new serial port input." << std::endl;
+        }
+
+
 
         sendActionMessage("New source node created.");
 
@@ -986,10 +993,6 @@ bool ProcessorGraph::disableProcessors()
 void ProcessorGraph::setRecordState(bool isRecording)
 {
 
-   // const MessageManagerLock mmLock; // lock the message manager to prevent rendering crashes
-    
-    // inform other processors that recording will begin
-
     // actually start recording
     if (isRecording)
     {
@@ -1033,15 +1036,3 @@ RecordNode* ProcessorGraph::getRecordNode()
     return (RecordNode*) node->getProcessor();
 
 }
-
-// void ProcessorGraph::saveState()
-// {
-// 	File file = File("./savedState.xml");
-// 	getEditorViewport()->saveState(file);
-// }
-
-// void ProcessorGraph::loadState()
-// {
-// 	File file = File("./savedState.xml");
-// 	getEditorViewport()->loadState(file);
-// }

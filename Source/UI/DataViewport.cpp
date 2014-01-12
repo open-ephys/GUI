@@ -105,6 +105,7 @@ void DataViewport::destroyTab(int index)
         setVisible(false);
 
     setCurrentTabIndex(tabArray.size()-1);
+
 }
 
 void DataViewport::disableConnectionToEditorViewport()

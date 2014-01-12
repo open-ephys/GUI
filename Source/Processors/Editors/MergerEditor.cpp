@@ -188,6 +188,24 @@ void MergerEditor::switchSource(int source)
     }
 }
 
+int MergerEditor::getPathForEditor(GenericEditor* editor)
+{
+    Merger* processor = (Merger*) getProcessor();
+    
+    for (int pathNum = 0; pathNum < 2; pathNum++)
+    {
+    switchSource(pathNum);
+    
+    if (processor->getSourceNode() != nullptr)
+    {
+        if (processor->getEditor() == editor)
+            return pathNum;
+    }
+    }
+    
+    return -1;
+
+}
 
 void MergerEditor::switchIO(int source)
 {
@@ -195,6 +213,7 @@ void MergerEditor::switchIO(int source)
 
     select();
 }
+
 
 void MergerEditor::switchSource()
 {

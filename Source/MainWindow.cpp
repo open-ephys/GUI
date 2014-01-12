@@ -212,7 +212,6 @@ void MainWindow::loadWindowBounds()
 
             }
 
-
         }
 
         delete xml;

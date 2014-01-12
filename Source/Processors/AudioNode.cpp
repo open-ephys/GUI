@@ -26,7 +26,7 @@
 #include "Channel.h"
 
 AudioNode::AudioNode()
-    : GenericProcessor("Audio Node"), audioEditor(0), volume(0.00001f), 
+    : GenericProcessor("Audio Node"), audioEditor(0), volume(0.00001f), noiseGateLevel(0.0f),
     bufferA(2,10000),
     bufferB(2,10000)
 {
@@ -137,6 +137,12 @@ void AudioNode::setParameter(int parameterIndex, float newValue)
         // volume level
         volume = newValue*0.1f;
 
+    }
+    else if (parameterIndex == 2)
+    {
+        // noiseGateLevel level
+        noiseGateLevel = newValue; // in microVolts
+        
     }
     else if (parameterIndex == 100)
     {
@@ -289,6 +295,8 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                     } // copying buffer
 
                     gain = volume/(float(0x7fff) * channelPointers[i-2]->bitVolts);
+                    // Data are floats in units of microvolts, so dividing by bitVolts and 0x7fff (max value for 16b signed)
+                    // rescales to between -1 and +1. Audio output starts So, maximum gain applied to maximum data would be 10.
 
                     int remainingSamples = numSamplesExpected - samplesToCopy;
 
@@ -318,6 +326,7 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                                    remainingSamples, //  number of samples
                                    gain       // gain to apply
                                   );
+
                     }
 
                     orphanedSamples = nSamples - samplesToCopy2;
@@ -336,7 +345,7 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                                    gain       // gain to apply
                                   );
 
-                        backupBuffer->addFrom(0,       // destination channel
+                          backupBuffer->addFrom(0,       // destination channel
                                    samplesInBackupBuffer,           // destination start sample
                                    buffer,      // source
                                    i,           // source channel
@@ -346,7 +355,18 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                                   );
 
                     }
-
+                    
+                    // Simple implementation of a "noise gate" on audio output
+                    float *leftChannelData = buffer.getSampleData(0);
+                    float *rightChannelData = buffer.getSampleData(1);
+                    float gateLevel = noiseGateLevel * gain; // uVolts scaled by gain
+                    
+                    for (int m = 0; m < buffer.getNumSamples(); m++) {
+                        if (fabs(leftChannelData[m])  < gateLevel)
+                            leftChannelData[m] = 0;
+                        if (fabs(rightChannelData[m]) < gateLevel)
+                            rightChannelData[m] = 0;
+                    }
                 }
             }
 

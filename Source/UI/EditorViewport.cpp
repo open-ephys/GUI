@@ -23,8 +23,12 @@
 
 #include "EditorViewport.h"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 #include "SignalChainManager.h"
+#include "GraphViewer.h"
 #include "EditorViewportButtons.h"
 
 EditorViewport::EditorViewport()
@@ -267,6 +271,8 @@ void EditorViewport::itemDropped(const SourceDetails& dragSourceDetails)
         refreshEditors();
 
         somethingIsBeingDraggedOver = false;
+        
+        getGraphViewer()->addNode(activeEditor);
 
         repaint();
 
@@ -282,6 +288,7 @@ void EditorViewport::clearSignalChain()
         std::cout << "Clearing signal chain." << std::endl;
         signalChainManager->clearSignalChain();
         getProcessorGraph()->clearSignalChain();
+        getGraphViewer()->removeAllNodes();
 
     }
     else
@@ -328,7 +335,8 @@ void EditorViewport::deleteNode(GenericEditor* editor)
         editor->setVisible(false);
 
         signalChainManager->updateVisibleEditors(editor, indexOfMovingComponent, insertionPoint, REMOVE);
-
+        getGraphViewer()->removeNode(editor);
+        
         refreshEditors();
 
         getProcessorGraph()->removeProcessor((GenericProcessor*) editor->getProcessor());
@@ -337,6 +345,8 @@ void EditorViewport::deleteNode(GenericEditor* editor)
         indexOfMovingComponent = -1;
 
         somethingIsBeingDraggedOver = false;
+        
+        
 
         repaint();
 
