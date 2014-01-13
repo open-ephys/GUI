@@ -206,8 +206,8 @@ public:
 	int TTLchannelTrialAlignment;
 	int smoothingMS;
 
-	void saveCustomParameters(XmlElement* xml);
-	void loadCustomParameters(XmlElement* xml);
+	void saveVisualizerParameters(XmlElement* xml);
+	void loadVisualizerParameters(XmlElement* xml);
 
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;

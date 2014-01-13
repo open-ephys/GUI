@@ -99,7 +99,7 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 
 
-void PeriStimulusTimeHistogramEditor::saveCustomParameters(XmlElement* xml)
+void PeriStimulusTimeHistogramEditor::saveVisualizerParameters(XmlElement* xml)
 {
 
      XmlElement* xmlNode = xml->createNewChildElement("PSTH_EDITOR");
@@ -114,7 +114,7 @@ void PeriStimulusTimeHistogramEditor::saveCustomParameters(XmlElement* xml)
 	 xmlNode->setAttribute("smoothingMS",smoothingMS);
 }
 
-void PeriStimulusTimeHistogramEditor::loadCustomParameters(XmlElement* xml)
+void PeriStimulusTimeHistogramEditor::loadVisualizerParameters(XmlElement* xml)
 {
     forEachXmlChildElement(*xml, xmlNode)
     {
