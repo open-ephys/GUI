@@ -205,6 +205,10 @@ public:
 	bool showSortedUnits,showLFP,showCompactView,showSmooth,showAutoRescale,showMatchRange;
 	int TTLchannelTrialAlignment;
 	int smoothingMS;
+
+	void saveCustomParameters(XmlElement* xml);
+	void loadCustomParameters(XmlElement* xml);
+
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;

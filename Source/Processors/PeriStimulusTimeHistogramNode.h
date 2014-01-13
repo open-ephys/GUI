@@ -78,6 +78,8 @@ public:
 	void reallocate(int numChannels);
 	void stopRecording();
 	void startRecording();
+	void saveCustomParametersToXml(XmlElement* parentElement);
+	void loadCustomParametersFromXml();
 
 	TrialCircularBuffer *trialCircularBuffer;
 	bool saveTTLs, saveNetworkEvents,saveEyeTracking ;

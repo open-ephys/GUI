@@ -41,6 +41,39 @@ PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
 	syncCounter = 0;
 }
 
+
+void PeriStimulusTimeHistogramNode::saveCustomParametersToXml(XmlElement* parentElement)
+{
+    XmlElement* mainNode = parentElement->createNewChildElement("PSTH");
+    mainNode->setAttribute("saveEyeTracking", saveEyeTracking);
+    mainNode->setAttribute("saveTTLs", saveTTLs);
+	mainNode->setAttribute("saveNetworkEvents", saveNetworkEvents);
+	mainNode->setAttribute("saveNetworkEventsWhenNotRecording", saveNetworkEventsWhenNotRecording);
+	mainNode->setAttribute("spikeSavingMode", spikeSavingMode);
+}
+
+
+
+void PeriStimulusTimeHistogramNode::loadCustomParametersFromXml()
+{
+	if (parametersAsXml != nullptr)
+	{
+		forEachXmlChildElement(*parametersAsXml, mainNode)
+		{
+			if (mainNode->hasTagName("PSTH"))
+			{
+				int numElectrodes = mainNode->getIntAttribute("numElectrodes");
+
+				saveEyeTracking = mainNode->getBoolAttribute("saveEyeTracking");
+				saveTTLs = mainNode->getBoolAttribute("saveTTLs");
+				saveNetworkEvents = mainNode->getBoolAttribute("saveNetworkEvents");
+				saveNetworkEventsWhenNotRecording = mainNode->getBoolAttribute("saveNetworkEventsWhenNotRecording");
+				spikeSavingMode = mainNode->getIntAttribute("spikeSavingMode");
+			}
+		}
+	}
+}
+
 PeriStimulusTimeHistogramNode::~PeriStimulusTimeHistogramNode()
 {
     

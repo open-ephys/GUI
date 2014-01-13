@@ -97,11 +97,57 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 
 }
 
+
+
+void PeriStimulusTimeHistogramEditor::saveCustomParameters(XmlElement* xml)
+{
+
+     XmlElement* xmlNode = xml->createNewChildElement("PSTH_EDITOR");
+     xmlNode->setAttribute("showSortedUnits",showSortedUnits);
+
+     xmlNode->setAttribute("showLFP",showLFP);
+	 xmlNode->setAttribute("showCompactView",showCompactView);
+	 xmlNode->setAttribute("showSmooth",showSmooth);
+	 xmlNode->setAttribute("showAutoRescale",showAutoRescale);
+	 xmlNode->setAttribute("showMatchRange",showMatchRange);
+	 xmlNode->setAttribute("TTLchannelTrialAlignment",TTLchannelTrialAlignment);
+	 xmlNode->setAttribute("smoothingMS",smoothingMS);
+}
+
+void PeriStimulusTimeHistogramEditor::loadCustomParameters(XmlElement* xml)
+{
+    forEachXmlChildElement(*xml, xmlNode)
+    {
+        if (xmlNode->hasTagName("PSTH_EDITOR"))
+		{
+
+			showLFP = xmlNode->getBoolAttribute("showLFP");
+			showCompactView = xmlNode->getBoolAttribute("showCompactView");
+			showSmooth = xmlNode->getBoolAttribute("showSmooth");
+			showAutoRescale = xmlNode->getBoolAttribute("showAutoRescale");
+			showMatchRange = xmlNode->getBoolAttribute("showMatchRange");
+			TTLchannelTrialAlignment = xmlNode->getIntAttribute("TTLchannelTrialAlignment");
+			smoothingMS = xmlNode->getIntAttribute("smoothingMS");
+
+			if (periStimulusTimeHistogramCanvas != nullptr)
+			{
+				periStimulusTimeHistogramCanvas->setLFPvisibility(showLFP);
+				periStimulusTimeHistogramCanvas->setSpikesVisibility(showSortedUnits);
+				periStimulusTimeHistogramCanvas->setCompactView(showCompactView);
+				periStimulusTimeHistogramCanvas->setAutoRescale(showAutoRescale);
+				periStimulusTimeHistogramCanvas->setMatchRange(showMatchRange);
+				periStimulusTimeHistogramCanvas->setSmoothing(smoothingMS);
+			}
+		}
+	}
+}
+
+
 void PeriStimulusTimeHistogramEditor::comboBoxChanged(ComboBox* comboBox)
 {
 	if (comboBox == hardwareTrialAlignment)
 	{
-
+		// TODO
 	}
 }
 
@@ -170,6 +216,7 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			} 
 			if (result >= 40 && result <= 47)
 			{
+				smoothingMS = SmoothingFactors[result-40];
 				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40]);
 			}
 	} else if (button == saveOptions)
@@ -513,7 +560,11 @@ void PeriStimulusTimeHistogramCanvas::update()
 		if (!compactView &&  plottedSomething) 
 			row++;			
 	}
-	numRows = row;
+	if (compactView)
+		numRows = row+1;//MAX(1,row);
+	else
+		numRows = row;
+
 	if (maxUnitsPerElectrode == 0 && !showLFP) {
 		// nothing to be drawn...
 		processor->trialCircularBuffer->unlockPSTH();
@@ -1441,3 +1492,5 @@ void XYPlot::paint(Graphics &g)
 	}
 
 }
+
+

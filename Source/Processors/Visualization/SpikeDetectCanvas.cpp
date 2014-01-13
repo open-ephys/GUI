@@ -614,7 +614,12 @@ void SpikeHistogramPlot::buttonClicked(Button* button)
         ranges.set(index, 500.0f);
         label = "500";
     }
-    else if (ranges[index] == 500.0f)
+	 else if (ranges[index] == 500.0f)
+    {
+        ranges.set(index, 1000.0f);
+        label = "1000";
+    }
+    else if (ranges[index] == 1000.0f)
     {
         ranges.set(index, 100.0f);
         label = "100";
