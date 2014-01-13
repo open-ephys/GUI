@@ -1175,6 +1175,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
 	mainNode->setAttribute("autoDACassignment",	autoDACassignment);
+	mainNode->setAttribute("uniqueID",uniqueID);
 
 
     XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
@@ -1235,7 +1236,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 				numPreSamples = mainNode->getIntAttribute("numPreSamples");
 				numPostSamples = mainNode->getIntAttribute("numPostSamples");
 				autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
-				mainNode->setAttribute("autoDACassignment",	autoDACassignment);
+				uniqueID = mainNode->getIntAttribute("uniqueID");
 
 				forEachXmlChildElement(*mainNode, xmlNode)
 				{
