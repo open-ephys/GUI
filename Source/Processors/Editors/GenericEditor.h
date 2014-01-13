@@ -280,7 +280,7 @@ public:
     GenericEditor* getDestEditor();
 
     /** Returns the editors a splitter or merger is connected to */
-    virtual Array<GenericEditor*> getConnectedEditors() { }
+	virtual Array<GenericEditor*> getConnectedEditors(){ Array<GenericEditor*> a; return a;}
     
 protected:
 
