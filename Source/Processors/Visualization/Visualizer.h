@@ -41,7 +41,7 @@ class Visualizer : public Component,
 public:
     Visualizer()
     {
-        refreshRate = 40;    // 25 Hz default refresh rate
+        refreshRate = 25;    // 25 Hz default refresh rate
     }
     ~Visualizer() {}
 
@@ -69,7 +69,7 @@ public:
     /** Starts the timer callbacks. */
     void startCallbacks()
     {
-        startTimer(refreshRate);
+        startTimer(1000/refreshRate);
     }
 
     /** Stops the timer callbacks. */
