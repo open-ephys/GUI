@@ -424,6 +424,7 @@ double AdvancerNode::getAdvancerPosition(int advancerID)
 			}
 		}
 	}
+	lock.exit();
 	return 0;
 }
 
@@ -442,6 +443,7 @@ double AdvancerNode::getAdvancerPosition(String advancerName)
 			}
 		}
 	}
+	lock.exit();
 	return 0;
 }
 
@@ -469,6 +471,7 @@ double AdvancerNode::setAdvancerPosition(int advancerID, double newDepth, bool a
 			}
 		}
 	}
+	lock.exit();
 	return 0.0;
 }
 
