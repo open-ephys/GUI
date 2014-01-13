@@ -108,7 +108,7 @@ void SerialInput::process(AudioSampleBuffer& buffer,
     }
     
     if (bytesAvailable > 0){
-        unsigned char buffer[bytesAvailable];
+        unsigned char *buffer = new unsigned char[bytesAvailable];
         int bytesRead = serial.readBytes(buffer, bytesAvailable);
         
         if (bytesRead > 0)
@@ -120,10 +120,12 @@ void SerialInput::process(AudioSampleBuffer& buffer,
                      0,         // eventChannel
                      bytesRead, // numBytes
                      buffer);   // data
+			delete buffer;
         }
         else if (bytesRead < 0)
         {
             // ToDo: Properly warn about problem here!
+			delete buffer;
             AlertWindow::showMessageBoxAsync(AlertWindow::WarningIcon, "SerialInput device read error!", "Could not read serial input, even though data should be available.");
             return;
         }
