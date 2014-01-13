@@ -465,8 +465,9 @@ void SpikeDetectorEditor::setThresholdValue(int channel, double threshold)
 void SpikeDetectorEditor::channelChanged(int chan)
 {
     //std::cout << "New channel: " << chan << std::endl;
-	if (chan == -1)
+	if (chan <=0)
 		return;
+
     for (int i = 0; i < electrodeButtons.size(); i++)
     {
         if (electrodeButtons[i]->getToggleState())
