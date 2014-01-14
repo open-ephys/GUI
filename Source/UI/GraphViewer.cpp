@@ -80,59 +80,6 @@ void GraphViewer::updateNodeLocations()
         checkLayout(availableNodes[i]);
     }
 
-     rootNum = 0;
-
-    // for (int i = availableNodes.size(); i > -1; i--) // do it again
-    // {
-
-    //     checkLayout(availableNodes[i]);
-    // }
-
-    //     if (availableNodes[i]->getSource() == nullptr) // no source node
-    //     {
-
-    //         int level = 0;
-
-    //         availableNodes[i]->setHorzShift(rootNum);
-    //         rootNum++;
-
-    //         GraphNode* gn = getNodeForEditor(availableNodes[i]->getDest());
-
-    //         while (gn != nullptr)
-    //         {
-    //             gn->setLevel(getNodeForEditor(gn->getSource())->getLevel()+1); // increase level
-    //             gn->setHorzShift(getNodeForEditor(gn->getSource())->getHorzShift()); // same horz shift
-    //             gn = getNodeForEditor(gn->getDest());
-
-    //             if (gn->isSplitter())
-    //             {
-    //                 Array<GenericEditor*> editors = gn->getConnectedEditors();
-    //             }
-    //         }
-
-    //     }    
-    // }
-
-    // for (int i = 0; i < availableNodes.size(); i++)
-    // {
-
-    //     if (availableNodes[i]->getSource() != nullptr) // source node exists
-    //     {
-
-    //         if (!availableNodes[i]->isSplitter() && !availableNodes[i]->isMerger())
-    //         {
-    //             GraphNode* gn = availableNodes[indexOfEditor(availableNodes[i]->getSource())];
-
-    //             availableNodes[i]->setLevel(gn->getLevel()+1);
-    //         }
-
-    //     }    
-    //    // availableNodes[i]->updateBoundaries();
-    // }
-    
-    // perform checks
-    //checkLayout(); // not helpful...yet
-    
     repaint();
 }
 
@@ -196,47 +143,8 @@ void GraphViewer::checkLayout(GraphNode* gn)
 
         checkLayout(getNodeForEditor(gn->getDest()));
 
-        // if (gn->isSplitter())
-        // {
-        //     Array<GenericEditor*> editors = gn->getConnectedEditors();
-
-        //     checkLayout(getNodeForEditor(editors[0]));
-
-        //     if (editors[1] != nullptr)
-        //     {
-        //         getNodeForEditor(editors[1])->setLevel(gn->getLevel()+1);
-        //         getNodeForEditor(editors[1])->setHorzShift(gn->getHorzShift()+1);
-        //         checkLayout(getNodeForEditor(getNodeForEditor(editors[1])->getDest()));
-        //     }
-
-        // } else {
-        //     checkLayout(getNodeForEditor(gn->getDest()));
-        // }
-
     }
 
-    // for (int i = 0; i < availableNodes.size(); i++)
-    // {
-    //     int sourceIndex = indexOfEditor(availableNodes[i]->getSource());
-        
-    //     if (sourceIndex > -1)
-    //     {
-    //         if (availableNodes[i]->getHorzShift() < availableNodes[sourceIndex]->getHorzShift())
-    //         {
-    //             availableNodes[i]->setHorzShift(availableNodes[sourceIndex]->getHorzShift());
-    //         }
-    //     }
-        
-    //     int destIndex = indexOfEditor(availableNodes[i]->getDest());
-        
-    //     if (destIndex > -1)
-    //     {
-    //         if (availableNodes[i]->getLevel() > availableNodes[destIndex]->getLevel())
-    //         {
-    //             availableNodes[destIndex]->setLevel(availableNodes[i]->getLevel()+1);
-    //         }
-    //     }
-    // }
 }
 
 int GraphViewer::indexOfEditor(GenericEditor* editor)
