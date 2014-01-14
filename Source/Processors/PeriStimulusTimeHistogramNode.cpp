@@ -269,18 +269,25 @@ void PeriStimulusTimeHistogramNode::dumpEyeTrackingEventToDisk(EyePosition pos)
 	// write event type
 	fwrite(&eventType, 1,1, eventFile); 
 	// write event size
-	int16 eventSize = 8 + 8 + 8 + 8 + 8; //  x,y,pupil,timestamp
+	int16 eventSize = 8 + 8 + 8 + 8 + 8 +8 +8; //  x,y,xc,yc,pupil,timestamp
     fwrite(&eventSize, 2,1, eventFile);
 	// write event data
 	// 1. eye x position
 	fwrite(&pos.x, 8,1, eventFile);
 	// 2. eye y position
 	fwrite(&pos.y, 8,1, eventFile);
-	// 3. eye pupil
+
+
+	// 3. calibrated eye x position
+	fwrite(&pos.xc, 8,1, eventFile);
+	// 4. calibrated eye y position
+	fwrite(&pos.yc, 8,1, eventFile);
+
+	// 5. eye pupil
 	fwrite(&pos.pupil, 8,1, eventFile);
-	// 4. software timestamp
+	// 6. software timestamp
 	fwrite(&pos.software_timestamp, 8,1, eventFile);
-	// 5. hardware timestamp
+	// 7. hardware timestamp
 	fwrite(&pos.hardware_timestamp, 8,1, eventFile);
 
 	diskWriteLock->exit();

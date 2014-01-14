@@ -98,9 +98,10 @@ ttlCounter = 1;
 TimstampSoftware = [];
 TimestampHardware = [];
 SessionStartInd = [];
+networkEventsTS = [];
 spikeCounter = 1;
 TTLs = zeros(0,4);
-EyePos = zeros(0,5);
+EyePos = zeros(0,7);
 eyeCounter = 1;
 while (1)
     index=index+1;
@@ -125,9 +126,9 @@ while (1)
             
         case TTL
             risingEdge = fread(fid,1,'uint8=>bool'); % start = 1
-            channel = fread(fid,1,'uint8=>bool'); % start = 1
+            channel = fread(fid,1,'uint16=>uint16'); % start = 1
             softwareTS = fread(fid,1,'int64=>int64');
-            hardwareTS = fread(fid,1,'int16=>int16');
+            hardwareTS = fread(fid,1,'int64=>int64');
             TTLs = [TTLs;channel,risingEdge,softwareTS,hardwareTS];
             ttlCounter=ttlCounter+1;
         case SPIKE
@@ -139,28 +140,32 @@ while (1)
             numChannels = fread(fid,1,'int16=>int16');
             numPts = fread(fid,1,'int16=>int16');
             if (eventSize(index) > 8+8+2+2+2+2)
-                WaveForm = fread(fid,numPts*numChannels,'uint16=>uint16');
+                Waveform = fread(fid,numPts*numChannels,'uint16=>uint16');
             end
             if (spikeCounter == 1)
                Spikes = [softwareTS, hardwareTS, electrodeID, sortedID];
-               WaveForm = [WaveForm(:)'];
+               AllWaveforms = [Waveform(:)'];
             else
                Spikes = [Spikes;softwareTS, hardwareTS, electrodeID, sortedID];
-               WaveForm = [WaveForm;WaveForm(:)'];
+               AllWaveforms = [AllWaveforms;Waveform(:)'];
+               
             end
-    
+            spikeCounter=spikeCounter+1;
         case NETWORK
              str = fread(fid,eventSize(index)-8,'char=>char')'; % start = 1
              softwareTS = fread(fid,1,'int64=>int64');
              acNetworkEvents{networkCounter} = str;
+             networkEventsTS(networkCounter) = softwareTS;
              networkCounter = networkCounter + 1;
         case EYE_POSITION
               x = fread(fid,1,'double=>double');
               y = fread(fid,1,'double=>double');
+              xc = fread(fid,1,'double=>double');
+              yc = fread(fid,1,'double=>double');
               p = fread(fid,1,'double=>double');
               softwareTS = fread(fid,1,'int64=>int64');
               hardwareTS = fread(fid,1,'int64=>int64');
-              EyePos = [EyePos;x,y,p,softwareTS,hardwareTS];
+              EyePos = [EyePos;x,y,xc,yc,p,softwareTS,hardwareTS];
               eyeCounter = eyeCounter+1;
 
         otherwise
@@ -171,13 +176,35 @@ while (1)
 end
 fclose(fid);
 
-
-figure;
+%% Synchronization 
+% Match software & hardware timestamp using robust linear regression.
+figure(1);
+clf;
 plot(TimstampSoftware-TimstampSoftware(1),TimestampHardware-TimestampHardware(1),'.');
 % robust fit has trouble with very large values.
 % so we remove the offset and then regress
-[SyncCoeff]=robustfit(TimstampSoftware(:)-TimstampSoftware(1),TimestampHardware(:)-TimestampHardware(1))
-
+[SyncCoeff]=robustfit(TimstampSoftware(:)-TimstampSoftware(1),TimestampHardware(:)-TimestampHardware(1));
 % Software to hardware mapping jitter:
-JitterMS = 1e3*(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1)) -  (TimestampHardware-TimestampHardware(1))) / header.sampleRate;
+JitterMS = 1e3/ header.sampleRate*(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1)) -  (TimestampHardware-TimestampHardware(1))) ;
+hold on;
+plot(TimstampSoftware-TimstampSoftware(1),(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1))),'r');
 mean(JitterMS)
+
+
+%% Spikes
+figure(2);
+clf;
+[sortedUnits,~,mapToUnits] = unique(Spikes(:,3:4),'rows');
+n=ceil(sqrt(size(sortedUnits,1)));
+for k=1:size(sortedUnits,1)
+    subplot(n,n,k);
+    unitWaveforms = double(AllWaveforms(mapToUnits==k,:));
+    plot(-1*unitWaveforms','color',[0.5 0.5 0.5]);
+    hold on;
+    plot(-1*mean(unitWaveforms),'k','LineWidth',2);
+    title(sprintf('Electrode %d, Unit %d',sortedUnits(k,1),sortedUnits(k,2)));
+end
+
+%% Trials
+
+  dbg = 1; 
