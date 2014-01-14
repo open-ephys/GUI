@@ -227,19 +227,21 @@ void ISCANnode::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& event
 
 void ISCANnode::postEyePositionToMidiBuffer(EyePosition p, MidiBuffer& events)
 {
-	uint8* eyePositionSerialized = new uint8[8+8+8+8+8]; 
+	uint8* eyePositionSerialized = new uint8[8+8+8+8+8+8+8]; 
 	memcpy(eyePositionSerialized, &p.x, 8);	
 	memcpy(eyePositionSerialized+8, &p.y, 8);	
-	memcpy(eyePositionSerialized+8+8, &p.pupil, 8);	
-	memcpy(eyePositionSerialized+8+8+8, &p.software_timestamp, 8);	
-	memcpy(eyePositionSerialized+8+8+8+8, &p.hardware_timestamp, 8);	
+	memcpy(eyePositionSerialized+8+8, &p.xc, 8);	
+	memcpy(eyePositionSerialized+8+8+8, &p.yc, 8);	
+	memcpy(eyePositionSerialized+8+8+8+8, &p.pupil, 8);	
+	memcpy(eyePositionSerialized+8+8+8+8+8, &p.software_timestamp, 8);	
+	memcpy(eyePositionSerialized+8+8+8+8+8+8, &p.hardware_timestamp, 8);	
 
 	addEvent(events, 
 			 (uint8) EYE_POSITION,
 			 0,
 			 0,
 			 (uint8) GENERIC_EVENT,
-			 (uint8) 8+8+8+8+8+8, //x,y,p+ts
+			 (uint8) 8+8+8+8+8+8+8+8, //x,y,xc,yc,p+ts
 			 eyePositionSerialized);
 
 	delete eyePositionSerialized;
@@ -249,6 +251,13 @@ void ISCANnode::setSerialCommunication(bool state)
 {
 	serialCommunication = state;
 }
+double ISCANnode::applyCalibration(double input, int channel)
+{
+	// TODO, add linear calibration here....
+	// channel indicates whether it is X (channel = 0) or Y (channel = 1)
+	return input;
+}
+
 void ISCANnode::process(AudioSampleBuffer& buffer,
 							MidiBuffer& events,
 							int& nSamples)
@@ -279,8 +288,11 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 					sampleCounter = 0;
 					prevEyePosition.software_timestamp = software_timestamp + ((float)k/adcRate)*numTicksPerSec;
 					prevEyePosition.hardware_timestamp =hardware_timestamp + k;
-					prevEyePosition.x = (offsetX+xbuf[k])*gainX;
-					prevEyePosition.y = (offsetY+ybuf[k])*gainY;
+					prevEyePosition.x = xbuf[k];
+					prevEyePosition.y = ybuf[k];
+					prevEyePosition.xc = applyCalibration(prevEyePosition.x,0);
+					prevEyePosition.yc = applyCalibration(prevEyePosition.y,1);
+
 					if (analogPupilchannel >= 0)
 						prevEyePosition.pupil = pbuf[k];
 					else

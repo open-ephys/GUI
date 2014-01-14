@@ -48,6 +48,7 @@ SpikeDetector::SpikeDetector()
 	channelBuffers=nullptr;
 	PCAbeforeBoxes = true;
 	autoDACassignment = true;
+	syncThresholds = false;
 }
 
 int SpikeDetector::getNumPreSamples()
@@ -64,6 +65,17 @@ bool SpikeDetector::getAutoDacAssignmentStatus()
 {
 	return autoDACassignment;
 }
+
+bool SpikeDetector::getThresholdSyncStatus()
+{
+	return syncThresholds;
+}
+
+void SpikeDetector::setThresholdSyncStatus(bool status)
+{
+	syncThresholds= status;
+}
+
 
 void SpikeDetector::seteAutoDacAssignment(bool status)
 {
@@ -622,6 +634,18 @@ void SpikeDetector::setChannelThreshold(int electrodeNum, int channelNum, float 
 	electrodes[electrodeNum]->thresholds[channelNum] = thresh;
 	if (electrodes[electrodeNum]->spikePlot != nullptr)
 		electrodes[electrodeNum]->spikePlot->setDisplayThresholdForChannel(channelNum,thresh);
+
+	if (syncThresholds)
+	{
+		for (int k=0;k<electrodes.size();k++)
+		{
+			for (int i=0;i<electrodes[k]->numChannels;i++)
+			{
+				electrodes[k]->thresholds[i] = thresh;
+			}
+		}
+	}
+
 	mut.exit();
     setParameter(99, thresh);
 }
@@ -1175,6 +1199,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("numPreSamples", numPreSamples);
 	mainNode->setAttribute("numPostSamples", numPostSamples);
 	mainNode->setAttribute("autoDACassignment",	autoDACassignment);
+	mainNode->setAttribute("syncThresholds",syncThresholds);
 	mainNode->setAttribute("uniqueID",uniqueID);
 
 
@@ -1236,6 +1261,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 				numPreSamples = mainNode->getIntAttribute("numPreSamples");
 				numPostSamples = mainNode->getIntAttribute("numPostSamples");
 				autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
+				syncThresholds = mainNode->getBoolAttribute("syncThresholds");
 				uniqueID = mainNode->getIntAttribute("uniqueID");
 
 				forEachXmlChildElement(*mainNode, xmlNode)

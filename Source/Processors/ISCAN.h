@@ -34,7 +34,8 @@
 class EyePosition
 {
 public:
-	double x,y,pupil;
+	double x,y,pupil; // raw values
+	double xc, yc; // calibrated to pixel coordinates
 	int64 software_timestamp,hardware_timestamp;
 };
 class ISCANnode : public GenericProcessor
@@ -66,7 +67,8 @@ public:
 	void setSamplingRate(int sampleRate);
 	void setXchannel(int ch);
 	void setYchannel(int ch);
-	
+	double applyCalibration(double input, int channel);
+
 	void updateSettings();
 
 	 String device;

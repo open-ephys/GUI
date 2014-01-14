@@ -277,6 +277,8 @@ public:
 	void assignDACtoChannel(int dacOutput, int channel);
 	Array<int> getDACassignments();
 	void updateDACthreshold(int dacChannel, float threshold);
+	bool getThresholdSyncStatus();
+	void setThresholdSyncStatus(bool status);
 
 	Array<Electrode*> getElectrodes();
 
@@ -327,6 +329,7 @@ private:
     void resetElectrode(Electrode*);
 	CriticalSection mut;
 	bool autoDACassignment;
+	bool syncThresholds;
 	RHD2000Thread* getRhythmAccess();
 
 
