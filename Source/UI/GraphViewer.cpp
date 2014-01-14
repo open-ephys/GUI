@@ -74,10 +74,26 @@ void GraphViewer::updateNodeLocations()
 
     rootNum = 0;
 
+    // do initial layout
     for (int i = 0; i < availableNodes.size(); i++)
     {
-
         checkLayout(availableNodes[i]);
+    }
+
+    // check for overlap
+    for (int i = 0; i < availableNodes.size(); i++)
+    {
+        for (int j = 0; j < availableNodes.size(); j++)
+        {
+            if (j != i)
+            {
+                if (availableNodes[j]->getLevel() == availableNodes[i]->getLevel() &&
+                    availableNodes[j]->getHorzShift() == availableNodes[i]->getHorzShift())
+                {
+                    availableNodes[j]->setHorzShift(availableNodes[j]->getHorzShift()+1);
+                }
+            }
+        }
     }
 
     repaint();
