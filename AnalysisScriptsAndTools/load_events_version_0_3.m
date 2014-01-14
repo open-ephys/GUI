@@ -49,7 +49,7 @@ function [data, timestamps, info] = load_open_ephys_data(filename)
 %
 %     <http://www.gnu.org/licenses/>.
 %
-filename = 'C:\Users\shayo\Documents\GitHub\GUI\Builds\VisualStudio2012\Debug64\bin\2013-12-10_13-03-06\all_channels.events';
+filename = 'E:\Data\Doris\Electrophys\Intan\140113_154158_Debug\all_channels.events';
 filetype = filename(max(strfind(filename,'.'))+1:end); % parse filetype
 
 fid = fopen(filename);
@@ -86,15 +86,22 @@ TIMESTAMP = 0;
 TTL = 3;
 SPIKE = 4;
 NETWORK = 7;
+EYE_POSITION = 8;
 
 timestampCounter = 1;
 fseek(fid,NUM_HEADER_BYTES,-1)
 afSpikeTimeHardware = [];
 afSpikeTimeSoftware= [];
-
+acNetworkEvents = cell(0);
+networkCounter = 1;
+ttlCounter = 1;
 TimstampSoftware = [];
 TimestampHardware = [];
 SessionStartInd = [];
+spikeCounter = 1;
+TTLs = zeros(0,4);
+EyePos = zeros(0,5);
+eyeCounter = 1;
 while (1)
     index=index+1;
     eventTy= fread(fid, 1, 'uint8=>uint8');
@@ -116,11 +123,13 @@ while (1)
             TimestampHardware(timestampCounter) = fread(fid,1,'int64=>int64');
             timestampCounter=timestampCounter+1;
             
-             
         case TTL
             risingEdge = fread(fid,1,'uint8=>bool'); % start = 1
+            channel = fread(fid,1,'uint8=>bool'); % start = 1
             softwareTS = fread(fid,1,'int64=>int64');
-            hardwareTS = fread(fid,1,'int64=>int64');
+            hardwareTS = fread(fid,1,'int16=>int16');
+            TTLs = [TTLs;channel,risingEdge,softwareTS,hardwareTS];
+            ttlCounter=ttlCounter+1;
         case SPIKE
             
             softwareTS = fread(fid,1,'int64=>int64');
@@ -130,12 +139,29 @@ while (1)
             numChannels = fread(fid,1,'int16=>int16');
             numPts = fread(fid,1,'int16=>int16');
             if (eventSize(index) > 8+8+2+2+2+2)
-                fread(fid,numPts*numChannels,'uint16=>uint16');
+                WaveForm = fread(fid,numPts*numChannels,'uint16=>uint16');
+            end
+            if (spikeCounter == 1)
+               Spikes = [softwareTS, hardwareTS, electrodeID, sortedID];
+               WaveForm = [WaveForm(:)'];
+            else
+               Spikes = [Spikes;softwareTS, hardwareTS, electrodeID, sortedID];
+               WaveForm = [WaveForm;WaveForm(:)'];
             end
     
         case NETWORK
              str = fread(fid,eventSize(index)-8,'char=>char')'; % start = 1
              softwareTS = fread(fid,1,'int64=>int64');
+             acNetworkEvents{networkCounter} = str;
+             networkCounter = networkCounter + 1;
+        case EYE_POSITION
+              x = fread(fid,1,'double=>double');
+              y = fread(fid,1,'double=>double');
+              p = fread(fid,1,'double=>double');
+              softwareTS = fread(fid,1,'int64=>int64');
+              hardwareTS = fread(fid,1,'int64=>int64');
+              EyePos = [EyePos;x,y,p,softwareTS,hardwareTS];
+              eyeCounter = eyeCounter+1;
 
         otherwise
             fprintf('Unknown event. Skipping %d\n',eventSize(index));
