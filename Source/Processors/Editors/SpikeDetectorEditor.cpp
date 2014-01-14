@@ -212,6 +212,8 @@ void SpikeDetectorEditor::sliderEvent(Slider* slider)
                                        electrodeNum,
                                        slider->getValue());
 
+
+	
 		//Array<int> dacChannels = processor->getDACassignments;
 		int dacChannel = dacCombo->getSelectedId()-2;
 		if (dacChannel >= 0)
@@ -314,6 +316,8 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		waveSizeMenu.addSubMenu("Post samples",waveSizePostMenu);
 		configMenu.addSubMenu("Waveform size",waveSizeMenu,true);
 		configMenu.addItem(5,"Current Channel => Audio",true,processor->getAutoDacAssignmentStatus());
+		configMenu.addItem(6,"Threshold => All channels",true,processor->getThresholdSyncStatus());
+
 		const int result = configMenu.show();
 		switch (result)
 		{
@@ -332,6 +336,8 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		case 5:
 			processor->seteAutoDacAssignment(!processor->getAutoDacAssignmentStatus());
 			refreshElectrodeList();
+		case 6:
+			processor->setThresholdSyncStatus(~processor->getThresholdSyncStatus());
 		}
 
 	}

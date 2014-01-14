@@ -592,7 +592,7 @@ void SpikeHistogramPlot::resized()
         wAxes[i]->setBounds(5 + (i % nWaveCols) * axesWidth/nWaveCols, 20 + (i/nWaveCols) * axesHeight, axesWidth/nWaveCols, axesHeight);
         rangeButtons[i]->setBounds(8 + (i % nWaveCols) * axesWidth/nWaveCols,
                                    20 + (i/nWaveCols) * axesHeight + axesHeight - 18,
-                                   25, 15);
+                                   35, 15);
     }
 
    // for (int i = 0; i < nProjAx; i++)
@@ -931,7 +931,7 @@ void WaveformAxes::drawThresholdSlider(Graphics& g)
 
     g.setColour(thresholdColour);
     g.drawLine(0, h, getWidth(), h);
-    g.drawText(String(roundFloatToInt(displayThresholdLevel)),2,h,25,10,Justification::left, false);
+    g.drawText(String(roundFloatToInt(displayThresholdLevel)),2,h,35,10,Justification::left, false);
 
     /*
     h = getHeight()*(0.5f - detectorThresholdLevel/range);
