@@ -116,14 +116,14 @@ void EditorViewport::paint(Graphics& g)
         float insertionX = (float)(borderSize) * 2.5 + (float) tabSize;
 
         int n;
-        for (n = 0; n < insertionPoint; n++)
+        for (n = leftmostEditor; n < insertionPoint; n++)
         {
             insertionX += editorArray[n]->getWidth();
 
         }
 
-        if (n > 1)
-            insertionX += borderSize*(n-1);
+        if (n - leftmostEditor > 1)
+            insertionX += borderSize*(n-leftmostEditor-1);
 
         g.setColour(Colours::yellow);
         g.drawLine(insertionX, (float) borderSize,
@@ -188,7 +188,7 @@ void EditorViewport::itemDragMove(const SourceDetails& dragSourceDetails)
         int leftEdge;
         int centerPoint;
 
-        for (int n = 0; n < editorArray.size(); n++)
+        for (int n = leftmostEditor; n < editorArray.size(); n++)
         {
             leftEdge = editorArray[n]->getX();
             centerPoint = leftEdge + (editorArray[n]->getWidth())/2;
@@ -317,6 +317,16 @@ void EditorViewport::makeEditorVisible(GenericEditor* editor, bool highlight, bo
 
     if (highlight)
         editor->highlight();
+
+    while (!editor->isVisible())
+    {
+        if (leftmostEditor < editorArray.indexOf(editor))
+            leftmostEditor++;
+        else
+            leftmostEditor--;
+
+        refreshEditors();
+    }
 
     repaint();
 
