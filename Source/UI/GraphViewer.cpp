@@ -124,7 +124,7 @@ void GraphViewer::checkLayout(GraphNode* gn)
                 level2 = getNodeForEditor(editors[1])->getLevel();
             }
 
-            std::cout << "LEVEL1 = " << level1 << " LEVEL2 = " << level2 << std::endl;
+           // std::cout << "LEVEL1 = " << level1 << " LEVEL2 = " << level2 << std::endl;
 
             sourceNode = level1 > level2 ? getNodeForEditor(editors[0]) : 
                                            getNodeForEditor(editors[1]); // choose the higher source
