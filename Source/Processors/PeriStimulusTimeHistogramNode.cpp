@@ -455,7 +455,15 @@ String PeriStimulusTimeHistogramNode::generateHeader()
     header += getAudioComponent()->getBufferSize();
     header += ";\n";
     header += "header.bitVolts = ";
-    header += String(getDefaultBitVolts());
+	if (recordNode->channels.size() > 0)
+	{
+		header += String(recordNode->channels[0]->bitVolts);
+	}
+	else
+	{
+		header += String(getDefaultBitVolts());
+	}
+
     header += ";\n";
     header = header.paddedRight(' ', HEADER_SIZE);
     return header;

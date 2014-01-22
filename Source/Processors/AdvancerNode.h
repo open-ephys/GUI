@@ -105,6 +105,7 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 	bool disable();
 	bool enable();
+	void startRecording();
 
 	int addContainer(String type, String parameters);
 	int addContainer(AdvancerContainer c);

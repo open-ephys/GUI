@@ -815,6 +815,36 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
 }
 
+void SpikeDetector::startRecording()
+{
+	// send status messages about which electrodes and units are available.
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		String eventlog = "CurrentElectrodes "+String(electrodes[k]->electrodeID) + " "+ String(electrodes[k]->advancerID) + " "+String(electrodes[k]->depthOffsetMM) + " "+
+			String(electrodes[k]->numChannels) + " ";
+		for (int i=0;i<electrodes[k]->numChannels;i++)
+		{
+			eventlog += String(electrodes[k]->channels[i])+ " " + electrodes[k]->name;
+		}
+		addNetworkEventToQueue(StringTS(eventlog));
+
+		std::vector<BoxUnit> boxUnits = electrodes[k]->spikeSort->getBoxUnits();
+		for (int i=0;i<boxUnits.size();i++)
+		{
+			String eventlog = "CurrentElectrodeUnits "+String(electrodes[k]->electrodeID) + " " + String(boxUnits[i].UnitID);
+		}
+
+		std::vector<PCAUnit> pcaUnits = electrodes[k]->spikeSort->getPCAUnits();
+		for (int i=0;i<pcaUnits.size();i++)
+		{
+			String eventlog = "CurrentElectrodeUnits "+String(electrodes[k]->electrodeID) + " " + String(pcaUnits[i].UnitID);
+		}
+
+	}
+	
+	mut.exit();
+}
 
 int64 SpikeDetector::getExtrapolatedHardwareTimestamp(int64 softwareTS)
 {

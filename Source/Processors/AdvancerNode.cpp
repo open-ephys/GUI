@@ -61,6 +61,21 @@ AdvancerNode::~AdvancerNode()
 
 }
 
+void AdvancerNode::startRecording()
+{
+	// It is possible that advancers were manipulated before recording started
+	// So we send messages about the current status of all of them.
+	lock.enter();
+	for (int container=0;container<advancerContainers.size();container++)
+	{
+		for (int advancer = 0; advancer < advancerContainers[container].advancers.size();advancer++)
+		{
+			addMessageToMidiQueue(StringTS("AdancerPositionStatus "+String(advancerContainers[container].ID)+" "+String(advancerContainers[container].advancers[advancer].ID)+" "+String(advancerContainers[container].advancers[advancer].depthMM ,4)));
+		}
+	}
+	lock.exit();
+}
+
 bool AdvancerNode::disable()
 {
 	return true;
@@ -110,6 +125,12 @@ Polygon2D AdvancerNode::createCircle(float diameterMM)
 int AdvancerNode::removeContainer(int containerIndex)
 {
 	lock.enter();
+	// First, send messages and remove all advancers that belong to this container
+	for (int advancer=0;advancer<advancerContainers[containerIndex].advancers.size();advancer++)
+	{
+		addMessageToMidiQueue(StringTS("RemoveAdvancer "+advancerContainers[containerIndex].advancers[advancer].ID));
+	}
+	addMessageToMidiQueue(StringTS("RemoveAdvancerContainer "+advancerContainers[containerIndex].ID));
 	advancerContainers.erase(advancerContainers.begin()+containerIndex);
 	int k = advancerContainers.size();
 	lock.exit();
@@ -119,6 +140,7 @@ int AdvancerNode::removeContainer(int containerIndex)
 int AdvancerNode::removeAdvancer(int containerIndex, int advancerIndex)
 {
 	lock.enter();
+	addMessageToMidiQueue(StringTS("RemoveAdvancer "+advancerContainers[containerIndex].advancers[advancerIndex].ID));
 	advancerContainers[containerIndex].advancers.erase(advancerContainers[containerIndex].advancers.begin()+advancerIndex);
 	int k = advancerContainers[containerIndex].advancers.size();
 	lock.exit();

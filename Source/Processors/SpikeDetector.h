@@ -281,7 +281,7 @@ public:
 	void setThresholdSyncStatus(bool status);
 	bool getFlipSignalState();
 	void setFlipSignalState(bool state);
-
+	void startRecording();
 
 
 	Array<Electrode*> getElectrodes();
