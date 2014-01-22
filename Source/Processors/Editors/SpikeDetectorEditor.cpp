@@ -314,7 +314,8 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 
 		waveSizeMenu.addSubMenu("Pre samples",waveSizePreMenu);
 		waveSizeMenu.addSubMenu("Post samples",waveSizePostMenu);
-		configMenu.addSubMenu("Waveform size",waveSizeMenu,true);
+		waveSizeMenu.addItem(7,"Flip Signal",true,processor->getFlipSignalState());
+		configMenu.addSubMenu("Waveform",waveSizeMenu,true);
 		configMenu.addItem(5,"Current Channel => Audio",true,processor->getAutoDacAssignmentStatus());
 		configMenu.addItem(6,"Threshold => All channels",true,processor->getThresholdSyncStatus());
 
@@ -337,7 +338,9 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 			processor->seteAutoDacAssignment(!processor->getAutoDacAssignmentStatus());
 			refreshElectrodeList();
 		case 6:
-			processor->setThresholdSyncStatus(~processor->getThresholdSyncStatus());
+			processor->setThresholdSyncStatus(!processor->getThresholdSyncStatus());
+		case 7:
+			processor->setFlipSignalState(!processor->getFlipSignalState());
 		}
 
 	}

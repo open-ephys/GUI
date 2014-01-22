@@ -279,6 +279,10 @@ public:
 	void updateDACthreshold(int dacChannel, float threshold);
 	bool getThresholdSyncStatus();
 	void setThresholdSyncStatus(bool status);
+	bool getFlipSignalState();
+	void setFlipSignalState(bool state);
+
+
 
 	Array<Electrode*> getElectrodes();
 
@@ -331,6 +335,7 @@ private:
 	bool autoDACassignment;
 	bool syncThresholds;
 	RHD2000Thread* getRhythmAccess();
+	bool flipSignal;
 
 
 

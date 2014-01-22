@@ -210,6 +210,7 @@ public:
     bool updateSpikeData(const SpikeObject& s);
     bool checkThreshold(const SpikeObject& spike);
 
+	void setSignalFlip(bool state);
     void paint(Graphics& g);
 	void isOverUnitBox(float x, float y, int &UnitID, int &BoxID, String &where) ;
 
@@ -239,6 +240,7 @@ public:
 //	int selectedUnit, selectedBox;
 
 private:
+	bool signalFlipped;
 	bool bDragging ;
     Colour waveColour;
     Colour thresholdColour;
@@ -352,6 +354,7 @@ public:
 
     void paint(Graphics& g);
     void resized();
+	void setFlipSignal(bool state);
 
     void select();
     void deselect();

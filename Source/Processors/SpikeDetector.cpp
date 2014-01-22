@@ -49,6 +49,28 @@ SpikeDetector::SpikeDetector()
 	PCAbeforeBoxes = true;
 	autoDACassignment = true;
 	syncThresholds = false;
+	flipSignal = false;
+}
+
+bool SpikeDetector::getFlipSignalState()
+{
+	return flipSignal;
+}
+
+
+void SpikeDetector::setFlipSignalState(bool state)
+{
+	flipSignal = state;
+
+	mut.enter();
+	if (currentElectrode >= 0)
+	{
+	if (electrodes[currentElectrode]->spikePlot != nullptr)
+		electrodes[currentElectrode]->spikePlot->setFlipSignal(state);
+
+	}
+	mut.exit();
+
 }
 
 int SpikeDetector::getNumPreSamples()
@@ -762,6 +784,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
         { 
 
             // warning -- be careful of bitvolts conversion
+			// do not flip signal (!).
             s->data[currentIndex] = uint16(getNextSample(electrodes[electrodeNumber]->channels[currentChannel]) / channels[chan]->bitVolts + 32768);
 
             currentIndex++;
@@ -903,9 +926,9 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                     int currentChannel = electrode->channels[chan];
 
 					bool bSpikeDetectedPositive  = electrode->thresholds[chan] > 0 &&
-						(-getNextSample(currentChannel) > electrode->thresholds[chan]); // rising edge
+						(getNextSample(currentChannel) > electrode->thresholds[chan]); // rising edge
 					bool bSpikeDetectedNegative = electrode->thresholds[chan] < 0 &&
-						(-getNextSample(currentChannel) < electrode->thresholds[chan]); // falling edge
+						(getNextSample(currentChannel) < electrode->thresholds[chan]); // falling edge
 
                     if  (bSpikeDetectedPositive || bSpikeDetectedNegative)
                     { 
@@ -917,8 +940,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 						if (bSpikeDetectedPositive) 
 						{
 							// find localmaxima
-							while (-getCurrentSample(currentChannel) <
-								-getNextSample(currentChannel) &&
+							while (getCurrentSample(currentChannel) < getNextSample(currentChannel) &&
 								   sampleIndex < peakIndex + electrode->postPeakSamples)
 							 {
 							 sampleIndex++;
@@ -926,8 +948,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 						} else {
 							// find local minimum
 							
-							while (-getCurrentSample(currentChannel) >
-								-getNextSample(currentChannel) &&
+							while (getCurrentSample(currentChannel) > getNextSample(currentChannel) &&
 								   sampleIndex < peakIndex + electrode->postPeakSamples)
 							 {
 							 sampleIndex++;
@@ -1057,7 +1078,7 @@ float SpikeDetector::getNextSample(int& chan)
         int ind = overflowBufferSize + sampleIndex;
 
         if (ind < overflowBuffer.getNumSamples())
-            return *overflowBuffer.getSampleData(chan, ind);
+            return (*overflowBuffer.getSampleData(chan, ind));
         else
             return 0;
 
@@ -1068,7 +1089,7 @@ float SpikeDetector::getNextSample(int& chan)
         // std::cout << "  sample index " << sampleIndex << "from regular buffer" << std::endl;
 
         if (sampleIndex < dataBuffer.getNumSamples())
-            return *dataBuffer.getSampleData(chan, sampleIndex);
+            return (*dataBuffer.getSampleData(chan, sampleIndex));
         else
             return 0;
     }
@@ -1092,13 +1113,13 @@ float SpikeDetector::getCurrentSample(int& chan)
     if (sampleIndex < 1)
     {
         //std::cout << "  sample index " << sampleIndex << "from overflowBuffer" << std::endl;
-        return *overflowBuffer.getSampleData(chan, overflowBufferSize + sampleIndex - 1);
+        return (*overflowBuffer.getSampleData(chan, overflowBufferSize + sampleIndex - 1)) ;
     }
     else
     {
         //  useOverflowBuffer = false;
         // std::cout << "  sample index " << sampleIndex << "from regular buffer" << std::endl;
-        return *dataBuffer.getSampleData(chan, sampleIndex - 1);
+        return (*dataBuffer.getSampleData(chan, sampleIndex - 1));
     }
     //} else {
 
@@ -1201,7 +1222,7 @@ void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("autoDACassignment",	autoDACassignment);
 	mainNode->setAttribute("syncThresholds",syncThresholds);
 	mainNode->setAttribute("uniqueID",uniqueID);
-
+	mainNode->setAttribute("flipSignal",flipSignal);
 
     XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
 
@@ -1263,6 +1284,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 				autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
 				syncThresholds = mainNode->getBoolAttribute("syncThresholds");
 				uniqueID = mainNode->getIntAttribute("uniqueID");
+				flipSignal = mainNode->getBoolAttribute("flipSignal");
 
 				forEachXmlChildElement(*mainNode, xmlNode)
 				{
