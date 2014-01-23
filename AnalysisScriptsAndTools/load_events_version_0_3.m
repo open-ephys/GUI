@@ -254,14 +254,18 @@ if ~isempty(Spikes)
         clf;
         [sortedUnits,~,mapToUnits] = unique(Spikes(:,3:4),'rows');
         n=ceil(sqrt(size(sortedUnits,1)));
+        tm = [-8:31]/30000*1e3;
         for k=1:size(sortedUnits,1)
             subplot(n,n,k);
             unitWaveforms = double(AllWaveforms(mapToUnits==k,:));
             unitWaveforms_uV = ((unitWaveforms-32768)* 0.00975000020);
-            plot(unitWaveforms_uV','color',[0.5 0.5 0.5]);
+            plot(tm,unitWaveforms_uV','color',[0.5 0.5 0.5]);
             hold on;
-            plot(mean(unitWaveforms_uV),'k','LineWidth',2);
+            plot(tm,mean(unitWaveforms_uV),'k','LineWidth',2);
             title(sprintf('Electrode %d, Unit %d',sortedUnits(k,1),sortedUnits(k,2)));
+            xlabel('Time (ms)');
+            ylabel('Amplitude (uV)');
+            set(gca,'ylim',[-120 100]);
         end
     end
 else

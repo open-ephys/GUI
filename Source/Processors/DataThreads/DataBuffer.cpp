@@ -79,8 +79,8 @@ int DataBuffer::getNumSamples()
 int DataBuffer::readAllFromBuffer(AudioSampleBuffer& data, uint64* timestamp, int16* eventCodes, int maxSize)
 {
     // check to see if the maximum size is smaller than the total number of available ints
-    int numItems = (maxSize < abstractFifo.getNumReady()) ?
-                   maxSize : abstractFifo.getNumReady();
+	int numReady = abstractFifo.getNumReady();
+    int numItems = (maxSize < numReady) ? maxSize : numReady;
 
     int startIndex1, blockSize1, startIndex2, blockSize2;
     abstractFifo.prepareToRead(numItems, startIndex1, blockSize1, startIndex2, blockSize2);

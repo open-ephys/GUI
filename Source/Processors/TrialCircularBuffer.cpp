@@ -1257,6 +1257,7 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.alignTS_hardware = 0;
 		  currentTrial.hardwareAlignment = false;
   		  currentTrial.trialInProgress = true;
+		  currentTrial.type = -1;
 		  lfpBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 			{
