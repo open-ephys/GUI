@@ -184,7 +184,10 @@ Visualizer* SpikeDisplayEditor::createNewCanvas()
 {
 
     SpikeDisplayNode* processor = (SpikeDisplayNode*) getProcessor();
-    return new SpikeDisplayCanvas(processor);
+    SpikeDisplayCanvas* canvas = new SpikeDisplayCanvas(processor);
+    ActionListener* listener = (ActionListener*) canvas;
+    getUIComponent()->registerAnimatedComponent(listener);
+    return canvas;
 
 }
 

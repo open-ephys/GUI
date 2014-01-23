@@ -515,6 +515,21 @@ void UIComponent::setRecentlyUsedFilenames(const StringArray& filenames)
     controlPanel->setRecentlyUsedFilenames(filenames);
 }
 
+ void UIComponent::registerAnimatedComponent(ActionListener* listener)
+ {
+    animationTimer.addActionListener(listener);
+ }
+
+void UIComponent::beginAnimation()
+{
+    animationTimer.startTimer(20); // 50 Hz refresh rate
+}
+    
+void UIComponent::endAnimation()
+{
+    animationTimer.stopTimer();
+}
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 EditorViewportButton::EditorViewportButton(UIComponent* ui) : UI(ui)

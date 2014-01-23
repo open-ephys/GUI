@@ -44,7 +44,10 @@ Visualizer* LfpDisplayEditor::createNewCanvas()
 {
 
     LfpDisplayNode* processor = (LfpDisplayNode*) getProcessor();
-    return new LfpDisplayCanvas(processor);
+    LfpDisplayCanvas* canvas = new LfpDisplayCanvas(processor);
+    ActionListener* listener = (ActionListener*) canvas;
+    getUIComponent()->registerAnimatedComponent(listener);
+    return canvas;
 
 }
 

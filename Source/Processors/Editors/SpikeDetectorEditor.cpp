@@ -175,6 +175,8 @@ Visualizer* SpikeDetectorEditor::createNewCanvas()
 
     SpikeDetector* processor = (SpikeDetector*) getProcessor();
     spikeDetectorCanvas = new SpikeDetectCanvas(processor);
+    ActionListener* listener = (ActionListener*) spikeDetectorCanvas;
+    getUIComponent()->registerAnimatedComponent(listener);
 	return spikeDetectorCanvas;
 }
 

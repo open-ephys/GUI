@@ -951,6 +951,7 @@ bool ProcessorGraph::enableProcessors()
         }
     }
 
+    getUIComponent()->beginAnimation();
     getEditorViewport()->signalChainCanBeEdited(false);
 
     //	sendActionMessage("Acquisition started.");
@@ -983,6 +984,7 @@ bool ProcessorGraph::disableProcessors()
         }
     }
 
+    getUIComponent()->endAnimation();
     getEditorViewport()->signalChainCanBeEdited(true);
 
     //	sendActionMessage("Acquisition ended.");

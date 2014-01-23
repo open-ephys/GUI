@@ -41,6 +41,28 @@ class MainWindow;
 class ProcessorList;
 
 class EditorViewportButton;
+class AnimationTimer;
+
+/**
+
+  Synchronizes Visualizer animation, so we don't end up with too many timers.
+
+  @see UIComponent, Visualizer
+
+*/
+
+class AnimationTimer : public Timer, 
+                       public ActionBroadcaster
+{
+public:
+    AnimationTimer() { }
+    ~AnimationTimer() { }
+private:
+    void timerCallback()
+    {
+        sendActionMessage("");
+    }
+};
 
 /**
 
@@ -171,6 +193,11 @@ public:
 
     void setRecentlyUsedFilenames(const StringArray& filenames);
 
+    void registerAnimatedComponent(ActionListener* listener);
+
+    void beginAnimation();
+    void endAnimation();
+
 private:
 
     ScopedPointer<DataViewport> dataViewport;
@@ -217,6 +244,8 @@ private:
         resizeWindow            = 0x2012
     };
 
+    AnimationTimer animationTimer;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIComponent);
 
 };
@@ -259,5 +288,7 @@ private:
     Font buttonFont;
 
 };
+
+
 
 #endif  // __UICOMPONENT_H_D97C73CF__
