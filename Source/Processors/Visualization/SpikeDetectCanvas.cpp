@@ -87,14 +87,14 @@ void SpikeDetectCanvas::beginAnimation()
 {
     std::cout << "SpikeDetectCanvas beginning animation." << std::endl;
 
-    startCallbacks();
+    //startCallbacks();
 }
 
 void SpikeDetectCanvas::endAnimation()
 {
     std::cout << "SpikeDetectCanvas ending animation." << std::endl;
 
-    stopCallbacks();
+   // stopCallbacks();
 }
 
 void SpikeDetectCanvas::update()

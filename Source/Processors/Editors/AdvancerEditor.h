@@ -95,6 +95,8 @@ public:
 
 	void resized() ;
 
+	void actionListenerCallback(const String& msg) { } // unused
+
     void startRecording() { } // unused
     void stopRecording() { } // unused
     

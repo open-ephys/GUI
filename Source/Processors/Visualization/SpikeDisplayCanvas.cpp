@@ -66,14 +66,14 @@ void SpikeDisplayCanvas::beginAnimation()
 {
     std::cout << "SpikeDisplayCanvas beginning animation." << std::endl;
 
-    startCallbacks();
+    //startCallbacks();
 }
 
 void SpikeDisplayCanvas::endAnimation()
 {
     std::cout << "SpikeDisplayCanvas ending animation." << std::endl;
 
-    stopCallbacks();
+    //stopCallbacks();
 }
 
 void SpikeDisplayCanvas::update()

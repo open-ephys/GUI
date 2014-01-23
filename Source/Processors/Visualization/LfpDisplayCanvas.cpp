@@ -184,14 +184,14 @@ void LfpDisplayCanvas::beginAnimation()
 
     screenBufferIndex = 0;
 
-    startCallbacks();
+  //  startCallbacks();
 }
 
 void LfpDisplayCanvas::endAnimation()
 {
     std::cout << "Ending animation." << std::endl;
 
-    stopCallbacks();
+  //  stopCallbacks();
 }
 
 void LfpDisplayCanvas::update()

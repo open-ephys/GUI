@@ -372,7 +372,7 @@ PeriStimulusTimeHistogramCanvas::~PeriStimulusTimeHistogramCanvas()
 
 void PeriStimulusTimeHistogramCanvas::beginAnimation()
 {
-	startCallbacks();
+	//startCallbacks();
 }
 
 void PeriStimulusTimeHistogramCanvas::buttonClicked(Button* button)
@@ -384,7 +384,7 @@ void PeriStimulusTimeHistogramCanvas::endAnimation()
 {
 	std::cout << "SpikeDisplayCanvas ending animation." << std::endl;
 
-	stopCallbacks();
+	//stopCallbacks();
 }
 
 

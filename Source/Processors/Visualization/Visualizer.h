@@ -35,7 +35,8 @@
 */
 
 class Visualizer : public Component,
-    public Timer
+    public Timer, 
+    public ActionListener
 
 {
 public:
@@ -84,6 +85,11 @@ public:
         refresh();
     }
 
+    void actionListenerCallback(const String& msg)
+    {
+        refresh();
+    }
+
     /** Refresh rate in Hz. */
     float refreshRate;
 
@@ -93,6 +99,8 @@ public:
 
     /** Loads parameters from XML */
     virtual void loadVisualizerParameters(XmlElement* xml) { }
+
+    static ActionBroadcaster b;
 
 };
 
