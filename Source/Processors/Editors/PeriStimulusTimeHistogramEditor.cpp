@@ -309,6 +309,8 @@ Visualizer* PeriStimulusTimeHistogramEditor::createNewCanvas()
 {
 	PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
 	periStimulusTimeHistogramCanvas = new PeriStimulusTimeHistogramCanvas(processor);
+	ActionListener* listener = (ActionListener*) periStimulusTimeHistogramCanvas;
+    getUIComponent()->registerAnimatedComponent(listener);
 	return periStimulusTimeHistogramCanvas;
 }
 
