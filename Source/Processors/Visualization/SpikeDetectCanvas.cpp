@@ -472,9 +472,9 @@ void SpikeHistogramPlot::paint(Graphics& g)
 
 void SpikeHistogramPlot::setFlipSignal(bool state)
 {
-	if (wAxes.size() > 0)
+	for (int i = 0; i < wAxes.size(); i++)
 	{
-		wAxes[0]->setSignalFlip(state);
+		wAxes[i]->setSignalFlip(state);
 	}
 }
 
