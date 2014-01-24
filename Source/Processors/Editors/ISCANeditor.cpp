@@ -138,6 +138,8 @@ Visualizer* ISCANeditor::createNewCanvas()
 {
    ISCANnode* processor = (ISCANnode*) getProcessor();
    ISCANcanvas* canvas = new ISCANcanvas(this,processor);
+   ActionListener* listener = (ActionListener*) canvas;
+   getUIComponent()->registerAnimatedComponent(listener);
 	return canvas;
 }
 
@@ -147,7 +149,7 @@ void ISCANeditor::collapsedStateChanged()
     buttonEvent(communication);
 }
 
-void ISCANeditor::buttonEvent(Button* button)
+void ISCANeditor::buttonCallback(Button* button)
 {
 	ISCANnode *processor  = (ISCANnode*) getProcessor();
 	if (button == clearButton)

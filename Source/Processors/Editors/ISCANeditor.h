@@ -83,7 +83,7 @@ public:
     ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~ISCANeditor();
 	void refreshAnalogDevices();
-    void buttonEvent(Button* button);
+    void buttonCallback(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
     void collapsedStateChanged();
 	Visualizer* createNewCanvas();
