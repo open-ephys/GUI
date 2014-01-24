@@ -51,6 +51,10 @@ ISCANnode::ISCANnode()
 	offsetY = 0;
 	gainX = 1;
 	gainY = 1;
+	device = "";
+	calibrationMode = 0;
+	screenCenterX = 1024/2; 
+	screenCenterY = 768/2;
 }
 
 ISCANnode::~ISCANnode()
@@ -80,19 +84,32 @@ bool ISCANnode::disable()
 	}
 
 
+	int ISCANnode::getXchannel()
+	{
+		return analogXchannel;
+	}
+
+	int ISCANnode::getYchannel()
+	{
+		return analogYchannel;
+	}
+
 AudioProcessorEditor* ISCANnode::createEditor()
 {
     editor = new ISCANeditor(this, true);
-
     return editor;
-
-
 }
 
 void ISCANnode::setSamplingRate(int sampleRate)
 {
 	eyeSamplingRateHz = sampleRate;
 }
+
+int ISCANnode::getAnalogSamplingRate()
+{
+	return eyeSamplingRateHz;
+}
+
 
 StringArray ISCANnode::getAnalogDeviceNames(Array<int> &channelNumbers)
 {
@@ -153,7 +170,7 @@ bool ISCANnode::connect(int selectedDevice)
 void ISCANnode::updateSettings()
 {
 	ISCANeditor*ed=(ISCANeditor*)getEditor();
-	ed->refreshAnalogDevices();
+//	ed->refreshAnalogDevices();
 }
 
 void ISCANnode::setParameter(int parameterIndex, float newValue)
@@ -170,6 +187,26 @@ void ISCANnode::setParameter(int parameterIndex, float newValue)
 
 }
 
+int ISCANnode::getGainX()
+{
+		return gainX;
+}
+
+int ISCANnode::getGainY()
+{
+	return gainY;
+}
+
+void ISCANnode::setGainX(int gain)
+{
+	gainX = gain;
+}
+
+void ISCANnode::setGainY(int gain)
+{
+	gainY = gain;
+}
+
 void ISCANnode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
 	if (eventType == TIMESTAMP)
@@ -184,22 +221,30 @@ void ISCANnode::handleEvent(int eventType, juce::MidiMessage& event, int sampleP
 		std::vector<String> splitted = s.splitString(' ');
   		if (splitted[0] == "CalibrateEyePosition")
 		{
-			float Xpos = splitted[1].getFloatValue();
-			float Ypos = splitted[2].getFloatValue();
+			float fixateXpos = splitted[1].getFloatValue();
+			float fixateYpos = splitted[2].getFloatValue();
 			int screenWidth = splitted[3].getFloatValue();
 			int screenHeight = splitted[4].getFloatValue();
-			// prevEyePosition
-			int centerX = screenWidth/2;
-			int centerY = screenHeight/2;
 
-			// We use a linear model that maps analog signal back to pixel coordinates:
-			// x (pixel) = a0_x + a1_x * analog_x
-			// y (pixel) = a0_y + a1_y * analog_y
-			// this means we need at least two calibrate eye position events to solve this equation.
-			// a1_x = (x_pix1 - x_pix2) / (analog_x1 - analog_x2)
-			// a0_x = x_pix1 - a1_x*analog_x1
-			//
-			// in the future, this should be replaced with a proper LSQ solution that uses svd to compute the psedou inverse.
+			if (calibrationMode == 1)
+			{
+				// easy hack. User manually inputs the gain. We only compute offsets.
+				screenCenterX = screenWidth/2;
+				screenCenterY = screenHeight/2;
+				offsetX = prevEyePosition.x - (fixateXpos-screenCenterX) / gainX;
+				offsetY = prevEyePosition.y - (fixateYpos-screenCenterY) / gainY;
+			} else if (calibrationMode == 2)
+			{
+				// TODO...
+				// We use a linear model that maps analog signal back to pixel coordinates:
+				// x (pixel) = a0_x + a1_x * analog_x
+				// y (pixel) = a0_y + a1_y * analog_y
+				// this means we need at least two calibrate eye position events to solve this equation.
+				// a1_x = (x_pix1 - x_pix2) / (analog_x1 - analog_x2)
+				// a0_x = x_pix1 - a1_x*analog_x1
+				//
+				// in the future, this should be replaced with a proper LSQ solution that uses svd to compute the psedou inverse.
+			}
 
 
 		}
@@ -247,12 +292,54 @@ void ISCANnode::postEyePositionToMidiBuffer(EyePosition p, MidiBuffer& events)
 	delete eyePositionSerialized;
 }
 
+int ISCANnode::getCalibrationMode()
+{
+	return calibrationMode;
+}
+
+void ISCANnode::setCalibrationMode(int mode)
+{
+	calibrationMode = mode;
+}
+
 void ISCANnode::setSerialCommunication(bool state)
 {
 	serialCommunication = state;
 }
+
+String ISCANnode::getSerialDevice()
+{
+	return device;
+}
+	
+void ISCANnode::setSerialDevice(String d)
+{
+	device = d;
+}
+
+bool ISCANnode::getSerialCommunication()
+{
+	return serialCommunication;
+}
+
 double ISCANnode::applyCalibration(double input, int channel)
 {
+	if (calibrationMode == 0)
+		return input;
+	if (calibrationMode == 1)
+	{
+		// fixed gain.
+		if (channel == 0)
+		{
+			// X
+			return (input - offsetX) * gainX + screenCenterX;
+		} else
+		{
+			// Y
+			return (input - offsetY) * gainY + screenCenterY;
+		}
+	}
+
 	// TODO, add linear calibration here....
 	// channel indicates whether it is X (channel = 0) or Y (channel = 1)
 	return input;
@@ -358,6 +445,8 @@ void ISCANnode::process_serialCommunication(MidiBuffer& events)
 						prevEyePosition.software_timestamp = timestamp;
 						prevEyePosition.x = e.x;
 						prevEyePosition.y = e.y;
+						prevEyePosition.xc = applyCalibration(prevEyePosition.x,0);
+						prevEyePosition.yc = applyCalibration(prevEyePosition.y,1);
 						prevEyePosition.pupil = e.pupil;
 						postEyePositionToMidiBuffer(prevEyePosition, events);
 
@@ -416,7 +505,21 @@ void ISCANnode::saveCustomParametersToXml(XmlElement* parentElement)
 	mainNode->setAttribute("device", device);
 	mainNode->setAttribute("analogXchannel", analogXchannel);
 	mainNode->setAttribute("analogYchannel", analogYchannel);
+
+	mainNode->setAttribute("gainX", gainX);
+	mainNode->setAttribute("gainY", gainY);
+
+	mainNode->setAttribute("offsetX", offsetX);
+	mainNode->setAttribute("offsetY", offsetY);
+
+	mainNode->setAttribute("eyeSamplingRateHz",eyeSamplingRateHz);
+	mainNode->setAttribute("calibrationMode",calibrationMode);
+
+	mainNode->setAttribute("screenCenterX",screenCenterX);
+	mainNode->setAttribute("screenCenterY",screenCenterY);
 }
+	
+	
 
 
 void ISCANnode::loadCustomParametersFromXml()
@@ -432,14 +535,20 @@ void ISCANnode::loadCustomParametersFromXml()
 				analogXchannel = mainNode->getIntAttribute("analogXchannel");
 				analogYchannel = mainNode->getIntAttribute("analogYchannel");
 				device = mainNode->getStringAttribute("device");
+				screenCenterX = mainNode->getDoubleAttribute("screenCenterX",1024/2);
+				screenCenterY = mainNode->getDoubleAttribute("screenCenterY",768/2);
+				gainX = mainNode->getDoubleAttribute("gainX",1.0);
+				gainY = mainNode->getDoubleAttribute("gainY",1.0);
+				offsetX = mainNode->getDoubleAttribute("offsetX",0);
+				offsetY= mainNode->getDoubleAttribute("offsetY",0);
+				eyeSamplingRateHz = mainNode->getIntAttribute("eyeSamplingRateHz",120);
+				calibrationMode = mainNode->getIntAttribute("calibrationMode",0);
 				if (serialCommunication && device != "")
 				{
 					StringArray serialDevices = getDeviceNames();
 					for (int k=0;k<serialDevices.size();k++)
 					{
 						if (serialDevices[k] == device) {
-							ISCANeditor *ed = (ISCANeditor*) getEditor();
-							ed->setDevice(serialDevices,1+k);
 							connect(k+1);
 							break;
 						}

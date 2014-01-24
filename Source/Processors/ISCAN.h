@@ -68,10 +68,22 @@ public:
 	void setXchannel(int ch);
 	void setYchannel(int ch);
 	double applyCalibration(double input, int channel);
+	bool getSerialCommunication();
+	int getAnalogSamplingRate();
+	int getXchannel();
+	int getYchannel();
+	int getCalibrationMode();
+	void setCalibrationMode(int mode);
+	int getGainX();
+	int getGainY();
+	void setGainX(int gain);
+	void setGainY(int gain);
+	String getSerialDevice();
+	void setSerialDevice(String d);
 
 	void updateSettings();
 
-	 String device;
+	
 
 private:
 	int sampleCounter;
@@ -90,9 +102,10 @@ private:
 	int64 numTicksPerSec;
 	bool firstTime;
 	int packetCounter;
-	float offsetX, offsetY, gainX, gainY;
+	float offsetX, offsetY, gainX, gainY,screenCenterX,screenCenterY;
 	int64 hardware_timestamp,software_timestamp;
-	
+	 String device;
+	int calibrationMode ;
 
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANnode);
 
