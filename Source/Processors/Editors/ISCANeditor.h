@@ -86,13 +86,12 @@ public:
     void buttonEvent(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
     void collapsedStateChanged();
-	Visualizer* createNewCanvas() ;
-	void setDevice(StringArray devices,int k);
+	Visualizer* createNewCanvas();
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;
-    ScopedPointer<Label> urlLabel, devXlbl,devYlbl,sampleLbl;
-	ScopedPointer<ComboBox> deviceList, devX,devY,sampleRate;
+    ScopedPointer<Label> gainX,gainY,gainXedt,gainYedt;
+	ScopedPointer<UtilityButton> configButton,clearButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANeditor);
 

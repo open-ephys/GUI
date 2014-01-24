@@ -41,7 +41,20 @@ ISCANcanvas::~ISCANcanvas()
 
 void ISCANcanvas::paint(Graphics &g)
 {
+	static int x = 0;
+	x++;
 
+	g.fillAll(Colours::grey);
+	if (x % 2 == 0)
+		g.setColour(juce::Colours::blueviolet);
+	else
+		g.setColour(juce::Colours::darkgreen);
+
+	g.fillRect(50,100,300,400);
+
+	// paint the current eye position. Stretch things to GUI monitor size
+	int h = getHeight();
+	int w = getWidth();
 
 }
 
@@ -54,6 +67,7 @@ void ISCANcanvas::update()
 
 void ISCANcanvas::resized()
 {
+
 }
 
 void ISCANcanvas::refresh()
@@ -73,117 +87,60 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
 	: VisualizerEditor(parentNode, useDefaultParameterEditors)
 
 {
+    ISCANnode* processor = (ISCANnode*) getProcessor();
+
+	tabText = "Eye Tracking";
 	desiredWidth = 220;
 
-	communication = new ToggleButton("Serial Communication");//,Font("Default", 15, Font::plain));
-	communication->addListener(this);
-	communication->setColour(Label::textColourId, Colours::white);
-	communication->setBounds(10,30,160,20);
-	communication->setToggleState(true, false);
-	addAndMakeVisible(communication);
+	configButton = new UtilityButton("Config",Font("Default", 15, Font::plain));
+	configButton->addListener(this);
+	configButton->setColour(Label::textColourId, Colours::white);
+	configButton->setBounds(10,30,70,20);
+	addAndMakeVisible(configButton);
 
-    urlLabel = new Label("Device:", "Device:");
-    urlLabel->setBounds(20,60,60,25);
-    addAndMakeVisible(urlLabel);
-	urlLabel->setVisible(true);
+	clearButton = new UtilityButton("Clear",Font("Default", 15, Font::plain));
+	clearButton->addListener(this);
+	clearButton->setColour(Label::textColourId, Colours::white);
+	clearButton->setBounds(100,30,70,20);
+	addAndMakeVisible(clearButton);
+	
+	gainX = new Label("X gain:", "X gain:");
+    gainX->setBounds(10,50,80,25);
+    addAndMakeVisible(gainX);
+	gainX->setVisible(false);
 
-	deviceList = new ComboBox("SerialDevices");
-	deviceList->setEditableText(false);
-	deviceList->setJustificationType(Justification::centredLeft);
-	deviceList->addListener(this);
-	deviceList->setBounds(80,60,130,20);
-	addAndMakeVisible(deviceList);
-	refreshDevices();
-	deviceList->setVisible(true);
-
-
-	devXlbl = new Label("X Channel:", "X Channel:");
-    devXlbl->setBounds(20,50,80,25);
-    addAndMakeVisible(devXlbl);
-	devXlbl->setVisible(false);
-
-	devYlbl = new Label("Y Channel:", "Y Channel:");
-    devYlbl->setBounds(20,80,80,25);
-    addAndMakeVisible(devYlbl);
-	devYlbl->setVisible(false);
-
-	devX = new ComboBox("DeviceX");
-	devX->setEditableText(false);
-	devX->setJustificationType(Justification::centredLeft);
-	devX->addListener(this);
-	devX->setBounds(110,55,90,20);
-	addAndMakeVisible(devX);
-	devX->setVisible(false);
-
-	devY = new ComboBox("DeviceY");
-	devY->setEditableText(false);
-	devY->setJustificationType(Justification::centredLeft);
-	devY->addListener(this);
-	devY->setBounds(110,85,90,20);
-	addAndMakeVisible(devY);
-	devY->setVisible(false);
+	gainY= new Label("Y gain:", "Y gain:");
+    gainY->setBounds(10,70,80,25);
+    addAndMakeVisible(gainY);
+	gainY->setVisible(false);
 
 
-	sampleLbl = new Label("Sample Rate", "Sample Rate:");
-    sampleLbl->setBounds(20,110,80,25);
-    addAndMakeVisible(sampleLbl);
-	sampleLbl->setVisible(false);
+	gainXedt = new Label("X gain:", String(processor->getGainX()));
+    gainXedt->setBounds(60,50,80,25);
+    addAndMakeVisible(gainXedt);
+	gainXedt->setEditable(true);
+	gainXedt->setColour(Label::textColourId, Colours::white);
+	gainXedt->setVisible(false);
 
-
-	sampleRate = new ComboBox("sampleRate");
-	sampleRate->setEditableText(false);
-	sampleRate->setJustificationType(Justification::centredLeft);
-	sampleRate->addListener(this);
-	sampleRate->setBounds(110,110,90,20);
-	addAndMakeVisible(sampleRate);
-	sampleRate->addItem("50 Hz",1);
-	sampleRate->addItem("60 Hz",2);
-	sampleRate->addItem("100 Hz",3);
-	sampleRate->addItem("120 Hz",4);
-	sampleRate->addItem("200 Hz",5);
-	sampleRate->setSelectedId(4,false);
-	sampleRate->setVisible(false);
+	gainYedt= new Label("Y gain:", String(processor->getGainY()));
+    gainYedt->setBounds(60,70,80,25);
+	gainYedt->setEditable(true);
+    addAndMakeVisible(gainYedt);
+	gainYedt->setColour(Label::textColourId, Colours::white);
+	gainYedt->setVisible(false);
 
     setEnabledState(false);
 
 }
 
 
-	Visualizer* ISCANeditor::createNewCanvas() 
+Visualizer* ISCANeditor::createNewCanvas() 
 {
    ISCANnode* processor = (ISCANnode*) getProcessor();
    ISCANcanvas* canvas = new ISCANcanvas(this,processor);
 	return canvas;
 }
 
-	void ISCANeditor::setDevice(StringArray devices, int k)
-	{
-		deviceList->clear();
-		deviceList->addItemList(devices,1);
-		deviceList->setSelectedId(k,true);
-	}
-
-void ISCANeditor::refreshAnalogDevices()
-{
-	ISCANnode *processor  = (ISCANnode*) getProcessor();
-	Array<int> channelNumbers;
-	StringArray analogDevices = processor->getAnalogDeviceNames(channelNumbers);
-	devX->clear();
-	devY->clear();
-	for (int k=0;k<channelNumbers.size();k++)
-	{
-		devX->addItem(analogDevices[k], channelNumbers[k]);
-		devY->addItem(analogDevices[k], channelNumbers[k]);
-	}
-}
-
-void ISCANeditor::refreshDevices()
-{
-	ISCANnode *processor  = (ISCANnode*) getProcessor();
-	StringArray devices = processor->getDeviceNames();
-	deviceList->clear();
-	deviceList->addItemList(devices,1);
-}
 
 void ISCANeditor::collapsedStateChanged()
 {
@@ -193,85 +150,103 @@ void ISCANeditor::collapsedStateChanged()
 void ISCANeditor::buttonEvent(Button* button)
 {
 	ISCANnode *processor  = (ISCANnode*) getProcessor();
-	if (button == communication)
+	if (button == clearButton)
 	{
-		if (communication->getToggleState())
+	} else if (button == configButton)
+	{
+		ISCANnode *processor  = (ISCANnode*) getProcessor();
+		StringArray devices = processor->getDeviceNames();
+
+		PopupMenu m;
+		PopupMenu sourceSubMenu,analogSubMenu,serialSubMenu,XchannelMenu,YchannelMenu,analogSampleRateMenu,calibSubMenu;
+		// update serial device list
+		for (int k=0;k<devices.size();k++)
 		{
+			serialSubMenu.addItem(1+k, devices[k], true, processor->getSerialDevice() == devices[k]);
+		}
+
+		// update analog device list
+		Array<int> channelNumbers;
+		StringArray analogDevices = processor->getAnalogDeviceNames(channelNumbers);
+		for (int j=0;j<analogDevices.size();j++)
+		{
+			XchannelMenu.addItem(1000+channelNumbers[j], analogDevices[j],true, processor->getXchannel() ==channelNumbers[j]);
+			YchannelMenu.addItem(2000+channelNumbers[j], analogDevices[j],true, processor->getYchannel() ==channelNumbers[j]);
+		}
+		int sampleRates[6] = {50,60,80,100,120,200};
+		for (int i=0;i<6;i++)
+		{
+			analogSampleRateMenu.addItem(100+i,String(sampleRates[i])+" Hz",true, processor->getAnalogSamplingRate() == sampleRates[i]);
+		}
+
+		analogSubMenu.addSubMenu("X", XchannelMenu);
+		analogSubMenu.addSubMenu("Y", YchannelMenu);
+		analogSubMenu.addSubMenu("Sample Rate", analogSampleRateMenu);
+
+		sourceSubMenu.addSubMenu("Serial", serialSubMenu,true,juce::Image::null,processor->getSerialCommunication());
+		sourceSubMenu.addSubMenu("Analog", analogSubMenu,true,juce::Image::null,!processor->getSerialCommunication());
+
+		calibSubMenu.addItem(3000,"None",true,processor->getCalibrationMode() == 0);
+		calibSubMenu.addItem(3001,"2 DOF (Fixed Gain)",true,processor->getCalibrationMode() == 1);
+		calibSubMenu.addItem(3002,"4 DOF (linear model)",false,processor->getCalibrationMode() == 2);
+
+		m.addSubMenu("Source", sourceSubMenu);
+		m.addSubMenu("Calibration", calibSubMenu);
+	
+		const int result = m.show();
+		if (result <= 0)
+			return;
+
+		if (result < 100)
+		{
+			// selected serial communication.
 			processor->setSerialCommunication(true);
-			communication->setButtonText("Serial Communication");
-			urlLabel->setVisible(true);
-  		    refreshDevices();
-			deviceList->setVisible(true);
-
-			devXlbl->setVisible(false);
-			devYlbl->setVisible(false);
-			devX->setVisible(false);
-			devY->setVisible(false);
-			sampleRate->setVisible(false);
-			sampleLbl->setVisible(false);
-		}
-		else 
+			processor->setSerialDevice(devices[result-1]);
+		
+		} else	if (result < 106)
 		{
+			// analog sample rate
 			processor->setSerialCommunication(false);
-			communication->setButtonText("Analog Communication");
-			urlLabel->setVisible(false);
-			deviceList->setVisible(false);
+			processor->setSamplingRate(sampleRates[result - 100]);
+		} else if (result < 2000)
+		{
+			// analog communication
+			processor->setSerialCommunication(false);
+			processor->setXchannel(result-1000);
+		} else if (result < 3000)
+		{
+			// analog communication
+			processor->setSerialCommunication(false);
+			processor->setYchannel(result-2000);
+		} else if (result < 4000)
+		{
+			processor->setCalibrationMode(result-3000);
+			if (result-3000 == 1)
+			{
+				gainX->setVisible(true);
+				gainY->setVisible(true);
+				gainXedt->setVisible(true);
+				gainYedt->setVisible(true);
 
-			devXlbl->setVisible(true);
-			devYlbl->setVisible(true);
-			devX->setVisible(true);
-			devY->setVisible(true);
-			sampleRate->setVisible(true);
-			sampleLbl->setVisible(true);
-			refreshAnalogDevices();
+			} else 
+			{
+				gainX->setVisible(false);
+				gainY->setVisible(false);
+				gainXedt->setVisible(false);
+				gainYedt->setVisible(false);
+
+			}
 
 		}
+
 	}
+	
 }
 
 void ISCANeditor::comboBoxChanged(ComboBox* comboBox)
 {
 	ISCANnode *processor  = (ISCANnode*) getProcessor();
 
-	if (comboBox == deviceList)
-	{
-		int selectedDevice = comboBox->getSelectedId();
-		if (selectedDevice > 0)
-		{
-			processor->connect(selectedDevice);
-		}
-	} else if (comboBox == devX)
-	{
-		int xChannel = devX->getSelectedId();
-		processor->setXchannel(xChannel);
-	} else if (comboBox == devY)
-	{
-		int yChannel = devY->getSelectedId();
-		processor->setYchannel(yChannel);
-	} else if (comboBox == sampleRate)
-	{
-		int selectedID = sampleRate->getSelectedId();
-		int selectedSamplingRate=0;
-		switch (selectedID)
-		{
-		case 1:
-			selectedSamplingRate =50;
-			break;
-		case 2:
-			selectedSamplingRate =60;
-			break;
-		case 3:
-			selectedSamplingRate =100;
-			break;
-		case 4:
-			selectedSamplingRate =120;
-			break;
-		case 5:
-			selectedSamplingRate =200;
-			break;
-		}
-		processor->setSamplingRate(selectedSamplingRate );
-	}
 }
 
 ISCANeditor::~ISCANeditor()
