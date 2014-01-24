@@ -116,6 +116,7 @@ private:
   
 	ScopedPointer<SpikeThresholdCoordinator> thresholdCoordinator;
 	ScopedPointer<UtilityButton> lockThresholdsButton;
+    ScopedPointer<UtilityButton> invertSpikesButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeDisplayCanvas);
 
@@ -136,6 +137,8 @@ public:
     void resized();
 
     void mouseDown(const MouseEvent& event);
+
+    void invertSpikes(bool);
 
     void plotSpike(const SpikeObject& spike, int electrodeNum);
 
@@ -202,6 +205,8 @@ public:
     void getBestDimensions(int*, int*);
 
     void clear();
+
+    void invertSpikes(bool);
 
     float minWidth;
     float aspectRatio;
@@ -331,6 +336,11 @@ public:
 	void registerThresholdCoordinator(SpikeThresholdCoordinator *stc);
 	void setDisplaythreshold(float threshold);
 
+    void invertSpikes(bool shouldInvert)
+    {
+        spikesInverted = shouldInvert;
+    }
+
 private:
 
     Colour waveColour;
@@ -362,6 +372,8 @@ private:
 
     MouseCursor::StandardCursorType cursorType;
 	SpikeThresholdCoordinator *thresholdCoordinator;
+
+    bool spikesInverted;
 
 };
 
