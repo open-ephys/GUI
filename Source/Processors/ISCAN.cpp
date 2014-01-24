@@ -55,6 +55,7 @@ ISCANnode::ISCANnode()
 	calibrationMode = 0;
 	screenCenterX = 1024/2; 
 	screenCenterY = 768/2;
+	bufferSize = 50; // for display purposes.
 }
 
 ISCANnode::~ISCANnode()
@@ -187,22 +188,22 @@ void ISCANnode::setParameter(int parameterIndex, float newValue)
 
 }
 
-int ISCANnode::getGainX()
+float ISCANnode::getGainX()
 {
 		return gainX;
 }
 
-int ISCANnode::getGainY()
+float ISCANnode::getGainY()
 {
 	return gainY;
 }
 
-void ISCANnode::setGainX(int gain)
+void ISCANnode::setGainX(float gain)
 {
 	gainX = gain;
 }
 
-void ISCANnode::setGainY(int gain)
+void ISCANnode::setGainY(float gain)
 {
 	gainY = gain;
 }
@@ -357,7 +358,16 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 		process_serialCommunication(events);
 	} else
 	{
-		if (analogXchannel >= 0 && analogYchannel >= 0 && analogXchannel)
+		process_analogCommunication(events,buffer,nSamples);
+	}
+
+//	 nSamples = -10; // make sure this is not processed;
+	
+}
+
+void ISCANnode::process_analogCommunication(MidiBuffer& events, AudioSampleBuffer& buffer, int nSamples)
+{
+	if (analogXchannel >= 0 && analogYchannel >= 0 && analogXchannel)
 		{
 			// use two analog channels (if available).
 			float *xbuf = buffer.getSampleData(analogXchannel,0);
@@ -385,14 +395,34 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 					else
 						prevEyePosition.pupil = 0;
 
+					updateEyeBuffer(prevEyePosition);
 					postEyePositionToMidiBuffer(prevEyePosition, events);
 				}
 			}
 		}
-	}
+}
 
-	 nSamples = -10; // make sure this is not processed;
-	
+Array<EyePosition> ISCANnode::getEyeBuffer()
+{
+	Array<EyePosition> buf;
+	mut.enter();
+	for (std::list<EyePosition>::iterator it = prevEyePositions.begin();it != prevEyePositions.end(); it++)
+	{
+		buf.add(*it);
+	}
+	mut.exit();
+	return buf;
+}
+
+void ISCANnode::updateEyeBuffer(EyePosition current)
+{
+	mut.enter();
+	prevEyePositions.push_back(current);
+	if (prevEyePositions.size() > bufferSize)
+	{
+		prevEyePositions.pop_front();
+	}
+	mut.exit();
 }
 
 void ISCANnode::process_serialCommunication(MidiBuffer& events)
@@ -448,8 +478,10 @@ void ISCANnode::process_serialCommunication(MidiBuffer& events)
 						prevEyePosition.xc = applyCalibration(prevEyePosition.x,0);
 						prevEyePosition.yc = applyCalibration(prevEyePosition.y,1);
 						prevEyePosition.pupil = e.pupil;
-						postEyePositionToMidiBuffer(prevEyePosition, events);
 
+						updateEyeBuffer(prevEyePosition);
+
+						postEyePositionToMidiBuffer(prevEyePosition, events);
 					}
 				} 
 				serialBuffer = serialBuffer.substr(	1+line_termination_pos);

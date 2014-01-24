@@ -41,21 +41,45 @@ ISCANcanvas::~ISCANcanvas()
 
 void ISCANcanvas::paint(Graphics &g)
 {
-	static int x = 0;
-	x++;
+	
 
 	g.fillAll(Colours::grey);
-	if (x % 2 == 0)
-		g.setColour(juce::Colours::blueviolet);
-	else
-		g.setColour(juce::Colours::darkgreen);
+	Array<EyePosition> buf = processor->getEyeBuffer();
+	if (buf.size() > 0)
+	{
+		
+		// paint the current eye position. Stretch things to GUI monitor size
+		int h = getHeight();
+		int w = getWidth();
+		
+		for (int k=0;k<buf.size();k++)
+		{
+			if (k == buf.size()-1)
+			{
+				g.setColour(juce::Colours::green);
+				float xc =  buf[k].xc;
+				float yc =  buf[k].yc;
+				float fx = xc/(processor->screenCenterX*2) * w -5;
+				float fy = yc/(processor->screenCenterY*2) * h -5;
+				g.fillEllipse(fx,fy,5,5);
 
-	g.fillRect(50,100,300,400);
+			} else
+			{
+				g.setColour(juce::Colour::fromRGB(float(k)/buf.size()*255.0,0,0));
+				float x0 = buf[k].xc/(processor->screenCenterX*2) * w -5;
+				float y0 = buf[k].yc/(processor->screenCenterY*2) * h -5; 
+				float x1 = buf[k+1].xc/(processor->screenCenterX*2) * w -5;
+				float y1 = buf[k+1].yc/(processor->screenCenterY*2) * h -5; 
+				g.drawLine(x0,y0,x1,y1,1);
+			}
 
-	// paint the current eye position. Stretch things to GUI monitor size
-	int h = getHeight();
-	int w = getWidth();
+								  
 
+			
+		}
+		
+	}
+	repaint();
 }
 
 void ISCANcanvas::update()
@@ -119,13 +143,16 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
     gainXedt->setBounds(60,50,80,25);
     addAndMakeVisible(gainXedt);
 	gainXedt->setEditable(true);
+	gainXedt->addListener(this);
 	gainXedt->setColour(Label::textColourId, Colours::white);
 	gainXedt->setVisible(false);
 
 	gainYedt= new Label("Y gain:", String(processor->getGainY()));
     gainYedt->setBounds(60,70,80,25);
 	gainYedt->setEditable(true);
+	gainYedt->addListener(this);
     addAndMakeVisible(gainYedt);
+
 	gainYedt->setColour(Label::textColourId, Colours::white);
 	gainYedt->setVisible(false);
 
@@ -138,8 +165,6 @@ Visualizer* ISCANeditor::createNewCanvas()
 {
    ISCANnode* processor = (ISCANnode*) getProcessor();
    ISCANcanvas* canvas = new ISCANcanvas(this,processor);
-   ActionListener* listener = (ActionListener*) canvas;
-   getUIComponent()->registerAnimatedComponent(listener);
 	return canvas;
 }
 
@@ -243,6 +268,20 @@ void ISCANeditor::buttonCallback(Button* button)
 
 	}
 	
+}
+
+void ISCANeditor::labelTextChanged(Label *label)
+{
+	ISCANnode *processor  = (ISCANnode*) getProcessor();
+	
+	if (label == gainXedt)
+	{
+		processor->setGainX( label->getText().getDoubleValue());
+	} else if (label == gainYedt)
+	{
+		processor->setGainY( label->getText().getDoubleValue());
+	}
+
 }
 
 void ISCANeditor::comboBoxChanged(ComboBox* comboBox)

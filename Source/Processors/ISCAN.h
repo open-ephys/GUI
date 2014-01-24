@@ -74,16 +74,17 @@ public:
 	int getYchannel();
 	int getCalibrationMode();
 	void setCalibrationMode(int mode);
-	int getGainX();
-	int getGainY();
-	void setGainX(int gain);
-	void setGainY(int gain);
+	float getGainX();
+	float getGainY();
+	void setGainX(float gain);
+	void setGainY(float gain);
 	String getSerialDevice();
 	void setSerialDevice(String d);
-
+	void process_analogCommunication(MidiBuffer& events, AudioSampleBuffer& buffer, int nSamples);
 	void updateSettings();
 
-	
+	Array<EyePosition> getEyeBuffer();
+	int screenCenterX,screenCenterY;
 
 private:
 	int sampleCounter;
@@ -96,16 +97,21 @@ private:
 	std::string serialBuffer;
 	Time timer;
 	EyePosition prevEyePosition;
+	std::list<EyePosition> prevEyePositions;
 	void handleEvent(int eventType, MidiMessage& event, int samplePos);
 	int eyeSamplingRateHz;
 	int64 software_ts;
 	int64 numTicksPerSec;
 	bool firstTime;
 	int packetCounter;
-	float offsetX, offsetY, gainX, gainY,screenCenterX,screenCenterY;
+	float offsetX, offsetY, gainX, gainY;
 	int64 hardware_timestamp,software_timestamp;
 	 String device;
 	int calibrationMode ;
+	int bufferSize;
+	void updateEyeBuffer(EyePosition current);
+	
+	CriticalSection mut;
 
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ISCANnode);
 
