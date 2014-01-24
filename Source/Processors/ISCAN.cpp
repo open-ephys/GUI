@@ -53,8 +53,8 @@ ISCANnode::ISCANnode()
 	gainY = 1;
 	device = "";
 	calibrationMode = 0;
-	screenCenterX = 1024/2; 
-	screenCenterY = 768/2;
+	fixateXpos = screenCenterX = 1024/2; 
+	fixateYpos = screenCenterY = 768/2;
 	bufferSize = 50; // for display purposes.
 }
 
@@ -208,6 +208,16 @@ void ISCANnode::setGainY(float gain)
 	gainY = gain;
 }
 
+float ISCANnode::getFixationSpotX()
+{
+	return fixateXpos;
+}
+
+float ISCANnode::getFixationSpotY()
+{
+	return fixateYpos;
+}
+
 void ISCANnode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
 	if (eventType == TIMESTAMP)
@@ -220,10 +230,17 @@ void ISCANnode::handleEvent(int eventType, juce::MidiMessage& event, int sampleP
 		// CalibrateEyePosition
 		StringTS s(event);
 		std::vector<String> splitted = s.splitString(' ');
+		if (splitted[0] == "FixationSpotPosition")
+		{
+			fixateXpos = splitted[1].getFloatValue();
+			fixateYpos = splitted[2].getFloatValue();
+			int screenWidth = splitted[3].getFloatValue();
+			int screenHeight = splitted[4].getFloatValue();
+		}
   		if (splitted[0] == "CalibrateEyePosition")
 		{
-			float fixateXpos = splitted[1].getFloatValue();
-			float fixateYpos = splitted[2].getFloatValue();
+			fixateXpos = splitted[1].getFloatValue();
+			fixateYpos = splitted[2].getFloatValue();
 			int screenWidth = splitted[3].getFloatValue();
 			int screenHeight = splitted[4].getFloatValue();
 

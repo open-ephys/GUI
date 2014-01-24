@@ -82,6 +82,8 @@ public:
 	void setSerialDevice(String d);
 	void process_analogCommunication(MidiBuffer& events, AudioSampleBuffer& buffer, int nSamples);
 	void updateSettings();
+	float getFixationSpotX();
+	float getFixationSpotY();
 
 	Array<EyePosition> getEyeBuffer();
 	int screenCenterX,screenCenterY;
@@ -108,6 +110,7 @@ private:
 	int64 hardware_timestamp,software_timestamp;
 	 String device;
 	int calibrationMode ;
+	float fixateXpos,fixateYpos;
 	int bufferSize;
 	void updateEyeBuffer(EyePosition current);
 	

@@ -42,16 +42,21 @@ ISCANcanvas::~ISCANcanvas()
 void ISCANcanvas::paint(Graphics &g)
 {
 	
+		int h = getHeight();
+		int w = getWidth();
+		
 
 	g.fillAll(Colours::grey);
 	Array<EyePosition> buf = processor->getEyeBuffer();
+	g.setColour(juce::Colours::green);
+	g.drawEllipse(processor->getFixationSpotX()/(processor->screenCenterX*2)*w-15,
+				  processor->getFixationSpotY()/(processor->screenCenterY*2)*h-15,
+				  30,30,1);
+
 	if (buf.size() > 0)
 	{
 		
 		// paint the current eye position. Stretch things to GUI monitor size
-		int h = getHeight();
-		int w = getWidth();
-		
 		for (int k=0;k<buf.size();k++)
 		{
 			if (k == buf.size()-1)
@@ -59,9 +64,9 @@ void ISCANcanvas::paint(Graphics &g)
 				g.setColour(juce::Colours::green);
 				float xc =  buf[k].xc;
 				float yc =  buf[k].yc;
-				float fx = xc/(processor->screenCenterX*2) * w -5;
-				float fy = yc/(processor->screenCenterY*2) * h -5;
-				g.fillEllipse(fx,fy,5,5);
+				float fx = xc/(processor->screenCenterX*2) * w -3;
+				float fy = yc/(processor->screenCenterY*2) * h -3;
+				g.fillEllipse(fx,fy,6,6);
 
 			} else
 			{
@@ -70,7 +75,8 @@ void ISCANcanvas::paint(Graphics &g)
 				float y0 = buf[k].yc/(processor->screenCenterY*2) * h -5; 
 				float x1 = buf[k+1].xc/(processor->screenCenterX*2) * w -5;
 				float y1 = buf[k+1].yc/(processor->screenCenterY*2) * h -5; 
-				g.drawLine(x0,y0,x1,y1,1);
+				if (x0 >=0 && y0 >=0 && x1 <= w && y1 <= h)
+					g.drawLine(x0,y0,x1,y1,1);
 			}
 
 								  
