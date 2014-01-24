@@ -624,7 +624,7 @@ PeriStimulusTimeHistogramDisplay::PeriStimulusTimeHistogramDisplay(PeriStimulusT
 
 PeriStimulusTimeHistogramDisplay::~PeriStimulusTimeHistogramDisplay()
 {
-	for (int k=0;k<psthPlots.size();k++)
+	for (int k = 0; k < psthPlots.size();k++)
 	{
 		delete(psthPlots[k]);
 	}
@@ -633,7 +633,7 @@ PeriStimulusTimeHistogramDisplay::~PeriStimulusTimeHistogramDisplay()
 
 void PeriStimulusTimeHistogramDisplay::refresh()
 {
-	for (int k=0;k<psthPlots.size();k++)
+	for (int k = 0; k < psthPlots.size(); k++)
 	{
 		psthPlots[k]->repaint();
 	}
