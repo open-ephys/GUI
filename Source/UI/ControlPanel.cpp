@@ -595,7 +595,10 @@ void ControlPanel::startRecording()
     playButton->setToggleState(true,false);
     masterClock->startRecording(); // turn on recording
     backgroundColour = Colour(255,0,0);
-    
+
+    prependText->setEditable(false);
+    appendText->setEditable(false);
+
     repaint();
 }
 
@@ -605,8 +608,13 @@ void ControlPanel::stopRecording()
     masterClock->stopRecording();
     newDirectoryButton->setEnabledState(true);
     backgroundColour = Colour(58,58,58);
+
+    prependText->setEditable(true);
+    appendText->setEditable(true);
+
     repaint();
 }
+
 
 void ControlPanel::buttonClicked(Button* button)
 
