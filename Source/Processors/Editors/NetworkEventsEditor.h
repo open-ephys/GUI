@@ -50,8 +50,7 @@ public:
 	void setLabelColor(juce::Colour color);
 private:
 
-	UtilityButton* trialSimulation;
-	UtilityButton* startRecord;
+	ScopedPointer<UtilityButton> restartConnection;
     ScopedPointer<Label> urlLabel;
 	ScopedPointer<Label> labelPort;
 
