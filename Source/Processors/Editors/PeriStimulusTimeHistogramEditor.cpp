@@ -1441,7 +1441,7 @@ void XYPlot::paintSpikes(Graphics &g)
 
 	}
 	tcb->unlockPSTH();
-	repaint();
+
 }
 
 
@@ -1525,16 +1525,20 @@ void XYPlot::paintLFP(Graphics &g)
 	tcb->unlockPSTH();
 
 
-	repaint();
+	//repaint();
 }
 
 
 void XYPlot::paint(Graphics &g)
 {
 	if (spikePlot)
+	{
 		paintSpikes(g);
+	}
 	else
+	{
 		paintLFP(g);
+	}
 
 	if (zooming)
 	{

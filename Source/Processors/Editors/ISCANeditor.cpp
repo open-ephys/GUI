@@ -85,7 +85,7 @@ void ISCANcanvas::paint(Graphics &g)
 		}
 		
 	}
-	repaint();
+	
 }
 
 void ISCANcanvas::update()
@@ -171,6 +171,8 @@ Visualizer* ISCANeditor::createNewCanvas()
 {
    ISCANnode* processor = (ISCANnode*) getProcessor();
    ISCANcanvas* canvas = new ISCANcanvas(this,processor);
+   ActionListener* listener = (ActionListener*) canvas;
+   getUIComponent()->registerAnimatedComponent(listener);
 	return canvas;
 }
 
