@@ -583,7 +583,11 @@ void ControlPanel::openState(bool os)
 
 void ControlPanel::labelTextChanged(Label* label)
 {
+    graph->getRecordNode()->newDirectoryNeeded = true;
+    newDirectoryButton->setEnabledState(false);
+    masterClock->resetRecordTime();
 
+    dateText->setColour(Label::textColourId, Colours::grey);
 }
 
 void ControlPanel::startRecording()
@@ -591,6 +595,7 @@ void ControlPanel::startRecording()
     playButton->setToggleState(true,false);
     masterClock->startRecording(); // turn on recording
     backgroundColour = Colour(255,0,0);
+    
     repaint();
 }
 
