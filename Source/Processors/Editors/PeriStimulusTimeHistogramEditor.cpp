@@ -184,7 +184,18 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 				smoothingSubMenu.addItem(40+k,s,true, smoothingMS == SmoothingFactors[k]);
 			}
 
+			PopupMenu rangeTimeMenu,preRangeTimeMenu,postRangeTimeMenu;
+			double rangeTimes[4] = {0.5,1,1.5,2};
+			for (int k=0;k<4;k++) {
+				String s = String(rangeTimes[k],1) + " sec";
+				preRangeTimeMenu.addItem(50+k,s,true, fabs(processor->trialCircularBuffer->preSec - rangeTimes[k])<0.01);
+				postRangeTimeMenu.addItem(60+k,s,true, fabs(processor->trialCircularBuffer->postSec - rangeTimes[k])<0.01);
+			}
+			rangeTimeMenu.addSubMenu("pre trial", preRangeTimeMenu,true);
+			rangeTimeMenu.addSubMenu("post trial", postRangeTimeMenu,true);
+
 			m.addSubMenu("Smooth Curves", smoothingSubMenu);
+			m.addSubMenu("Range", rangeTimeMenu,true);
 			m.addItem(5,"Auto Rescale",true, showAutoRescale);
 			m.addItem(6,"Match range",false, showMatchRange);
 			m.addItem(7,"Raster Plots",false, false);
@@ -218,6 +229,15 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			{
 				smoothingMS = SmoothingFactors[result-40];
 				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40]);
+			} else if (result >= 50 && result <= 54)
+			{
+				// this will require killing 
+				double newPreSec = rangeTimes[result-50];
+				processor->modifyTimeRange(newPreSec,processor->trialCircularBuffer->postSec);
+			} else if (result >= 60 && result <= 64)
+			{
+				double newPostSec = rangeTimes[result-60];
+				processor->modifyTimeRange(processor->trialCircularBuffer->preSec,newPostSec);
 			}
 	} else if (button == saveOptions)
 	{

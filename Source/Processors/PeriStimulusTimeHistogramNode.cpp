@@ -330,8 +330,29 @@ void PeriStimulusTimeHistogramNode::syncInternalDataStructuresWithSpikeSorter()
 			// 2. All channels match
 			// 3. We have all sorted unit information
 			trialCircularBuffer->syncInternalDataStructuresWithSpikeSorter(electrodes);
+		}
+	}
+}
 
 
+void PeriStimulusTimeHistogramNode::modifyTimeRange(double preSec_, double postSec_)
+{
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "Spike Detector")
+		{
+			SpikeDetector *node = (SpikeDetector*)p[k];
+			Array<Electrode*> electrodes = node->getElectrodes();
+
+			// for each electrode, verify that 
+			// 1. We have it in our internal structure 
+			// 2. All channels match
+			// 3. We have all sorted unit information
+			trialCircularBuffer->preSec = preSec_;
+			trialCircularBuffer->postSec = postSec_;
+			trialCircularBuffer->syncInternalDataStructuresWithSpikeSorter(electrodes);
 		}
 	}
 }
