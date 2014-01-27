@@ -3,7 +3,7 @@
 <SETTINGS>
   <INFO>
     <VERSION>0.1</VERSION>
-    <DATE>17 Jan 2014 14:31:41</DATE>
+    <DATE>27 Jan 2014 10:57:06</DATE>
     <OS>Windows 7</OS>
     <MACHINE>ALPHA</MACHINE>
   </INFO>
@@ -154,7 +154,7 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.20484568" HighCut="7603.76512"
+      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.44639448" HighCut="7603.76512"
               ADCsOn="1" AudioOutputL="1" AudioOutputR="1" NoiseSlicer="0"
               TTLFastSettle="2" DAC_TTL="1" DAC_HPF="8"/>
     </PROCESSOR>
@@ -793,7 +793,7 @@
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR isCollapsed="0" Type="FilterEditor">
-        <VALUES HighCut="300" LowCut="1" ApplyToADC="0"/>
+        <VALUES HighCut="6000" LowCut="300" ApplyToADC="0"/>
       </EDITOR>
     </PROCESSOR>
     <PROCESSOR name="Utilities/Merger" insertionPoint="1" NodeId="109">
@@ -1798,7 +1798,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="1" x="31" y="79" width="800" height="500"/>
+        <WINDOW Active="0" x="13" y="529" width="800" height="500"/>
         <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="1"
                     EventButtonState="239" ChannelDisplayState="1111111111111111111111111111111111111111111"
                     ScrollX="0" ScrollY="0"/>
@@ -1807,7 +1807,9 @@
     <SWITCH number="3"/>
     <PROCESSOR name="Filters/Eye Tracking" insertionPoint="1" NodeId="110">
       <ISCAN serialCommunication="1" device="\\.\COM18" analogXchannel="-1"
-             analogYchannel="-1"/>
+             analogYchannel="-1" gainX="1" gainY="1" offsetX="0" offsetY="0"
+             eyeSamplingRateHz="120" calibrationMode="0" screenCenterX="512"
+             screenCenterY="384"/>
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
@@ -1955,7 +1957,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="0"/>
+        <WINDOW Active="1" x="936" y="842" width="313" height="292"/>
       </EDITOR>
     </PROCESSOR>
     <PROCESSOR name="Filters/Bandpass Filter" insertionPoint="1" NodeId="105">
@@ -2795,13 +2797,13 @@
     </PROCESSOR>
     <PROCESSOR name="Filters/Spike Detector" insertionPoint="1" NodeId="108">
       <SPIKEDETECTOR numElectrodes="1" activeElectrode="0" numPreSamples="8" numPostSamples="32"
-                     autoDACassignment="1" syncThresholds="0" uniqueID="1">
+                     autoDACassignment="1" syncThresholds="0" uniqueID="1" flipSignal="0">
         <ELECTRODE_COUNTER numElectrodeTypes="1">
           <ELECTRODE_TYPE type="Single Electrode" count="2"/>
         </ELECTRODE_COUNTER>
         <ELECTRODE name="Single Electrode 1" numChannels="1" prePeakSamples="8"
                    postPeakSamples="32" advancerID="1" depthOffsetMM="0" electrodeID="1">
-          <SUBCHANNEL ch="0" thresh="31.790123" isActive="1"/>
+          <SUBCHANNEL ch="0" thresh="30" isActive="1"/>
           <SPIKESORTING numBoxUnits="1" numPCAUnits="1" selectedUnit="1" selectedBox="0">
             <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
               <BOX ch="0" x="246" y="57" w="300" h="40"/>
@@ -2837,48 +2839,48 @@
               <POLYGON_POINT pointX="422.064636" pointY="-169.61084"/>
             </PCAUNIT>
           </SPIKESORTING>
-          <PCA numChannels="1" waveformLength="40" pc1min="-3020.46899" pc2min="-4923.19287"
-               pc1max="1833.39587" pc2max="7849.61084" PCAjobFinished="0" PCAcomputed="1">
-            <PCA_DIM pc1="-0.00657520397" pc2="0.027506901"/>
-            <PCA_DIM pc1="-0.0315583609" pc2="0.0190400425"/>
-            <PCA_DIM pc1="-0.0630618334" pc2="0.00543210795"/>
-            <PCA_DIM pc1="-0.105487362" pc2="-0.011074652"/>
-            <PCA_DIM pc1="-0.153712317" pc2="-0.0278441943"/>
-            <PCA_DIM pc1="-0.20496735" pc2="-0.0470934361"/>
-            <PCA_DIM pc1="-0.289984554" pc2="0.126314387"/>
-            <PCA_DIM pc1="-0.361385405" pc2="0.088723667"/>
-            <PCA_DIM pc1="-0.376799732" pc2="-0.1325728"/>
-            <PCA_DIM pc1="-0.337141097" pc2="-0.186043307"/>
-            <PCA_DIM pc1="-0.254016101" pc2="-0.337447315"/>
-            <PCA_DIM pc1="-0.259566486" pc2="0.0861111581"/>
-            <PCA_DIM pc1="-0.231007531" pc2="0.0173908006"/>
-            <PCA_DIM pc1="-0.207289368" pc2="-0.0417278633"/>
-            <PCA_DIM pc1="-0.182341754" pc2="-0.107745528"/>
-            <PCA_DIM pc1="-0.160856575" pc2="-0.176950172"/>
-            <PCA_DIM pc1="-0.139885858" pc2="-0.240177855"/>
-            <PCA_DIM pc1="-0.113667816" pc2="-0.295228958"/>
-            <PCA_DIM pc1="-0.149637058" pc2="0.191699445"/>
-            <PCA_DIM pc1="-0.129590318" pc2="0.151344702"/>
-            <PCA_DIM pc1="-0.110643379" pc2="0.112516008"/>
-            <PCA_DIM pc1="-0.0864140913" pc2="0.0731318295"/>
-            <PCA_DIM pc1="-0.0646745637" pc2="0.033568237"/>
-            <PCA_DIM pc1="-0.0516483746" pc2="-0.00287680351"/>
-            <PCA_DIM pc1="-0.0390691236" pc2="-0.032596685"/>
-            <PCA_DIM pc1="-0.0219238475" pc2="-0.0584773347"/>
-            <PCA_DIM pc1="-0.0054617729" pc2="-0.0846491382"/>
-            <PCA_DIM pc1="0.0105699115" pc2="-0.109033659"/>
-            <PCA_DIM pc1="0.0284927469" pc2="-0.129967481"/>
-            <PCA_DIM pc1="0.0475872159" pc2="-0.147798151"/>
-            <PCA_DIM pc1="0.0614636503" pc2="-0.165991396"/>
-            <PCA_DIM pc1="0.0678357407" pc2="-0.18456167"/>
-            <PCA_DIM pc1="0.071968995" pc2="-0.199509218"/>
-            <PCA_DIM pc1="0.0746929422" pc2="-0.209617659"/>
-            <PCA_DIM pc1="0.077471979" pc2="-0.217019543"/>
-            <PCA_DIM pc1="0.0767054409" pc2="-0.224986091"/>
-            <PCA_DIM pc1="0.0766935647" pc2="-0.231923252"/>
-            <PCA_DIM pc1="0.0801252276" pc2="-0.235869274"/>
-            <PCA_DIM pc1="0.0827094987" pc2="-0.239053652"/>
-            <PCA_DIM pc1="0.0830957666" pc2="-0.24064751"/>
+          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
+               pc2max="1" PCAjobFinished="0" PCAcomputed="0">
+            <PCA_DIM pc1="9.50013828" pc2="9.56249905"/>
+            <PCA_DIM pc1="0" pc2="0"/>
+            <PCA_DIM pc1="8.98529434" pc2="8.98529434"/>
+            <PCA_DIM pc1="3.08455729" pc2="3.08455729"/>
+            <PCA_DIM pc1="7.49694872" pc2="7.49694872"/>
+            <PCA_DIM pc1="5.83487463" pc2="5.83487463"/>
+            <PCA_DIM pc1="5.19624043" pc2="5.19624043"/>
+            <PCA_DIM pc1="7.9529295" pc2="7.9529295"/>
+            <PCA_DIM pc1="2.33247137" pc2="2.33247137"/>
+            <PCA_DIM pc1="9.20921135" pc2="9.20921135"/>
+            <PCA_DIM pc1="-0.784042656" pc2="-0.784042656"/>
+            <PCA_DIM pc1="9.46759129" pc2="9.46759129"/>
+            <PCA_DIM pc1="-3.81559682" pc2="-3.81559682"/>
+            <PCA_DIM pc1="8.70007038" pc2="8.70007038"/>
+            <PCA_DIM pc1="-6.4336977" pc2="-6.4336977"/>
+            <PCA_DIM pc1="6.98981667" pc2="6.98981667"/>
+            <PCA_DIM pc1="-8.35464764" pc2="-8.35464764"/>
+            <PCA_DIM pc1="4.52215195" pc2="4.52215195"/>
+            <PCA_DIM pc1="-9.37029552" pc2="-9.37029552"/>
+            <PCA_DIM pc1="1.56447041" pc2="1.56447041"/>
+            <PCA_DIM pc1="-9.37058449" pc2="-9.37058449"/>
+            <PCA_DIM pc1="-1.5627358" pc2="-1.5627358"/>
+            <PCA_DIM pc1="-8.35548592" pc2="-8.35548592"/>
+            <PCA_DIM pc1="-4.52060366" pc2="-4.52060366"/>
+            <PCA_DIM pc1="-6.43499422" pc2="-6.43499422"/>
+            <PCA_DIM pc1="-6.98862314" pc2="-6.98862314"/>
+            <PCA_DIM pc1="-3.81720877" pc2="-3.81720877"/>
+            <PCA_DIM pc1="-8.69936275" pc2="-8.69936275"/>
+            <PCA_DIM pc1="-0.78579706" pc2="-0.78579706"/>
+            <PCA_DIM pc1="-9.46744537" pc2="-9.46744537"/>
+            <PCA_DIM pc1="2.33076644" pc2="2.33076644"/>
+            <PCA_DIM pc1="-9.20964336" pc2="-9.20964336"/>
+            <PCA_DIM pc1="5.19476652" pc2="5.19476652"/>
+            <PCA_DIM pc1="-7.95389223" pc2="-7.95389223"/>
+            <PCA_DIM pc1="7.49586678" pc2="7.49586678"/>
+            <PCA_DIM pc1="-5.83626461" pc2="-5.83626461"/>
+            <PCA_DIM pc1="8.98472214" pc2="8.98472214"/>
+            <PCA_DIM pc1="-3.08622098" pc2="-3.08622098"/>
+            <PCA_DIM pc1="9.5" pc2="9.5"/>
+            <PCA_DIM pc1="-0.00176041818" pc2="-0.00176041818"/>
           </PCA>
         </ELECTRODE>
       </SPIKEDETECTOR>
@@ -3029,7 +3031,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="1" x="77" y="604" width="800" height="500"/>
+        <WINDOW Active="1" x="15" y="35" width="903" height="457"/>
       </EDITOR>
     </PROCESSOR>
     <SWITCH number="7"/>
@@ -3345,7 +3347,7 @@
       <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="0"/>
+        <WINDOW Active="1" x="940" y="35" width="842" height="765"/>
       </EDITOR>
     </PROCESSOR>
     <SWITCH number="15"/>
@@ -3504,7 +3506,7 @@
       <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="1" x="892" y="84" width="800" height="500"/>
+        <WINDOW Active="1" x="16" y="530" width="900" height="604"/>
         <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="1"
                     EventButtonState="239" ChannelDisplayState="1111111111111111111111111111111111111111"
                     ScrollX="0" ScrollY="0"/>

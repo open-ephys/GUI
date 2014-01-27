@@ -35,9 +35,13 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     urlLabel = new Label("Port", "Port:");
     urlLabel->setBounds(20,80,140,25);
     addAndMakeVisible(urlLabel);
-
-
 	NetworkEvents *p= (NetworkEvents *)getProcessor();
+
+	restartConnection = new UtilityButton("Restart Connection",Font("Default", 15, Font::plain));
+    restartConnection->setBounds(20,45,150,18);
+    restartConnection->addListener(this);
+    addAndMakeVisible(restartConnection);
+
 	
 	/*
 	trialSimulation = new UtilityButton("Trial",Font("Default", 15, Font::plain));
@@ -52,7 +56,7 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
     addAndMakeVisible(startRecord);
 	*/
 
-	labelPort = new Label("Smooth MS", String(p->urlport));
+	labelPort = new Label("Port", String(p->urlport));
     labelPort->setBounds(70,85,80,18);
     labelPort->setFont(Font("Default", 15, Font::plain));
     labelPort->setColour(Label::textColourId, Colours::white);
@@ -80,7 +84,11 @@ NetworkEventsEditor::NetworkEventsEditor(GenericProcessor* parentNode, bool useD
 void NetworkEventsEditor::buttonEvent(Button* button)
 {
 			NetworkEvents *processor  = (NetworkEvents*) getProcessor();
-
+	if (button == restartConnection)
+	{
+		NetworkEvents *p= (NetworkEvents *)getProcessor();
+		p->setNewListeningPort(p->urlport);
+	}
 			/*
 	if (button == trialSimulation)
 	{

@@ -43,17 +43,17 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	tabText = "PSTH";
 	desiredWidth = 300;
 
-	visibleConditions = new UtilityButton("Conditions",Font("Default", 15, Font::plain));
+/*	visibleConditions = new UtilityButton("Conditions",Font("Default", 15, Font::plain));
 	visibleConditions->addListener(this);
 	visibleConditions->setColour(Label::textColourId, Colours::white);
 	visibleConditions->setBounds(10,30,110,20);
 	addAndMakeVisible(visibleConditions);
-
+*/
 
 	saveOptions = new UtilityButton("Save Options",Font("Default", 15, Font::plain));
 	saveOptions->addListener(this);
 	saveOptions->setColour(Label::textColourId, Colours::white);
-	saveOptions->setBounds(160,30,110,20);
+	saveOptions->setBounds(180,30,100,20);
 	addAndMakeVisible(saveOptions);
 
 
@@ -67,7 +67,7 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	visualizationOptions =  new UtilityButton("Visualization Options",Font("Default", 15, Font::plain));
 	visualizationOptions->addListener(this);
 	visualizationOptions->setColour(Label::textColourId, Colours::white);
-	visualizationOptions->setBounds(10,60,160,20);
+	visualizationOptions->setBounds(10,30,160,20);
 	addAndMakeVisible(visualizationOptions);
 
 	hardwareTrigger = new Label("hardwareTrigger","TTL Trial Alignment:");
@@ -184,7 +184,18 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 				smoothingSubMenu.addItem(40+k,s,true, smoothingMS == SmoothingFactors[k]);
 			}
 
+			PopupMenu rangeTimeMenu,preRangeTimeMenu,postRangeTimeMenu;
+			double rangeTimes[4] = {0.5,1,1.5,2};
+			for (int k=0;k<4;k++) {
+				String s = String(rangeTimes[k],1) + " sec";
+				preRangeTimeMenu.addItem(50+k,s,true, fabs(processor->trialCircularBuffer->preSec - rangeTimes[k])<0.01);
+				postRangeTimeMenu.addItem(60+k,s,true, fabs(processor->trialCircularBuffer->postSec - rangeTimes[k])<0.01);
+			}
+			rangeTimeMenu.addSubMenu("pre trial", preRangeTimeMenu,true);
+			rangeTimeMenu.addSubMenu("post trial", postRangeTimeMenu,true);
+
 			m.addSubMenu("Smooth Curves", smoothingSubMenu);
+			m.addSubMenu("Range", rangeTimeMenu,true);
 			m.addItem(5,"Auto Rescale",true, showAutoRescale);
 			m.addItem(6,"Match range",false, showMatchRange);
 			m.addItem(7,"Raster Plots",false, false);
@@ -218,6 +229,15 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			{
 				smoothingMS = SmoothingFactors[result-40];
 				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40]);
+			} else if (result >= 50 && result <= 54)
+			{
+				// this will require killing 
+				double newPreSec = rangeTimes[result-50];
+				processor->modifyTimeRange(newPreSec,processor->trialCircularBuffer->postSec);
+			} else if (result >= 60 && result <= 64)
+			{
+				double newPostSec = rangeTimes[result-60];
+				processor->modifyTimeRange(processor->trialCircularBuffer->preSec,newPostSec);
 			}
 	} else if (button == saveOptions)
 	{
@@ -268,10 +288,10 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 				processor->saveNetworkEventsWhenNotRecording = !processor->saveNetworkEventsWhenNotRecording;
 			}
 			
-		} else if (button == visibleConditions)
+	} /*else if (button == visibleConditions)
 	{
 
-	
+
 		if ( processor->trialCircularBuffer != nullptr)
 		{
 			processor->trialCircularBuffer ->lockConditions();
@@ -293,12 +313,16 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 				// update the visibility for all channels and units.
 				PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
 				processor->toggleConditionVisibility(result-1);
+				if (periStimulusTimeHistogramCanvas != nullptr)
+				{
+					periStimulusTimeHistogramCanvas->update();
+				}
 
 			}
 			processor->trialCircularBuffer ->unlockConditions();
 		}
-
-	}
+		
+	}*/
 
 
 
@@ -348,6 +372,8 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	processor(n)
 {
 	screenWidth = screenHeight = 0;
+	conditionWidth = 200;
+
 	inFocusedMode = false;
 	showLFP = true;
 	showSpikes = true;
@@ -359,8 +385,14 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	psthDisplay = new PeriStimulusTimeHistogramDisplay(n, viewport, this);
 	viewport->setViewedComponent(psthDisplay, false);
 	viewport->setScrollBarsShown(true, true);
-
 	addAndMakeVisible(viewport);
+
+
+	conditionsViewport = new Viewport();
+	conditionsList = new ConditionList(n, conditionsViewport, this);
+	conditionsViewport->setViewedComponent(conditionsList, false);
+	conditionsViewport->setScrollBarsShown(true, true);
+	addAndMakeVisible(conditionsViewport);
 	resized();
 	update();
 
@@ -375,6 +407,7 @@ PeriStimulusTimeHistogramCanvas::~PeriStimulusTimeHistogramCanvas()
 void PeriStimulusTimeHistogramCanvas::beginAnimation()
 {
 	//startCallbacks();
+	
 }
 
 void PeriStimulusTimeHistogramCanvas::buttonClicked(Button* button)
@@ -462,8 +495,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 
 	heightPerElectrodePix = 200;
 	widthPerUnit = 200;
-	
-	int maxUnitsPerRow = MAX(4,screenWidth/ widthPerUnit);
+	int maxUnitsPerRow = (screenWidth-conditionWidth)/ widthPerUnit;
 	updateNeeded = false;
 	for (int k=0; k < psthDisplay->psthPlots.size();k++)
 	{
@@ -478,7 +510,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
 	int plotCounter = 0;
-	numCols = maxUnitsPerRow;
+	numCols = 0;
 	numRows = 0;
 	int plotID = 0;
 	for (int e=0;e<numElectrodes;e++) 
@@ -498,6 +530,9 @@ void PeriStimulusTimeHistogramCanvas::update()
 					plotCounter,row);
 
 					plotCounter++;
+					numCols++;
+					numCols = min(maxUnitsPerRow,numCols);
+
 					if (plotCounter >= maxUnitsPerRow )
 					{
 						plotCounter = 0;
@@ -509,6 +544,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
 					u,row);
+					numCols = max(numCols,u);
 
 				}
 				newplot->setSmoothState(smoothPlots);
@@ -537,6 +573,9 @@ void PeriStimulusTimeHistogramCanvas::update()
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
 						plotCounter,row);
 						plotCounter++;
+						numCols++;
+						numCols = min(maxUnitsPerRow,numCols);
+
 						if (plotCounter >= maxUnitsPerRow )
 						{
 							plotCounter = 0;
@@ -548,6 +587,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
 						offset+u,row);
+						numCols = max(numCols,offset+u);
 					}
 					newplot->setSmoothState(smoothPlots);
 					newplot->setAutoRescale(autoRescale);
@@ -563,10 +603,14 @@ void PeriStimulusTimeHistogramCanvas::update()
 			row++;			
 	}
 	if (compactView)
+	{
 		numRows = row+1;//MAX(1,row);
-	else
+	}
+	else {
 		numRows = row;
-
+		numCols = numCols+1;
+	}
+	
 	if (maxUnitsPerElectrode == 0 && !showLFP) {
 		// nothing to be drawn...
 		processor->trialCircularBuffer->unlockPSTH();
@@ -581,6 +625,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	repaint();
 
 	processor->trialCircularBuffer->unlockPSTH();
+	conditionsList->updateConditionButtons();
 }
 
 
@@ -588,15 +633,22 @@ void PeriStimulusTimeHistogramCanvas::resized()
 {
 	screenWidth = getWidth();
 	screenHeight = getHeight();
-	viewport->setBounds(0,0,getWidth(),getHeight()-20);
+
 	int scrollBarThickness = viewport->getScrollBarThickness();
 
-
+	viewport->setBounds(0,0,getWidth()-conditionWidth,getHeight());
 	int totalHeight = numRows * heightPerElectrodePix;
 	int totalWidth = numCols * widthPerUnit;
-	psthDisplay->setBounds(0,0,totalWidth-scrollBarThickness, totalHeight);
+	psthDisplay->setBounds(0,0,totalWidth, totalHeight);
 
-
+	int numConditions = 0;
+	if (processor->trialCircularBuffer != nullptr)
+	{
+		numConditions = processor->trialCircularBuffer->conditions.size();
+	}
+	
+	conditionsViewport->setBounds(getWidth()-conditionWidth,0,conditionWidth,getHeight());
+	conditionsList->setBounds(0,0,conditionWidth, 50+20*numConditions);
 }
 
 void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
@@ -1389,7 +1441,7 @@ void XYPlot::paintSpikes(Graphics &g)
 
 	}
 	tcb->unlockPSTH();
-	repaint();
+
 }
 
 
@@ -1473,16 +1525,20 @@ void XYPlot::paintLFP(Graphics &g)
 	tcb->unlockPSTH();
 
 
-	repaint();
+	//repaint();
 }
 
 
 void XYPlot::paint(Graphics &g)
 {
 	if (spikePlot)
+	{
 		paintSpikes(g);
+	}
 	else
+	{
 		paintLFP(g);
+	}
 
 	if (zooming)
 	{
@@ -1495,4 +1551,123 @@ void XYPlot::paint(Graphics &g)
 
 }
 
+/***********************************/
+ConditionList::ConditionList(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c) :
+	processor(n), viewport(p), canvas(c)
+{
 
+	titleButton = new ColorButton("CONDITIONS LIST", Font("Default", 24, Font::plain));
+	titleButton->setBounds(0,0, 200,25);
+	titleButton->addListener(this);
+	addAndMakeVisible(titleButton);
+	
+	allButton = new ColorButton("All", Font("Default", 20, Font::plain));
+    allButton->setBounds(0,25,100,20);
+	allButton->addListener(this);
+    addAndMakeVisible(allButton);
+
+	noneButton = new ColorButton("None", Font("Default", 20, Font::plain));
+    noneButton->setBounds(100,25,100,20);
+	noneButton->addListener(this);
+    addAndMakeVisible(noneButton);
+	
+	updateConditionButtons();
+
+}
+
+
+void ConditionList::updateConditionButtons()
+{
+	if (processor->trialCircularBuffer != nullptr)
+	{
+		processor->trialCircularBuffer->lockConditions();
+		conditionButtons.clear();
+		for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
+		{
+			ColorButton* conditionButton = new ColorButton(processor->trialCircularBuffer->conditions[k].name, Font("Default", 20, Font::plain));
+			conditionButton->setBounds(0,50+k*20,200,20);
+			conditionButton->setColors(Colours::white,
+				juce::Colour::fromRGB(processor->trialCircularBuffer->conditions[k].colorRGB[0],
+				processor->trialCircularBuffer->conditions[k].colorRGB[1],
+				processor->trialCircularBuffer->conditions[k].colorRGB[2]));
+			conditionButton->setEnabledState(processor->trialCircularBuffer->conditions[k].visible);
+			conditionButton->setUserDefinedData(processor->trialCircularBuffer->conditions[k].conditionID);
+			conditionButton->setShowEnabled(true);
+			conditionButton->addListener(this);
+			addAndMakeVisible(conditionButton);
+			conditionButtons.add(conditionButton);
+		}
+
+		processor->trialCircularBuffer->unlockConditions();
+	}
+}
+
+ConditionList::~ConditionList()
+{
+	
+    for (int i = 0; i < conditionButtons.size(); i++)
+    {
+        removeChildComponent(conditionButtons[i]);
+    }
+}
+	
+void ConditionList::paint(Graphics& g)
+{
+	g.fillAll(juce::Colours::grey);
+	//g.drawText
+}
+
+void ConditionList::buttonClicked(Button *btn)
+{
+	ColorButton *cbtn = (ColorButton *)btn;
+	// also inform trial circular buffer about visibility change.
+	if (btn == titleButton)
+	{
+		int x = 5;
+	} else if (btn == noneButton)
+	{
+		if (processor->trialCircularBuffer != nullptr)
+		{
+			processor->trialCircularBuffer->lockConditions();
+			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
+			{
+				processor->trialCircularBuffer->conditions[k].visible = false;
+				conditionButtons[k]->setEnabledState(false);
+			}
+			processor->trialCircularBuffer->unlockConditions();
+		}
+
+	} else if (btn == allButton)
+	{
+		if (processor->trialCircularBuffer != nullptr)
+		{
+			processor->trialCircularBuffer->lockConditions();
+			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
+			{
+				processor->trialCircularBuffer->conditions[k].visible = true;
+				conditionButtons[k]->setEnabledState(true);
+			}
+			processor->trialCircularBuffer->unlockConditions();
+		}
+
+	} else 
+	{
+		// probably a condition button
+		int conditionID = cbtn->getUserDefinedData();
+		cbtn->setEnabledState(!cbtn->getEnabledState());
+		processor->trialCircularBuffer->lockConditions();
+		for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
+		{
+			if (processor->trialCircularBuffer->conditions[k].conditionID == conditionID)
+			{
+				processor->trialCircularBuffer->conditions[k].visible = cbtn->getEnabledState();
+				break;
+			}
+		}	
+		processor->trialCircularBuffer->unlockConditions();
+		
+
+	}
+
+	repaint();
+}

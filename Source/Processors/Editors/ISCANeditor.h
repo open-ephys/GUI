@@ -77,7 +77,7 @@ private:
 };
 
 
-class ISCANeditor : public VisualizerEditor,  public ComboBox::Listener
+class ISCANeditor : public VisualizerEditor,  public Label::Listener
 {
 public:
     ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
@@ -86,6 +86,7 @@ public:
     void buttonCallback(Button* button);
 	void comboBoxChanged(ComboBox* comboBox);
     void collapsedStateChanged();
+	void labelTextChanged(Label *label);
 	Visualizer* createNewCanvas();
 private:
 	void refreshDevices();
