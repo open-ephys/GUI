@@ -138,6 +138,52 @@ public:
 
 };
 
+
+
+
+
+
+
+class ProcessorListItem;
+class UIComponent;
+
+
+class ConditionList : public Component,
+	public AccessClass, Button::Listener
+
+{
+public:
+
+    ConditionList(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c);
+    ~ConditionList();
+
+	/** Draws the ConditionList. */
+    void paint(Graphics& g);
+	void buttonClicked(Button *btn);
+	void updateConditionButtons();
+
+private:
+	PeriStimulusTimeHistogramNode* processor;
+	Viewport *viewport;
+	PeriStimulusTimeHistogramCanvas *canvas;
+
+	ScopedPointer<ColorButton> titleButton;
+	ScopedPointer<ColorButton> allButton,noneButton;
+	OwnedArray<ColorButton> conditionButtons;
+    /** The main method for drawing the ProcessorList.*/
+ //   void drawItems(Graphics& g);
+
+	/** Called when a mouse click begins within the boundaries of the ProcessorList.*/
+    //void mouseDown(const MouseEvent& e);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConditionList);
+
+};
+
+
+
+
+
 class PeriStimulusTimeHistogramCanvas: public Visualizer, public Button::Listener
 {
 public:
@@ -178,10 +224,13 @@ public:
 		int screenHeight, screenWidth;
 
    private:
+	int conditionWidth;
+
     bool showLFP, showSpikes, smoothPlots, autoRescale,compactView, matchRange, inFocusedMode;
 	PeriStimulusTimeHistogramNode *processor;
-    ScopedPointer<Viewport> viewport;
+    ScopedPointer<Viewport> viewport, conditionsViewport;
 	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
+	ScopedPointer<ConditionList> conditionsList;
 	float gaussianStandardDeviationMS;
 	int numRows,numCols;
 
@@ -218,6 +267,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 
 };
+
+
+
 
 
 

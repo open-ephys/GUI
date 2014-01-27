@@ -36,6 +36,7 @@ class GenericProcessor;
 class DrawerButton;
 class TriangleButton;
 class UtilityButton;
+class ColorButton;
 class ParameterEditor;
 class ChannelSelector;
 class Channel;
@@ -422,6 +423,48 @@ private:
 
     void resized();
 };
+
+
+
+
+
+/**
+
+  A button that displays text with flexibility to change look & feel
+
+  @see GenericEditor
+
+*/
+
+class ColorButton : public Button
+{
+public:
+    ColorButton(String label_, Font font_);
+    ~ColorButton() {}
+
+    void setEnabledState(bool);
+    bool getEnabledState()
+    {
+        return isEnabled;
+    }
+	void setColors(Colour foreground, Colour background);
+    void setLabel(String label);
+	String getLabel();
+	void setVerticalOrientation(bool state);
+	void setUserDefinedData(int d);
+	int getUserDefinedData();
+	void setShowEnabled(bool state);
+private:
+	int userDefinedData;
+    void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);
+	bool vert;
+    String label;
+    Font font;
+    Colour fontColor,backgroundColor;
+	bool showEnabledStatus;
+    bool isEnabled;
+};
+
 
 
 #endif  // __GENERICEDITOR_H_DD406E71__

@@ -31,14 +31,51 @@
 
 void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 {
-	int IDmodule = (ID-1) % 6; // ID can't be zero
-	const int colors[6][3] = {
+	int IDmodule = (ID-1) % 32; // ID can't be zero
+	const int colors[32][3] = {
+
+		{26, 188, 156},
+	{46, 204, 113},
+	{52, 152, 219},
+	{155, 89, 182},
+	{241, 196, 15},
+	{52, 73, 94},
+	{230, 126, 34},
+	{231, 76, 60},
+	{22, 160, 133},
+	{39, 174, 96},
+	{41, 128, 185},
+	{142, 68, 173},
+	{44, 62, 80},
+	{243, 156, 18},
+	{211, 84, 0},
+	{192, 57, 43},
+
+		{224,185,36},
+  {214,210,182},
+  {243,119,33},
+  {186,157,168},
+  {237,37,36},
+  {179,122,79},
+  {217,46,171},
+  {217, 139,196},
+  {101,31,255},
+  {141,111,181},
+  {48,117,255},
+  {184,198,224},
+  {116,227,156},
+  {150,158,155},
+  {82,173,0},
+		{125,99,32}};
+
+
+	/*
    {      0,         0,    255},
    {      0,    128,         0},
    { 255,         0,         0},
    {      0,    192,    192},
    { 192,         0,    192},
-   { 192,    192,         0}};
+   { 192,    192,         0}};*/
 
 	R = colors[IDmodule][0];
 	G = colors[IDmodule][1];
@@ -907,6 +944,8 @@ TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, Pe
 
 	for (int k=0;k<numTTLchannels;k++)
 		lastTTLts[k] = 0;
+
+	clearDesign();
 }
 
 
@@ -1473,15 +1512,6 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, 
 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
-	if (firstTime) {
-
-		Array<bool> ttlVisible;
-		for (int k=0;k<numTTLchannels;k++)
-			ttlVisible.add(false);
-
-		addDefaultTTLConditions(ttlVisible);
-		firstTime = false;
-	}
 	// first, update LFP circular buffers
 	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
 	// now, check if a trial finished, and enough time has elapsed so we also
