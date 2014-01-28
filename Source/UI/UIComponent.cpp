@@ -34,12 +34,13 @@ UIComponent::UIComponent(MainWindow* mainWindow_, ProcessorGraph* pgraph, AudioC
     infoLabel = new InfoLabel();
     logWindow = new LogWindow();
     graphViewer = new GraphViewer();
+    graphViewport.setViewedComponent(graphViewer);
 
     dataViewport = new DataViewport();
     addChildComponent(dataViewport);
     dataViewport->addTabToDataViewport("Info", infoLabel,0);
 	dataViewport->addTabToDataViewport("Log",logWindow,0);
-    dataViewport->addTabToDataViewport("Graph", graphViewer,0);
+    dataViewport->addTabToDataViewport("Graph", &graphViewport,0);
 
     std::cout << "Created data viewport." << std::endl;
 
@@ -109,7 +110,10 @@ UIComponent::UIComponent(MainWindow* mainWindow_, ProcessorGraph* pgraph, AudioC
 
 UIComponent::~UIComponent()
 {
+    graphViewport.setViewedComponent(nullptr);
     dataViewport->destroyTab(0); // get rid of tab for InfoLabel
+    dataViewport->destroyTab(1); // get rid of tab for LogWindow
+    dataViewport->destroyTab(2); // get rid of tab for GraphViewer
 }
 
 void UIComponent::resized()

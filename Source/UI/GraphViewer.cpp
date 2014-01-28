@@ -28,6 +28,7 @@ GraphViewer::GraphViewer()
     
     labelFont = Font("Paragraph", 50, Font::plain);
     rootNum = 0;
+    setBounds(0,0,1000,1000);
 }
 
 GraphViewer::~GraphViewer()
@@ -236,7 +237,7 @@ void GraphViewer::paint(Graphics& g)
     
     g.setColour(Colours::grey);
     
-    g.drawFittedText("open ephys", 40, 40, getWidth()-50, getHeight()-50, Justification::bottomRight, 100);
+    g.drawFittedText("open ephys", 40, 40, getParentComponent()->getWidth()-50, getParentComponent()->getHeight()-50, Justification::bottomRight, 100);
     
     // draw connections
 
