@@ -127,11 +127,11 @@ public:
 };
 
 
-class ConditionPSTH
+class PSTH
 {
 public:
-	ConditionPSTH(int ID, float _maxTrialTimeSec, float _preSecs, float _postSecs,bool vis);
-	ConditionPSTH(const ConditionPSTH& c);
+	PSTH(int ID, float _maxTrialTimeSec, float _preSecs, float _postSecs,bool vis);
+	PSTH(const PSTH& c);
 	void clear();
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
 	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
@@ -158,7 +158,7 @@ private:
 class UnitPSTHs 
 {
 public:
-	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, int sampleRateHz,uint8 R, uint8 G, uint8 B);
+	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, int sampleRateHz,uint8 R, uint8 G, uint8 B, float preSec, float postSec);
 	void updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial *trial);
 	void addSpikeToBuffer(int64 spikeTimestampSoftware,int64 spikeTimestampHardware);
 	void addTrialStartToSmartBuffer(Trial *t);
@@ -167,26 +167,31 @@ public:
 	bool isNewDataAvailable();
 	void informPainted();
 
-	std::vector<ConditionPSTH> conditionPSTHs;
+	std::vector<PSTH> conditionPSTHs;
+	std::vector<PSTH> trialPSTHs;
+	
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
 	bool redrawNeeded;
+	float preSec, postSec,maxTrialTimeSeconds;
 };
 
 class ChannelPSTHs 
 {
 public:
 	ChannelPSTHs(int channelID, float maxTrialTimeSeconds, int maxTrialsInMemory, float preSecs, float postSecs, int binResolutionMS);
-	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid);
+	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid, Trial *trial);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	bool isNewDataAvailable();
 	void informPainted();
 	int channelID;
-	std::vector<ConditionPSTH> conditionPSTHs;
+	std::vector<PSTH> conditionPSTHs;
+	std::vector<PSTH> trialPSTHs;
+	
 	std::vector<float> binTime;
-	float preSecs, postSecs;
+	float preSecs, postSecs,maxTrialTimeSeconds;
 	bool redrawNeeded;
 };
 

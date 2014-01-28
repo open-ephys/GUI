@@ -44,10 +44,19 @@ struct zoom
 	float xmin,xmax,ymin,ymax;
 };
 
+
+    enum xyPlotTypes
+    {
+        SPIKE_PLOT = 0,
+        LFP_PLOT = 1,
+		EYE_PLOT = 2
+    };
+
 class XYPlot : public Component
 {
 public:
-	XYPlot(PeriStimulusTimeHistogramDisplay* dsp, int _plotID, bool spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col);
+	XYPlot(PeriStimulusTimeHistogramDisplay* dsp, int _plotID, xyPlotTypes plotType, 
+		TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col, bool _rasterMode);
 	void resized();
 	void paint(Graphics &g);
 	void setSmoothState(bool enable);
@@ -73,6 +82,8 @@ public:
 	int electrodeID, unitID;
 	TrialCircularBuffer *tcb;
 private:
+	void paintSpikeRaster(Graphics &g);
+	void paintLFPraster(Graphics &g);
 	void paintPlotNameAndRect(Graphics &g);
 	void computeSamplePositions(float &xmin, float &xmax);
 	void plotTicks(Graphics &g,float xmin, float xmax, float ymin, float ymax);
@@ -88,7 +99,8 @@ private:
 	
 	bool findIndices(int &electrodeIndex, int &entryindex, bool findUnitOrChannel);
 
-	bool spikePlot, smoothPlot,autoRescale,firstTime;
+	xyPlotTypes plotType;
+	bool  smoothPlot,autoRescale,firstTime,rasterMode;
 	float axesRange[4];
 
 	std::vector<float> smoothKernel; 
@@ -203,6 +215,7 @@ public:
     void resized();
 	void buttonClicked(Button* button);
 
+	void setRasterMode(bool rasterModeActive);
 	void setLFPvisibility(bool visible);
 	void setSpikesVisibility(bool visible);
 	void setSmoothPSTH(bool smooth);
@@ -226,7 +239,7 @@ public:
    private:
 	int conditionWidth;
 
-    bool showLFP, showSpikes, smoothPlots, autoRescale,compactView, matchRange, inFocusedMode;
+    bool showLFP, showSpikes, smoothPlots, autoRescale,compactView, matchRange, inFocusedMode,rasterMode;
 	PeriStimulusTimeHistogramNode *processor;
     ScopedPointer<Viewport> viewport, conditionsViewport;
 	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
@@ -251,7 +264,7 @@ public:
 	void comboBoxChanged(ComboBox* comboBox);
 	void updateCanvas();
 	void buttonEvent(Button* button);
-	bool showSortedUnits,showLFP,showCompactView,showSmooth,showAutoRescale,showMatchRange;
+	bool showSortedUnits,showLFP,showCompactView,showSmooth,showAutoRescale,showMatchRange,showRasters;
 	int TTLchannelTrialAlignment;
 	int smoothingMS;
 

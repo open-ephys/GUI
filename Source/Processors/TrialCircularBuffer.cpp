@@ -85,7 +85,7 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 
 
 /******************************/
-ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float post, bool vis) : conditionID(ID), preSecs(pre), 
+PSTH::PSTH(int ID, float _maxTrialTimeSec, float pre, float post, bool vis) : conditionID(ID), preSecs(pre), 
 	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1),preSec(pre),postSec(post),visible(vis)
 {
 	// allocate data for 1 ms resolution bins to cover trials 
@@ -108,7 +108,7 @@ ConditionPSTH::ConditionPSTH(int ID, float _maxTrialTimeSec, float pre, float po
 	}
 }
 
-ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
+PSTH::PSTH(const PSTH& c)
 {
 	conditionID = c.conditionID;
 	postSecs = c.postSecs;
@@ -134,7 +134,7 @@ ConditionPSTH::ConditionPSTH(const ConditionPSTH& c)
 }
 
 
-void ConditionPSTH::clear()
+void PSTH::clear()
 {
 	numTrials= 0;
 	xmin = -preSec;
@@ -149,7 +149,7 @@ void ConditionPSTH::clear()
 	
 }
 
-void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
+void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
 	Time t;
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
@@ -195,7 +195,7 @@ void ConditionPSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *tri
 	}
 }
 
-void ConditionPSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
+void PSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
 {
 	xMin = xmin;
 	yMax = ymax;
@@ -203,7 +203,7 @@ void ConditionPSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
 	yMin = ymin;
 }
 
-void ConditionPSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
+void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
 {
 	numTrials++;
 
@@ -366,9 +366,10 @@ Condition::Condition(String Name, std::vector<int> types, std::vector<int> outco
 /**********************************************/
 
 
-ChannelPSTHs::ChannelPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, float presecs, float postsecs, int binResolutionMS) : channelID(ID),
-	preSecs(presecs), postSecs(postsecs)
+ChannelPSTHs::ChannelPSTHs(int ID, float maxTrialTimeSeconds_, int maxTrialsInMemory, float presecs, float postsecs, int binResolutionMS) : channelID(ID),
+	preSecs(presecs), postSecs(postsecs),maxTrialTimeSeconds(maxTrialTimeSeconds_)
 {
+
 	float timeSpanSecs=preSecs + postSecs + maxTrialTimeSeconds;
 	int numBins = (timeSpanSecs) * 1000.0f / binResolutionMS; // 1 ms resolution
 	binTime.resize(numBins);	
@@ -379,7 +380,7 @@ ChannelPSTHs::ChannelPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMem
 	redrawNeeded = true;
 }
 
-void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid)
+void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid, Trial *trial)
 {
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
@@ -395,7 +396,19 @@ void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdati
 			}
 		}
 	}
+	// update individual trial PSTH
 
+	// first, make sure we have enough memory allocated to hold all these trials...
+	if (trial->type >= trialPSTHs.size())
+	{
+		for (int k=trialPSTHs.size();k<=trial->type;k++)
+		{
+			// increase the size of trialPSTH
+			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSecs,postSecs,true));
+		}
+	}
+	// now update
+	trialPSTHs[trial->type].updatePSTH(alignedLFP,valid);
 }
 
 bool ChannelPSTHs::isNewDataAvailable()
@@ -432,11 +445,16 @@ void ChannelPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 void ChannelPSTHs::clearStatistics()
 {
 	for (int k=0;k<conditionPSTHs.size();k++)
+	{
 		conditionPSTHs[k].clear();
+	}
+	trialPSTHs.clear();
+	
 }
 
 /***********************************************/
-UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, int sampleRateHz, uint8 R, uint8 G, uint8 B): unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory,sampleRateHz)
+UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds_, int maxTrialsInMemory, int sampleRateHz, uint8 R, uint8 G, uint8 B,float preSec_, float postSec_): 
+	preSec(preSec_), postSec(postSec_),maxTrialTimeSeconds(maxTrialTimeSeconds_), unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory,sampleRateHz)
 {
 	colorRGB[0] = R;
 	colorRGB[1] = G;
@@ -460,6 +478,7 @@ void UnitPSTHs::clearStatistics()
 	{
 		conditionPSTHs[k].clear();
 	}
+	trialPSTHs.clear();
 }
 
 void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware, int64 spikeTimestampHardware)
@@ -509,6 +528,21 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 	}
 
+	// update individual trial PSTH
+
+	// first, make sure we have enough memory allocated to hold all these trials...
+	if (trial->type >= trialPSTHs.size())
+	{
+		for (int k=trialPSTHs.size();k<=trial->type;k++)
+		{
+			// increase the size of trialPSTH
+			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSec,postSec,true));
+		}
+	}
+	// now update
+	trialPSTHs[trial->type].updatePSTH(&spikeBuffer, trial);
+
+
 }
 
 /********************/
@@ -551,7 +585,7 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 	{
 		for (int ch=0;ch<channelsPSTHs.size();ch++)
 		{
-			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid);
+			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid, trial);
 		}
 	}
 
@@ -1000,12 +1034,12 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
 			  }
 		  }
 		  unlockPSTH();
@@ -1147,7 +1181,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 			// add all known conditions
 			for (int c=0;c<conditions.size();c++)
 			{
-				channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
+				channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
 			}
 			electrodePSTH.channelsPSTHs.push_back(channelPSTH);
 		  }
@@ -1160,10 +1194,10 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 
 			  int unitID = boxUnits[boxIter].UnitID;
 			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,boxUnits[boxIter].ColorRGB[0],
-				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
+				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2],preSec,postSec);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1173,10 +1207,10 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 
 			  int unitID = pcaUnits[pcaIter].UnitID;
 			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,pcaUnits[pcaIter].ColorRGB[0],
-				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2]);
+				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2],preSec,postSec);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1200,7 +1234,7 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 		// add all known conditions
 		for (int c=0;c<conditions.size();c++)
 		{
-			channelPSTH.conditionPSTHs.push_back(ConditionPSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
+			channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
 		}
 		e.channelsPSTHs.push_back(channelPSTH);	
 	}
@@ -1228,10 +1262,10 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b)
 {
 	// build a new PSTH for all defined conditions
-	UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,r,g,b);
+	UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,r,g,b,preSec,postSec);
 	for (int k=0;k<conditions.size();k++)
 	{
-		unitPSTHs.conditionPSTHs.push_back(ConditionPSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+		unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
 	}
 	for (int k=0;k<electrodesPSTH.size();k++) {
 		if (electrodesPSTH[k].electrodeID == electrodeID) {
@@ -1369,12 +1403,12 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(ConditionPSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
 			  }
 		  }
 		  unlockPSTH();
