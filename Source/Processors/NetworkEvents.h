@@ -35,7 +35,7 @@
 
 /**
 
-  Searches for threshold crossings and sends out TTL events.
+ Sends incoming TCP/IP messages from 0MQ to the events buffer
 
   @see GenericProcessor
 

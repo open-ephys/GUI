@@ -40,6 +40,7 @@ class Electrode;
 class PeriStimulusTimeHistogramNode;
 
 #define TTL_TRIAL_OFFSET 30000
+#define NUM_TTL_CHANNELS 8
 
 #ifndef MAX
 #define MAX(a,b)((a)<(b)?(b):(a))
@@ -247,7 +248,6 @@ public:
 	int samplingRateHz;
 	bool firstTime;
 	 double postSec, preSec;
-     int numTTLchannels ;
 	 float numTicksPerSecond;
 	 float binResolutionMS;
 	 float maxTrialTimeSeconds;

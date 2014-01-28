@@ -399,16 +399,27 @@ void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdati
 	// update individual trial PSTH
 
 	// first, make sure we have enough memory allocated to hold all these trials...
-	if (trial->type >= trialPSTHs.size())
+
+	int modifiedTrialType;
+	if (trial->type >= TTL_TRIAL_OFFSET)
 	{
-		for (int k=trialPSTHs.size();k<=trial->type;k++)
+		modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
+	}
+	else
+	{
+		modifiedTrialType = trial->type+NUM_TTL_CHANNELS;
+	}
+
+	if (modifiedTrialType >= trialPSTHs.size())
+	{
+		for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
 		{
 			// increase the size of trialPSTH
 			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSecs,postSecs,true));
 		}
 	}
 	// now update
-	trialPSTHs[trial->type].updatePSTH(alignedLFP,valid);
+	trialPSTHs[modifiedTrialType].updatePSTH(alignedLFP,valid);
 }
 
 bool ChannelPSTHs::isNewDataAvailable()
@@ -454,7 +465,7 @@ void ChannelPSTHs::clearStatistics()
 
 /***********************************************/
 UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds_, int maxTrialsInMemory, int sampleRateHz, uint8 R, uint8 G, uint8 B,float preSec_, float postSec_): 
-	preSec(preSec_), postSec(postSec_),maxTrialTimeSeconds(maxTrialTimeSeconds_), unitID(ID), spikeBuffer(maxTrialTimeSeconds,maxTrialsInMemory,sampleRateHz)
+	preSec(preSec_), postSec(postSec_),maxTrialTimeSeconds(maxTrialTimeSeconds_), unitID(ID), spikeBuffer(maxTrialTimeSeconds_,maxTrialsInMemory,sampleRateHz)
 {
 	colorRGB[0] = R;
 	colorRGB[1] = G;
@@ -529,18 +540,26 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 	}
 
 	// update individual trial PSTH
-
-	// first, make sure we have enough memory allocated to hold all these trials...
-	if (trial->type >= trialPSTHs.size())
+	int modifiedTrialType;
+	if (trial->type >= TTL_TRIAL_OFFSET)
 	{
-		for (int k=trialPSTHs.size();k<=trial->type;k++)
+		modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
+	}
+	else
+	{
+		modifiedTrialType = trial->type+NUM_TTL_CHANNELS;
+	}
+
+	if (modifiedTrialType >= trialPSTHs.size())
+	{
+		for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
 		{
 			// increase the size of trialPSTH
 			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSec,postSec,true));
 		}
 	}
 	// now update
-	trialPSTHs[trial->type].updatePSTH(&spikeBuffer, trial);
+	trialPSTHs[modifiedTrialType].updatePSTH(&spikeBuffer, trial);
 
 
 }
@@ -970,13 +989,12 @@ TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, Pe
 	int subSample = samplingRateHz / desiredSamplingRateHz;
 	float numSeconds = 2*maxTrialTimeSeconds;
 	lfpBuffer = new SmartContinuousCircularBuffer(numChannels, samplingRateHz, subSample, numSeconds);
-	numTTLchannels = 8;
-	lastTTLts.resize(numTTLchannels);
+	lastTTLts.resize(NUM_TTL_CHANNELS);
 
 	 ttlSupressionTimeSec = 1.0;
 	 ttlTrialLengthSec = 2;
 
-	for (int k=0;k<numTTLchannels;k++)
+	for (int k=0;k<NUM_TTL_CHANNELS;k++)
 		lastTTLts[k] = 0;
 
 	clearDesign();
@@ -1010,7 +1028,7 @@ void TrialCircularBuffer::unlockConditions()
 void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 {
 	  int numExistingConditions = conditions.size();
-	  for (int channel = 0; channel < numTTLchannels; channel++)
+	  for (int channel = 0; channel < NUM_TTL_CHANNELS; channel++)
 	  {
 		  StringTS simulatedConditionString;
 		  if (visibility[channel])
@@ -1083,11 +1101,11 @@ void TrialCircularBuffer::clearDesign()
 	Array<bool> ttlVisible;
 	if (conditions.size() > 0)
 	{
-		for (int k=0;k<numTTLchannels;k++)
+		for (int k=0;k<NUM_TTL_CHANNELS;k++)
 			ttlVisible.add(conditions[k].visible);
 	} else
 	{
-		for (int k=0;k<numTTLchannels;k++)
+		for (int k=0;k<NUM_TTL_CHANNELS;k++)
 			ttlVisible.add(false);
 	}
 

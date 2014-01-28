@@ -3,7 +3,7 @@
 <SETTINGS>
   <INFO>
     <VERSION>0.1</VERSION>
-    <DATE>27 Jan 2014 10:57:06</DATE>
+    <DATE>27 Jan 2014 12:26:00</DATE>
     <OS>Windows 7</OS>
     <MACHINE>ALPHA</MACHINE>
   </INFO>
@@ -154,7 +154,7 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.44639448" HighCut="7603.76512"
+      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.57784514" HighCut="7603.76512"
               ADCsOn="1" AudioOutputL="1" AudioOutputR="1" NoiseSlicer="0"
               TTLFastSettle="2" DAC_TTL="1" DAC_HPF="8"/>
     </PROCESSOR>
@@ -1798,10 +1798,7 @@
       <EVENTCHANNEL name="15" number="15"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
-        <WINDOW Active="0" x="13" y="529" width="800" height="500"/>
-        <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="1"
-                    EventButtonState="239" ChannelDisplayState="1111111111111111111111111111111111111111111"
-                    ScrollX="0" ScrollY="0"/>
+        <WINDOW Active="0"/>
       </EDITOR>
     </PROCESSOR>
     <SWITCH number="3"/>
@@ -2803,13 +2800,13 @@
         </ELECTRODE_COUNTER>
         <ELECTRODE name="Single Electrode 1" numChannels="1" prePeakSamples="8"
                    postPeakSamples="32" advancerID="1" depthOffsetMM="0" electrodeID="1">
-          <SUBCHANNEL ch="0" thresh="30" isActive="1"/>
-          <SPIKESORTING numBoxUnits="1" numPCAUnits="1" selectedUnit="1" selectedBox="0">
+          <SUBCHANNEL ch="0" thresh="-100.000023" isActive="1"/>
+          <SPIKESORTING numBoxUnits="1" numPCAUnits="1" selectedUnit="-1" selectedBox="-1">
             <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
               <BOX ch="0" x="246" y="57" w="300" h="40"/>
             </BOXUNIT>
             <PCAUNIT UnitID="2" ColorR="0" ColorG="255" ColorB="0" PolygonNumPoints="27"
-                     PolygonOffsetX="0" PolygonOffsetY="0">
+                     PolygonOffsetX="175" PolygonOffsetY="-861">
               <POLYGON_POINT pointX="405.582642" pointY="-252.285217"/>
               <POLYGON_POINT pointX="352.840149" pointY="-252.285217"/>
               <POLYGON_POINT pointX="319.876099" pointY="-252.285217"/>
@@ -2839,48 +2836,48 @@
               <POLYGON_POINT pointX="422.064636" pointY="-169.61084"/>
             </PCAUNIT>
           </SPIKESORTING>
-          <PCA numChannels="1" waveformLength="40" pc1min="-1" pc2min="-1" pc1max="1"
-               pc2max="1" PCAjobFinished="0" PCAcomputed="0">
-            <PCA_DIM pc1="9.50013828" pc2="9.56249905"/>
-            <PCA_DIM pc1="0" pc2="0"/>
-            <PCA_DIM pc1="8.98529434" pc2="8.98529434"/>
-            <PCA_DIM pc1="3.08455729" pc2="3.08455729"/>
-            <PCA_DIM pc1="7.49694872" pc2="7.49694872"/>
-            <PCA_DIM pc1="5.83487463" pc2="5.83487463"/>
-            <PCA_DIM pc1="5.19624043" pc2="5.19624043"/>
-            <PCA_DIM pc1="7.9529295" pc2="7.9529295"/>
-            <PCA_DIM pc1="2.33247137" pc2="2.33247137"/>
-            <PCA_DIM pc1="9.20921135" pc2="9.20921135"/>
-            <PCA_DIM pc1="-0.784042656" pc2="-0.784042656"/>
-            <PCA_DIM pc1="9.46759129" pc2="9.46759129"/>
-            <PCA_DIM pc1="-3.81559682" pc2="-3.81559682"/>
-            <PCA_DIM pc1="8.70007038" pc2="8.70007038"/>
-            <PCA_DIM pc1="-6.4336977" pc2="-6.4336977"/>
-            <PCA_DIM pc1="6.98981667" pc2="6.98981667"/>
-            <PCA_DIM pc1="-8.35464764" pc2="-8.35464764"/>
-            <PCA_DIM pc1="4.52215195" pc2="4.52215195"/>
-            <PCA_DIM pc1="-9.37029552" pc2="-9.37029552"/>
-            <PCA_DIM pc1="1.56447041" pc2="1.56447041"/>
-            <PCA_DIM pc1="-9.37058449" pc2="-9.37058449"/>
-            <PCA_DIM pc1="-1.5627358" pc2="-1.5627358"/>
-            <PCA_DIM pc1="-8.35548592" pc2="-8.35548592"/>
-            <PCA_DIM pc1="-4.52060366" pc2="-4.52060366"/>
-            <PCA_DIM pc1="-6.43499422" pc2="-6.43499422"/>
-            <PCA_DIM pc1="-6.98862314" pc2="-6.98862314"/>
-            <PCA_DIM pc1="-3.81720877" pc2="-3.81720877"/>
-            <PCA_DIM pc1="-8.69936275" pc2="-8.69936275"/>
-            <PCA_DIM pc1="-0.78579706" pc2="-0.78579706"/>
-            <PCA_DIM pc1="-9.46744537" pc2="-9.46744537"/>
-            <PCA_DIM pc1="2.33076644" pc2="2.33076644"/>
-            <PCA_DIM pc1="-9.20964336" pc2="-9.20964336"/>
-            <PCA_DIM pc1="5.19476652" pc2="5.19476652"/>
-            <PCA_DIM pc1="-7.95389223" pc2="-7.95389223"/>
-            <PCA_DIM pc1="7.49586678" pc2="7.49586678"/>
-            <PCA_DIM pc1="-5.83626461" pc2="-5.83626461"/>
-            <PCA_DIM pc1="8.98472214" pc2="8.98472214"/>
-            <PCA_DIM pc1="-3.08622098" pc2="-3.08622098"/>
-            <PCA_DIM pc1="9.5" pc2="9.5"/>
-            <PCA_DIM pc1="-0.00176041818" pc2="-0.00176041818"/>
+          <PCA numChannels="1" waveformLength="40" pc1min="-2564.6853" pc2min="-5886.42236"
+               pc1max="1981.823" pc2max="5065.86377" PCAjobFinished="0" PCAcomputed="1">
+            <PCA_DIM pc1="-0.00200219243" pc2="0.0318231061"/>
+            <PCA_DIM pc1="-0.0250572618" pc2="0.0131662367"/>
+            <PCA_DIM pc1="-0.0358281247" pc2="-0.0217407495"/>
+            <PCA_DIM pc1="-0.0475742072" pc2="-0.0478078052"/>
+            <PCA_DIM pc1="-0.0843538418" pc2="-0.0470483899"/>
+            <PCA_DIM pc1="-0.165284455" pc2="-0.0152879907"/>
+            <PCA_DIM pc1="-0.299991369" pc2="0.0120631792"/>
+            <PCA_DIM pc1="-0.426963598" pc2="0.216768771"/>
+            <PCA_DIM pc1="-0.496851921" pc2="0.226269275"/>
+            <PCA_DIM pc1="-0.420706958" pc2="0.164086968"/>
+            <PCA_DIM pc1="-0.271109045" pc2="-0.0211252682"/>
+            <PCA_DIM pc1="-0.173950225" pc2="-0.433079451"/>
+            <PCA_DIM pc1="-0.124452718" pc2="-0.539423943"/>
+            <PCA_DIM pc1="-0.125070319" pc2="-0.473343611"/>
+            <PCA_DIM pc1="-0.139954224" pc2="-0.296569407"/>
+            <PCA_DIM pc1="-0.146750256" pc2="-0.109916978"/>
+            <PCA_DIM pc1="-0.139690682" pc2="0.0157513674"/>
+            <PCA_DIM pc1="-0.123396456" pc2="0.0669092089"/>
+            <PCA_DIM pc1="-0.102312647" pc2="0.0689145252"/>
+            <PCA_DIM pc1="-0.0735054463" pc2="0.0481248386"/>
+            <PCA_DIM pc1="-0.0396146514" pc2="0.0225987267"/>
+            <PCA_DIM pc1="-0.0191349238" pc2="0.00324239163"/>
+            <PCA_DIM pc1="-0.014000427" pc2="-0.00611044932"/>
+            <PCA_DIM pc1="-0.00655109482" pc2="-0.00523937726"/>
+            <PCA_DIM pc1="0.016322365" pc2="0.00934596825"/>
+            <PCA_DIM pc1="0.0447489917" pc2="0.0347727723"/>
+            <PCA_DIM pc1="0.0587851889" pc2="0.0564380102"/>
+            <PCA_DIM pc1="0.0555972196" pc2="0.0686456338"/>
+            <PCA_DIM pc1="0.0515186638" pc2="0.0781290531"/>
+            <PCA_DIM pc1="0.0573547557" pc2="0.0879241973"/>
+            <PCA_DIM pc1="0.0682739168" pc2="0.0953843296"/>
+            <PCA_DIM pc1="0.0632878765" pc2="0.0924857184"/>
+            <PCA_DIM pc1="0.0326539129" pc2="0.070799686"/>
+            <PCA_DIM pc1="-0.0106730964" pc2="0.0338462628"/>
+            <PCA_DIM pc1="-0.03563416" pc2="-6.23287633e-007"/>
+            <PCA_DIM pc1="-0.0318149514" pc2="-0.012705165"/>
+            <PCA_DIM pc1="-0.0219796821" pc2="-0.000214142026"/>
+            <PCA_DIM pc1="-0.0290207695" pc2="0.0242171362"/>
+            <PCA_DIM pc1="-0.0535446517" pc2="0.0443002917"/>
+            <PCA_DIM pc1="-0.0732052028" pc2="0.0579178892"/>
           </PCA>
         </ELECTRODE>
       </SPIKEDETECTOR>
@@ -3507,9 +3504,9 @@
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
         <WINDOW Active="1" x="16" y="530" width="900" height="604"/>
-        <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="1"
-                    EventButtonState="239" ChannelDisplayState="1111111111111111111111111111111111111111"
-                    ScrollX="0" ScrollY="0"/>
+        <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="0"
+                    EventButtonState="1" ChannelDisplayState="1111111111111111111111111111111100111111"
+                    ScrollX="0" ScrollY="1486"/>
       </EDITOR>
     </PROCESSOR>
   </SIGNALCHAIN>
