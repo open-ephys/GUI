@@ -74,6 +74,7 @@ public:
 
     int horzShift;
     int vertShift;
+
     
 private:
 
@@ -106,6 +107,8 @@ public:
     int nodesAtLevel(int lvl);
     int getHorizontalShift(GraphNode*);
     GraphNode* getNodeForEditor(GenericEditor* editor);
+
+    void resized();
 
 private:
 

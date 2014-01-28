@@ -36,6 +36,13 @@ GraphViewer::~GraphViewer()
     
 }
 
+void GraphViewer::resized()
+{
+   // setBounds(0,0,getParentComponent()->getWidth(), getParentComponent()->getHeight());
+
+    //updateNodeLocations();
+}
+
 void GraphViewer::addNode(GenericEditor* editor)
 {
     
@@ -67,6 +74,7 @@ void GraphViewer::removeAllNodes()
 
 void GraphViewer::updateNodeLocations()
 {
+
     // set the initial locations
     for (int i = 0; i < availableNodes.size(); i++)
     {
@@ -95,6 +103,19 @@ void GraphViewer::updateNodeLocations()
                 }
             }
         }
+    }
+
+    // check boundaries
+    for (int i = 0; i < availableNodes.size(); i++)
+    {
+        int bottomEdge = availableNodes[i]->getY() + availableNodes[i]->getHeight();
+        int leftEdge = availableNodes[i]->getX() + availableNodes[i]->getWidth();
+        
+        if (bottomEdge + 20 > getHeight())
+            setBounds(0,0,getWidth(), bottomEdge + 20);
+
+        if (leftEdge + 20 > getWidth())
+            setBounds(0,0,leftEdge+20, getHeight());
     }
 
     repaint();
@@ -237,7 +258,7 @@ void GraphViewer::paint(Graphics& g)
     
     g.setColour(Colours::grey);
     
-    g.drawFittedText("open ephys", 40, 40, getParentComponent()->getWidth()-50, getParentComponent()->getHeight()-50, Justification::bottomRight, 100);
+   // g.drawFittedText("open ephys", 40, 40, getParentComponent()->getWidth()-60, getParentComponent()->getHeight()-60, Justification::bottomRight, 100);
     
     // draw connections
 
