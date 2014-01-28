@@ -112,6 +112,10 @@ private:
 	std::vector<std::vector<bool>> interpolatedConditionsValid;
 	std::vector<float> conditionMaxY;
 	std::vector<float> conditionMinY;
+
+	
+    Image rasterImage;
+
 	float rangeX,rangeY;
 	int plotID;
 	bool fullScreenMode;

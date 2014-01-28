@@ -1552,6 +1552,18 @@ void XYPlot::paintLFP(Graphics &g)
 
 void XYPlot::paintSpikeRaster(Graphics &g)
 {
+	/*
+	rasterImage = Image(Image::RGB, imageDim, imageDim, true);
+	rasterImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+			Colours::black);
+
+	Graphics gi(rasterImage);
+    
+    g.drawImage(rasterImage,
+                0, 0, getWidth(), getHeight(),
+                0, 0, rangeX, rangeY);
+*/
+
 }
 
 void XYPlot::paintLFPraster(Graphics &g)
