@@ -221,6 +221,7 @@ public:
     void updatePSTHwithTrial(Trial *trial);
 	bool contains(std::vector<int> v, int x);
 	void toggleConditionVisibility(int cond);
+	void modifyConditionVisibility(int cond, bool newstate);
 	void parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);

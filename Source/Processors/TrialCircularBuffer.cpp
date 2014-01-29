@@ -1134,6 +1134,29 @@ void TrialCircularBuffer::clearDesign()
 }
 
 
+void TrialCircularBuffer::modifyConditionVisibility(int cond, bool newstate)
+{
+	// now add a new psth for this condition for all sorted units on all electrodes
+	lockPSTH();
+	conditions[cond].visible = newstate;
+	for (int i=0;i<electrodesPSTH.size();i++) 
+	{
+		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
+		{
+			electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs[cond].visible = newstate;
+			electrodesPSTH[i].channelsPSTHs[ch].redrawNeeded = true;
+		}
+
+		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+		{
+			electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs[cond].visible = newstate;
+			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
+		}
+	}
+	unlockPSTH();
+	// inform editor repaint is needed
+
+}
 
 void TrialCircularBuffer::toggleConditionVisibility(int cond)
 {

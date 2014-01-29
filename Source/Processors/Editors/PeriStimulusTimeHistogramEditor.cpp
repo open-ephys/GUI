@@ -1679,7 +1679,7 @@ void ConditionList::buttonClicked(Button *btn)
 			processor->trialCircularBuffer->lockConditions();
 			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = false;
+				processor->trialCircularBuffer->modifyConditionVisibility(k,false);
 				conditionButtons[k]->setEnabledState(false);
 			}
 			processor->trialCircularBuffer->unlockConditions();
@@ -1692,7 +1692,7 @@ void ConditionList::buttonClicked(Button *btn)
 			processor->trialCircularBuffer->lockConditions();
 			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = true;
+				processor->trialCircularBuffer->modifyConditionVisibility(k,true);
 				conditionButtons[k]->setEnabledState(true);
 			}
 			processor->trialCircularBuffer->unlockConditions();
@@ -1708,7 +1708,7 @@ void ConditionList::buttonClicked(Button *btn)
 		{
 			if (processor->trialCircularBuffer->conditions[k].conditionID == conditionID)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = cbtn->getEnabledState();
+				processor->trialCircularBuffer->modifyConditionVisibility(k, cbtn->getEnabledState());
 				break;
 			}
 		}	
