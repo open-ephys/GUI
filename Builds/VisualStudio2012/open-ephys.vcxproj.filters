@@ -418,6 +418,9 @@
     <ClCompile Include="..\..\Source\Processors\ISCAN.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\NotchFilterNode.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
@@ -527,6 +530,9 @@
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\NothFilterEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp">
@@ -1986,6 +1992,9 @@
     <ClInclude Include="..\..\Source\Processors\ISCAN.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\NotchFilterNode.h">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
@@ -2101,6 +2110,9 @@
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\NotchFilterEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h">

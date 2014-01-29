@@ -32,6 +32,7 @@
 #include "EventNode.h"
 #include "AdvancerNode.h"
 #include "FilterNode.h"
+#include "NotchFilterNode.h"
 #include "GenericProcessor.h"
 #include "RecordNode.h"
 #include "ResamplingNode.h"
@@ -740,8 +741,13 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             std::cout << "Creating a new filter." << std::endl;
             processor = new FilterNode();
 
-        }
-        else if (subProcessorType.equalsIgnoreCase("Resampler"))
+        } else if (subProcessorType.equalsIgnoreCase("Notch Filter"))
+        {
+
+            std::cout << "Creating a new notch filter." << std::endl;
+            processor = new NotchFilterNode();
+
+		} else if (subProcessorType.equalsIgnoreCase("Resampler"))
         {
             std::cout << "Creating a new resampler." << std::endl;
             processor = new ResamplingNode();

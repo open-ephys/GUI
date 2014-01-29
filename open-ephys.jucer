@@ -233,6 +233,10 @@
       <GROUP id="yQmqZWk" name="Processors">
         <FILE id="EfiSON" name="ISCAN.cpp" compile="1" resource="0" file="Source/Processors/ISCAN.cpp"/>
         <FILE id="g6IxtJ" name="ISCAN.h" compile="0" resource="0" file="Source/Processors/ISCAN.h"/>
+        <FILE id="kXTh3Y" name="NotchFilterNode.h" compile="0" resource="0"
+              file="Source/Processors/NotchFilterNode.h"/>
+        <FILE id="hb9jBe" name="NotchFilterNode.cpp" compile="1" resource="0"
+              file="Source/Processors/NotchFilterNode.cpp"/>
         <FILE id="XKaTgW" name="PeriStimulusTimeHistogramNode.cpp" compile="1"
               resource="0" file="Source/Processors/PeriStimulusTimeHistogramNode.cpp"/>
         <FILE id="T2ALk8" name="PeriStimulusTimeHistogramNode.h" compile="0"
@@ -356,6 +360,10 @@
                 file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
           <FILE id="lUiYWT" name="NetworkEventsEditor.h" compile="0" resource="0"
                 file="Source/Processors/Editors/NetworkEventsEditor.h"/>
+          <FILE id="fUBAnW" name="NothFilterEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/Editors/NothFilterEditor.cpp"/>
+          <FILE id="ooP1Kc" name="NotchFilterEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/NotchFilterEditor.h"/>
           <FILE id="yQ68uW" name="AdvancerEditor.cpp" compile="1" resource="0"
                 file="Source/Processors/Editors/AdvancerEditor.cpp"/>
           <FILE id="tRdvgP" name="AdvancerEditor.h" compile="0" resource="0"
