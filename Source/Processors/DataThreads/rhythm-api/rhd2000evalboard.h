@@ -156,8 +156,8 @@ public:
 
 	int gecDacDataChannel(int dacChannel);
 
-	void setFastSettleByTTL(bool state);
-	void setFastSettleByTTLchannel(int channel);
+	void enableExternalFastSettle(bool enable);
+	void setExternalFastSettleChannel(int channel);
 
     void flush();
     bool readDataBlock(Rhd2000DataBlock* dataBlock);
@@ -212,13 +212,16 @@ private:
         WireInDacSource8 = 0x1d,
         WireInDacManual1 = 0x1e,
         WireInDacManual2 = 0x1f,
+		WireInMultiUse = 0x1f, 
+
 		WireInTTLSettleChannel   = 0x16,
-        WireInMultiUse = 0x1f,
         TrigInDcmProg = 0x40,
         TrigInSpiStart = 0x41,
         TrigInRamWrite = 0x42,
         TrigInDacThresh = 0x43,
         TrigInDacHpf = 0x44,
+		TrigInExtFastSettle = 0x45,
+
 
         WireOutNumWordsLsb = 0x20,
         WireOutNumWordsMsb = 0x21,
