@@ -1009,27 +1009,7 @@ void RHD2000Thread::updateRegisters()
     evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0,
                                       commandSequenceLength - 1);
 
-    commandSequenceLength = chipRegisters.createCommandListFastSettle(commandList);
-    // Upload version with fast settle enabled to AuxCmd3 RAM Bank 3.
-    evalBoard->uploadCommandList(commandList, Rhd2000EvalBoard::AuxCmd3, 3);
-    evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0, commandSequenceLength - 1);
-
 	chipRegisters.setFastSettle(false);
-	/*
-    commandSequenceLength = chipRegisters.createCommandListFastSettle(commandList);
-    // Upload version to turn on fast settle 
-    evalBoard->uploadCommandList(commandList, Rhd2000EvalBoard::AuxCmd3, 3);
-    evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0,
-                                      commandSequenceLength - 1);
-
-	
-    commandSequenceLength = chipRegisters.createCommandListFastSettle(commandList);
-    // Upload version to turn off fast settle 
-    evalBoard->uploadCommandList(commandList, Rhd2000EvalBoard::AuxCmd3, 4);
-    evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0,
-                                      commandSequenceLength - 1);
-*/
-
     evalBoard->selectAuxCommandBank(Rhd2000EvalBoard::PortA, Rhd2000EvalBoard::AuxCmd3,
                                     fastSettleEnabled ? 2 : 1);
     evalBoard->selectAuxCommandBank(Rhd2000EvalBoard::PortB, Rhd2000EvalBoard::AuxCmd3,
