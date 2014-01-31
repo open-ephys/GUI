@@ -1145,24 +1145,32 @@ void Rhd2000EvalBoard::selectDacDataStream(int dacChannel, int stream)
     dev->UpdateWireIns();
 }
 
-void Rhd2000EvalBoard::setFastSettleByTTL(bool state)
-{
 
-    dev->SetWireInValue(WireInResetRun, (state ? 0x10 : 0x00), 0x10);
+
+
+
+// Enable external triggering of amplifier hardware 'fast settle' function (blanking).
+// If external triggering is enabled, this fast settling of amplifiers on all connected
+// chips will be controlled in real time via one of the 16 TTL inputs.
+void Rhd2000EvalBoard::enableExternalFastSettle(bool enable)
+{
+    dev->SetWireInValue(WireInMultiUse, enable ? 1 : 0);
     dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInExtFastSettle, 0);
 }
 
-void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
+// Select which of the TTL inputs 0-15 is used to perform a hardware 'fast settle' (blanking)
+// of the amplifiers if external triggering of fast settling
+// is enabled.
+void Rhd2000EvalBoard::setExternalFastSettleChannel(int channel)
 {
-  if (channel < 0 || channel > 7)
-    {
-        cerr << "Error in Rhd2000EvalBoard::setFastSettleByTTLchannel: channel out of range." << endl;
+    if (channel < 0 || channel > 15) {
+        cerr << "Error in Rhd2000EvalBoard::setExternalFastSettleChannel: channel out of range." << endl;
         return;
     }
-// the WireInTTLSettleChannel is also used by DAC, so keep the values of 10 used bits
- // and shift the channel value 10 bits to the left
-	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x3c00);
+    dev->SetWireInValue(WireInMultiUse, channel);
     dev->UpdateWireIns();
+    dev->ActivateTriggerIn(TrigInExtFastSettle, 1);
 }
 
 int Rhd2000EvalBoard::gecDacDataChannel(int dacChannel)

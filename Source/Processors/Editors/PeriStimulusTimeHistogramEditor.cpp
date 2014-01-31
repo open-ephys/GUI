@@ -34,6 +34,7 @@ PeriStimulusTimeHistogramEditor::PeriStimulusTimeHistogramEditor(GenericProcesso
 	showLFP = true;
 	showCompactView = false;
 	showSmooth = true;
+	showRasters = false;
 	showAutoRescale = true;
 	showMatchRange = false;
 	TTLchannelTrialAlignment = -1;
@@ -109,6 +110,7 @@ void PeriStimulusTimeHistogramEditor::saveVisualizerParameters(XmlElement* xml)
 	 xmlNode->setAttribute("showCompactView",showCompactView);
 	 xmlNode->setAttribute("showSmooth",showSmooth);
 	 xmlNode->setAttribute("showAutoRescale",showAutoRescale);
+	 xmlNode->setAttribute("showRasters",showRasters);
 	 xmlNode->setAttribute("showMatchRange",showMatchRange);
 	 xmlNode->setAttribute("TTLchannelTrialAlignment",TTLchannelTrialAlignment);
 	 xmlNode->setAttribute("smoothingMS",smoothingMS);
@@ -125,6 +127,7 @@ void PeriStimulusTimeHistogramEditor::loadVisualizerParameters(XmlElement* xml)
 			showCompactView = xmlNode->getBoolAttribute("showCompactView");
 			showSmooth = xmlNode->getBoolAttribute("showSmooth");
 			showAutoRescale = xmlNode->getBoolAttribute("showAutoRescale");
+			showRasters= xmlNode->getBoolAttribute("showRasters");
 			showMatchRange = xmlNode->getBoolAttribute("showMatchRange");
 			TTLchannelTrialAlignment = xmlNode->getIntAttribute("TTLchannelTrialAlignment");
 			smoothingMS = xmlNode->getIntAttribute("smoothingMS");
@@ -137,6 +140,7 @@ void PeriStimulusTimeHistogramEditor::loadVisualizerParameters(XmlElement* xml)
 				periStimulusTimeHistogramCanvas->setAutoRescale(showAutoRescale);
 				periStimulusTimeHistogramCanvas->setMatchRange(showMatchRange);
 				periStimulusTimeHistogramCanvas->setSmoothing(smoothingMS);
+				periStimulusTimeHistogramCanvas->setRasterMode(showRasters);
 			}
 		}
 	}
@@ -188,17 +192,25 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			double rangeTimes[4] = {0.5,1,1.5,2};
 			for (int k=0;k<4;k++) {
 				String s = String(rangeTimes[k],1) + " sec";
-				preRangeTimeMenu.addItem(50+k,s,true, fabs(processor->trialCircularBuffer->preSec - rangeTimes[k])<0.01);
-				postRangeTimeMenu.addItem(60+k,s,true, fabs(processor->trialCircularBuffer->postSec - rangeTimes[k])<0.01);
+				if (processor->trialCircularBuffer == nullptr)
+				{
+					preRangeTimeMenu.addItem(50+k,s,true, false);
+					postRangeTimeMenu.addItem(60+k,s,true, false);
+				} else 
+				{
+					preRangeTimeMenu.addItem(50+k,s,true, fabs(processor->trialCircularBuffer->preSec - rangeTimes[k])<0.01);
+					postRangeTimeMenu.addItem(60+k,s,true, fabs(processor->trialCircularBuffer->postSec - rangeTimes[k])<0.01);
+				}
 			}
 			rangeTimeMenu.addSubMenu("pre trial", preRangeTimeMenu,true);
 			rangeTimeMenu.addSubMenu("post trial", postRangeTimeMenu,true);
 
 			m.addSubMenu("Smooth Curves", smoothingSubMenu);
+			m.addItem(7,"Raster mode",true, showRasters);
+
 			m.addSubMenu("Range", rangeTimeMenu,true);
 			m.addItem(5,"Auto Rescale",true, showAutoRescale);
 			m.addItem(6,"Match range",false, showMatchRange);
-			m.addItem(7,"Raster Plots",false, false);
 			m.addItem(8,"Bar Graph",false, false);
 			m.addItem(9,"2D Heat map",false, false);
 			const int result = m.show();
@@ -223,6 +235,10 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 			case 6:
 				showMatchRange=!showMatchRange;
 				periStimulusTimeHistogramCanvas->setMatchRange(showMatchRange);
+				break;
+			case 7:
+				showRasters = !showRasters;
+				periStimulusTimeHistogramCanvas->setRasterMode(showRasters);
 				break;
 			} 
 			if (result >= 40 && result <= 47)
@@ -422,6 +438,11 @@ void PeriStimulusTimeHistogramCanvas::endAnimation()
 	//stopCallbacks();
 }
 
+void PeriStimulusTimeHistogramCanvas::setRasterMode(bool rasterModeActive)
+{
+	rasterMode = rasterModeActive;
+	update();
+}
 
 void PeriStimulusTimeHistogramCanvas::setLFPvisibility(bool visible)
 {
@@ -524,10 +545,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 				XYPlot *newplot;
 				if (compactView)
 				{
-					newplot = new XYPlot(psthDisplay,++plotID,false,processor->trialCircularBuffer,
+					newplot = new XYPlot(psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
-					plotCounter,row);
+					plotCounter,row,rasterMode);
 
 					plotCounter++;
 					numCols++;
@@ -540,10 +561,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 					}
 				} else 
 				{
-					newplot = new XYPlot(psthDisplay,++plotID,false,processor->trialCircularBuffer,
+					newplot = new XYPlot(psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 					processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 					processor->trialCircularBuffer->electrodesPSTH[e].channels[u],
-					u,row);
+					u,row,rasterMode);
 					numCols = max(numCols,u);
 
 				}
@@ -568,10 +589,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 					XYPlot *newplot;
 					if (compactView)
 					{
-					    newplot = new XYPlot(psthDisplay,++plotID,true,processor->trialCircularBuffer,
+					    newplot = new XYPlot(psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
-						plotCounter,row);
+						plotCounter,row,rasterMode);
 						plotCounter++;
 						numCols++;
 						numCols = min(maxUnitsPerRow,numCols);
@@ -583,10 +604,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 						}
 					} else
 					{
-					newplot = new XYPlot(psthDisplay,++plotID,true,processor->trialCircularBuffer,
+					newplot = new XYPlot(psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						processor->trialCircularBuffer->electrodesPSTH[e].electrodeID,
 						processor->trialCircularBuffer->electrodesPSTH[e].unitsPSTHs[u].unitID,
-						offset+u,row);
+						offset+u,row,rasterMode);
 						numCols = max(numCols,offset+u);
 					}
 					newplot->setSmoothState(smoothPlots);
@@ -784,13 +805,14 @@ void PeriStimulusTimeHistogramDisplay::focusOnPlot(int plotID)
 }
 
 /******************************************/
-XYPlot::XYPlot(PeriStimulusTimeHistogramDisplay *dsp, int _plotID, bool _spikePlot, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col) :
-	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col),spikePlot(_spikePlot), plotID(_plotID), display(dsp)
+XYPlot::XYPlot(PeriStimulusTimeHistogramDisplay *dsp, int _plotID, xyPlotTypes _plotType, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col, bool _rasterMode) :
+	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col),plotType(_plotType), plotID(_plotID), display(dsp),rasterMode(_rasterMode)
 {
 	font = Font("Default", 15, Font::plain);
 	guassianStandardDeviationMS = 5; // default smoothing
 	buildSmoothKernel(guassianStandardDeviationMS); 
-	smoothPlot = spikePlot; // don't smooth LFPs
+	
+	smoothPlot = plotType == SPIKE_PLOT; // don't smooth LFPs
 	autoRescale = true;
 	firstTime = true;
 	fullScreenMode = false;
@@ -1014,7 +1036,7 @@ void XYPlot::mouseDoubleClick(const juce::MouseEvent& event)
 		{
 			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
 			{
-				if (spikePlot)
+				if (plotType == SPIKE_PLOT)
 				{
 					for (int unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
 					{
@@ -1143,11 +1165,11 @@ void XYPlot::paintPlotNameAndRect(Graphics &g)
 
 	g.setFont(font);
 	String axesName;
-	if (spikePlot) 
+	if (plotType == SPIKE_PLOT) 
 	{
 		axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+ 
 			String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
-	} else 
+	} else  if (plotType == LFP_PLOT) 
 	{
 		axesName = String("LFP ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
 			String(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID);
@@ -1157,7 +1179,7 @@ void XYPlot::paintPlotNameAndRect(Graphics &g)
 
 
 	// keep a fixed amount of pixels for axes labels
-	if (spikePlot) 
+	if (plotType == SPIKE_PLOT) 
 	{
 		g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
 			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
@@ -1528,16 +1550,42 @@ void XYPlot::paintLFP(Graphics &g)
 	//repaint();
 }
 
+void XYPlot::paintSpikeRaster(Graphics &g)
+{
+	/*
+	rasterImage = Image(Image::RGB, imageDim, imageDim, true);
+	rasterImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
+			Colours::black);
+
+	Graphics gi(rasterImage);
+    
+    g.drawImage(rasterImage,
+                0, 0, getWidth(), getHeight(),
+                0, 0, rangeX, rangeY);
+*/
+
+}
+
+void XYPlot::paintLFPraster(Graphics &g)
+{
+}
+
 
 void XYPlot::paint(Graphics &g)
 {
-	if (spikePlot)
+	if (plotType == SPIKE_PLOT)
 	{
-		paintSpikes(g);
+		if (rasterMode)
+			paintSpikeRaster(g);
+		else
+			paintSpikes(g);
 	}
-	else
+	else if (plotType == LFP_PLOT)
 	{
-		paintLFP(g);
+		if (rasterMode)
+			paintLFPraster(g);
+		else
+			paintLFP(g);
 	}
 
 	if (zooming)
@@ -1631,7 +1679,7 @@ void ConditionList::buttonClicked(Button *btn)
 			processor->trialCircularBuffer->lockConditions();
 			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = false;
+				processor->trialCircularBuffer->modifyConditionVisibility(k,false);
 				conditionButtons[k]->setEnabledState(false);
 			}
 			processor->trialCircularBuffer->unlockConditions();
@@ -1644,7 +1692,7 @@ void ConditionList::buttonClicked(Button *btn)
 			processor->trialCircularBuffer->lockConditions();
 			for (int k=0;k<processor->trialCircularBuffer->conditions.size();k++)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = true;
+				processor->trialCircularBuffer->modifyConditionVisibility(k,true);
 				conditionButtons[k]->setEnabledState(true);
 			}
 			processor->trialCircularBuffer->unlockConditions();
@@ -1660,7 +1708,7 @@ void ConditionList::buttonClicked(Button *btn)
 		{
 			if (processor->trialCircularBuffer->conditions[k].conditionID == conditionID)
 			{
-				processor->trialCircularBuffer->conditions[k].visible = cbtn->getEnabledState();
+				processor->trialCircularBuffer->modifyConditionVisibility(k, cbtn->getEnabledState());
 				break;
 			}
 		}	

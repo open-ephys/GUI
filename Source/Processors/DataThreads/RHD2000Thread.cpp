@@ -1000,16 +1000,16 @@ void RHD2000Thread::updateRegisters()
     evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0,
                                       commandSequenceLength - 1);
 
+	
     chipRegisters.setFastSettle(true);
+	
     commandSequenceLength = chipRegisters.createCommandListRegisterConfig(commandList, false);
     // Upload version with fast settle enabled to AuxCmd3 RAM Bank 2.
     evalBoard->uploadCommandList(commandList, Rhd2000EvalBoard::AuxCmd3, 2);
     evalBoard->selectAuxCommandLength(Rhd2000EvalBoard::AuxCmd3, 0,
                                       commandSequenceLength - 1);
-    chipRegisters.setFastSettle(false);
 
-
-
+	chipRegisters.setFastSettle(false);
     evalBoard->selectAuxCommandBank(Rhd2000EvalBoard::PortA, Rhd2000EvalBoard::AuxCmd3,
                                     fastSettleEnabled ? 2 : 1);
     evalBoard->selectAuxCommandBank(Rhd2000EvalBoard::PortB, Rhd2000EvalBoard::AuxCmd3,
@@ -1272,8 +1272,8 @@ bool RHD2000Thread::updateBuffer()
 		}
 
         evalBoard->setTtlMode(ttlMode);
-        evalBoard->setFastSettleByTTL(fastTTLSettleEnabled);
-        evalBoard->setFastSettleByTTLchannel(fastSettleTTLChannel);
+        evalBoard->enableExternalFastSettle(fastTTLSettleEnabled);
+        evalBoard->setExternalFastSettleChannel(fastSettleTTLChannel);
 	    evalBoard->setDacHighpassFilter(desiredDAChpf);
 		evalBoard->enableDacHighpassFilter(desiredDAChpfState);
 
