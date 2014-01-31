@@ -601,26 +601,45 @@ void ProcessorGraph::connectProcessors(GenericProcessor* source, GenericProcesso
     std::cout << "     Connecting " << source->getName() << " " << source->getNodeId(); //" channel ";
     std::cout << " to " << dest->getName() << " " << dest->getNodeId() << std::endl;
 
-    // 1. connect continuous channels
-    for (int chan = 0; chan < source->getNumOutputs(); chan++)
-    {
-        //std::cout << chan << " ";
 
-        addConnection(source->getNodeId(),         // sourceNodeID
-                      chan,                        // sourceNodeChannelIndex
-                      dest->getNodeId(),           // destNodeID
-                      dest->getNextChannel(true)); // destNodeChannelIndex
+    bool connectContinuous = true;
+    bool connectEvents = true;
+
+    if (dest->isMerger())
+    {
+        Merger* merger = (Merger*) dest;
+
+        connectContinuous = merger->sendContinuousForSource(source);
+        connectEvents = merger->sendEventsForSource(source);
     }
+
+    // 1. connect continuous channels
+    if (connectContinuous)
+    {
+        for (int chan = 0; chan < source->getNumOutputs(); chan++)
+        {
+            //std::cout << chan << " ";
+
+            addConnection(source->getNodeId(),         // sourceNodeID
+                          chan,                        // sourceNodeChannelIndex
+                          dest->getNodeId(),           // destNodeID
+                          dest->getNextChannel(true)); // destNodeChannelIndex
+        }
+    }
+    
 
     // std::cout << "     Connecting " << source->getName() <<
     //           " event channel to " <<
     //           dest->getName() << std::endl;
 
     // 2. connect event channel
-    addConnection(source->getNodeId(),    // sourceNodeID
-                  midiChannelIndex,       // sourceNodeChannelIndex
-                  dest->getNodeId(),      // destNodeID
-                  midiChannelIndex);      // destNodeChannelIndex
+    if (connectEvents)
+    {
+        addConnection(source->getNodeId(),    // sourceNodeID
+                      midiChannelIndex,       // sourceNodeChannelIndex
+                      dest->getNodeId(),      // destNodeID
+                      midiChannelIndex);      // destNodeChannelIndex
+    }
 
 }
 

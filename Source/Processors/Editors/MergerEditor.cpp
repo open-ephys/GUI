@@ -89,33 +89,127 @@ MergerEditor::MergerEditor(GenericProcessor* parentNode, bool useDefaultParamete
     pipelineSelectorB->setToggleState(false,false);
     addAndMakeVisible(pipelineSelectorB);
 
+    eventsButtonA = new UtilityButton("E", Font("Small Text", 13, Font::plain));
+    eventsButtonA->addListener(this);
+    eventsButtonA->setBounds(5,25,15,15);
+    eventsButtonA->setClickingTogglesState(true);
+    eventsButtonA->setToggleState(true, false);
+    addAndMakeVisible(eventsButtonA);
+
+    continuousButtonA = new UtilityButton("C", Font("Small Text", 13, Font::plain));
+    continuousButtonA->addListener(this);
+    continuousButtonA->setBounds(5,40,15,15);
+    continuousButtonA->setClickingTogglesState(true);
+    continuousButtonA->setToggleState(true, false);
+    addAndMakeVisible(continuousButtonA);
+
+     eventsButtonB = new UtilityButton("E", Font("Small Text", 13, Font::plain));
+    eventsButtonB->addListener(this);
+    eventsButtonB->setBounds(5,95,15,15);
+    eventsButtonB->setClickingTogglesState(true);
+    eventsButtonB->setToggleState(true, false);
+    addAndMakeVisible(eventsButtonB);
+    eventsButtonB->setVisible(false);
+
+    continuousButtonB = new UtilityButton("C", Font("Small Text", 13, Font::plain));
+    continuousButtonB->addListener(this);
+    continuousButtonB->setBounds(5,110,15,15);
+    continuousButtonB->setClickingTogglesState(true);
+    continuousButtonB->setToggleState(true, false);
+    addAndMakeVisible(continuousButtonB);
+    continuousButtonB->setVisible(false);
+
 }
 
 MergerEditor::~MergerEditor()
 {
-    deleteAllChildren();
+
 }
 
 void MergerEditor::buttonEvent(Button* button)
 {
+
+    Merger* processor = (Merger*) getProcessor();
+
+    if (!acquisitionIsActive)
+    {
+
+       if (button == eventsButtonA)
+        {
+            processor->sendEventsForSourceA = button->getToggleState();
+
+        } else if (button == eventsButtonB)
+        {
+            processor->sendEventsForSourceB = button->getToggleState();
+
+        } else if (button == continuousButtonA)
+        {
+            processor->sendContinuousForSourceA = button->getToggleState();
+
+        } else if (button == continuousButtonB)
+        {
+            processor->sendContinuousForSourceB = button->getToggleState();
+
+        }
+
+        if (button == eventsButtonA || 
+            button == eventsButtonB || 
+            button == continuousButtonA || 
+            button == continuousButtonB)
+        {
+            getEditorViewport()->makeEditorVisible(this, false, true);
+        }
+
+
+    } else {
+        if (button == eventsButtonA || 
+            button == eventsButtonB || 
+            button == continuousButtonA || 
+            button == continuousButtonB)
+        {
+            button->setToggleState(!button->getToggleState(),false);
+        }
+    }
+
     if (button == pipelineSelectorA)
     {
         pipelineSelectorA->setToggleState(true,false);
         pipelineSelectorB->setToggleState(false,false);
-        Merger* processor = (Merger*) getProcessor();
         processor->switchIO(0);
+
+        eventsButtonA->setVisible(true);
+        continuousButtonA->setVisible(true);
+
+        eventsButtonB->setVisible(false);
+        continuousButtonB->setVisible(false);
+
+         getEditorViewport()->makeEditorVisible(this, false);
 
     }
     else if (button == pipelineSelectorB)
     {
         pipelineSelectorB->setToggleState(true,false);
         pipelineSelectorA->setToggleState(false,false);
-        Merger* processor = (Merger*) getProcessor();
         processor->switchIO(1);
+
+        eventsButtonB->setVisible(true);
+        continuousButtonB->setVisible(true);
+
+        eventsButtonA->setVisible(false);
+        continuousButtonA->setVisible(false);
+
+        getEditorViewport()->makeEditorVisible(this, false);
 
     }
 
-    getEditorViewport()->makeEditorVisible(this, false);
+   
+
+
+    
+
+    
+
+    
 }
 
 void MergerEditor::mouseDown(const MouseEvent& e)

@@ -33,6 +33,11 @@ Merger::Merger()
       sourceNodeA(0), sourceNodeB(0), activePath(0)//, tabA(-1), tabB(-1)
 {
     sendSampleCount = false;
+
+    sendContinuousForSourceA = true;
+    sendContinuousForSourceB = true;
+    sendEventsForSourceA = true;
+    sendEventsForSourceB = true;
 }
 
 Merger::~Merger()
@@ -106,6 +111,53 @@ bool Merger::stillHasSource()
 
 }
 
+bool Merger::sendEventsForSource(GenericProcessor* source)
+{
+
+    int sourceIndex = getIndexForSourceNode(source);
+
+    if (sourceIndex == -1)
+        return false;
+
+    if (source == 0)
+        return sendEventsForSourceA;
+    else
+        return sendEventsForSourceB;
+}
+
+bool Merger::sendContinuousForSource(GenericProcessor* source)
+{
+
+    int sourceIndex = getIndexForSourceNode(source);
+
+    std::cout << "Source index: " <<  sourceIndex << std::endl;
+
+    if (sourceIndex == -1)
+        return false;
+
+    if (sourceIndex == 0)
+        return sendContinuousForSourceA;
+    else
+        return sendContinuousForSourceB;
+
+     
+
+}
+
+
+int Merger::getIndexForSourceNode(GenericProcessor* sn)
+{
+    if (sn == sourceNodeA)
+    {
+        return 0;
+    } else if (sn == sourceNodeB)
+    {
+        return 1;
+    }
+
+    return -1;
+}
+
 void Merger::switchIO()
 {
 
@@ -127,24 +179,33 @@ void Merger::switchIO()
 void Merger::addSettingsFromSourceNode(GenericProcessor* sn)
 {
 
-    settings.numInputs += sn->getNumOutputs();
-    //settings.inputChannelNames.addArray(sn->settings.inputChannelNames);
-    //settings.eventChannelIds.addArray(sn->settings.eventChannelIds);
-    //settings.eventChannelNames.addArray(sn->settings.eventChannelNames);
-    //settings.bitVolts.addArray(sn->settings.bitVolts);
+    std::cout << "Adding settings from " << sn->getName() << std::endl;
 
-    for (int i = 0; i < sn->channels.size(); i++)
+    if (sendContinuousForSource(sn))
     {
-        Channel* sourceChan = sn->channels[i];
-        Channel* ch = new Channel(*sourceChan);
-        channels.add(ch);
+
+        std::cout << "Send continous data, please!" << std::endl;
+
+        settings.numInputs += sn->getNumOutputs();
+
+        for (int i = 0; i < sn->channels.size(); i++)
+        {
+            Channel* sourceChan = sn->channels[i];
+            Channel* ch = new Channel(*sourceChan);
+            channels.add(ch);
+        }
+    } else {
+        std::cout << "No continous data!" << std::endl;
     }
 
-    for (int i = 0; i < sn->eventChannels.size(); i++)
+    if (sendEventsForSource(sn))
     {
-        Channel* sourceChan = sn->eventChannels[i];
-        Channel* ch = new Channel(*sourceChan);
-        eventChannels.add(ch);
+        for (int i = 0; i < sn->eventChannels.size(); i++)
+        {
+            Channel* sourceChan = sn->eventChannels[i];
+            Channel* ch = new Channel(*sourceChan);
+            eventChannels.add(ch);
+        }
     }
 
     settings.originalSource = sn->settings.originalSource;

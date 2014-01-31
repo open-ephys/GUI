@@ -58,8 +58,13 @@ public:
 
 private:
 
-    ImageButton* pipelineSelectorA;
-    ImageButton* pipelineSelectorB;
+    ScopedPointer<ImageButton> pipelineSelectorA;
+    ScopedPointer<ImageButton> pipelineSelectorB;
+
+    ScopedPointer<UtilityButton> continuousButtonA;
+    ScopedPointer<UtilityButton> eventsButtonA;
+    ScopedPointer<UtilityButton> continuousButtonB;
+    ScopedPointer<UtilityButton> eventsButtonB;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MergerEditor);
 

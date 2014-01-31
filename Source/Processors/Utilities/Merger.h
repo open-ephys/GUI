@@ -71,6 +71,16 @@ public:
 	void saveCustomParametersToXml(XmlElement* parentElement);
 	void loadCustomParametersFromXml();
 
+    bool sendEventsForSource(GenericProcessor* sn);
+    bool sendContinuousForSource(GenericProcessor* sn);
+
+    int getIndexForSourceNode(GenericProcessor* sn);
+
+    bool sendContinuousForSourceA;
+    bool sendContinuousForSourceB;
+    bool sendEventsForSourceA;
+    bool sendEventsForSourceB;
+
 private:
 
     GenericProcessor* sourceNodeA;
