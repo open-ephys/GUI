@@ -63,8 +63,8 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
-  $(OBJDIR)/ISCAN_d4969b61.o \
   $(OBJDIR)/NotchFilterNode_2542f9ad.o \
+  $(OBJDIR)/ISCAN_d4969b61.o \
   $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
   $(OBJDIR)/AdvancerNode_12999801.o \
   $(OBJDIR)/NetworkEvents_28b3b762.o \
@@ -101,8 +101,8 @@ OBJECTS := \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
+  $(OBJDIR)/NotchFilterEditor_d326734f.o \
   $(OBJDIR)/NetworkEventsEditor_fd22826.o \
-  $(OBJDIR)/NothFilterEditor_ade67432.o \
   $(OBJDIR)/AdvancerEditor_6d27d95.o \
   $(OBJDIR)/ISCANeditor_2fa05bc5.o \
   $(OBJDIR)/LfpTriggeredAverageEditor_101d75b.o \
@@ -300,14 +300,14 @@ $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	@echo "Compiling AudioComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/ISCAN_d4969b61.o: ../../Source/Processors/ISCAN.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling ISCAN.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/NotchFilterNode_2542f9ad.o: ../../Source/Processors/NotchFilterNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling NotchFilterNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ISCAN_d4969b61.o: ../../Source/Processors/ISCAN.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling ISCAN.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o: ../../Source/Processors/PeriStimulusTimeHistogramNode.cpp
@@ -490,14 +490,14 @@ $(OBJDIR)/EventNode_95c842b7.o: ../../Source/Processors/EventNode.cpp
 	@echo "Compiling EventNode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/NotchFilterEditor_d326734f.o: ../../Source/Processors/Editors/NotchFilterEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NotchFilterEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/NetworkEventsEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling NetworkEventsEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/NothFilterEditor_ade67432.o: ../../Source/Processors/Editors/NothFilterEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling NothFilterEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AdvancerEditor_6d27d95.o: ../../Source/Processors/Editors/AdvancerEditor.cpp

@@ -287,8 +287,8 @@
     <ClCompile Include="..\..\Source\Dsp\RootFinder.cpp"/>
     <ClCompile Include="..\..\Source\Dsp\State.cpp"/>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\ISCAN.cpp"/>
     <ClCompile Include="..\..\Source\Processors\NotchFilterNode.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\ISCAN.cpp"/>
     <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\NetworkEvents.cpp"/>
@@ -325,8 +325,8 @@
     <ClCompile Include="..\..\Source\Processors\SpikeDetector.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AudioNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\Editors\NotchFilterEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp"/>
-    <ClCompile Include="..\..\Source\Processors\Editors\NothFilterEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\ISCANeditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.cpp"/>
@@ -1500,8 +1500,8 @@
     <ClInclude Include="..\..\Source\Dsp\Types.h"/>
     <ClInclude Include="..\..\Source\Dsp\Utilities.h"/>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h"/>
-    <ClInclude Include="..\..\Source\Processors\ISCAN.h"/>
     <ClInclude Include="..\..\Source\Processors\NotchFilterNode.h"/>
+    <ClInclude Include="..\..\Source\Processors\ISCAN.h"/>
     <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h"/>
     <ClInclude Include="..\..\Source\Processors\AdvancerNode.h"/>
     <ClInclude Include="..\..\Source\Processors\NetworkEvents.h"/>
@@ -1540,8 +1540,8 @@
     <ClInclude Include="..\..\Source\Processors\SpikeDetector.h"/>
     <ClInclude Include="..\..\Source\Processors\AudioNode.h"/>
     <ClInclude Include="..\..\Source\Processors\EventNode.h"/>
-    <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\NotchFilterEditor.h"/>
+    <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\ISCANeditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.h"/>

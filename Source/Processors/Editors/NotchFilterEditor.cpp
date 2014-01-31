@@ -36,13 +36,13 @@ NotchFilterEditor::NotchFilterEditor(GenericProcessor* parentNode, bool useDefau
     bandwidthString = " ";
 
     centerLabel = new Label("center freq", "Center Freq:");
-    centerLabel->setBounds(10,65,80,20);
+    centerLabel->setBounds(10,25,80,20);
     centerLabel->setFont(Font("Small Text", 12, Font::plain));
     centerLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(centerLabel);
 
     bandwidthLabel = new Label("bandwidth", "Bandwidth:");
-    bandwidthLabel->setBounds(10,25,80,20);
+    bandwidthLabel->setBounds(10,65,80,20);
     bandwidthLabel->setFont(Font("Small Text", 12, Font::plain));
     bandwidthLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(bandwidthLabel);
