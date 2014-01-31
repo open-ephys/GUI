@@ -226,6 +226,9 @@ private:
     /** Pointer to the GUI's AudioComponent. Owned by the MainWindow. */
     Viewport graphViewport;
 
+    /** Pointer to the GUI's AudioComponent. Owned by the MainWindow. */
+    Viewport processorListViewport;
+
     /** Resizes all of components inside the UIComponent to fit the new boundaries
     of the MainWindow, or to account for opening/closing events.*/
     void resized();

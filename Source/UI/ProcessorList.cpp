@@ -119,6 +119,14 @@ ProcessorList::~ProcessorList()
 }
 
 
+void ProcessorList::resized()
+{
+    setBounds(0,0,195,getTotalHeight());
+}
+
+
+
+
 
 bool ProcessorList::isOpen()
 {
@@ -137,7 +145,7 @@ void ProcessorList::paint(Graphics& g)
 
 void ProcessorList::drawItems(Graphics& g)
 {
-    totalHeight = yBuffer;
+    totalHeight = yBuffer + itemHeight;
 
     category = baseItem->getName();
 
@@ -166,6 +174,9 @@ void ProcessorList::drawItems(Graphics& g)
             }
         }
     }
+
+    if (isOpen())
+        setSize(getWidth(),totalHeight);
 
 }
 
