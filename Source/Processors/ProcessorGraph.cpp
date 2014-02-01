@@ -116,20 +116,7 @@ void ProcessorGraph::createDefaultNodes()
     addNode(an, AUDIO_NODE_ID);
     addNode(arn, RESAMPLING_NODE_ID);
 
-    // connect audio subnetwork
-    for (int n = 0; n < 2; n++)
-    {
-
-        addConnection(AUDIO_NODE_ID, n,
-                      RESAMPLING_NODE_ID, n);
-
-        addConnection(RESAMPLING_NODE_ID, n,
-                      OUTPUT_NODE_ID, n);
-
-    }
-
-    addConnection(AUDIO_NODE_ID, midiChannelIndex,
-                  RESAMPLING_NODE_ID, midiChannelIndex);
+    
 
     std::cout << "Default nodes created." << std::endl;
 
@@ -288,7 +275,7 @@ void ProcessorGraph::clearConnections()
     {
         Node* node = getNode(i);
 
-        if (node->nodeId != OUTPUT_NODE_ID && node->nodeId != RESAMPLING_NODE_ID)
+        if (node->nodeId != OUTPUT_NODE_ID)
         {
             disconnectNode(node->nodeId);
             GenericProcessor* p =(GenericProcessor*) node->getProcessor();
@@ -296,6 +283,21 @@ void ProcessorGraph::clearConnections()
 
         }
     }
+
+    // connect audio subnetwork
+    for (int n = 0; n < 2; n++)
+    {
+
+        addConnection(AUDIO_NODE_ID, n,
+                      RESAMPLING_NODE_ID, n);
+
+        addConnection(RESAMPLING_NODE_ID, n,
+                      OUTPUT_NODE_ID, n);
+
+    }
+
+    addConnection(AUDIO_NODE_ID, midiChannelIndex,
+                  RESAMPLING_NODE_ID, midiChannelIndex);
 }
 
 
