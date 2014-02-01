@@ -132,8 +132,8 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
 
         int samplesLeft = totalSamples - eventTime;
 
-        //	 std::cout << "Received event from " << eventNodeId << ", channel "
-        //	           << eventChannel << ", with ID " << eventId << std::endl;
+        	 std::cout << "Received event from " << eventNodeId << ", channel "
+        	           << eventChannel << ", with ID " << eventId << std::endl;
         
         int bufferIndex = (displayBufferIndex + eventTime);// % displayBuffer->getNumSamples();
 

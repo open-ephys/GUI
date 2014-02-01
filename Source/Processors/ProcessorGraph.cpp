@@ -262,29 +262,38 @@ Array<GenericProcessor*> ProcessorGraph::getListOfProcessors()
 void ProcessorGraph::clearConnections()
 {
 
-    for (int i = 0; i < getNumConnections(); i++)
-    {
-        const Connection* connection = getConnection(i);
+    // for (int i = 0; i < getNumConnections(); i++)
+    // {
+    //     const Connection* connection = getConnection(i);
 
-        if (connection->destNodeId == RESAMPLING_NODE_ID ||
-            connection->destNodeId == OUTPUT_NODE_ID)
-        {
-            ; // leave it
-        }
-        else
-        {
-            removeConnection(i);
-        }
-    }
+    //     if (connection->destNodeId == RESAMPLING_NODE_ID ||
+    //         connection->destNodeId == OUTPUT_NODE_ID)
+    //     {
+    //         ; // leave it
+    //     }
+    //     else
+    //     {
+    //         if (connection->sourceChannelIndex == 4096)
+    //         {
+    //         std::cout << "Removing connection from " << connection->sourceNodeId << 
+    //                      " to " << connection->destNodeId << 
+    //                      " channel " << connection->sourceChannelIndex << std::endl;
+    //         }
+            
+    //         removeConnection(i);
+    //     }
+    // }
 
     for (int i = 0; i < getNumNodes(); i++)
     {
         Node* node = getNode(i);
 
-        if (node->nodeId != OUTPUT_NODE_ID)
+        if (node->nodeId != OUTPUT_NODE_ID && node->nodeId != RESAMPLING_NODE_ID)
         {
+            disconnectNode(node->nodeId);
             GenericProcessor* p =(GenericProcessor*) node->getProcessor();
             p->resetConnections();
+
         }
     }
 }
