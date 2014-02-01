@@ -183,27 +183,6 @@ void ProcessorGraph::clearSignalChain()
          removeProcessor(processors[i]);
     }
 
-    // int n = 0;
-
-    // while (getNumNodes() > 4)
-    // {
-    //     Node* node = getNode(n);
-    //     int nodeId = node->nodeId;
-
-    //     if (nodeId != OUTPUT_NODE_ID &&
-    //         nodeId != AUDIO_NODE_ID &&
-    //         nodeId != RECORD_NODE_ID &&
-    //         nodeId != RESAMPLING_NODE_ID)
-    //     {
-    //         GenericProcessor* p =(GenericProcessor*) node->getProcessor();
-    //         removeProcessor(p);
-    //     }
-    //     else
-    //     {
-    //         n++;
-    //     }
-    // }
-
 }
 
 void ProcessorGraph::changeListenerCallback(ChangeBroadcaster* source)
@@ -605,12 +584,17 @@ void ProcessorGraph::connectProcessors(GenericProcessor* source, GenericProcesso
     bool connectContinuous = true;
     bool connectEvents = true;
 
-    if (dest->isMerger())
+    if (source->getDestNode() != nullptr)
     {
-        Merger* merger = (Merger*) dest;
 
-        connectContinuous = merger->sendContinuousForSource(source);
-        connectEvents = merger->sendEventsForSource(source);
+        if (source->getDestNode()->isMerger())
+        {
+
+            Merger* merger = (Merger*) source->getDestNode();
+
+            connectContinuous = merger->sendContinuousForSource(source);
+            connectEvents = merger->sendEventsForSource(source);
+        }
     }
 
     // 1. connect continuous channels
@@ -627,14 +611,14 @@ void ProcessorGraph::connectProcessors(GenericProcessor* source, GenericProcesso
         }
     }
     
-
-    // std::cout << "     Connecting " << source->getName() <<
-    //           " event channel to " <<
-    //           dest->getName() << std::endl;
-
     // 2. connect event channel
     if (connectEvents)
     {
+
+        std::cout << "     Connecting " << source->getName() <<
+               " event channel to " <<
+               dest->getName() << std::endl;
+
         addConnection(source->getNodeId(),    // sourceNodeID
                       midiChannelIndex,       // sourceNodeChannelIndex
                       dest->getNodeId(),      // destNodeID
@@ -923,6 +907,7 @@ void ProcessorGraph::removeProcessor(GenericProcessor* processor)
 
     std::cout << "Removing processor with ID " << processor->getNodeId() << std::endl;
 
+    disconnectNode(processor->getNodeId());
     removeNode(processor->getNodeId());
 
 }

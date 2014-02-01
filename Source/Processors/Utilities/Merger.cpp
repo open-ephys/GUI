@@ -119,7 +119,7 @@ bool Merger::sendEventsForSource(GenericProcessor* source)
     if (sourceIndex == -1)
         return false;
 
-    if (source == 0)
+    if (sourceIndex == 0)
         return sendEventsForSourceA;
     else
         return sendEventsForSourceB;

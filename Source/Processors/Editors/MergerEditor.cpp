@@ -345,3 +345,32 @@ void MergerEditor::switchSource()
     processor->switchIO();
 
 }
+
+
+void MergerEditor::saveCustomParameters(XmlElement* xml)
+{
+
+    xml->setAttribute("Type", "MergerEditor");
+
+    XmlElement* textLabelValues = xml->createNewChildElement("SENDS");
+    textLabelValues->setAttribute("EventsA",eventsButtonA->getToggleState());
+    textLabelValues->setAttribute("EventsB",eventsButtonB->getToggleState());
+    textLabelValues->setAttribute("ContinuousA",continuousButtonA->getToggleState());
+    textLabelValues->setAttribute("ContinuousB",continuousButtonB->getToggleState());
+}
+
+void MergerEditor::loadCustomParameters(XmlElement* xml)
+{
+
+    forEachXmlChildElement(*xml, xmlNode)
+    {
+        if (xmlNode->hasTagName("SENDS"))
+        {
+
+            eventsButtonA->setToggleState(xmlNode->getBoolAttribute("EventsA"),true);
+            eventsButtonB->setToggleState(xmlNode->getBoolAttribute("EventsB"),true);
+            continuousButtonA->setToggleState(xmlNode->getBoolAttribute("ContinuousA"),true);
+            continuousButtonB->setToggleState(xmlNode->getBoolAttribute("ContinuousB"),true);
+        }
+    }
+}

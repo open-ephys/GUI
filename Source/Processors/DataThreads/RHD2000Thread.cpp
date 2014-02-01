@@ -246,6 +246,7 @@ bool RHD2000Thread::uploadBitfile(String bitfilename)
             if (fc.browseForFileToOpen())
             {
                 File currentFile = fc.getResult();
+
                 uploadBitfile(currentFile.getFullPathName()); // call recursively
             }
             else
@@ -326,7 +327,7 @@ void RHD2000Thread::initializeBoard()
     Rhd2000DataBlock* dataBlock = new Rhd2000DataBlock(evalBoard->getNumEnabledDataStreams());
 
 
-    evalBoard->readDataBlock(dataBlock);
+   // evalBoard->readDataBlock(dataBlock);
 
     // Now that ADC calibration has been performed, we switch to the command sequence
     // that does not execute ADC calibration.

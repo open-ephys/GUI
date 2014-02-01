@@ -48,6 +48,9 @@ public:
     void switchSource(int);
     void switchSource();
 
+    void saveCustomParameters(XmlElement* xml);
+    void loadCustomParameters(XmlElement* xml);
+
     void switchIO(int);
 
     void mouseDown(const MouseEvent& event);
