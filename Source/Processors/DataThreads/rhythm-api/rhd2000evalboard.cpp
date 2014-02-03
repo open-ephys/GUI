@@ -39,6 +39,7 @@ using namespace std;
 Rhd2000EvalBoard::Rhd2000EvalBoard()
 {
     int i;
+	fast_settle_enabled = false;
     sampleRate = SampleRate30000Hz; // Rhythm FPGA boots up with 30.0 kS/s/channel sampling rate
     numDataStreams = 0;
 	dev = 0; //nullptr;
@@ -1154,11 +1155,16 @@ void Rhd2000EvalBoard::selectDacDataStream(int dacChannel, int stream)
 // chips will be controlled in real time via one of the 16 TTL inputs.
 void Rhd2000EvalBoard::enableExternalFastSettle(bool enable)
 {
+	fast_settle_enabled = enable;
     dev->SetWireInValue(WireInMultiUse, enable ? 1 : 0);
     dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInExtFastSettle, 0);
 }
 
+bool Rhd2000EvalBoard::getExternalFastSettle()
+{
+	return fast_settle_enabled;
+}
 // Select which of the TTL inputs 0-15 is used to perform a hardware 'fast settle' (blanking)
 // of the amplifiers if external triggering of fast settling
 // is enabled.
