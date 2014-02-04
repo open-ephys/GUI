@@ -89,6 +89,10 @@ public:
     void selectAuxCommandBank(BoardPort port, AuxCmdSlot auxCommandSlot, int bank);
     void selectAuxCommandLength(AuxCmdSlot auxCommandSlot, int loopIndex, int endIndex);
 
+	void runImpedance();
+	bool getExternalFastSettle();
+
+
     void resetBoard();
     void setContinuousRunMode(bool continuousMode);
     void setMaxTimeStep(unsigned int maxTimeStep);
@@ -173,6 +177,7 @@ private:
     int dataStreamEnabled[MAX_NUM_DATA_STREAMS]; // 0 (disabled) or 1 (enabled)
 	int *dacChannelAssignment;
 	float *dacChannelThreshold;
+	bool fast_settle_enabled;
 
     // Buffer for reading bytes from USB interface
     unsigned char usbBuffer[USB_BUFFER_SIZE];

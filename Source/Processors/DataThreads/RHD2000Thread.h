@@ -74,12 +74,22 @@ public:
     double setLowerBandwidth(double lower);
     
     int setNoiseSlicerLevel(int level);
+	void runImpedanceTest();
 	void setFastTTLSettle(bool state, int channel);
 	void setTTLoutputMode(bool state);
 	void setDAChpf(float cutoff, bool enabled);
 
     void scanPorts();
-
+	float updateImpedanceFrequency(float desiredImpedanceFreq, bool &impedanceFreqValid);
+	int loadAmplifierData(queue<Rhd2000DataBlock> &dataQueue,
+                                       int numBlocks, int numDataStreams);
+	void measureComplexAmplitude(std::vector<std::vector<std::vector<double>>> &measuredMagnitude,
+                                            std::vector<std::vector<std::vector<double>>> &measuredPhase,
+                                              int capIndex, int stream, int chipChannel, int numBlocks,
+                                              double sampleRate, double frequency, int numPeriods);
+	void amplitudeOfFreqComponent(double &realComponent, double &imagComponent,
+                                               const std::vector<double> &data, int startIndex,
+                                               int endIndex, double sampleRate, double frequency);
     int getNumEventChannels();
 	int getNumADCchannels();
 
@@ -98,9 +108,12 @@ private:
     Rhd2000Registers chipRegisters;
     Rhd2000DataBlock* dataBlock;
 
-
+	std::vector<std::vector<std::vector<double>>> amplifierPreFilter;
     Array<int> numChannelsPerDataStream;
-
+	void factorOutParallelCapacitance(double &impedanceMagnitude, double &impedancePhase,
+                                              double frequency, double parasiticCapacitance);
+	void empiricalResistanceCorrection(double &impedanceMagnitude, double &impedancePhase,
+                                               double boardSampleRate);
     int numChannels;
     bool deviceFound;
 
@@ -153,6 +166,7 @@ private:
 	int *dacChannels;
 	float *dacThresholds;
 	bool *dacChannelsToUpdate;
+	Array<int> chipId;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Thread);
 };
