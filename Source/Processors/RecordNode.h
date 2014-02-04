@@ -128,6 +128,7 @@ public:
     bool newDirectoryNeeded;
 
     bool isRecording;
+    bool allFilesOpened;
 
     /** Generate a Matlab-compatible datestring */
     String generateDateString();

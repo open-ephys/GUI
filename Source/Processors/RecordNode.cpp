@@ -36,6 +36,7 @@ RecordNode::RecordNode()
 
     isProcessing = false;
     isRecording = false;
+    allFilesOpened = false;
     blockIndex = 0;
     signalFilesShouldClose = false;
 	directoryName = "";
@@ -462,6 +463,8 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
             }
         }
 
+        allFilesOpened = true;
+
     }
     else if (parameterIndex == 0)
     {
@@ -666,6 +669,7 @@ void RecordNode::closeAllFiles()
 		closeFile(eventChannel);
 
     blockIndex = 0; // back to the beginning of the block
+    allFilesOpened = false;
 }
 
 bool RecordNode::enable()
@@ -858,7 +862,7 @@ void RecordNode::process(AudioSampleBuffer& buffer,
     // CONSTRAINTS:
     // samplesWritten must equal nSamples by the end of the process() method
 
-    if (isRecording)
+    if (isRecording && allFilesOpened)
     {
 
         // FIRST: cycle through events -- extract the TTLs and the timestamps
