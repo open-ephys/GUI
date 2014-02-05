@@ -55,6 +55,7 @@ public:
 	void getYRange(double &lowestValue, double &highestValue);
 	void removeMean();
 	void smooth(std::vector<float> kernel);
+	int getNumPoints();
 private:
 	float interp(float x_sample, bool &inrange);
 	float interp_bilinear(float x_sample, bool &inrange);
@@ -95,6 +96,9 @@ public:
 	void setThresholdLineVisibility(bool state);
 	void setThresholdLineValue(double Value);
 	double getThresholdLineValue();
+	void drawImage(Image I,float maxValue);
+	void setImageMode(bool state);
+	void getRange(float &minx, float &maxx, float &miny, float &maxy);
 private:
 	void mouseDown(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
@@ -116,25 +120,30 @@ private:
 	void drawTicks(Graphics &g);
 	void paint(Graphics &g);
 	std::vector<XYline> lines;
+	Image image;
 	float xmin,xmax,ymin,ymax;
+	bool imageMode, imageSet;
 	bool horiz0,vert0;
 	bool thresholdLineVisibility,overThresholdLine;
 	double thresholdLineValue;
 	bool showBounds;
 	bool showTriggered;
+	float maxImageValue;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DrawComponent);
 };
 
 class AxesComponent : public Component
 {
 public:
-	AxesComponent(bool horizontal);
+	AxesComponent(bool horizontal, bool flip);
     ~AxesComponent() {}
 	void setTicks(std::vector<float> ticks_);
 	void paint(Graphics &g);
 	void setFontHeight(int height);
 	String setRange(float minvalue, float maxvalue);
+	void setFlip(bool state);
 private:
+	bool flipDirection;
 	int numDigits;
 	Font font;
 	int selectedTimeScale;
@@ -149,7 +158,7 @@ class MatlabLikePlot : public Component, Button::Listener
 {
 public:
 	MatlabLikePlot(); // use approximate for faster drawing. exact x-axis values will not be accurate...
-    ~MatlabLikePlot() {}
+    ~MatlabLikePlot();
 	void setControlButtonsVisibile(bool state);
 	void setHorizonal0Visible(bool state);
 	void setVertical0Visible(bool state);
@@ -165,13 +174,14 @@ public:
 	double getThresholdLineValue();
 	void setTriggered();
 	void setShowBounds(bool state);
-	
+	void drawImage(Image I, float maxValue);
 	void addEvent(String e);
 	void resized();
 	String getLastEvent();
+	void setImageMode(bool state);
 	bool eventsAvail();
 	void mouseDoubleClick(const juce::MouseEvent& event);
-
+	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 private:
 
 	void determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);

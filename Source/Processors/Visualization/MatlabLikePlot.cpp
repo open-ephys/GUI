@@ -25,9 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**********************************************************************/
 MatlabLikePlot::MatlabLikePlot()
 {
-	vertAxesComponent = new AxesComponent(false);
+	vertAxesComponent = new AxesComponent(false,false);
 	addAndMakeVisible(vertAxesComponent);
-	horizAxesComponent = new AxesComponent(true);
+	horizAxesComponent = new AxesComponent(true,false);
 	addAndMakeVisible(horizAxesComponent);
 	drawComponent = new DrawComponent(this);
 	addAndMakeVisible(drawComponent);
@@ -71,6 +71,23 @@ MatlabLikePlot::MatlabLikePlot()
 	setRange(xmin,xmax,ymin,ymax);
 }
 
+MatlabLikePlot::~MatlabLikePlot()
+{
+	removeChildComponent(vertAxesComponent);
+	removeChildComponent(horizAxesComponent);
+	removeChildComponent(drawComponent);
+}
+
+void MatlabLikePlot::setImageMode(bool state)
+{
+	vertAxesComponent->setFlip(state);
+	drawComponent->setImageMode(state);
+}
+
+void MatlabLikePlot::drawImage(Image I, float maxValue)
+{
+	drawComponent->drawImage(I,maxValue);
+}
 
 void MatlabLikePlot::setShowBounds(bool state)
 {
@@ -215,7 +232,7 @@ std::vector<float> MatlabLikePlot::roundlin(float minv, float maxv, int numticks
 void MatlabLikePlot::setBorderColor(juce::Colour col) 
 {
 	borderColor = col;
-	repaint();
+	
 }
 
 void MatlabLikePlot::determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick)
@@ -223,6 +240,12 @@ void MatlabLikePlot::determineTickLocations(float xmin, float xmax,float ymin,fl
 	int numTicks = (getWidth() < 250) ? 5 : 7;
 	xtick = roundlin(xmin, xmax, numTicks);
 	ytick = roundlin(ymin, ymax, numTicks);
+}
+
+
+void MatlabLikePlot::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
+{
+	drawComponent->getRange(xmin, xmax, ymin, ymax);
 }
 
 void MatlabLikePlot::setRange(float xmin, float xmax, float ymin, float ymax)
@@ -239,7 +262,7 @@ void MatlabLikePlot::setRange(float xmin, float xmax, float ymin, float ymax)
 	drawComponent->setScaleString(ampScale,timeScale);
 	vertAxesComponent->setTicks(ytick);
 	horizAxesComponent->setTicks(xtick);
-	repaint();
+	
 }
 
 void MatlabLikePlot::setTitle(String t)
@@ -311,12 +334,17 @@ void MatlabLikePlot::mouseDoubleClick(const juce::MouseEvent& event)
 }
 
 /*************************************************************************/
-AxesComponent::AxesComponent(bool horizontal) : horiz(horizontal)
+AxesComponent::AxesComponent(bool horizontal, bool flip) : horiz(horizontal), flipDirection(flip)
 {
 	minv = -1e4;
 	maxv = 1e4;
 	font = Font("Default", 15, Font::plain);
 	setRange(minv,maxv);
+}
+
+void AxesComponent::setFlip(bool state)
+{
+	flipDirection = state;
 }
 
 String AxesComponent::setRange(float minvalue, float maxvalue)
@@ -378,7 +406,7 @@ String AxesComponent::setRange(float minvalue, float maxvalue)
 void AxesComponent::setTicks(std::vector<float> ticks_)
 {
 	ticks = ticks_;
-	repaint();
+	
 }
 
 void AxesComponent::setFontHeight(int height)
@@ -410,7 +438,12 @@ void AxesComponent::paint(Graphics &g)
 		{
 			float ytickloc = (ticks[k] -minv) / (maxv-minv) * h; 
 			String tickString = (numDigits == 0) ? String(int(ticks[k]*gain)) : String(ticks[k]*gain,numDigits);
-			g.drawText(tickString,0,h-ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
+			if (flipDirection)
+				g.drawText(tickString,0,ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
+			else
+				g.drawText(tickString,0,h-ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
+	
+	
 		}
 	}
 
@@ -441,7 +474,10 @@ XYline::XYline(float x0_, float ymin, float ymax, juce::Colour color_) : x0(x0_)
 	fixedDx = false;
 }
 
-
+int XYline::getNumPoints()
+{
+	return numpts;
+}
 
 void XYline::smooth(std::vector<float> smoothKernel)
 {
@@ -658,8 +694,10 @@ DrawComponent::DrawComponent(MatlabLikePlot *mlp_) : mlp(mlp_)
 	overThresholdLine = false;
 	showTriggered = false;
 	showBounds = false;
+	imageMode = imageSet = false;
 	ampScale = "";
 	timeScale = "";
+	maxImageValue = 0;
 	font = Font("Default", 12, Font::plain);
 	setMode(ZOOM); // default mode
 }
@@ -684,6 +722,9 @@ void DrawComponent::drawTicks(Graphics &g)
 	float tickThickness = 2;
 	double rangeX = (xmax-xmin);
 	double rangeY = (ymax-ymin);
+	if (abs(rangeX) < 1e-6 || abs(rangeY) < 1e-6)
+		return;
+
 	int plotWidth = getWidth();
 	int plotHeight = getHeight();
 
@@ -713,7 +754,7 @@ void DrawComponent::clearplot()
 {
 	lowestValue = 1e10;
 	highestValue = -1e10;
-
+	imageSet = false;
 	lines.clear();
 }
 
@@ -721,7 +762,7 @@ void DrawComponent::clearplot()
 void DrawComponent::paint(Graphics &g)
 {
 	g.fillAll(juce::Colours::black);
-	
+
 	int w = getWidth();
 	int h = getHeight();
 
@@ -732,43 +773,57 @@ void DrawComponent::paint(Graphics &g)
 		ymax = highestValue;
 		mlp->setRange(xmin,xmax,ymin,ymax);
 	}
-	// now draw curves.
-	for (int k=0;k<lines.size();k++) 
-	{
-		lines[k].draw(g,xmin,xmax,ymin,ymax,w,h,showBounds);
-	}
-	if (lines.size() > 0)
-	{
-		// draw the horizontal zero line
-		if (horiz0)
-		{
-			std::vector<float> y;
-			y.push_back(0);
-			y.push_back(0);
-			XYline l(xmin,xmax-xmin,y,1.0,Colours::white);
-			l.draw(g, xmin,xmax,ymin,ymax,w,h,false);
-		}
-		if (vert0) 
-		{
-			// draw the vertical zero line
-			XYline lv(0,ymin,ymax,Colours::white);
-			lv.draw(g, xmin,xmax,ymin,ymax,w,h,false);
-		}
 
-
-		if (zooming)
-		{
-			g.setColour(juce::Colours::white);
-			int width = abs(mouseDownX-mouseDragX);
-			int height= abs(mouseDownY-mouseDragY);
-			if (width > 0 & height > 0)
-				g.drawRect(MIN(mouseDownX,mouseDragX),MIN(mouseDownY,mouseDragY),width,height,2);
-		}
-		drawTicks(g);
+	if 	(imageMode && imageSet)
+	{
+		g.drawImage(image,0,0,w,h,0,0,image.getWidth(),image.getHeight());
+	
 	}
+	else {
+
+		// now draw curves.
+		for (int k=0;k<lines.size();k++) 
+		{
+			lines[k].draw(g,xmin,xmax,ymin,ymax,w,h,showBounds);
+		}
+		if (lines.size() > 0)
+		{
+			// draw the horizontal zero line
+			if (horiz0)
+			{
+				std::vector<float> y;
+				y.push_back(0);
+				y.push_back(0);
+				XYline l(xmin,xmax-xmin,y,1.0,Colours::white);
+				l.draw(g, xmin,xmax,ymin,ymax,w,h,false);
+			}
+			if (vert0) 
+			{
+				// draw the vertical zero line
+				XYline lv(0,ymin,ymax,Colours::white);
+				lv.draw(g, xmin,xmax,ymin,ymax,w,h,false);
+			}
+
+		}
+	}
+
+	if (zooming)
+	{
+		g.setColour(juce::Colours::white);
+		int width = abs(mouseDownX-mouseDragX);
+		int height= abs(mouseDownY-mouseDragY);
+		if (width > 0 & height > 0)
+			g.drawRect(MIN(mouseDownX,mouseDragX),MIN(mouseDownY,mouseDragY),width,height,2);
+	}
+	drawTicks(g);
+
 	g.setFont(font);
 	g.setColour(juce::Colours::white);
-	g.drawText(ampScale + ", " + timeScale,6,2,50,20,juce::Justification::left,false);
+	if (imageMode)
+		g.drawText(String(maxImageValue,1)+ " Hz" ,6,2,80,20,juce::Justification::left,false);
+	else
+		g.drawText(ampScale + ", " + timeScale,6,2,50,20,juce::Justification::left,false);
+
 	if (thresholdLineVisibility)
 	{
 		juce::Colour col = (overThresholdLine) ? juce::Colours::red : juce::Colours::grey;
@@ -828,7 +883,7 @@ void DrawComponent::mouseWheelMove(const MouseEvent &event, const MouseWheelDeta
 	ymax += 0.1 * sn * yRange;
 
 	mlp->setRange(xmin,xmax,ymin,ymax);
-	repaint();
+	
 }
 
 void DrawComponent::mouseUp(const juce::MouseEvent& event)
@@ -879,7 +934,7 @@ void DrawComponent::mouseUp(const juce::MouseEvent& event)
 		ymin = MIN(downY, upY);
 		ymax = MAX(downY, upY);
 		mlp->setRange(xmin,xmax,ymin,ymax);
-		repaint();
+		
 	}
 }
 
@@ -912,7 +967,7 @@ void DrawComponent::mouseDrag(const juce::MouseEvent& event)
 		mousePrevY = event.y;
 	}
 
-	repaint();
+
 }
 
 
@@ -924,6 +979,7 @@ void DrawComponent::mouseMove(const juce::MouseEvent& event)
 	float thresholdLineValuePix = h - ((thresholdLineValue-ymin) / (ymax-ymin) * h);
 	// check if we are close to the threshold line...
 	overThresholdLine = abs(event.y - thresholdLineValuePix) < 5;
+
 }
 
 void DrawComponent::mouseDown(const juce::MouseEvent& event)
@@ -943,7 +999,7 @@ void DrawComponent::mouseDown(const juce::MouseEvent& event)
 			ymin = prevZoom.ymin;
 			ymax = prevZoom.ymax;
 			mlp->setRange(xmin,xmax,ymin,ymax);
-			repaint();
+			
 		}
 
 	} else if (event.mods.isLeftButtonDown())
@@ -958,7 +1014,7 @@ void DrawComponent::mouseDown(const juce::MouseEvent& event)
 		mouseDownY = event.y;
 		mouseDragX = event.x;
 		mouseDragY = event.y;
-		if (lines.size() > 0)
+		if (lines.size() > 0 || imageMode)
 		{
 			if (mode == ZOOM)
 				zooming = true;
@@ -972,13 +1028,13 @@ void DrawComponent::mouseDown(const juce::MouseEvent& event)
 void DrawComponent::setHorizonal0Visible(bool state)
 {
 	horiz0 = state;
-	repaint();
+	
 }
 
 void DrawComponent::setVertical0Visible(bool state)
 {
 	vert0 = state;
-	repaint();
+	
 }
 
 void DrawComponent::setScaleString(String ampScale_, String timeScale_)
@@ -1000,4 +1056,25 @@ void DrawComponent::setThresholdLineValue(double Value)
 double DrawComponent::getThresholdLineValue()
 {
 	return thresholdLineValue;
+}
+
+void DrawComponent::drawImage(Image I, float maxValue)
+{
+	imageSet = true;
+	image = I;
+	maxImageValue = maxValue;
+}
+
+
+void DrawComponent::setImageMode(bool state)
+{
+	imageMode = state;
+}
+
+void DrawComponent::getRange(float &minx, float &maxx, float &miny, float &maxy)
+{
+	minx = xmin;
+	maxx = xmax;
+	miny = ymin;
+	maxy = ymax;
 }

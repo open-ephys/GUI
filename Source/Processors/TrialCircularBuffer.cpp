@@ -2218,3 +2218,302 @@ void TrialCircularBuffer::clearChanneltatistics(int electrodeID, int channelID)
 	unlockPSTH();
 }
 
+
+
+ std::vector<float> TrialCircularBuffer::buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS)
+{
+	 std::vector<float> smoothKernel;
+	// assume each bin correponds to one millisecond.
+	// build the gaussian kernel
+	int numKernelBins = 2*(int)(guassianStandardDeviationMS*3.5/binSizeInMS)+1; // +- 3.5 standard deviations.
+	int zeroIndex = (numKernelBins-1)/2;
+	smoothKernel.resize(numKernelBins); 
+	float sumZ = 0;
+	for (int k=0;k<numKernelBins;k++) 
+	{
+		float z = float(k*binSizeInMS-zeroIndex);
+		smoothKernel[k] = exp(- (z*z)/(2*guassianStandardDeviationMS*guassianStandardDeviationMS));
+		sumZ+=smoothKernel[k];
+	}
+	// normalize kernel
+	for (int k=0;k<numKernelBins;k++) 
+	{
+		smoothKernel[k] /= sumZ;
+	}
+	return smoothKernel;
+}
+
+std::vector<float> TrialCircularBuffer::smooth(std::vector<float> y, std::vector<float> smoothKernel, int xmin, int xmax)
+{
+	std::vector<float> smoothy;
+	smoothy.resize(xmax-xmin+1);
+
+	int numKernelBins = smoothKernel.size();
+	int zeroIndex = (numKernelBins-1)/2;
+	int numXbins = y.size();
+	for (int k=xmin;k<=xmax;k++)
+	{
+		float response = 0;
+		for (int j=-zeroIndex;j<zeroIndex;j++)
+		{
+			if (k+j >=0 && k+j < numXbins)
+				response+=y[k+j] * smoothKernel[j+zeroIndex];
+		}
+		smoothy[k-xmin] = response;
+	}
+	return  smoothy;
+}
+// Builds average raster matrix.
+// each line corresponds to a trial type, and contains the average response for that trial type.
+// each column corresponds to a specific time point, returned by x_time
+// the number of trial types is returned, as well as the number of repetitions of each individual trial type.
+// constrain output to be between xmin & xmax (approximately).
+std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageUnitResponse(int electrodeID, int unitID, 
+	std::vector<float> &x_time, int &numTrialTypes, std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax)
+{
+	// allocate a matrix with average trial responses (not conditions!)
+	std::vector<std::vector<float>> avgResponseMatrix;
+	avgResponseMatrix.clear();
+	x_time.clear();
+	numTrialRepeats.clear();
+	numTrialTypes = 0;
+
+	std::vector<float> smoothKernel;
+	if (smoothMS > 0)
+		smoothKernel = buildSmoothKernel(smoothMS, 1.0);
+
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					numTrialTypes = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs.size();
+					if (numTrialTypes == 0)
+						return avgResponseMatrix;
+
+					int xminIndex = -1,xmaxIndex=-1;
+					for (int t=0;t<electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[0].binTime.size();t++)
+					{
+						if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[0].binTime[t] >= xmin && xminIndex == -1)
+						{
+							xminIndex = t;
+						}
+						if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[0].binTime[t] >= xmax && xmaxIndex == -1)
+						{
+							xmaxIndex = t;
+						}
+
+					}
+					// constrain output to be between [xminIndex,xmaxIndex]
+					if (xmaxIndex-xminIndex < 10)
+						return avgResponseMatrix; // no point displaying an image with less than 10 pixels ?
+
+					numTrialRepeats.resize(numTrialTypes);
+
+					x_time.resize(xmaxIndex-xminIndex+1);
+					for (int t=0;t<xmaxIndex-xminIndex+1;t++)
+					{
+						x_time[t] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[0].binTime[xminIndex+t];
+					}
+
+					avgResponseMatrix.resize(numTrialTypes);
+					int numTimePoints = x_time.size();
+					for (int trialIter = 0;trialIter < numTrialTypes;trialIter++)
+					{
+						if (smoothMS > 0)
+							avgResponseMatrix[trialIter] = smooth(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse(), smoothKernel,xminIndex,xmaxIndex);
+						else
+							avgResponseMatrix[trialIter] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse();
+
+						numTrialRepeats[trialIter] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].numTrials;
+					}
+
+					unlockConditions();
+					unlockPSTH();
+					return avgResponseMatrix;
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return avgResponseMatrix;
+}
+
+const uint8 jet_colors_64[64][3] = {
+{0,0,143},
+{0,0,159},
+{0,0,175},
+{0,0,191},
+{0,0,207},
+{0,0,223},
+{0,0,239},
+{0,0,255},
+{0,16,255},
+{0,32,255},
+{0,48,255},
+{0,64,255},
+{0,80,255},
+{0,96,255},
+{0,112,255},
+{0,128,255},
+{0,143,255},
+{0,159,255},
+{0,175,255},
+{0,191,255},
+{0,207,255},
+{0,223,255},
+{0,239,255},
+{0,255,255},
+{16,255,239},
+{32,255,223},
+{48,255,207},
+{64,255,191},
+{80,255,175},
+{96,255,159},
+{112,255,143},
+{128,255,128},
+{143,255,112},
+{159,255,96},
+{175,255,80},
+{191,255,64},
+{207,255,48},
+{223,255,32},
+{239,255,16},
+{255,255,0},
+{255,239,0},
+{255,223,0},
+{255,207,0},
+{255,191,0},
+{255,175,0},
+{255,159,0},
+{255,143,0},
+{255,128,0},
+{255,112,0},
+{255,96,0},
+{255,80,0},
+{255,64,0},
+{255,48,0},
+{255,32,0},
+{255,16,0},
+{255,0,0},
+{239,0,0},
+{223,0,0},
+{207,0,0},
+{191,0,0},
+{175,0,0},
+{159,0,0},
+{143,0,0},
+{128,0,0}};
+
+// use a nice jet transform for pretty colors :)
+int TrialCircularBuffer::getNumTrialTypes(int electrodeID, int unitID)
+{
+
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					unlockConditions();
+					unlockPSTH();
+					return electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs.size();
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return 0;
+}
+
+
+
+
+juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, float &maxValue)
+{
+	std::vector<float> x_time;
+	int numTrialTypes;
+	std::vector<int> numTrialRepeats;
+	std::vector<std::vector<float>> trialResponseMatrix = getTrialsAverageUnitResponse(electrodeID, unitID, x_time, numTrialTypes, numTrialRepeats,guassianStandardDeviationMS,xmin, xmax);
+
+	// normalize response matrix to maximum across all trial types.
+	maxValue = -1e10;
+	for (int i=0;i<trialResponseMatrix.size();i++)
+	{
+		for (int j=0;j<trialResponseMatrix[i].size();j++)
+		{
+			maxValue=MAX(maxValue, trialResponseMatrix[i][j]);
+		}
+	}
+	int imageWidth = x_time.size();
+	int imageHeight = numTrialTypes;
+	juce::Image I(juce::Image::PixelFormat::RGB, imageWidth, imageHeight, true);
+	juce::Image::BitmapData bitmap(I,0,0,imageWidth,imageHeight,Image::BitmapData::ReadWriteMode::readWrite);
+	if (maxValue < 1e-5)
+		return I;
+
+	uint8 *ptr = bitmap.data;
+    
+	
+	for (int i=0;i<imageHeight;i++)
+	{
+		int yoffset = 3 * imageWidth;
+		if (numTrialRepeats[i] == 0)
+		{
+			// special case, make all pixels black...
+			// in other words - do nothing :)
+		} else 
+		{
+			for (int j=0;j<imageWidth;j++)
+			{
+				float normalizedValue = trialResponseMatrix[i][j] / maxValue;
+				if (normalizedValue > 1) 
+					normalizedValue = 1.0;
+				int jetIndex = (int)(normalizedValue*63) % 64;
+				// convert to a nice Jet RGB value.
+				// just take the closest value...
+				ptr[i * bitmap.lineStride + j * bitmap.pixelStride + 0] = jet_colors_64[jetIndex][2];
+				ptr[i * bitmap.lineStride + j * bitmap.pixelStride + 1] = jet_colors_64[jetIndex][1];
+				ptr[i * bitmap.lineStride + j * bitmap.pixelStride + 2] = jet_colors_64[jetIndex][0];
+			}
+		}
+	}
+	// finally, we can start storing values.
+
+	return I;
+}
+
+
+	/*
+		ImagePixelData A(juce::Image::PixelFormat::RGB,);
+
+
+		tcb->getTrialsAverageUnitResponse(electrodeID, subID);
+	int imageDimX = lines[0].getNumPoints();
+	int imageDimY = lines[0].getNumPoints();
+
+	
+	rasterImage = Image(Image::RGB, imageDim, imageDim, true);
+	rasterImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),Colours::black);
+    Graphics gi(rasterImage);
+    g.drawImage(rasterImage, 0, 0, getWidth(), getHeight(), 0, 0, rangeX, rangeY);
+	*/

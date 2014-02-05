@@ -1722,6 +1722,10 @@ GenericPlot::GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xy
 	fullScreenMode = false;
 	mlp = new MatlabLikePlot();
 	mlp->setControlButtonsVisibile(false);
+	if (rasterMode)
+		mlp->setImageMode(true);
+	else
+		mlp->setImageMode(false);
 	addAndMakeVisible(mlp);
 
 	if (plotType == SPIKE_PLOT) 
@@ -1751,7 +1755,17 @@ void GenericPlot::resized()
 
 void GenericPlot::paintSpikeRaster(Graphics &g)
 {
+	int numTrialTypes = tcb->getNumTrialTypes(electrodeID, subID);
+	if (numTrialTypes > 0)
+	{
+		float xmin,xmax,ymin,ymax,maxValue;
+		mlp->getRange(xmin,xmax,ymin,ymax);
+		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax, maxValue);
+		mlp->setRange(xmin,xmax, 1, numTrialTypes);
+		mlp->drawImage(rasterImage,maxValue);
+	}
 }
+
 void GenericPlot::paintSpikes(Graphics &g)
 {
 	std::vector<XYline> lines = tcb->getUnitConditionCurves(electrodeID, subID);
@@ -1843,7 +1857,7 @@ void GenericPlot::buildSmoothKernel(float gaussianStandardDeviationMS_)
 
 void GenericPlot::handleEventFromMatlabLikePlot(String event)
 {
-	if (event == "DblClickRight")
+	if (event == "DblkClickRight")
 	{
 
 		if (plotType == SPIKE_PLOT) 
@@ -1856,7 +1870,7 @@ void GenericPlot::handleEventFromMatlabLikePlot(String event)
 		}
 
 	} else 
-	if (event == "DblClickLeft")
+	if (event == "DblkClickLeft")
 	{
 		// full screen toggle
 		display->focusOnPlot(plotID);

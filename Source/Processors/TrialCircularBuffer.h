@@ -308,12 +308,21 @@ public:
 	std::vector<XYline> getElectrodeConditionCurves(int electrodeID, int channelID);
 	std::vector<XYline> getUnitConditionCurves(int electrodeID, int unitID);
 	
+	std::vector<std::vector<float>> getTrialsAverageUnitResponse(int electrodeID, int unitID, 
+																 std::vector<float> &x_time, int &numTrialTypes, 
+																 std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax);
+
+	juce::Image getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, float &maxValue);
+	int getNumTrialTypes(int electrodeID, int unitID);
 	void clearUnitStatistics(int electrodeID, int unitID);
 	void clearChanneltatistics(int electrodeID, int channelID);
+	 std::vector<float> buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS);
 
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
 private:
+	std::vector<float> smooth(std::vector<float> y, std::vector<float> smoothKernel, int xmin, int xmax);
+
 	bool firstTime;
 	int lastTrialID;
 	float numTicksPerSecond;
