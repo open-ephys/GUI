@@ -287,6 +287,7 @@
     <ClCompile Include="..\..\Source\Dsp\RootFinder.cpp"/>
     <ClCompile Include="..\..\Source\Dsp\State.cpp"/>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\OscilloscopeNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\NotchFilterNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ISCAN.cpp"/>
     <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp"/>
@@ -317,6 +318,7 @@
     <ClCompile Include="..\..\Source\Processors\Utilities\RecordControl.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Utilities\Merger.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Utilities\Splitter.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\Visualization\MatlabLikePlot.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeObject.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDisplayCanvas.cpp"/>
@@ -325,6 +327,7 @@
     <ClCompile Include="..\..\Source\Processors\SpikeDetector.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AudioNode.cpp"/>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\Editors\OscilloscopeEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\NotchFilterEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp"/>
@@ -1500,6 +1503,7 @@
     <ClInclude Include="..\..\Source\Dsp\Types.h"/>
     <ClInclude Include="..\..\Source\Dsp\Utilities.h"/>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h"/>
+    <ClInclude Include="..\..\Source\Processors\OscilloscopeNode.h"/>
     <ClInclude Include="..\..\Source\Processors\NotchFilterNode.h"/>
     <ClInclude Include="..\..\Source\Processors\ISCAN.h"/>
     <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h"/>
@@ -1531,6 +1535,7 @@
     <ClInclude Include="..\..\Source\Processors\Utilities\RecordControl.h"/>
     <ClInclude Include="..\..\Source\Processors\Utilities\Merger.h"/>
     <ClInclude Include="..\..\Source\Processors\Utilities\Splitter.h"/>
+    <ClInclude Include="..\..\Source\Processors\Visualization\MatlabLikePlot.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeObject.h"/>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDisplayCanvas.h"/>
@@ -1540,6 +1545,7 @@
     <ClInclude Include="..\..\Source\Processors\SpikeDetector.h"/>
     <ClInclude Include="..\..\Source\Processors\AudioNode.h"/>
     <ClInclude Include="..\..\Source\Processors\EventNode.h"/>
+    <ClInclude Include="..\..\Source\Processors\Editors\OscilloscopeEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\NotchFilterEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h"/>

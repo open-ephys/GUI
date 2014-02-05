@@ -28,6 +28,7 @@
 #include "Channel.h"
 #include "SpikeDisplayNode.h"
 #include "PeriStimulusTimeHistogramNode.h"
+#include "Editors\PeriStimulusTimeHistogramEditor.h"
 class spikeSorter;
 
 SpikeDetector::SpikeDetector()
@@ -259,7 +260,10 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
 		isActive[i] = true;
     }
 	spikePlot = nullptr;
-	spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
+	if (computingThread != nullptr)
+		spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
+	else
+		spikeSort = nullptr;
 
     isMonitored = false;
 }
@@ -393,6 +397,7 @@ void SpikeDetector::updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, u
 					// remove electrode
 					node->trialCircularBuffer->removeUnit(electrodeID,unitID);
 				}
+				((PeriStimulusTimeHistogramEditor *) node->getEditor())->updateCanvas();
 			}
 		}
 	}
@@ -437,6 +442,7 @@ void SpikeDetector::updateSinks(Electrode* electrode)
 			{
 					// add electrode
 					node->trialCircularBuffer->addNewElectrode(electrode);
+					(((PeriStimulusTimeHistogramEditor *) node->getEditor()))->updateCanvas();
 			}
 		}
 		if (p[k]->getName() == "Spike Viewer")
@@ -463,6 +469,7 @@ void SpikeDetector::updateSinks(int electrodeID)
 			{
 				// remove electrode
 				node->trialCircularBuffer->removeElectrode(electrodeID);
+				((PeriStimulusTimeHistogramEditor *) node->getEditor())->updateCanvas();
 			}
 		}
 		if (p[k]->getName() == "Spike Viewer")
@@ -1654,9 +1661,10 @@ ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate
 {
 		Time t;
 	
-	numTicksPerSecond = t.getHighResolutionTicksPerSecond();
+	numTicksPerSecond = (double) t.getHighResolutionTicksPerSecond();
 
-	int numSamplesToHoldPerChannel = (SamplingRate * NumSecInBuffer / SubSampling);
+	int numSamplesToHoldPerChannel = (int)(SamplingRate * NumSecInBuffer / SubSampling);
+	buffer_dx = 1.0 / (SamplingRate / SubSampling);
 	subSampling = SubSampling;
 	samplingRate = SamplingRate;
 	numCh =NumCh;
@@ -1677,74 +1685,30 @@ ContinuousCircularBuffer::ContinuousCircularBuffer(int NumCh, float SamplingRate
 	ptr = 0; // points to a valid position in the buffer.
 }
 
-/*
-void ContinuousCircularBuffer::FindInterval(int saved_ptr, double Bef, double Aft, int &start, int &N)
-{
-	int CurrPtr = saved_ptr;
-	N = 0;
-	while (N < bufLen && N < numSamplesInBuf)
-	{
-		if ((TS[CurrPtr] < Bef) || (TS[CurrPtr] > Aft) || !valid[CurrPtr])
-			break;
-		// Add spike..
-		CurrPtr--;
-		N++;
-		if (CurrPtr < 0)
-			CurrPtr = bufLen - 1;
-	}
-	if (N > 0 && !valid[CurrPtr])
-	{
-		CurrPtr++;
-		if (CurrPtr >= bufLen)
-			CurrPtr = 0;
-	}
-	start = CurrPtr;
-	CurrPtr = saved_ptr;
-	while (N < bufLen && N < numSamplesInBuf)
-	{
-		if ((TS[CurrPtr] < Bef) || (TS[CurrPtr] > Aft) || !valid[CurrPtr])
-			break;
-		// Add spike..
-		CurrPtr++;
-		N++;
-		if (CurrPtr >= bufLen)
-			CurrPtr = 0;
-	}
-	if (N > 0 && !valid[CurrPtr])
-	{
-		CurrPtr--;
-		if (CurrPtr < 0)
-			CurrPtr = bufLen-1;
-	}
 
-}
-*/
-
-/*
-LFP_Trial_Data ContinuousCircularBuffer::GetRelevantData(int saved_ptr, double Start_TS, double Align_TS, double End_TS, double BeforeSec, double AfterSec)
+void ContinuousCircularBuffer::update(int channel, int64 hardware_ts, int64 software_ts, bool rise)
 {
-             // gurantee to return to return the first index "start" such that TS[start] < T0-SearchBeforeSec
-             // and TS[end] > T0+SearchAfterSec
+	// used to record ttl pulses as continuous data...
 	mut.enter();
-	int N,start;
-	FindInterval(saved_ptr, Start_TS - BeforeSec, End_TS + AfterSec, start, N);
-	LFP_Trial_Data triallfp(numCh, N);
-	int p = start;
-	for (int k = 0; k < N; k++)
+	valid[ptr] = true;
+	hardwareTS[ptr] = hardware_ts;
+	softwareTS[ptr] = software_ts;
+
+	Buf[channel][ptr] = (rise) ? 1.0 : 0.0;
+
+	ptr++;
+	if (ptr == bufLen)
 	{
-		triallfp.time[k] = TS[p]-Align_TS;
-		for (int ch = 0; ch < numCh; ch++)
-		{
-			triallfp.data[ch][k] = Buf[ch][p];
-		}
-		p++;
-		if (p >= bufLen)
-			p = 0;
+		ptr = 0;
+	}
+	numSamplesInBuf++;
+	if (numSamplesInBuf >= bufLen)
+	{
+		numSamplesInBuf = bufLen;
 	}
 	mut.exit();
-	return triallfp;
 }
-*/
+
 void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts, int numpts)
 {
 	mut.enter();
@@ -1752,8 +1716,10 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_
 	// we don't start from zero because of subsampling issues.
 	// previous packet may not have ended exactly at the last given sample.
 	int k = leftover_k;
+	int lastUsedSample;
 	for (; k < numpts; k+=subSampling)
 	{
+		lastUsedSample = k;
 		valid[ptr] = true;
 		hardwareTS[ptr] = hardware_ts + k;
 		softwareTS[ptr] = software_ts + int64(float(k) / samplingRate * numTicksPerSecond);
@@ -1773,9 +1739,47 @@ void ContinuousCircularBuffer::update(AudioSampleBuffer& buffer, int64 hardware_
 			numSamplesInBuf = bufLen;
 		}
 	}
-	int lastUsedSample = floor(numpts/subSampling) * subSampling;
-	int numMissedSamples = numpts-lastUsedSample;
-	leftover_k =subSampling-numMissedSamples;
+	
+	int numMissedSamples = (numpts-1)-lastUsedSample;
+	leftover_k = (subSampling-numMissedSamples-1) % subSampling;
+	mut.exit();
+
+}
+
+
+void ContinuousCircularBuffer::update(std::vector<std::vector<bool>> contdata, int64 hardware_ts, int64 software_ts, int numpts)
+{
+	mut.enter();
+	
+	// we don't start from zero because of subsampling issues.
+	// previous packet may not have ended exactly at the last given sample.
+	int k = leftover_k;
+	int lastUsedSample;
+	for (; k < numpts; k+=subSampling)
+	{
+		lastUsedSample = k;
+		valid[ptr] = true;
+		hardwareTS[ptr] = hardware_ts + k;
+		softwareTS[ptr] = software_ts + int64(float(k) / samplingRate * numTicksPerSecond);
+
+		for (int ch = 0; ch < numCh; ch++)
+		{
+			Buf[ch][ptr] = contdata[ch][k];
+		}
+		ptr++;
+		if (ptr == bufLen)
+		{
+			ptr = 0;
+		}
+		numSamplesInBuf++;
+		if (numSamplesInBuf >= bufLen)
+		{
+			numSamplesInBuf = bufLen;
+		}
+	}
+	
+	int numMissedSamples = (numpts-1)-lastUsedSample;
+	leftover_k =subSampling-numMissedSamples-1;
 	mut.exit();
 
 }

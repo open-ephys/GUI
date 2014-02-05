@@ -27,7 +27,13 @@
 #include "Channel.h"
 #include <string>
 
+TrialCircularBufferParams::TrialCircularBufferParams()
+{
+}
 
+TrialCircularBufferParams::~TrialCircularBufferParams()
+{
+}
 
 void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 {
@@ -85,39 +91,84 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 
 
 /******************************/
-PSTH::PSTH(int ID, float _maxTrialTimeSec, float pre, float post, bool vis) : conditionID(ID), preSecs(pre), 
-	postSecs(post), numTrials(0), maxTrialTimeSec(_maxTrialTimeSec), binResolutionMS(1),preSec(pre),postSec(post),visible(vis)
+PSTH::PSTH(int ID, TrialCircularBufferParams params_,bool vis) : conditionID(ID),params(params_),numTrials(0),visible(vis)
 {
-	// allocate data for 1 ms resolution bins to cover trials 
-	xmin = -pre;
-	xmax = post;
+	// if approximate is on, we won't sample exactly xmin and xmax
+	if (params.approximate)
+	{
+		dx = params.binResolutionMS / 1000.0f;
+
+		int numPostBins = ceil((params.postSec) / dx); 
+		int numPosBins = ceil((params.postSec + params.maxTrialTimeSeconds) / dx); 
+		int numNegBins = ceil(params.preSec / dx); 
+
+		numBins = 1 + numPosBins + numNegBins; // include bin "0"
+		timeSpanSecs=numBins * dx;
+
+		mod_pre_sec = dx * numNegBins;
+		mod_post_sec = dx *numPostBins;
+
+		//
+		avgResponse.resize(numBins);
+		numDataPoints.resize(numBins);
+		binTime.resize(numBins);
+
+		for (int k = 0; k < numNegBins; k++)
+		{
+			numDataPoints[k] = 0;
+			binTime[k] = -dx * (numNegBins-k);
+			avgResponse[k] = 0;
+		}
+		for (int k = 0; k < 1+numPosBins; k++)
+		{
+			numDataPoints[numNegBins+k] = 0;
+			binTime[numNegBins+k] = dx * k;
+			avgResponse[numNegBins+k] = 0;
+		}
+
+	} else
+	{
+		// accurate, but slow sampling (bilinear interpolation is needed)
+		mod_pre_sec = params.preSec;
+		mod_post_sec = params.postSec;
+		timeSpanSecs=params.preSec+ params.postSec + params.maxTrialTimeSeconds;
+		numBins = ceil((timeSpanSecs) * 1000.0f / params.binResolutionMS); 
+		avgResponse.resize(numBins);
+		numDataPoints.resize(numBins);
+		binTime.resize(numBins);
+		for (int k = 0; k < numBins; k++)
+		{
+			numDataPoints[k] = 0;
+			binTime[k] = (float)k / numBins * (timeSpanSecs) - params.preSec;
+			avgResponse[k] = 0;
+
+		}
+		dx = binTime[1]-binTime[0];
+	}
+	xmin = -mod_pre_sec;
+	xmax = mod_post_sec;
 	ymax = -1e10;
 	ymin = 1e10;
 	setDefaultColors(colorRGB[0],colorRGB[1],colorRGB[2], ID);
 
-	timeSpanSecs=preSecs + postSecs + maxTrialTimeSec;
-	numBins = (timeSpanSecs) * 1000.0f / binResolutionMS; // 1 ms resolution
-	avgResponse.resize(numBins);
-	numDataPoints.resize(numBins);
-	binTime.resize(numBins);
-	for (int k = 0; k < numBins; k++)
-	{
-		numDataPoints[k] = 0;
-		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
-		avgResponse[k] = 0;
-	}
+}
+PSTH::~PSTH()
+{
+	
+}
+double PSTH::getDx()
+{
+	return dx;
 }
 
 PSTH::PSTH(const PSTH& c)
 {
 	conditionID = c.conditionID;
-	postSecs = c.postSecs;
-	preSecs = c.preSecs;
 	numTrials = c.numTrials;
-	maxTrialTimeSec  = c.maxTrialTimeSec;
-	binResolutionMS = c.binResolutionMS;
+	params = c.params;
 	numBins = c.numBins;
 	avgResponse=c.avgResponse;
+	prevTrials = c.prevTrials;
 	numDataPoints=c.numDataPoints;
 	timeSpanSecs = c.timeSpanSecs;
 	binTime = c.binTime;
@@ -129,16 +180,20 @@ PSTH::PSTH(const PSTH& c)
 	colorRGB[1] = c.colorRGB[1];
 	colorRGB[2] = c.colorRGB[2];
 	visible = c.visible;
-	preSec = c.preSec;
-	postSec = c.postSec;
+	dx = c.dx;
+	mod_pre_sec = c.mod_pre_sec;
+	mod_post_sec = c.mod_post_sec;
+	
 }
 
 
 void PSTH::clear()
 {
 	numTrials= 0;
-	xmin = -preSec;
-	xmax = postSec;
+
+	xmin = -mod_pre_sec;
+	xmax = mod_post_sec;
+
 	ymax = -1e10;
 	ymin = 1e10;
 	for (int k = 0; k < numBins; k++)
@@ -151,9 +206,10 @@ void PSTH::clear()
 
 void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
+	
 	Time t;
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
-	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, preSecs, postSecs);
+	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, mod_pre_sec, mod_post_sec);
 	std::vector<float> instantaneousSpikesRate;
 	instantaneousSpikesRate.resize(numBins);
 	for (int k = 0; k < numBins; k++)
@@ -166,15 +222,16 @@ void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 		// spike times are aligned relative to trial alignment (i.e.) , onset is at "0"
 		// convert ticks back to seconds, then to bins.
 		float spikeTimeSec = float(alignedSpikes[k]) / ticksPerSec;
-		int binIndex = (spikeTimeSec + preSecs) / timeSpanSecs * numBins;
+
+		int binIndex = (spikeTimeSec +mod_pre_sec) / timeSpanSecs * numBins;
 		if (binIndex >= 0 && binIndex < numBins)
 		{
 			instantaneousSpikesRate[binIndex] += 1.0;
 		}
 	}
 
-	float lastUpdateTS = float(trial->endTS-trial->alignTS) / ticksPerSec + postSecs;
-	int lastBinIndex = (int)( (lastUpdateTS + preSecs) / timeSpanSecs * numBins);
+	float lastUpdateTS = float(trial->endTS-trial->alignTS) / ticksPerSec + mod_post_sec;
+	int lastBinIndex = (int)( (lastUpdateTS + mod_pre_sec) / timeSpanSecs * numBins);
 
 
 	xmax = MAX(xmax,lastUpdateTS);
@@ -193,6 +250,14 @@ void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 		ymax = MAX(ymax,avgResponse[k]);
 		ymin = MIN(ymin,avgResponse[k]);
 	}
+	// keep existing trial
+	if (prevTrials.size()+1 > params.maxTrialsInMemory)
+	{
+		prevTrials.pop_back();
+	}
+	prevTrials.push_front(instantaneousSpikesRate);
+	
+
 }
 
 void PSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
@@ -205,11 +270,12 @@ void PSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
 
 void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
 {
+	
 	numTrials++;
 
 	ymax = -1e10;
 	ymin = 1e10;
-	xmin = -preSec;
+	xmin = -mod_pre_sec;
 	xmax = 0;
 
 	// Update average firing rate, up to when the trial ended. 
@@ -224,9 +290,34 @@ void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
 		ymax = MAX(ymax, avgResponse[k]);
 		ymin = MIN(ymin, avgResponse[k]);
 	}			
-
+	
+	// keep existing trial
+	if (prevTrials.size()+1 > params.maxTrialsInMemory)
+	{
+		prevTrials.pop_back();
+	}
+	prevTrials.push_front(alignedLFP);
+	
 }
 
+std::vector<float> PSTH::getAverageTrialResponse()
+{
+	std::vector<float> tmp;
+	
+	tmp = avgResponse;
+
+	return tmp;
+}
+
+std::vector<float> PSTH::getLastTrial()
+{
+	std::vector<float> tmp;
+	if (prevTrials.size() > 0)
+	{
+		tmp = prevTrials.front();
+	}
+	return tmp;
+}
 
 /***********************/
 Condition::Condition()
@@ -366,17 +457,8 @@ Condition::Condition(String Name, std::vector<int> types, std::vector<int> outco
 /**********************************************/
 
 
-ChannelPSTHs::ChannelPSTHs(int ID, float maxTrialTimeSeconds_, int maxTrialsInMemory, float presecs, float postsecs, int binResolutionMS) : channelID(ID),
-	preSecs(presecs), postSecs(postsecs),maxTrialTimeSeconds(maxTrialTimeSeconds_)
+ChannelPSTHs::ChannelPSTHs(int ID, TrialCircularBufferParams params_) : channelID(ID), params(params_)
 {
-
-	float timeSpanSecs=preSecs + postSecs + maxTrialTimeSeconds;
-	int numBins = (timeSpanSecs) * 1000.0f / binResolutionMS; // 1 ms resolution
-	binTime.resize(numBins);	
-	for (int k = 0; k < numBins; k++)
-	{
-		binTime[k] = (float)k / numBins * (timeSpanSecs) - preSecs;
-	}
 	redrawNeeded = true;
 }
 
@@ -399,27 +481,29 @@ void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdati
 	// update individual trial PSTH
 
 	// first, make sure we have enough memory allocated to hold all these trials...
-
-	int modifiedTrialType;
-	if (trial->type >= TTL_TRIAL_OFFSET)
+	if (params.buildTrialsPSTH)
 	{
-		modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
-	}
-	else
-	{
-		modifiedTrialType = trial->type+NUM_TTL_CHANNELS;
-	}
-
-	if (modifiedTrialType >= trialPSTHs.size())
-	{
-		for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
+		int modifiedTrialType;
+		if (trial->type >= TTL_TRIAL_OFFSET)
 		{
-			// increase the size of trialPSTH
-			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSecs,postSecs,true));
+			modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
 		}
+		else
+		{
+			modifiedTrialType = trial->type+params.numTTLchannels;
+		}
+
+		if (modifiedTrialType >= trialPSTHs.size())
+		{
+			for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
+			{
+				// increase the size of trialPSTH
+				trialPSTHs.push_back(PSTH(k,params,true));
+			}
+		}
+		// now update
+		trialPSTHs[modifiedTrialType].updatePSTH(alignedLFP,valid);
 	}
-	// now update
-	trialPSTHs[modifiedTrialType].updatePSTH(alignedLFP,valid);
 }
 
 bool ChannelPSTHs::isNewDataAvailable()
@@ -464,8 +548,8 @@ void ChannelPSTHs::clearStatistics()
 }
 
 /***********************************************/
-UnitPSTHs::UnitPSTHs(int ID, float maxTrialTimeSeconds_, int maxTrialsInMemory, int sampleRateHz, uint8 R, uint8 G, uint8 B,float preSec_, float postSec_): 
-	preSec(preSec_), postSec(postSec_),maxTrialTimeSeconds(maxTrialTimeSeconds_), unitID(ID), spikeBuffer(maxTrialTimeSeconds_,maxTrialsInMemory,sampleRateHz)
+UnitPSTHs::UnitPSTHs(int ID,TrialCircularBufferParams params_, uint8 R, uint8 G, uint8 B): 
+	unitID(ID), params(params_), spikeBuffer(params_.maxTrialTimeSeconds, params_.maxTrialsInMemory, params_.sampleRate)
 {
 	colorRGB[0] = R;
 	colorRGB[1] = G;
@@ -539,28 +623,31 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 	}
 
-	// update individual trial PSTH
-	int modifiedTrialType;
-	if (trial->type >= TTL_TRIAL_OFFSET)
+	if (params.buildTrialsPSTH)
 	{
-		modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
-	}
-	else
-	{
-		modifiedTrialType = trial->type+NUM_TTL_CHANNELS;
-	}
 
-	if (modifiedTrialType >= trialPSTHs.size())
-	{
-		for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
+		// update individual trial PSTH
+		int modifiedTrialType;
+		if (trial->type >= TTL_TRIAL_OFFSET)
 		{
-			// increase the size of trialPSTH
-			trialPSTHs.push_back(PSTH(k,maxTrialTimeSeconds,preSec,postSec,true));
+			modifiedTrialType = trial->type-TTL_TRIAL_OFFSET;
 		}
-	}
-	// now update
-	trialPSTHs[modifiedTrialType].updatePSTH(&spikeBuffer, trial);
+		else
+		{
+			modifiedTrialType = trial->type+params.numTTLchannels;
+		}
 
+		if (modifiedTrialType >= trialPSTHs.size())
+		{
+			for (int k=trialPSTHs.size();k<=modifiedTrialType;k++)
+			{
+				// increase the size of trialPSTH
+				trialPSTHs.push_back(PSTH(k,params,true));
+			}
+		}
+		// now update
+		trialPSTHs[modifiedTrialType].updatePSTH(&spikeBuffer, trial);
+	}
 
 }
 
@@ -597,8 +684,8 @@ void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsN
 	std::vector<float> valid;
 	std::vector<std::vector<float> > alignedLFP;
 	// resample all electrode channels 
-	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].binTime,
-		channelsPSTHs[0].preSecs,channelsPSTHs[0].postSecs, alignedLFP,valid);
+	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].conditionPSTHs[0].binTime,
+		channelsPSTHs[0].params, alignedLFP,valid);
 	// now we can average data
 	if (success)
 	{
@@ -640,8 +727,198 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 	}
 }
 
-
 bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+												   TrialCircularBufferParams params,
+									std::vector<std::vector<float> > &output,
+									std::vector<float> &valid)
+{
+	if (!params.approximate) 
+	{
+		// use this for buffers with gaps
+		return getAlignedDataInterp(channels, trial, timeBins, params.preSec, params.postSec, output, valid);
+	}
+
+	// fast code.
+	if (numSamplesInBuf <= 1 )
+		return false;
+
+	int numTimeBins = timeBins->size();
+
+	output.resize(channels.size());
+	valid.resize(numTimeBins);
+	for (int ch=0;ch<channels.size();ch++)
+	{
+		output[ch].resize(numTimeBins);
+
+		for (int j=0;j<numTimeBins;j++)
+			output[ch][j] = 0;
+	}
+	for (int i=0;i<numTimeBins;i++)
+	{
+		valid[i] = false;
+	}
+
+
+
+	// 1. instead of searching the entire buffer, query when did the trial started....
+	int k = 0;
+	bool found = false;
+	for (;k<numTrials;k++)
+	{
+		if (smartPointerTrialID[k] == trial->trialID)
+		{
+			found = true;
+			break;
+		}
+	}
+	if (!found) 
+	{
+		//jassertfalse;
+		// couldn't find the trial !?!?!? buffer overrun?
+		return false;
+	}
+
+	// now we have a handle where to search the data...
+
+	int p=smartPointerIndex[k];
+	
+	// go backward and find the find time stamp we will need.
+	int search_back_ptr = p;
+	if (!trial->hardwareAlignment)
+	{
+		// software alignment is slightly harder. We actually need to search in the array (either forward / backward).
+		// usually, this won't be more than a couple of samples....
+
+		int next_index = search_back_ptr+1;
+		if (next_index >= bufLen)
+			next_index-=bufLen;
+
+		if (softwareTS[search_back_ptr] < trial->alignTS && softwareTS[next_index] > trial->alignTS)
+		{
+			// perfect. nothing more to do!
+		} else if (softwareTS[search_back_ptr] < trial->alignTS)
+		{
+			// search forward
+			for (int q=0;q<numSamplesInBuf;q++) 
+			{
+				if (softwareTS[search_back_ptr] >= trial->alignTS) 
+				{
+					// we found the first sample prior to required trial alignment
+					break;
+				}
+				search_back_ptr++;
+				if (search_back_ptr >= bufLen)
+					search_back_ptr=0;
+			}
+		} else 
+		{
+			// search backward
+			for (int q=0;q<numSamplesInBuf;q++) 
+			{
+				if (softwareTS[search_back_ptr] <= trial->alignTS) 
+				{
+					// we found the first sample prior to required trial alignment
+					break;
+				}
+				search_back_ptr--;
+				if (search_back_ptr < 0)
+					search_back_ptr=bufLen-1;
+			}
+		}
+	} else {
+		// hardware alignment is easy. hardwareTS always skips a fixed number.
+		int64 hardwareTSatTrialStart = hardwareTS[p];
+		// get an approximated hardware start...
+		int move_indx = (trial->alignTS_hardware - hardwareTSatTrialStart) / subSampling;
+		if (abs(move_indx) > bufLen )
+		{
+			// buffer overrun ?!?!?
+			return false;
+		}
+		search_back_ptr += move_indx;
+		if (search_back_ptr < 0)
+			search_back_ptr += bufLen;
+		if (search_back_ptr >= bufLen)
+			search_back_ptr -= bufLen;
+		jassert(search_back_ptr >= 0 && search_back_ptr < bufLen);
+	}
+
+	// consider search_back_ptr the buffer index pointing at time t=0
+	float t0 = hardwareTS[search_back_ptr];
+	int t0_indx = search_back_ptr;
+
+	float trial_length_sec = float(trial->endTS-trial->alignTS)/numTicksPerSecond;
+	// Assume we have no gaps
+	// and that hardware timestamp difference is always fixed....
+
+	// now assign values....
+	float timeBindx = (*timeBins)[1]-(*timeBins)[0];
+	if (fabs(timeBindx-buffer_dx) < 1e-5)
+	{
+		// easiest & fastest. No interpolation needed!
+		float dx = params.binResolutionMS / 1000.0f;
+		int numPosBins = ceil((params.postSec + trial_length_sec) / dx); 
+		int numNegBins = ceil(params.preSec / dx); 
+		int numBinsToUpdate = 1 + numPosBins + numNegBins; // include bin "0"
+		int start_index = t0_indx-numNegBins;
+		if (start_index < 0)
+			start_index += bufLen;
+
+		for (int index=0;index<numBinsToUpdate;index++)
+		{
+			valid[index] = true;
+			int actual_index = start_index+index;
+			if (actual_index>=bufLen)
+				actual_index-=bufLen;
+
+			for (int ch=0;ch<channels.size();ch++)
+			{
+				float value = Buf[channels[ch]][actual_index];
+				output[ch][index] =  value;
+			}
+		}
+
+	} else 
+	{
+		// the desired time bins do not have a time difference that match the buffer time difference.
+		// need to use bilinear interpolation.
+		for (int i = 0;i < numTimeBins; i++)
+		{
+			float tSamlple = (*timeBins)[i];
+			if (tSamlple > trial_length_sec + params.postSec)
+			{
+				// do not update  after trial ended
+				break;
+			}
+			valid[i] = true;
+
+			float wanted_index = t0_indx + tSamlple / buffer_dx;
+			int index1 = floor(wanted_index);
+			float frac = wanted_index-index1;
+
+			if (index1 < 0)
+				index1 += bufLen;
+			if (index1 >= bufLen)
+				index1 -= bufLen;
+
+			int index2 = index1+1;
+			if (index2 < 0)
+				index2 += bufLen;
+			if (index2 >= bufLen)
+				index2 -= bufLen;
+
+			for (int ch=0;ch<channels.size();ch++)
+			{
+				output[ch][i] =  Buf[channels[ch]][index1] * (1-frac) +  Buf[channels[ch]][index2] * (frac);
+			}
+
+		}
+	}
+	return true;
+}
+
+
+bool SmartContinuousCircularBuffer::getAlignedDataInterp(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid)
@@ -651,6 +928,33 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	// needed time bins.
 	if (numSamplesInBuf <= 1 )
 		return false;
+
+
+
+	// Debugging code
+	/*
+	int64 min_hard=MAXINT64, max_hard=0, min_soft=MAXINT64, max_soft=0;
+	for (int k=0;k<softwareTS.size();k++)
+	{
+		if (softwareTS[k] <= min_soft)
+			min_soft = softwareTS[k];
+
+		if (hardwareTS[k] <= min_hard)
+			min_hard = hardwareTS[k];
+
+	if (softwareTS[k] >= max_soft)
+			max_soft = softwareTS[k];
+
+		if (hardwareTS[k] >= max_hard)
+			max_hard = hardwareTS[k];
+	
+	}
+	int64 time_span_min = min_soft-trial->alignTS;
+	int64 time_span_max = max_soft-trial->alignTS;
+
+	int64 time_span_min_h = min_hard-trial->alignTS_hardware;
+	int64 time_span_max_h = max_hard-trial->alignTS_hardware;
+	*/
 
 	int numTimeBins = timeBins->size();
 
@@ -691,22 +995,25 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 	int p=smartPointerIndex[k];
 	
 	// go backward and find the find time stamp we will need.
-	int nSamples = 1;
+	//int nSamples = 1;
 	int search_back_ptr = p;
 	for (int q=0;q<numSamplesInBuf;q++) 
 	{
-		if (softwareTS[search_back_ptr] < trial->alignTS - int64(preSec*numTicksPerSecond))
+		if ((!trial->hardwareAlignment && (softwareTS[search_back_ptr] < trial->alignTS - int64(preSec*numTicksPerSecond))) ||
+			(trial->hardwareAlignment && (hardwareTS[search_back_ptr] < trial->alignTS_hardware - int64(preSec*samplingRate))))
 		{
 			// we found the first sample prior to required trial alignment
 			break;
 		}
 		search_back_ptr--;
-		nSamples++;
+		//nSamples++;
 		if (search_back_ptr < 0)
 			search_back_ptr=bufLen-1;
 	}
 
 	// go forward and find the last time stamp we will need.
+	/*
+	int nSamples = 0;
 	int search_forward_ptr = p;
 	for (int q=0;q<numSamplesInBuf;q++) 
 	{
@@ -720,7 +1027,8 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 		if (search_forward_ptr == bufLen)
 			search_forward_ptr=0;
 	}
-	
+	*/
+
 	// we would like to return the lfp, sampled at specific time bins
 	// (typically, 1 ms resolution, which is an overkill).
 	//
@@ -735,6 +1043,7 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 		index_next = 0;
 
 	float tA,tB;
+	float trial_length_sec = float(trial->endTS-trial->alignTS)/numTicksPerSecond;
 
 	if (trial->hardwareAlignment)
 	{
@@ -745,7 +1054,7 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 		tA = float(softwareTS[index]-trial->alignTS)/numTicksPerSecond;
 		tB = float(softwareTS[index_next]-trial->alignTS)/numTicksPerSecond;
 	}
-	float trial_length_sec = float(trial->endTS-trial->alignTS)/numTicksPerSecond;
+	
 
 	for (int i = 0;i < numTimeBins; i++)
 	{
@@ -784,8 +1093,8 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 
 					if (trial->hardwareAlignment)
 					{
-						tA = float(hardwareTS[index]-trial->alignTS)/samplingRate;
-						tB = float(hardwareTS[index_next]-trial->alignTS)/samplingRate;
+						tA = float(hardwareTS[index]-trial->alignTS_hardware)/samplingRate;
+						tB = float(hardwareTS[index_next]-trial->alignTS_hardware)/samplingRate;
 					} else
 					{
 						tA = float(softwareTS[index]-trial->alignTS)/numTicksPerSecond;
@@ -952,14 +1261,70 @@ std::vector<int64> SmartSpikeCircularBuffer::getAlignedSpikes(Trial *trial, floa
 TrialCircularBuffer::~TrialCircularBuffer()
 {
 	delete lfpBuffer;
-	lfpBuffer=nullptr;
+	lfpBuffer = nullptr;
+	delete ttlBuffer;
+	ttlBuffer = nullptr;
 	electrodesPSTH.clear();
 
 }
 TrialCircularBuffer::TrialCircularBuffer()
 {
-	lfpBuffer = nullptr;
+	lfpBuffer = ttlBuffer = nullptr;
 	hardwareTriggerAlignmentChannel = -1;
+	lastSimulatedTrialTS = 0;
+	lastTrialID = 0;
+}
+
+void TrialCircularBuffer::getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y)
+{
+	x0 = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].binTime[0];
+	dx = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getDx();
+	y = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getLastTrial();
+}
+
+Condition TrialCircularBuffer::getCondition(int conditionIndex)
+{
+	return conditions[conditionIndex];
+}
+
+int TrialCircularBuffer::getNumTrialsInCondition(int electrodeIndex, int channelIndex, int conditionIndex)
+{
+	return electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].numTrials;
+}
+
+int TrialCircularBuffer::getNumConditions()
+{
+	return conditions.size();
+}
+
+int TrialCircularBuffer::getNumUnitsInElectrode(int electrodeIndex)
+{
+	return electrodesPSTH[electrodeIndex].unitsPSTHs.size();
+}
+
+int TrialCircularBuffer::getUnitID(int electrodeIndex, int unitIndex)
+{
+	return electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID;
+}
+
+int TrialCircularBuffer::getNumElectrodes()
+{
+	return electrodesPSTH.size();
+}
+
+int TrialCircularBuffer::getElectrodeID(int index)
+{
+	return electrodesPSTH[index].electrodeID;
+}
+
+std::vector<int> TrialCircularBuffer::getElectrodeChannels(int e)
+{
+	return electrodesPSTH[e].channels;
+}
+
+TrialCircularBufferParams TrialCircularBuffer::getParams()
+{
+	return params;
 }
 
 void TrialCircularBuffer::setHardwareTriggerAlignmentChannel(int k)
@@ -967,35 +1332,28 @@ void TrialCircularBuffer::setHardwareTriggerAlignmentChannel(int k)
 	hardwareTriggerAlignmentChannel = k;
 }
 
-TrialCircularBuffer::TrialCircularBuffer(int numChannels, float samplingRate, PeriStimulusTimeHistogramNode *p) : processor(p)
+TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : params(params_)
 {
 	Time t;
-	 numTicksPerSecond = t.getHighResolutionTicksPerSecond();
-
-	maxTrialTimeSeconds = 10.0;
-	MaxTrialTimeTicks = numTicksPerSecond * maxTrialTimeSeconds;
+	numTicksPerSecond = t.getHighResolutionTicksPerSecond();
+	
 	conditionCounter = 0;
-	addDefaultTTLconditions = true;
 	firstTime = true;
-	postSec =  preSec = 0.5;
 	trialCounter = 0;
-	maxTrialsInMemory = 200;
-	binResolutionMS = 1;
-
-	float desiredSamplingRateHz = 600; // LFPs are usually in the range of 0-300 Hz, so
+	lastSimulatedTrialTS = 0;
+	lastTrialID = 0;
 	// sampling them should be at least 600 Hz (Nyquist!)
 	// We typically sample everything at 30000, so a sub-sampling by a factor of 50 should be good
-	samplingRateHz = samplingRate;
-	int subSample = samplingRateHz / desiredSamplingRateHz;
-	float numSeconds = 2*maxTrialTimeSeconds;
-	lfpBuffer = new SmartContinuousCircularBuffer(numChannels, samplingRateHz, subSample, numSeconds);
-	lastTTLts.resize(NUM_TTL_CHANNELS);
-
-	 ttlSupressionTimeSec = 1.0;
-	 ttlTrialLengthSec = 2;
-
-	for (int k=0;k<NUM_TTL_CHANNELS;k++)
+	int subSample = params.sampleRate/ params.desiredSamplingRateHz;
+	float numSeconds = 2*(params.maxTrialTimeSeconds+params.preSec+params.postSec);
+	lfpBuffer = new SmartContinuousCircularBuffer(params.numChannels, params.sampleRate, subSample, numSeconds);
+	ttlBuffer = new SmartContinuousCircularBuffer(params.numTTLchannels, params.sampleRate, subSample, numSeconds);
+	lastTTLts.resize(params.numTTLchannels);
+	ttlChannelStatus.resize(params.numTTLchannels);
+	for (int k=0;k<params.numTTLchannels;k++) {
+		ttlChannelStatus[k] = false;
 		lastTTLts[k] = 0;
+	}
 
 	clearDesign();
 }
@@ -1028,7 +1386,7 @@ void TrialCircularBuffer::unlockConditions()
 void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 {
 	  int numExistingConditions = conditions.size();
-	  for (int channel = 0; channel < NUM_TTL_CHANNELS; channel++)
+	  for (int channel = 0; channel < params.numTTLchannels; channel++)
 	  {
 		  StringTS simulatedConditionString;
 		  if (visibility[channel])
@@ -1041,10 +1399,6 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 		  lockConditions();
 		  newcondition.conditionID = ++conditionCounter;
 		  conditions.push_back(newcondition);
-
-		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-//		  edt->updateCondition(conditions);
-
 		  unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes
 		  lockPSTH();
@@ -1052,12 +1406,12 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID, params,visibility[channel]));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,visibility[channel]));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,params,visibility[channel]));
 			  }
 		  }
 		  unlockPSTH();
@@ -1101,18 +1455,16 @@ void TrialCircularBuffer::clearDesign()
 	Array<bool> ttlVisible;
 	if (conditions.size() > 0)
 	{
-		for (int k=0;k<NUM_TTL_CHANNELS;k++)
+		for (int k=0;k<params.numTTLchannels;k++)
 			ttlVisible.add(conditions[k].visible);
 	} else
 	{
-		for (int k=0;k<NUM_TTL_CHANNELS;k++)
+		for (int k=0;k<params.numTTLchannels;k++)
 			ttlVisible.add(false);
 	}
 
 	conditions.clear();
 	conditionCounter = 0;
-	PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-//	edt->updateCondition(conditions);
 	unlockConditions();
 	// clear conditions from all units
 	lockPSTH();
@@ -1129,10 +1481,22 @@ void TrialCircularBuffer::clearDesign()
 		}
 	}
 	unlockPSTH();
-	if (addDefaultTTLconditions)
+	if (params.autoAddTTLconditions)
 		addDefaultTTLConditions(ttlVisible);
 }
 
+void TrialCircularBuffer::modifyConditionVisibilityusingConditionID(int condID, bool newstate)
+{
+	lockConditions();
+	for (int k=0;k<conditions.size();k++) {
+		if (conditions[k].conditionID == condID)
+		{
+			modifyConditionVisibility(k, newstate);
+			break;
+		}
+	}
+	unlockConditions();
+}
 
 void TrialCircularBuffer::modifyConditionVisibility(int cond, bool newstate)
 {
@@ -1154,8 +1518,6 @@ void TrialCircularBuffer::modifyConditionVisibility(int cond, bool newstate)
 		}
 	}
 	unlockPSTH();
-	// inform editor repaint is needed
-
 }
 
 void TrialCircularBuffer::toggleConditionVisibility(int cond)
@@ -1218,11 +1580,11 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 		for (int k=0;k<numChannels;k++) {
 			int channelID = electrodes[electrodeIter]->channels[k];
 			electrodePSTH.channels.push_back(channelID);
-			ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
+			ChannelPSTHs channelPSTH(channelID,params);
 			// add all known conditions
 			for (int c=0;c<conditions.size();c++)
 			{
-				channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
+				channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID,params,conditions[c].visible));
 			}
 			electrodePSTH.channelsPSTHs.push_back(channelPSTH);
 		  }
@@ -1234,11 +1596,11 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 		  {
 
 			  int unitID = boxUnits[boxIter].UnitID;
-			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,boxUnits[boxIter].ColorRGB[0],
-				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2],preSec,postSec);
+			  UnitPSTHs unitPSTHs(unitID, params,boxUnits[boxIter].ColorRGB[0],
+				  boxUnits[boxIter].ColorRGB[1],boxUnits[boxIter].ColorRGB[2]);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,params,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1247,11 +1609,11 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 		  {
 
 			  int unitID = pcaUnits[pcaIter].UnitID;
-			  UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,pcaUnits[pcaIter].ColorRGB[0],
-				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2],preSec,postSec);
+			  UnitPSTHs unitPSTHs(unitID, params,pcaUnits[pcaIter].ColorRGB[0],
+				  pcaUnits[pcaIter].ColorRGB[1],pcaUnits[pcaIter].ColorRGB[2]);
 			  for (int k=0;k<conditions.size();k++)
 			  {
-				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+				  unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID, params,conditions[k].visible));
 			  }
 			  electrodePSTH.unitsPSTHs.push_back(unitPSTHs);
 		  }
@@ -1271,11 +1633,11 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 	{
 		int channelID = electrode->channels[k];
 		e.channels.push_back(channelID);
-		ChannelPSTHs channelPSTH(channelID,maxTrialTimeSeconds, maxTrialsInMemory,preSec,postSec,binResolutionMS);
+		ChannelPSTHs channelPSTH(channelID, params);
 		// add all known conditions
 		for (int c=0;c<conditions.size();c++)
 		{
-			channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[c].visible));
+			channelPSTH.conditionPSTHs.push_back(PSTH(conditions[c].conditionID, params, conditions[c].visible));
 		}
 		e.channelsPSTHs.push_back(channelPSTH);	
 	}
@@ -1297,16 +1659,16 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 			}
 		}
 	unlockPSTH();
-	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
 }
 
 void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b)
 {
 	// build a new PSTH for all defined conditions
-	UnitPSTHs unitPSTHs(unitID, maxTrialTimeSeconds, maxTrialsInMemory,samplingRateHz,r,g,b,preSec,postSec);
+	lockPSTH();
+	UnitPSTHs unitPSTHs(unitID, params,r,g,b);
 	for (int k=0;k<conditions.size();k++)
 	{
-		unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID,maxTrialTimeSeconds,preSec,postSec,conditions[k].visible));
+		unitPSTHs.conditionPSTHs.push_back(PSTH(conditions[k].conditionID, params,conditions[k].visible));
 	}
 	for (int k=0;k<electrodesPSTH.size();k++) {
 		if (electrodesPSTH[k].electrodeID == electrodeID) {
@@ -1314,8 +1676,8 @@ void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8
 			break;
 		}
 	}
-	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-	// inform editor repaint is needed
+	unlockPSTH();
+
 }
 
 void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
@@ -1335,8 +1697,7 @@ void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
 	  }
   }
   unlockPSTH();
-  ((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
-  // inform editor repaint is needed
+
 }
 
 
@@ -1352,14 +1713,13 @@ void TrialCircularBuffer::removeElectrode(int electrodeID)
 		}
 	}
 	unlockPSTH();
-	// inform editor repaint is in order
-	((PeriStimulusTimeHistogramEditor *) processor->getEditor())->updateCanvas();
 }
 
 
 
-void TrialCircularBuffer::parseMessage(StringTS msg)
+bool TrialCircularBuffer::parseMessage(StringTS msg)
   {
+	  bool redrawNeeded = false;
 	  std::vector<String> input = msg.splitString(' ');
 	  String command = input[0].toLowerCase();
 	  
@@ -1373,6 +1733,7 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
   		  currentTrial.trialInProgress = true;
 		  currentTrial.type = -1;
 		  lfpBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
+		  ttlBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 			{
 				for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
@@ -1393,7 +1754,7 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 			  currentTrial.outcome = input[1].getIntValue();
 		  }
 
-		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  currentTrial.endTS - currentTrial.startTS < MaxTrialTimeTicks)
+		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  currentTrial.endTS - currentTrial.startTS <= (numTicksPerSecond * params.maxTrialTimeSeconds))
 		  {
 			  if (currentTrial.alignTS == 0) 
 			  {
@@ -1401,8 +1762,6 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 			  }
 
 			  double trialLength = (currentTrial.endTS-currentTrial.alignTS)/numTicksPerSecond;
-			  //processor->getUIComponent()->getLogWindow()->addLineToLog("Trial Length: "+String(trialLength*1000));
-	
 			  aliveTrials.push(Trial(currentTrial));
 		  }
 	  } else if (command == "trialtype")
@@ -1422,11 +1781,13 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 	  {
 		  //clearDesign();
 		  designName = input[1];
+		  redrawNeeded = true;
 	  }
 	  else if (command == "cleardesign")
 	  {
 			clearDesign();
 			// inform editor repaint is needed
+			redrawNeeded = true;
 	  } else if (command == "addcondition")
 	  {
 		  int numExistingConditions = conditions.size();
@@ -1434,9 +1795,6 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  lockConditions();
 		  newcondition.conditionID = ++conditionCounter;
 		  conditions.push_back(newcondition);
-
-		  PeriStimulusTimeHistogramEditor* edt = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
-
 		  unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes
 		  lockPSTH();
@@ -1444,18 +1802,20 @@ void TrialCircularBuffer::parseMessage(StringTS msg)
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 			  {
-				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
+				  electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.push_back(PSTH(newcondition.conditionID, params, newcondition.visible));
 			  }
 
 			  for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 			  {
-				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,maxTrialTimeSeconds,preSec,postSec,newcondition.visible));
+				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID, params, newcondition.visible));
 			  }
 		  }
 		  unlockPSTH();
 		  // inform editor repaint is needed
-	  }
+		  redrawNeeded = true;
 
+	  }
+	  return   redrawNeeded ;
   }
 
 void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
@@ -1532,21 +1892,25 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 void TrialCircularBuffer::reallocate(int numChannels)
 {
 	lfpBuffer->reallocate(numChannels);
+	ttlBuffer->reallocate(numChannels);
 
 }
 
-void TrialCircularBuffer::simulateTTLtrial(int channel, int64 ttl_timestamp_software)
+
+void TrialCircularBuffer::simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec)
 {
 	Trial ttlTrial;
 	ttlTrial.trialID = ++trialCounter;
 	ttlTrial.startTS = ttl_timestamp_software;
 	ttlTrial.alignTS = ttl_timestamp_software;
-	ttlTrial.endTS = ttl_timestamp_software + ttlTrialLengthSec*numTicksPerSecond;
+	ttlTrial.alignTS_hardware = 0;
+	ttlTrial.endTS = ttl_timestamp_software + int64(lengthSec*numTicksPerSecond);
 	ttlTrial.outcome = 0;
 	ttlTrial.trialInProgress = false;
-	ttlTrial.type = TTL_TRIAL_OFFSET + channel;
-
+	ttlTrial.type = trialType;
+	ttlTrial.hardwareAlignment = false;
 	lfpBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
+	ttlBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
 		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
@@ -1557,7 +1921,43 @@ void TrialCircularBuffer::simulateTTLtrial(int channel, int64 ttl_timestamp_soft
 	aliveTrials.push(ttlTrial);
 }
 
-void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, int64 ttl_timestamp_hardware)
+
+void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, int trialType, float lengthSec)
+{
+	int64 tickdiff = ttl_timestamp_software- lastSimulatedTrialTS;
+	float secElapsed = float(tickdiff) / numTicksPerSecond;
+	if (secElapsed > params.ttlSupressionTimeSec)
+	{
+		Trial ttlTrial;
+		ttlTrial.trialID = ++trialCounter;
+		ttlTrial.startTS = ttl_timestamp_software;
+		ttlTrial.alignTS = ttl_timestamp_software;
+		ttlTrial.alignTS_hardware = ttl_timestamp_hardware;
+		ttlTrial.endTS = ttl_timestamp_software + int64(lengthSec*numTicksPerSecond);
+		ttlTrial.outcome = 0;
+		ttlTrial.trialInProgress = false;
+		ttlTrial.type = trialType;
+		ttlTrial.hardwareAlignment = true;
+		lfpBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
+		ttlBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
+		for (int i=0;i<electrodesPSTH.size();i++) 
+		{
+			for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			{
+				electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&ttlTrial);
+			}
+		}
+		aliveTrials.push(ttlTrial);
+		lastSimulatedTrialTS = ttl_timestamp_software;
+	}
+}
+
+void TrialCircularBuffer::simulateTTLtrial(int channel, int64 ttl_timestamp_software)
+{
+	simulateTrial(ttl_timestamp_software, TTL_TRIAL_OFFSET + channel,params.ttlTrialLengthSec*numTicksPerSecond);
+}
+
+void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, bool rise, bool simulateTrial)
 {
 	// measure how much time passed since last ttl on this channel.
 	// and only if its above some threshold, simulate a ttl trial.
@@ -1565,30 +1965,84 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, 
 	// to the first pulse.
 	if (channel >= 0 && channel < lastTTLts.size())
 	{
-		int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
-		float secElapsed = float(tickdiff) / numTicksPerSecond;
-		if (secElapsed > ttlSupressionTimeSec)
+		//ttlBuffer->update(channel, ttl_timestamp_software, ttl_timestamp_hardware,rise);
+		if (params.reconstructTTL)
 		{
-			// simulate a ttl trial 
-			simulateTTLtrial(channel, ttl_timestamp_software);
+			ttlStatus tmp;
+			tmp.channel = channel;
+			tmp.value = rise;
+			tmp.ts = ttl_timestamp_hardware;
+			ttlQueue.push(tmp);
 		}
-		lastTTLts[channel] = tickdiff;
 
-		if (channel == hardwareTriggerAlignmentChannel)
+	if (simulateTrial)
 		{
-			currentTrial.alignTS = ttl_timestamp_software;
-			currentTrial.alignTS_hardware = ttl_timestamp_hardware;
-			currentTrial.hardwareAlignment = true;
+			int64 tickdiff = ttl_timestamp_software-lastTTLts[channel];
+			float secElapsed = float(tickdiff) / numTicksPerSecond;
+			if (secElapsed > params.ttlSupressionTimeSec)
+			{
+				// simulate a ttl trial 
+				simulateTTLtrial(channel, ttl_timestamp_software);
+			}
+			lastTTLts[channel] = tickdiff;
+
+			if (channel == hardwareTriggerAlignmentChannel)
+			{
+				currentTrial.alignTS = ttl_timestamp_software;
+				currentTrial.alignTS_hardware = ttl_timestamp_hardware;
+				currentTrial.hardwareAlignment = true;
+			}
 		}
 	}
 	  
 }
 	
+std::vector<std::vector<bool>> TrialCircularBuffer::reconstructTTLchannels(int64 hardware_timestamp,int nSamples)
+{
+	std::vector<std::vector<bool>> contdata;
+	contdata.resize(params.numTTLchannels);
+	
+	for (int k=0;k<params.numTTLchannels;k++)
+	{
+		contdata[k].resize(nSamples);
+	}
+
+	int64 currTS = hardware_timestamp;
+	for (int i=0;i<nSamples;i++, currTS++)
+	{
+		bool repeat = true;
+		while (repeat && ttlQueue.size() > 0)
+		{
+			ttlStatus tmp = ttlQueue.front();
+			if (tmp.ts <= currTS)
+			{
+				ttlChannelStatus[tmp.channel] = tmp.value;
+				ttlQueue.pop();
+			} else {
+				repeat = false;
+			}
+		}
+
+		for (int ch=0;ch<params.numTTLchannels;ch++)
+		{
+			contdata[ch][i] = ttlChannelStatus[ch];
+		}
+		
+	}
+	return contdata;
+}
 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
 	// first, update LFP circular buffers
 	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+
+	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
+	if (params.reconstructTTL) {
+		std::vector<std::vector<bool>> reconstructedTTLs = reconstructTTLchannels(hardware_timestamp,nSamples);
+		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
+	}
+
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
@@ -1596,11 +2050,171 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		Trial topTrial = aliveTrials.front();
 		int64 ticksElapsed = software_timestamp - topTrial.endTS;
 		float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
-		if (timeElapsedSec > postSec)
+		if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
 		{
 			aliveTrials.pop();
+			lastTrialID = topTrial.trialID;
 			updatePSTHwithTrial(&topTrial);
 		}
 	}
 
 }
+
+int TrialCircularBuffer::getLastTrialID()
+{
+	return lastTrialID;
+}
+
+std::vector<XYline> TrialCircularBuffer::getElectrodeConditionCurves(int electrodeID, int channelID)
+{
+	std::vector<XYline> lines;
+	lockPSTH();
+	lockConditions();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					// great. we found our electrode.
+					// now iterate over conditions and build lines.
+					for (int cond=0;cond<electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
+					{
+						if (!electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
+							continue;
+						
+						
+						juce::Colour lineColor = juce::Colour(electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
+									 electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
+									 electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]);
+						double x0 = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime[0];
+						double dx = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].getDx();
+						std::vector<float> y = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse();
+						XYline l(x0,dx,y, 1.0, lineColor);
+						lines.push_back(l);
+					}
+
+					unlockConditions();
+					unlockPSTH();
+					return lines;
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return lines;
+}
+
+juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
+{
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					return juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
+										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
+										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]);
+				}
+			}
+		}
+	}
+	return juce::Colours::black;
+}
+
+std::vector<XYline> TrialCircularBuffer::getUnitConditionCurves(int electrodeID, int unitID)
+{
+	std::vector<XYline> lines;
+	lockPSTH();
+	lockConditions();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					// great. we found our unit.
+					// now iterate over conditions and build lines.
+					for (int cond=0;cond<electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
+					{
+						if (!electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
+							continue;
+						
+						
+						juce::Colour lineColor = juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
+									 electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
+									 electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]);
+						double x0 = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime[0];
+						double dx = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].getDx();
+						std::vector<float> y = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse();
+						XYline l(x0,dx,y, 1.0, lineColor);
+						lines.push_back(l);
+					}
+
+					unlockConditions();
+					unlockPSTH();
+					return lines;
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return lines;
+}
+
+void TrialCircularBuffer::clearUnitStatistics(int electrodeID, int unitID)
+{
+	lockPSTH();
+
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].clearStatistics();
+					unlockPSTH();
+					return;
+
+				}
+			}
+		}
+	}
+	unlockPSTH();
+}
+
+void TrialCircularBuffer::clearChanneltatistics(int electrodeID, int channelID)
+{
+	lockPSTH();
+
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].clearStatistics();
+					unlockPSTH();
+					return;
+				}
+			}
+		}
+	}
+	unlockPSTH();
+}
+

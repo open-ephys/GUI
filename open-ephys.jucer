@@ -231,6 +231,10 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <FILE id="knvMlW" name="OscilloscopeNode.cpp" compile="1" resource="0"
+              file="Source/Processors/OscilloscopeNode.cpp"/>
+        <FILE id="bsPEnR" name="OscilloscopeNode.h" compile="0" resource="0"
+              file="Source/Processors/OscilloscopeNode.h"/>
         <FILE id="PRooAI" name="NotchFilterNode.cpp" compile="1" resource="0"
               file="Source/Processors/NotchFilterNode.cpp"/>
         <FILE id="EvKhVT" name="NotchFilterNode.h" compile="0" resource="0"
@@ -329,6 +333,10 @@
           <FILE id="DXYynnz" name="Splitter.h" compile="0" resource="0" file="Source/Processors/Utilities/Splitter.h"/>
         </GROUP>
         <GROUP id="W4eqkOy" name="Visualization">
+          <FILE id="w7rOLp" name="MatlabLikePlot.cpp" compile="1" resource="0"
+                file="Source/Processors/Visualization/MatlabLikePlot.cpp"/>
+          <FILE id="g1ZhaT" name="MatlabLikePlot.h" compile="0" resource="0"
+                file="Source/Processors/Visualization/MatlabLikePlot.h"/>
           <FILE id="XyPSfd" name="SpikeDetectCanvas.cpp" compile="1" resource="0"
                 file="Source/Processors/Visualization/SpikeDetectCanvas.cpp"/>
           <FILE id="FvRtMF" name="SpikeDetectCanvas.h" compile="0" resource="0"
@@ -356,6 +364,10 @@
         <FILE id="hGnGAjh" name="EventNode.cpp" compile="1" resource="0" file="Source/Processors/EventNode.cpp"/>
         <FILE id="dUtRN6" name="EventNode.h" compile="0" resource="0" file="Source/Processors/EventNode.h"/>
         <GROUP id="AqvwO6w" name="Editors">
+          <FILE id="jrxkg7" name="OscilloscopeEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/Editors/OscilloscopeEditor.cpp"/>
+          <FILE id="b2W6T3" name="OscilloscopeEditor.h" compile="0" resource="0"
+                file="Source/Processors/Editors/OscilloscopeEditor.h"/>
           <FILE id="TIYX5I" name="NotchFilterEditor.cpp" compile="1" resource="0"
                 file="Source/Processors/Editors/NotchFilterEditor.cpp"/>
           <FILE id="cPnwFY" name="NotchFilterEditor.h" compile="0" resource="0"

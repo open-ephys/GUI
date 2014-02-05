@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Editors/NetworkEventsEditor.h"
 #include "../UI/UIComponent.h"
 
-const int MAX_MESSAGE_LENGTH = 32000;
+const int MAX_MESSAGE_LENGTH = 64000;
 
 
 StringTS::StringTS()

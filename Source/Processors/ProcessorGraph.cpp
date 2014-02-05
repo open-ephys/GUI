@@ -33,6 +33,7 @@
 #include "AdvancerNode.h"
 #include "FilterNode.h"
 #include "NotchFilterNode.h"
+#include "OscilloscopeNode.h"
 #include "GenericProcessor.h"
 #include "RecordNode.h"
 #include "ResamplingNode.h"
@@ -859,6 +860,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating a SpikeDisplayNode." << std::endl;
             processor = new SpikeDisplayNode();
+        } else if (subProcessorType.equalsIgnoreCase("Oscilloscope"))
+        {
+            std::cout << "Creating a OscilloscopeNode." << std::endl;
+            processor = new OscilloscopeNode();
         } 
         else if (subProcessorType.equalsIgnoreCase("PSTH"))
         {

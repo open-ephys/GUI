@@ -112,7 +112,9 @@ class ContinuousCircularBuffer
 public:
 	ContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
 	void reallocate(int N);
+	void update(std::vector<std::vector<bool>> contdata, int64 hardware_ts, int64 software_ts, int numpts);
 	void update(AudioSampleBuffer& buffer, int64 hardware_ts, int64 software_ts, int numpts);
+	void update(int channel, int64 hardware_ts, int64 software_ts, bool rise);
 	int GetPtr();
 	void addTrialStartToSmartBuffer(int trialID);
 	int numCh;
@@ -120,10 +122,12 @@ public:
 	float samplingRate;
 	CriticalSection mut;
 	int numSamplesInBuf;
-	float numTicksPerSecond;
+	double numTicksPerSecond;
 	int ptr;
 	int bufLen;
 	int leftover_k;
+	double buffer_dx;
+	
 	std::vector<std::vector<float> > Buf;
 	std::vector<bool> valid;
 	std::vector<int64> hardwareTS,softwareTS;

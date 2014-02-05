@@ -25,22 +25,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define __TRIALCIRCULARBUFFER_H__
 
 #include "../../JuceLibraryCode/JuceHeader.h"
-#include "PeriStimulusTimeHistogramNode.h"
 #include "GenericProcessor.h"
-
-#include "Editors/PeriStimulusTimeHistogramEditor.h"
 #include "Visualization/SpikeObject.h"
+#include "Visualization/MatlabLikePlot.h"
 #include "SpikeDetector.h"
-
 #include <algorithm>    
 #include <queue>
 #include <vector>
 #include <list>
 class Electrode;
-class PeriStimulusTimeHistogramNode;
 
 #define TTL_TRIAL_OFFSET 30000
-#define NUM_TTL_CHANNELS 8
 
 #ifndef MAX
 #define MAX(a,b)((a)<(b)?(b):(a))
@@ -49,6 +44,28 @@ class PeriStimulusTimeHistogramNode;
 #ifndef MIN
 #define MIN(a,b)((a)<(b)?(a):(b))
 #endif
+
+class TrialCircularBufferParams
+{
+public:
+	TrialCircularBufferParams();
+	~TrialCircularBufferParams();
+	double desiredSamplingRateHz; 
+	double maxTrialTimeSeconds;
+	double postSec, preSec;
+	int maxTrialsInMemory;
+	double binResolutionMS;
+	int numChannels;
+	double sampleRate;
+	double ttlSupressionTimeSec;
+	double ttlTrialLengthSec;
+	int numTTLchannels;
+	bool autoAddTTLconditions;
+	bool buildTrialsPSTH;
+	bool reconstructTTL;
+	bool approximate;
+};
+
 class Condition
 {
 	public:
@@ -115,7 +132,12 @@ class SmartContinuousCircularBuffer : public ContinuousCircularBuffer
 public:
 	SmartContinuousCircularBuffer(int NumCh, float SamplingRate, int SubSampling, float NumSecInBuffer);
 	bool getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
-									float preSec, float postSec,
+									TrialCircularBufferParams params,
+									std::vector<std::vector<float> > &output,
+									std::vector<float> &valid);
+
+	bool getAlignedDataInterp(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
+												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
 									std::vector<float> &valid);
 
@@ -131,35 +153,44 @@ public:
 class PSTH
 {
 public:
-	PSTH(int ID, float _maxTrialTimeSec, float _preSecs, float _postSecs,bool vis);
+	PSTH(int ID, TrialCircularBufferParams params,bool vis);
+	~PSTH();
 	PSTH(const PSTH& c);
+	double getDx();
 	void clear();
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
 	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
 
-	void getRange(float &xMin, float &xMax, float &yMin, float &yMax);
-	float preSecs, postSecs, maxTrialTimeSec;
-	int conditionID;
+	std::vector<float> getAverageTrialResponse();
+	std::vector<float> getLastTrial();
 
+	void getRange(float &xMin, float &xMax, float &yMin, float &yMax);
+
+	int conditionID;
 	float xmin, xmax, ymax,ymin;
 	bool visible;
 	int numBins;
-	int binResolutionMS;
 	int numTrials;
 	float timeSpanSecs;
 	std::vector<int> numDataPoints;
 	std::vector<float> binTime;
-	std::vector<float> avgResponse; // either firing rate or lfp
 	uint8 colorRGB[3];
-	float preSec,postSec;
+	TrialCircularBufferParams params;
+
 private:
+	double dx,mod_pre_sec, mod_post_sec;
+	std::list<std::vector<float>> prevTrials; 
+	std::vector<float> avgResponse; // either firing rate or lfp
+
+
 	std::vector<int64> getAlignSpikes(SmartSpikeCircularBuffer *spikeBuffer, Trial *t);
+
 };
 
 class UnitPSTHs 
 {
 public:
-	UnitPSTHs(int ID, float maxTrialTimeSeconds, int maxTrialsInMemory, int sampleRateHz,uint8 R, uint8 G, uint8 B, float preSec, float postSec);
+	UnitPSTHs(int ID,TrialCircularBufferParams params,uint8 R, uint8 G, uint8 B);
 	void updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial *trial);
 	void addSpikeToBuffer(int64 spikeTimestampSoftware,int64 spikeTimestampHardware);
 	void addTrialStartToSmartBuffer(Trial *t);
@@ -174,14 +205,15 @@ public:
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
+	
 	bool redrawNeeded;
-	float preSec, postSec,maxTrialTimeSeconds;
+	TrialCircularBufferParams params;
 };
 
 class ChannelPSTHs 
 {
 public:
-	ChannelPSTHs(int channelID, float maxTrialTimeSeconds, int maxTrialsInMemory, float preSecs, float postSecs, int binResolutionMS);
+	ChannelPSTHs(int channelID, TrialCircularBufferParams params);
 	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid, Trial *trial);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
@@ -190,9 +222,21 @@ public:
 	int channelID;
 	std::vector<PSTH> conditionPSTHs;
 	std::vector<PSTH> trialPSTHs;
-	
-	std::vector<float> binTime;
-	float preSecs, postSecs,maxTrialTimeSeconds;
+	TrialCircularBufferParams params;
+
+	bool redrawNeeded;
+};
+
+class TTL_PSTHs 
+{
+public:
+	TTL_PSTHs(int ttlChannelID, TrialCircularBufferParams params);
+	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid, Trial *trial);
+	void clearStatistics();
+	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
+	int ttlChannelID;
+	std::vector<PSTH> conditionPSTHs;
+	TrialCircularBufferParams params;
 	bool redrawNeeded;
 };
 
@@ -201,32 +245,38 @@ class ElectrodePSTH
 {
 public:
 	ElectrodePSTH(int ID);
-
 	void updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer);
-
-
-
 	int electrodeID;
 	std::vector<int> channels;
 	std::vector<UnitPSTHs> unitsPSTHs;
 	std::vector<ChannelPSTHs> channelsPSTHs;
+	std::vector<TTL_PSTHs> ttlPSTHs;
 };
 
+struct ttlStatus
+{
+	int channel;
+	bool value;
+	int64 ts;
+};
+	
 class TrialCircularBuffer 
 {
 public:
 	TrialCircularBuffer();
-	TrialCircularBuffer(int numCh, float samplingRate, PeriStimulusTimeHistogramNode *p);
+	TrialCircularBuffer(TrialCircularBufferParams param_);
 	~TrialCircularBuffer();
     void updatePSTHwithTrial(Trial *trial);
 	bool contains(std::vector<int> v, int x);
 	void toggleConditionVisibility(int cond);
 	void modifyConditionVisibility(int cond, bool newstate);
-	void parseMessage(StringTS s);
+	void modifyConditionVisibilityusingConditionID(int condID, bool newstate);
+	bool parseMessage(StringTS s);
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
-	
-	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware);
+	void simulateHardwareTrial(int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, int trialType, float lengthSec);
+	void simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec);
+	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, bool rise,bool simulateTrial);
 	void addDefaultTTLConditions(Array<bool> visibility);
 	void addCondition(std::vector<String> input);
 	void lockConditions();
@@ -237,7 +287,7 @@ public:
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
 	void clearAll();
-	
+	std::vector<std::vector<bool>>  reconstructTTLchannels(int64 hardware_timestamp,int nSamples);
 	void channelChange(int electrodeID, int channelindex, int newchannel);
 	void syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes);
 	void addNewElectrode(Electrode *electrode);
@@ -245,81 +295,45 @@ public:
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
 	void setHardwareTriggerAlignmentChannel(int k);
+	TrialCircularBufferParams getParams();
+	int getNumElectrodes();
+	std::vector<int> getElectrodeChannels(int e);
+	int getElectrodeID(int index);
+	int getNumTrialsInCondition(int electrodeIndex, int channelIndex, int conditionIndex);
+	int getNumUnitsInElectrode(int electrodeIndex);
+	int getUnitID(int electrodeIndex, int unitIndex);
+	int getNumConditions();
+	void getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y);
+	Condition getCondition(int conditionIndex);
+	std::vector<XYline> getElectrodeConditionCurves(int electrodeID, int channelID);
+	std::vector<XYline> getUnitConditionCurves(int electrodeID, int unitID);
+	
+	void clearUnitStatistics(int electrodeID, int unitID);
+	void clearChanneltatistics(int electrodeID, int channelID);
 
-	int samplingRateHz;
+	juce::Colour getUnitColor(int electrodeID, int unitID);
+	int getLastTrialID();
+private:
 	bool firstTime;
-	 double postSec, preSec;
-	 float numTicksPerSecond;
-	 float binResolutionMS;
-	 float maxTrialTimeSeconds;
-	 int  maxTrialsInMemory;
-	 int trialCounter;
+	int lastTrialID;
+	float numTicksPerSecond;
+	int trialCounter;
 	int conditionCounter;
 	CriticalSection conditionMutex, psthMutex;
 	Trial currentTrial;
-	int64 MaxTrialTimeTicks;
 	String designName;
-	bool addDefaultTTLconditions;
-
 	int hardwareTriggerAlignmentChannel;
-	float ttlSupressionTimeSec;
-	float ttlTrialLengthSec;
-
+	int64 lastSimulatedTrialTS;
 	std::vector<int64> lastTTLts;
+	std::vector<bool> ttlChannelStatus;
 	std::queue<Trial> aliveTrials;
 	std::vector<Condition> conditions;
 	std::vector<ElectrodePSTH> electrodesPSTH;
 	SmartContinuousCircularBuffer *lfpBuffer;
+	SmartContinuousCircularBuffer *ttlBuffer;
+	std::queue<ttlStatus> ttlQueue;
+	TrialCircularBufferParams params;
   
-	/*
-	void AddDefaultTTLConditions();
-	void AddCondition(const Condition &c);
-
-	std::vector<String> SplitString(String S, char sep);
-
-	void LockConditions();
-	void UnlockConditions();
-
-	void ClearStats(int channel, int unitID);
-	void ParseMessage(Event E);
-	Condition fnParseCondition(std::vector<String> items);
-	void AddEvent(Event E);
-	void run();
-	void UpdateConditionsWithTrial(Trial trial);
-	void UpdateTrialWithLFPData(Trial t);
-	void UpdateTrialWithSpikeData(Trial trial);
-	void AddSpikeToSpikeBuffer(int channel, int UnitID, double ts) ;
-
-	bool UnitAlive(int channel, int UnitID);
-	void RemoveUnitStats(int channel, int UnitID);
-
-	bool Contains(std::vector<int> vec, int value);
-
-	//int debug;
-	double MAX_TRIAL_TIME_SEC;
-	double AfterSec, BeforeSec;
-	String DesignName;
-	
-	Trial ttlTrial;
-	std::vector<double> lastTTLtrialTS;
-	thread_safe_queue<Event> eventQueue;
-	std::queue<Trial> AliveTrials;
-	juce::Time timer;
-	double TTL_Trial_Length_Sec;
-	double TTL_Trial_Inhibition_Sec;
-	std::vector<Condition> conditions;
-	int numCh, numTTLch;
-	//DWORD StatThread;
-	bool ProcessThreadRunning;
-	int numTrials;
-	double avgTrialLengthSec;
-	//int num_recv_trials = 0;
-	std::vector<std::list<SpikeCircularBuffer>> spikeBuffer;
-	ContinuousCircularBuffer *lfpBuffer;
-	CriticalSection conditionsMutex;
-	*/
-private:
-	PeriStimulusTimeHistogramNode *processor;
 };
 
 

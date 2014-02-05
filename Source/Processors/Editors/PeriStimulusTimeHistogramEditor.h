@@ -26,7 +26,8 @@
 
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
-
+#include "../Visualization/MatlabLikePlot.h""
+#include "../PeriStimulusTimeHistogramNode.h"
 #include "GenericEditor.h"
 #include "../../UI/UIComponent.h"
 #include "../../UI/DataViewport.h"
@@ -35,9 +36,10 @@
 
 class Condition;
 
-class TrialCircularBuffer;
 class PeriStimulusTimeHistogramNode;
 class PeriStimulusTimeHistogramDisplay;
+class TrialCircularBuffer;
+class MatlabLikePlot;
 
 struct zoom
 {
@@ -51,6 +53,7 @@ struct zoom
         LFP_PLOT = 1,
 		EYE_PLOT = 2
     };
+	/*
 
 class XYPlot : public Component
 {
@@ -124,9 +127,10 @@ private:
 	bool zooming;
 	std::list<zoom> zoomMemory;
 	PeriStimulusTimeHistogramDisplay* display;
-};
-class PeriStimulusTimeHistogramCanvas;
+};*/
 
+class PeriStimulusTimeHistogramCanvas;
+class GenericPlot;
 // this component holds all the individual PSTH plots
 class PeriStimulusTimeHistogramDisplay : public Component
 {
@@ -138,7 +142,7 @@ public:
 	void setAutoRescale(bool state);
 	void resized();
 
-	std::vector<XYPlot*> psthPlots;
+	std::vector<GenericPlot*> psthPlots;
 	void paint(Graphics &g);
 	void refresh();
 	void focusOnPlot(int plotIndex);
@@ -286,7 +290,45 @@ private:
 };
 
 
+class GenericPlot : public Component
+{
+public:
+	GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType, 
+					TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool _rasterMode);
+	void resized();
+	void paint(Graphics &g);
+	int getRow() {return row;}
+	int getCol() {return col;}
+	int getPlotID() {return plotID;}
+	bool isFullScreen() {return fullScreenMode;}
+	void toggleFullScreen(bool state) {fullScreenMode = state;}
+	void setSmoothState(bool state);
+	void setAutoRescale(bool state);
+	void buildSmoothKernel(float gaussianStandardDeviationMS);
+	
+	void handleEventFromMatlabLikePlot(String event);
+private:
+	void paintSpikeRaster(Graphics &g);
+	void paintSpikes(Graphics &g);
+	void paintLFPraster(Graphics &g);
+	void paintLFP(Graphics &g);
 
+
+	ScopedPointer<MatlabLikePlot> mlp;
+	PeriStimulusTimeHistogramDisplay* display;
+	TrialCircularBuffer *tcb;
+
+	int plotID;
+	xyPlotTypes plotType; 
+	int electrodeID;
+	int subID;
+	int row, col;
+	bool rasterMode;
+	bool fullScreenMode;
+	bool smoothPlot;
+	float guassianStandardDeviationMS;
+	std::vector<float> smoothKernel; 
+};
 
 
 

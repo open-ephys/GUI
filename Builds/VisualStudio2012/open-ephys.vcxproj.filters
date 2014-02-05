@@ -415,6 +415,9 @@
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\OscilloscopeNode.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\NotchFilterNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
@@ -505,6 +508,9 @@
     <ClCompile Include="..\..\Source\Processors\Utilities\Splitter.cpp">
       <Filter>open-ephys\Source\Processors\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Visualization\MatlabLikePlot.cpp">
+      <Filter>open-ephys\Source\Processors\Visualization</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
@@ -528,6 +534,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\EventNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\OscilloscopeEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\NotchFilterEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
@@ -1989,6 +1998,9 @@
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\OscilloscopeNode.h">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\NotchFilterNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
@@ -2082,6 +2094,9 @@
     <ClInclude Include="..\..\Source\Processors\Utilities\Splitter.h">
       <Filter>open-ephys\Source\Processors\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Visualization\MatlabLikePlot.h">
+      <Filter>open-ephys\Source\Processors\Visualization</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Visualization\SpikeDetectCanvas.h">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClInclude>
@@ -2108,6 +2123,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\EventNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\OscilloscopeEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\NotchFilterEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>

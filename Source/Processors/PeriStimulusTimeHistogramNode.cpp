@@ -86,13 +86,35 @@ AudioProcessorEditor* PeriStimulusTimeHistogramNode::createEditor()
 
 }
 
+void PeriStimulusTimeHistogramNode::allocateTrialCircularBuffer()
+{
+	TrialCircularBufferParams params;
+	params.numChannels = getNumInputs();
+	params.numTTLchannels = 8;
+	params.sampleRate = getSampleRate();
+	params.maxTrialTimeSeconds = 10.0;
+	params.preSec = 0.5;
+	params.postSec = 0.5;
+	params.maxTrialsInMemory = 200;
+	params.binResolutionMS = 1;
+	params.desiredSamplingRateHz = 600;
+	params.ttlSupressionTimeSec = 1.0;
+	params.ttlTrialLengthSec = 2;
+	params.autoAddTTLconditions = true;
+	params.buildTrialsPSTH = true;
+	params.reconstructTTL = false;
+	params.approximate = true;
+
+	trialCircularBuffer = new TrialCircularBuffer(params);
+}
+
 void PeriStimulusTimeHistogramNode::updateSettings()
 {
 	delete trialCircularBuffer;
 	trialCircularBuffer = nullptr;
 	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)
 	{
-		trialCircularBuffer = new TrialCircularBuffer(getNumInputs(),getSampleRate(),this);
+		allocateTrialCircularBuffer();
 		syncInternalDataStructuresWithSpikeSorter();
 	}
 
@@ -139,7 +161,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
 	
 
 	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)  {
-		trialCircularBuffer = new TrialCircularBuffer(getNumInputs(),getSampleRate(),this);
+		allocateTrialCircularBuffer();
 		syncInternalDataStructuresWithSpikeSorter();	
 	} else if (trialCircularBuffer != nullptr)
 	{
@@ -350,8 +372,9 @@ void PeriStimulusTimeHistogramNode::modifyTimeRange(double preSec_, double postS
 			// 1. We have it in our internal structure 
 			// 2. All channels match
 			// 3. We have all sorted unit information
-			trialCircularBuffer->preSec = preSec_;
-			trialCircularBuffer->postSec = postSec_;
+			TrialCircularBufferParams params = trialCircularBuffer->getParams();
+			params.preSec = preSec_;
+			params.postSec = postSec_;
 			trialCircularBuffer->syncInternalDataStructuresWithSpikeSorter(electrodes);
 		}
 	}
@@ -363,7 +386,12 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 	if (eventType == NETWORK)
 	{
 		StringTS s(event);
-  		trialCircularBuffer->parseMessage(s);
+  		bool redrawNeeded = trialCircularBuffer->parseMessage(s);
+		if (redrawNeeded ){
+			PeriStimulusTimeHistogramEditor* ed = (PeriStimulusTimeHistogramEditor*) getEditor();
+			ed->updateCanvas();
+		}
+			
 		if (isRecording && saveNetworkEvents)
 		{
 			dumpNetworkEventToDisk(s.getString(),s.timestamp);
@@ -418,7 +446,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 		   memcpy(&ttl_timestamp_software, dataptr+4, 8);
 		   memcpy(&ttl_timestamp_hardware, dataptr+12, 8);
 		   if (ttl_raise)
-				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software,ttl_timestamp_hardware);
+				trialCircularBuffer->addTTLevent(channel,ttl_timestamp_software,ttl_timestamp_hardware, true, false);
 		   if (isRecording && saveTTLs)
 			   dumpTTLeventToDisk(channel,ttl_raise,ttl_timestamp_software,ttl_timestamp_hardware,samplePosition );
 	}

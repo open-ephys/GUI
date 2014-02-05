@@ -3,7 +3,7 @@
 <SETTINGS>
   <INFO>
     <VERSION>0.1</VERSION>
-    <DATE>27 Jan 2014 12:26:00</DATE>
+    <DATE>3 Feb 2014 12:59:37</DATE>
     <OS>Windows 7</OS>
     <MACHINE>ALPHA</MACHINE>
   </INFO>
@@ -154,7 +154,7 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.57784514" HighCut="7603.76512"
+      <EDITOR isCollapsed="0" SampleRate="17" LowCut="1.83929655" HighCut="7603.76512"
               ADCsOn="1" AudioOutputL="1" AudioOutputR="1" NoiseSlicer="0"
               TTLFastSettle="2" DAC_TTL="1" DAC_HPF="8"/>
     </PROCESSOR>
@@ -453,7 +453,9 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EDITOR isCollapsed="0"/>
+      <EDITOR isCollapsed="0" Type="MergerEditor">
+        <SENDS EventsA="1" EventsB="1" ContinuousA="1" ContinuousB="1"/>
+      </EDITOR>
     </PROCESSOR>
     <PROCESSOR name="Utilities/Splitter" insertionPoint="1" NodeId="103">
       <CHANNEL name="0" number="0">
@@ -1072,23 +1074,9 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
-      <EDITOR isCollapsed="0"/>
+      <EDITOR isCollapsed="0" Type="MergerEditor">
+        <SENDS EventsA="0" EventsB="1" ContinuousA="1" ContinuousB="1"/>
+      </EDITOR>
     </PROCESSOR>
     <PROCESSOR name="Filters/Channel Map" insertionPoint="1" NodeId="111">
       <CHANNEL name="0" number="0">
@@ -1227,22 +1215,6 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0" Type="ChannelMappingEditor">
         <SETTING Type="visibleChannels" Value="86"/>
         <CHANNEL Number="0" Mapping="1" Reference="-1" Enabled="1"/>
@@ -1474,22 +1446,6 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0"/>
     </PROCESSOR>
     <PROCESSOR name="Sinks/Spike Viewer" insertionPoint="1" NodeId="113">
@@ -1629,28 +1585,13 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0">
         <SPIKE_DISPLAY saveSpikes="0"/>
       </EDITOR>
     </PROCESSOR>
     <SWITCH number="1"/>
-    <PROCESSOR name="Sinks/LFP Viewer" insertionPoint="1" NodeId="118">
+    <PROCESSOR name="Sinks/Oscilloscope" insertionPoint="1" NodeId="119">
+      <OSCILLOSCOPE/>
       <CHANNEL name="0" number="0">
         <SELECTIONSTATE param="1" record="0" audio="0"/>
       </CHANNEL>
@@ -2800,7 +2741,7 @@
         </ELECTRODE_COUNTER>
         <ELECTRODE name="Single Electrode 1" numChannels="1" prePeakSamples="8"
                    postPeakSamples="32" advancerID="1" depthOffsetMM="0" electrodeID="1">
-          <SUBCHANNEL ch="0" thresh="-100.000023" isActive="1"/>
+          <SUBCHANNEL ch="0" thresh="-100" isActive="1"/>
           <SPIKESORTING numBoxUnits="1" numPCAUnits="1" selectedUnit="-1" selectedBox="-1">
             <BOXUNIT UnitID="1" ColorR="255" ColorG="255" ColorB="0" NumBoxes="1">
               <BOX ch="0" x="246" y="57" w="300" h="40"/>
@@ -2836,48 +2777,48 @@
               <POLYGON_POINT pointX="422.064636" pointY="-169.61084"/>
             </PCAUNIT>
           </SPIKESORTING>
-          <PCA numChannels="1" waveformLength="40" pc1min="-2564.6853" pc2min="-5886.42236"
-               pc1max="1981.823" pc2max="5065.86377" PCAjobFinished="0" PCAcomputed="1">
-            <PCA_DIM pc1="-0.00200219243" pc2="0.0318231061"/>
-            <PCA_DIM pc1="-0.0250572618" pc2="0.0131662367"/>
-            <PCA_DIM pc1="-0.0358281247" pc2="-0.0217407495"/>
-            <PCA_DIM pc1="-0.0475742072" pc2="-0.0478078052"/>
-            <PCA_DIM pc1="-0.0843538418" pc2="-0.0470483899"/>
-            <PCA_DIM pc1="-0.165284455" pc2="-0.0152879907"/>
-            <PCA_DIM pc1="-0.299991369" pc2="0.0120631792"/>
-            <PCA_DIM pc1="-0.426963598" pc2="0.216768771"/>
-            <PCA_DIM pc1="-0.496851921" pc2="0.226269275"/>
-            <PCA_DIM pc1="-0.420706958" pc2="0.164086968"/>
-            <PCA_DIM pc1="-0.271109045" pc2="-0.0211252682"/>
-            <PCA_DIM pc1="-0.173950225" pc2="-0.433079451"/>
-            <PCA_DIM pc1="-0.124452718" pc2="-0.539423943"/>
-            <PCA_DIM pc1="-0.125070319" pc2="-0.473343611"/>
-            <PCA_DIM pc1="-0.139954224" pc2="-0.296569407"/>
-            <PCA_DIM pc1="-0.146750256" pc2="-0.109916978"/>
-            <PCA_DIM pc1="-0.139690682" pc2="0.0157513674"/>
-            <PCA_DIM pc1="-0.123396456" pc2="0.0669092089"/>
-            <PCA_DIM pc1="-0.102312647" pc2="0.0689145252"/>
-            <PCA_DIM pc1="-0.0735054463" pc2="0.0481248386"/>
-            <PCA_DIM pc1="-0.0396146514" pc2="0.0225987267"/>
-            <PCA_DIM pc1="-0.0191349238" pc2="0.00324239163"/>
-            <PCA_DIM pc1="-0.014000427" pc2="-0.00611044932"/>
-            <PCA_DIM pc1="-0.00655109482" pc2="-0.00523937726"/>
-            <PCA_DIM pc1="0.016322365" pc2="0.00934596825"/>
-            <PCA_DIM pc1="0.0447489917" pc2="0.0347727723"/>
-            <PCA_DIM pc1="0.0587851889" pc2="0.0564380102"/>
-            <PCA_DIM pc1="0.0555972196" pc2="0.0686456338"/>
-            <PCA_DIM pc1="0.0515186638" pc2="0.0781290531"/>
-            <PCA_DIM pc1="0.0573547557" pc2="0.0879241973"/>
-            <PCA_DIM pc1="0.0682739168" pc2="0.0953843296"/>
-            <PCA_DIM pc1="0.0632878765" pc2="0.0924857184"/>
-            <PCA_DIM pc1="0.0326539129" pc2="0.070799686"/>
-            <PCA_DIM pc1="-0.0106730964" pc2="0.0338462628"/>
-            <PCA_DIM pc1="-0.03563416" pc2="-6.23287633e-007"/>
-            <PCA_DIM pc1="-0.0318149514" pc2="-0.012705165"/>
-            <PCA_DIM pc1="-0.0219796821" pc2="-0.000214142026"/>
-            <PCA_DIM pc1="-0.0290207695" pc2="0.0242171362"/>
-            <PCA_DIM pc1="-0.0535446517" pc2="0.0443002917"/>
-            <PCA_DIM pc1="-0.0732052028" pc2="0.0579178892"/>
+          <PCA numChannels="1" waveformLength="40" pc1min="-2574.03711" pc2min="-2634.5647"
+               pc1max="1101.56165" pc2max="2663.13647" PCAjobFinished="0" PCAcomputed="1">
+            <PCA_DIM pc1="-0.016671814" pc2="0.0129682273"/>
+            <PCA_DIM pc1="-0.0409871377" pc2="0.0396341383"/>
+            <PCA_DIM pc1="-0.100488283" pc2="0.102596216"/>
+            <PCA_DIM pc1="-0.195362672" pc2="0.147280514"/>
+            <PCA_DIM pc1="-0.256596535" pc2="0.117971584"/>
+            <PCA_DIM pc1="-0.169007063" pc2="0.0162053704"/>
+            <PCA_DIM pc1="0.10671889" pc2="-0.0685784444"/>
+            <PCA_DIM pc1="0.427643359" pc2="-0.0661714748"/>
+            <PCA_DIM pc1="0.567005754" pc2="-0.0201733205"/>
+            <PCA_DIM pc1="0.444297314" pc2="-0.0380418785"/>
+            <PCA_DIM pc1="0.180706903" pc2="-0.156599432"/>
+            <PCA_DIM pc1="-0.0560544021" pc2="-0.310731113"/>
+            <PCA_DIM pc1="-0.176179722" pc2="-0.410020709"/>
+            <PCA_DIM pc1="-0.186904371" pc2="-0.405775994"/>
+            <PCA_DIM pc1="-0.142157584" pc2="-0.298740864"/>
+            <PCA_DIM pc1="-0.0920684636" pc2="-0.12825802"/>
+            <PCA_DIM pc1="-0.0588061139" pc2="0.0414315127"/>
+            <PCA_DIM pc1="-0.0435691923" pc2="0.165629432"/>
+            <PCA_DIM pc1="-0.0398116335" pc2="0.241560742"/>
+            <PCA_DIM pc1="-0.0379973091" pc2="0.277800649"/>
+            <PCA_DIM pc1="-0.031967178" pc2="0.275220245"/>
+            <PCA_DIM pc1="-0.0250903498" pc2="0.244127318"/>
+            <PCA_DIM pc1="-0.01962501" pc2="0.196310505"/>
+            <PCA_DIM pc1="-0.0146127567" pc2="0.14345926"/>
+            <PCA_DIM pc1="-0.0106608793" pc2="0.0936576799"/>
+            <PCA_DIM pc1="-0.00903010927" pc2="0.0603044257"/>
+            <PCA_DIM pc1="-0.00956860185" pc2="0.0455433764"/>
+            <PCA_DIM pc1="-0.0115137268" pc2="0.0368147977"/>
+            <PCA_DIM pc1="-0.0131369485" pc2="0.0229021609"/>
+            <PCA_DIM pc1="-0.0121566327" pc2="0.00991092809"/>
+            <PCA_DIM pc1="-0.0097729899" pc2="0.0113813765"/>
+            <PCA_DIM pc1="-0.00870428327" pc2="0.0243746378"/>
+            <PCA_DIM pc1="-0.00717356801" pc2="0.0291369539"/>
+            <PCA_DIM pc1="-0.00295728259" pc2="0.0179467723"/>
+            <PCA_DIM pc1="0.00195603073" pc2="0.00381955551"/>
+            <PCA_DIM pc1="0.0038311237" pc2="-0.00733136851"/>
+            <PCA_DIM pc1="0.00333483634" pc2="-0.0165867154"/>
+            <PCA_DIM pc1="-0.00059313461" pc2="-0.0251481384"/>
+            <PCA_DIM pc1="-0.00611732947" pc2="-0.0338312984"/>
+            <PCA_DIM pc1="-0.0089498302" pc2="-0.0420746915"/>
           </PCA>
         </ELECTRODE>
       </SPIKEDETECTOR>
@@ -3169,22 +3110,6 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0"/>
     </PROCESSOR>
     <PROCESSOR name="Sinks/PSTH" insertionPoint="1" NodeId="114">
@@ -3326,22 +3251,6 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
         <WINDOW Active="1" x="940" y="35" width="842" height="765"/>
@@ -3485,28 +3394,12 @@
       <EVENTCHANNEL name="13" number="13"/>
       <EVENTCHANNEL name="14" number="14"/>
       <EVENTCHANNEL name="15" number="15"/>
-      <EVENTCHANNEL name="16" number="16"/>
-      <EVENTCHANNEL name="17" number="17"/>
-      <EVENTCHANNEL name="18" number="18"/>
-      <EVENTCHANNEL name="19" number="19"/>
-      <EVENTCHANNEL name="20" number="20"/>
-      <EVENTCHANNEL name="21" number="21"/>
-      <EVENTCHANNEL name="22" number="22"/>
-      <EVENTCHANNEL name="23" number="23"/>
-      <EVENTCHANNEL name="24" number="24"/>
-      <EVENTCHANNEL name="25" number="25"/>
-      <EVENTCHANNEL name="26" number="26"/>
-      <EVENTCHANNEL name="27" number="27"/>
-      <EVENTCHANNEL name="28" number="28"/>
-      <EVENTCHANNEL name="29" number="29"/>
-      <EVENTCHANNEL name="30" number="30"/>
-      <EVENTCHANNEL name="31" number="31"/>
       <EDITOR isCollapsed="0" Type="Visualizer">
         <TAB Active="0"/>
         <WINDOW Active="1" x="16" y="530" width="900" height="604"/>
         <LFPDISPLAY Range="4" Timebase="5" Spread="5" colorGrouping="1" isInverted="0"
-                    EventButtonState="1" ChannelDisplayState="1111111111111111111111111111111100111111"
-                    ScrollX="0" ScrollY="1486"/>
+                    EventButtonState="1" ChannelDisplayState="1111111111111111111111111111111111111111"
+                    ScrollX="0" ScrollY="0"/>
       </EDITOR>
     </PROCESSOR>
   </SIGNALCHAIN>
@@ -3517,7 +3410,7 @@
     </PROCESSOR>
   </SIGNALCHAIN>
   <AUDIO bufferSize="1024"/>
-  <CONTROLPANEL isOpen="0" prependText="" appendText=""/>
+  <CONTROLPANEL isOpen="1" prependText="ttl" appendText=""/>
   <PROCESSORLIST>
     <COLOR ID="801" R="59" G="59" B="59"/>
     <COLOR ID="804" R="241" G="90" B="41"/>

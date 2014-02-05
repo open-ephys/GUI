@@ -67,7 +67,7 @@ bool FileReader::isReady()
 
 float FileReader::getDefaultSampleRate()
 {
-    return 40000.0f;
+    return 30000.0f;
 }
 
 int FileReader::getDefaultNumOutputs()
@@ -177,50 +177,59 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
     //     samplesNeeded = samplesNeeded + 2;
     //     counter = 0;
     // }
-
+	size_t numRead ;
 	if (0)
 	{
-		// generate perfect sine waves for debugging purposes...
-		int numRead = samplesNeeded*buffer.getNumChannels();
+		// generate perfect sine waves/ramps for debugging purposes...
+		numRead = samplesNeeded*buffer.getNumChannels();
 		static float counter = 0;
 
 		float Amplitude = 500;
+		bool ramps = true;
 		static bool rampup = true;
 		for (int k=0;k<samplesNeeded;k++)
 		{
-			//	counter++;
-
+			
+			if (ramps)
+			{
+				
 			// generate perfect ramps
 			if (rampup)
 			{
-				counter+=0.1;
+				counter+=1;
 				if (counter >=1000)
 					rampup = false;
 			} else 
 			{
-				counter -= 0.1;
+				counter -= 1;
 				if (counter <= 0) {
 					counter = 0;
 					rampup = true;
 				}
 			}
+			}
 			for (int ch=0;ch<buffer.getNumChannels();ch++)
 			{
-				// generate perfect sine waves
-				//readBuffer[k*buffer.getNumChannels()+ch] = sin((ch+1)*float(counter)/40000.0F*2.0*3.14)*Amplitude/getDefaultBitVolts();
-
-
-				readBuffer[k*buffer.getNumChannels()+ch] = counter/getDefaultBitVolts();
+				if (ramps)
+				{
+					readBuffer[k*buffer.getNumChannels()+ch] = counter/getDefaultBitVolts();
+				} else
+				{
+					// generate perfect sine waves
+					readBuffer[k*buffer.getNumChannels()+ch] = sin((ch+1)*float(counter)/40000.0F*2.0*3.14)*Amplitude/getDefaultBitVolts();
+				}
+				
 			}
 		}
+	} else
+	{
+		if (ftell(input) >= lengthOfInputFile - samplesNeeded)
+		{
+			rewind(input);
+		}
+
+		 numRead = fread(readBuffer, 2, samplesNeeded*buffer.getNumChannels(), input);
 	}
-
-  if (ftell(input) >= lengthOfInputFile - samplesNeeded)
-    {
-        rewind(input);
-    }
-
-    size_t numRead = fread(readBuffer, 2, samplesNeeded*buffer.getNumChannels(), input);
 
     int chan = 0;
     int samp = 0;
@@ -247,7 +256,7 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
         *buffer.getSampleData(chan++, samp) = -sample * getDefaultBitVolts();
 
     }
-
+	 timestamp++;
     nSamples = samplesNeeded;
 
 }

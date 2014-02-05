@@ -221,50 +221,52 @@ float ISCANnode::getFixationSpotY()
 void ISCANnode::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
 	if (eventType == TIMESTAMP)
-    {
-          const uint8* dataptr = event.getRawData();
-	      memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
-		  memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
+	{
+		const uint8* dataptr = event.getRawData();
+		memcpy(&hardware_timestamp, dataptr + 4, 8); // remember to skip first four bytes
+		memcpy(&software_timestamp, dataptr + 12, 8); // remember to skip first four bytes
 	} else if (eventType == NETWORK)
 	{
 		// CalibrateEyePosition
 		StringTS s(event);
 		std::vector<String> splitted = s.splitString(' ');
-		if (splitted[0] == "FixationSpotPosition")
+		if (splitted.size() > 0)
 		{
-			fixateXpos = splitted[1].getFloatValue();
-			fixateYpos = splitted[2].getFloatValue();
-			int screenWidth = splitted[3].getFloatValue();
-			int screenHeight = splitted[4].getFloatValue();
-		}
-  		if (splitted[0] == "CalibrateEyePosition")
-		{
-			fixateXpos = splitted[1].getFloatValue();
-			fixateYpos = splitted[2].getFloatValue();
-			int screenWidth = splitted[3].getFloatValue();
-			int screenHeight = splitted[4].getFloatValue();
-
-			if (calibrationMode == 1)
+			if (splitted[0] == "FixationSpotPosition")
 			{
-				// easy hack. User manually inputs the gain. We only compute offsets.
-				screenCenterX = screenWidth/2;
-				screenCenterY = screenHeight/2;
-				offsetX = prevEyePosition.x - (fixateXpos-screenCenterX) / gainX;
-				offsetY = prevEyePosition.y - (fixateYpos-screenCenterY) / gainY;
-			} else if (calibrationMode == 2)
-			{
-				// TODO...
-				// We use a linear model that maps analog signal back to pixel coordinates:
-				// x (pixel) = a0_x + a1_x * analog_x
-				// y (pixel) = a0_y + a1_y * analog_y
-				// this means we need at least two calibrate eye position events to solve this equation.
-				// a1_x = (x_pix1 - x_pix2) / (analog_x1 - analog_x2)
-				// a0_x = x_pix1 - a1_x*analog_x1
-				//
-				// in the future, this should be replaced with a proper LSQ solution that uses svd to compute the psedou inverse.
+				fixateXpos = splitted[1].getFloatValue();
+				fixateYpos = splitted[2].getFloatValue();
+				int screenWidth = splitted[3].getFloatValue();
+				int screenHeight = splitted[4].getFloatValue();
 			}
+			if (splitted[0] == "CalibrateEyePosition")
+			{
+				fixateXpos = splitted[1].getFloatValue();
+				fixateYpos = splitted[2].getFloatValue();
+				int screenWidth = splitted[3].getFloatValue();
+				int screenHeight = splitted[4].getFloatValue();
 
+				if (calibrationMode == 1)
+				{
+					// easy hack. User manually inputs the gain. We only compute offsets.
+					screenCenterX = screenWidth/2;
+					screenCenterY = screenHeight/2;
+					offsetX = prevEyePosition.x - (fixateXpos-screenCenterX) / gainX;
+					offsetY = prevEyePosition.y - (fixateYpos-screenCenterY) / gainY;
+				} else if (calibrationMode == 2)
+				{
+					// TODO...
+					// We use a linear model that maps analog signal back to pixel coordinates:
+					// x (pixel) = a0_x + a1_x * analog_x
+					// y (pixel) = a0_y + a1_y * analog_y
+					// this means we need at least two calibrate eye position events to solve this equation.
+					// a1_x = (x_pix1 - x_pix2) / (analog_x1 - analog_x2)
+					// a0_x = x_pix1 - a1_x*analog_x1
+					//
+					// in the future, this should be replaced with a proper LSQ solution that uses svd to compute the psedou inverse.
+				}
 
+			}
 		}
 
 	}

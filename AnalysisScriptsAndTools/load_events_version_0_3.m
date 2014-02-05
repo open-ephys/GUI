@@ -96,6 +96,7 @@ EYE_POSITION = 8;
 
 
 %% main loop (non optimized)
+AllWaveforms = [];
 timestampCounter = 1;
 acNetworkEvents = cell(1,MAX_NUMBER_OF_NETWORK_EVENTS);
 networkEventsTS = zeros(1,MAX_NUMBER_OF_NETWORK_EVENTS);
@@ -270,6 +271,7 @@ if ~isempty(Spikes)
     end
 else
     AllWaveforms = [];
+    sortedUnits = [];
 end
 %% Trial matrix
 state = 0;
@@ -278,7 +280,7 @@ TRIAL_TYPE = 'TrialType';
 TRIAL_ALIGN = 'TrialAlign';
 TRIAL_END = 'TrialEnd';
 TRIAL_OUTCOME = 'TrialOutcome';
-trialTable = nans(0,5); % [trial type, trial start TS, trial align TS, trial end TS, trial outcome] (all TS are in software)
+trialTable = NaN*ones(0,5); % [trial type, trial start TS, trial align TS, trial end TS, trial outcome] (all TS are in software)
 trialCounter = 1;
 for k=1:length(acNetworkEvents)
     if strncmpi(acNetworkEvents{k},TRIAL_START,length(TRIAL_START))
@@ -313,7 +315,7 @@ for k=1:length(acNetworkEvents)
             end
             state = 0;
             trialCounter=trialCounter+1;
-            trialTable(trialCounter,:) = nans(1,5);
+            trialTable(trialCounter,:) = NaN*ones(1,5);
         end
     end
   if strncmpi(acNetworkEvents{k},TRIAL_OUTCOME,length(TRIAL_OUTCOME))    

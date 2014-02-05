@@ -61,7 +61,8 @@ public:
 
     void syncInternalDataStructuresWithSpikeSorter();
 
-
+	
+	void allocateTrialCircularBuffer();
     void handleEvent(int, MidiMessage&, int);
 
     void updateSettings();

@@ -63,6 +63,7 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/OscilloscopeNode_c021b3e0.o \
   $(OBJDIR)/NotchFilterNode_2542f9ad.o \
   $(OBJDIR)/ISCAN_d4969b61.o \
   $(OBJDIR)/PeriStimulusTimeHistogramNode_6a16258e.o \
@@ -93,6 +94,7 @@ OBJECTS := \
   $(OBJDIR)/RecordControl_3e1c6062.o \
   $(OBJDIR)/Merger_2f90542e.o \
   $(OBJDIR)/Splitter_6e27a57b.o \
+  $(OBJDIR)/MatlabLikePlot_fb09c37f.o \
   $(OBJDIR)/SpikeDetectCanvas_a3370a31.o \
   $(OBJDIR)/SpikeObject_24e8c655.o \
   $(OBJDIR)/SpikeDisplayCanvas_b208ff6e.o \
@@ -101,6 +103,7 @@ OBJECTS := \
   $(OBJDIR)/SpikeDetector_300d85e7.o \
   $(OBJDIR)/AudioNode_94606ff3.o \
   $(OBJDIR)/EventNode_95c842b7.o \
+  $(OBJDIR)/OscilloscopeEditor_796fe134.o \
   $(OBJDIR)/NotchFilterEditor_d326734f.o \
   $(OBJDIR)/NetworkEventsEditor_fd22826.o \
   $(OBJDIR)/AdvancerEditor_6d27d95.o \
@@ -300,6 +303,11 @@ $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	@echo "Compiling AudioComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/OscilloscopeNode_c021b3e0.o: ../../Source/Processors/OscilloscopeNode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OscilloscopeNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/NotchFilterNode_2542f9ad.o: ../../Source/Processors/NotchFilterNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling NotchFilterNode.cpp"
@@ -450,6 +458,11 @@ $(OBJDIR)/Splitter_6e27a57b.o: ../../Source/Processors/Utilities/Splitter.cpp
 	@echo "Compiling Splitter.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/MatlabLikePlot_fb09c37f.o: ../../Source/Processors/Visualization/MatlabLikePlot.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling MatlabLikePlot.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/SpikeDetectCanvas_a3370a31.o: ../../Source/Processors/Visualization/SpikeDetectCanvas.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SpikeDetectCanvas.cpp"
@@ -488,6 +501,11 @@ $(OBJDIR)/AudioNode_94606ff3.o: ../../Source/Processors/AudioNode.cpp
 $(OBJDIR)/EventNode_95c842b7.o: ../../Source/Processors/EventNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling EventNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OscilloscopeEditor_796fe134.o: ../../Source/Processors/Editors/OscilloscopeEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OscilloscopeEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/NotchFilterEditor_d326734f.o: ../../Source/Processors/Editors/NotchFilterEditor.cpp
