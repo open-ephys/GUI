@@ -275,7 +275,7 @@ public:
 	void addSpikeToSpikeBuffer(SpikeObject newSpike);
 	void process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp);
 	void simulateHardwareTrial(int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, int trialType, float lengthSec);
-	void simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec);
+	//void simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec);
 	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, bool rise,bool simulateTrial);
 	void addDefaultTTLConditions(Array<bool> visibility);
 	void addCondition(std::vector<String> input);
@@ -312,8 +312,15 @@ public:
 																 std::vector<float> &x_time, int &numTrialTypes, 
 																 std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax);
 
+
+	std::vector<std::vector<float>> getTrialsAverageChannelResponse(int electrodeID, int channelID, 
+																	std::vector<float> &x_time, int &numTrialTypes, 
+																	std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax);
+
 	juce::Image getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue);
-	int getNumTrialTypes(int electrodeID, int unitID);
+	juce::Image getTrialsAverageChannelResponseAsJuceImage(int electrodeID, int channelID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue);
+	int getNumTrialTypesInUnit(int electrodeID, int unitID);
+	int getNumTrialTypesInChannel(int electrodeID, int channelID);
 	void clearUnitStatistics(int electrodeID, int unitID);
 	void clearChanneltatistics(int electrodeID, int channelID);
 	 std::vector<float> buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS);
@@ -321,6 +328,9 @@ public:
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
 private:
+	juce::Image getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	
+													std::vector<int> numTrialRepeats,	std::vector<std::vector<float>> trialResponseMatrix, float &maxValue);
+
 	std::vector<float> smooth(std::vector<float> y, std::vector<float> smoothKernel, int xmin, int xmax);
 
 	bool firstTime;

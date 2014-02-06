@@ -1728,6 +1728,8 @@ GenericPlot::GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xy
 	}
 	else
 		mlp->setImageMode(false);
+
+
 	addAndMakeVisible(mlp);
 
 	if (plotType == SPIKE_PLOT) 
@@ -1757,7 +1759,7 @@ void GenericPlot::resized()
 
 void GenericPlot::paintSpikeRaster(Graphics &g)
 {
-	int numTrialTypes = tcb->getNumTrialTypes(electrodeID, subID);
+	int numTrialTypes = tcb->getNumTrialTypesInUnit(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
 		float xmin,xmax,ymin,ymax,maxValue;
@@ -1783,7 +1785,14 @@ void GenericPlot::paintSpikes(Graphics &g)
 
 void GenericPlot::paintLFPraster(Graphics &g)
 {
-
+	int numTrialTypes = tcb->getNumTrialTypesInChannel(electrodeID, subID);
+	if (numTrialTypes > 0)
+	{
+		float xmin,xmax,ymin,ymax,maxValue;
+		mlp->getRange(xmin,xmax,ymin,ymax);
+		juce::Image rasterImage = tcb->getTrialsAverageChannelResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
+		mlp->drawImage(rasterImage,maxValue);
+	}
 }
 
 void GenericPlot::paintLFP(Graphics &g)

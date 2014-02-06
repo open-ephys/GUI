@@ -1898,7 +1898,7 @@ void TrialCircularBuffer::reallocate(int numChannels)
 	ttlBuffer->reallocate(numChannels);
 
 }
-
+/*
 
 void TrialCircularBuffer::simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec)
 {
@@ -1924,7 +1924,7 @@ void TrialCircularBuffer::simulateTrial(int64 ttl_timestamp_software, int trialT
 	aliveTrials.push(ttlTrial);
 }
 
-
+*/
 void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, int trialType, float lengthSec)
 {
 	int64 tickdiff = ttl_timestamp_software- lastSimulatedTrialTS;
@@ -1955,11 +1955,6 @@ void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int
 	}
 }
 
-void TrialCircularBuffer::simulateTTLtrial(int channel, int64 ttl_timestamp_software)
-{
-	simulateTrial(ttl_timestamp_software, TTL_TRIAL_OFFSET + channel,params.ttlTrialLengthSec*numTicksPerSecond);
-}
-
 void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, int64 ttl_timestamp_hardware, bool rise, bool simulateTrial)
 {
 	// measure how much time passed since last ttl on this channel.
@@ -1986,8 +1981,6 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, 
 			{
 				// simulate a ttl trial 
 				simulateHardwareTrial(ttl_timestamp_software,ttl_timestamp_hardware, TTL_TRIAL_OFFSET + channel, params.ttlTrialLengthSec);
-
-				//simulateTTLtrial(channel, ttl_timestamp_software);
 			}
 			lastTTLts[channel] = tickdiff;
 
@@ -2055,12 +2048,7 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		Trial topTrial = aliveTrials.front();
 		int64 ticksElapsed = software_timestamp - topTrial.endTS;
 		float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
-		if (timeElapsedSec < -10)
-		{
-			// unresolved bug.
-			// 
-			aliveTrials.pop();
-		}
+	
 		if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
 		{
 			aliveTrials.pop();
@@ -2369,6 +2357,103 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageUnitRespons
 	return avgResponseMatrix;
 }
 
+
+
+
+// Builds average raster matrix.
+// each line corresponds to a trial type, and contains the average response for that trial type.
+// each column corresponds to a specific time point, returned by x_time
+// the number of trial types is returned, as well as the number of repetitions of each individual trial type.
+// constrain output to be between xmin & xmax (approximately).
+std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageChannelResponse(int electrodeID, int channelID, 
+	std::vector<float> &x_time, int &numTrialTypes, std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax)
+{
+	// allocate a matrix with average trial responses (not conditions!)
+	std::vector<std::vector<float>> avgResponseMatrix;
+	avgResponseMatrix.clear();
+	x_time.clear();
+	numTrialRepeats.clear();
+	numTrialTypes = 0;
+
+	std::vector<float> smoothKernel;
+	if (smoothMS > 0)
+		smoothKernel = buildSmoothKernel(smoothMS, 1.0);
+
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					numTrialTypes = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs.size();
+					if (numTrialTypes == 0)
+						return avgResponseMatrix;
+
+					int xminIndex = -1,xmaxIndex=-1;
+					for (int t=0;t<electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[0].binTime.size();t++)
+					{
+						if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[0].binTime[t] >= xmin && xminIndex == -1)
+						{
+							xminIndex = t;
+						}
+						if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[0].binTime[t] >= xmax && xmaxIndex == -1)
+						{
+							xmaxIndex = t;
+						}
+
+					}
+					// constrain output to be between [xminIndex,xmaxIndex]
+					if (xmaxIndex-xminIndex < 10)
+						return avgResponseMatrix; // no point displaying an image with less than 10 pixels ?
+
+					numTrialRepeats.resize(numTrialTypes);
+
+					x_time.resize(xmaxIndex-xminIndex+1);
+					for (int t=0;t<xmaxIndex-xminIndex+1;t++)
+					{
+						x_time[t] = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[0].binTime[xminIndex+t];
+					}
+
+					avgResponseMatrix.resize(numTrialTypes);
+					int numTimePoints = x_time.size();
+					for (int trialIter = 0;trialIter < numTrialTypes;trialIter++)
+					{
+						numTrialRepeats[trialIter] = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[trialIter].numTrials;
+						if (numTrialRepeats[trialIter] == 0)
+						{
+							avgResponseMatrix[trialIter].resize(numTimePoints);
+							for (int q=0;q<numTimePoints;q++)
+								avgResponseMatrix[trialIter][q] = 0;
+						} else
+						{
+
+						if (smoothMS > 0)
+							avgResponseMatrix[trialIter] = smooth(electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse(), smoothKernel,xminIndex,xmaxIndex);
+						else
+							avgResponseMatrix[trialIter] = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse();
+						}
+						
+					}
+
+					unlockConditions();
+					unlockPSTH();
+					return avgResponseMatrix;
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return avgResponseMatrix;
+}
 const uint8 jet_colors_64[64][3] = {
 {0,0,143},
 {0,0,159},
@@ -2436,7 +2521,39 @@ const uint8 jet_colors_64[64][3] = {
 {128,0,0}};
 
 // use a nice jet transform for pretty colors :)
-int TrialCircularBuffer::getNumTrialTypes(int electrodeID, int unitID)
+
+
+
+int TrialCircularBuffer::getNumTrialTypesInChannel(int electrodeID, int channelID)
+{
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					unlockConditions();
+					unlockPSTH();
+					return electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs.size();
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return 0;
+}
+
+
+int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 {
 
 	lockPSTH();
@@ -2467,21 +2584,17 @@ int TrialCircularBuffer::getNumTrialTypes(int electrodeID, int unitID)
 
 
 
-
-juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue)
+juce::Image TrialCircularBuffer::getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	std::vector<int> numTrialRepeats,	std::vector<std::vector<float>> trialResponseMatrix, float &maxValue)
 {
-	std::vector<float> x_time;
-	int numTrialTypes;
-	std::vector<int> numTrialRepeats;
-	std::vector<std::vector<float>> trialResponseMatrix = getTrialsAverageUnitResponse(electrodeID, unitID, x_time, numTrialTypes, numTrialRepeats,guassianStandardDeviationMS,xmin, xmax);
-
 	// normalize response matrix to maximum across all trial types.
 	maxValue = -1e10;
+	double minValue = 1e10;
 	for (int i=0;i<trialResponseMatrix.size();i++)
 	{
 		for (int j=0;j<trialResponseMatrix[i].size();j++)
 		{
 			maxValue=MAX(maxValue, trialResponseMatrix[i][j]);
+			minValue=MIN(minValue, trialResponseMatrix[i][j]);
 		}
 	}
 	int imageWidth = x_time.size();
@@ -2508,7 +2621,7 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 		{
 			for (int j=0;j<imageWidth;j++)
 			{
-				float normalizedValue = trialResponseMatrix[ymin+i][j] / maxValue;
+				float normalizedValue = (trialResponseMatrix[ymin+i][j]-minValue) / (maxValue-minValue);
 				if (normalizedValue > 1) 
 					normalizedValue = 1.0;
 				int jetIndex = (int)(normalizedValue*63) % 64;
@@ -2523,6 +2636,24 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 	// finally, we can start storing values.
 
 	return I;
+}
+
+juce::Image TrialCircularBuffer::getTrialsAverageChannelResponseAsJuceImage(int electrodeID, int channelID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue)
+{
+	std::vector<float> x_time;
+	int numTrialTypes;
+	std::vector<int> numTrialRepeats;
+	std::vector<std::vector<float>> trialResponseMatrix = getTrialsAverageChannelResponse(electrodeID, channelID, x_time, numTrialTypes, numTrialRepeats,guassianStandardDeviationMS,xmin, xmax);
+	return getTrialsAverageResponseAsJuceImage(ymin,ymax,x_time,	numTrialTypes,	numTrialRepeats,	trialResponseMatrix, maxValue);
+}
+
+juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue)
+{
+	std::vector<float> x_time;
+	int numTrialTypes;
+	std::vector<int> numTrialRepeats;
+	std::vector<std::vector<float>> trialResponseMatrix = getTrialsAverageUnitResponse(electrodeID, unitID, x_time, numTrialTypes, numTrialRepeats,guassianStandardDeviationMS,xmin, xmax);
+	return getTrialsAverageResponseAsJuceImage(ymin,ymax,x_time,	numTrialTypes,	numTrialRepeats,	trialResponseMatrix, maxValue);
 }
 
 

@@ -99,7 +99,7 @@ void PeriStimulusTimeHistogramNode::allocateTrialCircularBuffer()
 	params.binResolutionMS = 1;
 	params.desiredSamplingRateHz = 600;
 	params.ttlSupressionTimeSec = 1.0;
-	params.ttlTrialLengthSec = 2;
+	params.ttlTrialLengthSec = 0;
 	params.autoAddTTLconditions = true;
 	params.buildTrialsPSTH = true;
 	params.reconstructTTL = false;
