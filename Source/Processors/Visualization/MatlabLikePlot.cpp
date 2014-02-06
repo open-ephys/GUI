@@ -36,6 +36,7 @@ MatlabLikePlot::MatlabLikePlot()
 	float xmax = 0.5;
 	float ymin = -1e3;
 	float ymax = 1e3;
+	maxImageHeight = 0;
 	title = "";
 	borderColor = juce::Colours::white;
 	controlButtonsVisible = false;
@@ -86,6 +87,16 @@ void MatlabLikePlot::setImageMode(bool state)
 
 void MatlabLikePlot::drawImage(Image I, float maxValue)
 {
+	float xmin, xmax, ymin, ymax;
+	drawComponent->getRange(xmin, xmax, ymin, ymax);
+
+	if (!drawComponent->getImageSet() || maxImageHeight <  I.getHeight())
+	{
+		// first time we draw an image / new image size. Set the y scale properly!
+		maxImageHeight = I.getHeight();
+		setRange(xmin,xmax,0,I.getHeight()-1);
+	}
+
 	drawComponent->drawImage(I,maxValue);
 }
 
@@ -211,35 +222,11 @@ void MatlabLikePlot::plotxy(XYline l)
 	drawComponent->plotxy(l);
 }
 
-std::vector<float> MatlabLikePlot::roundlin(float minv, float maxv, int numticks)
-{
-	// use linspace, but round things?
-	float xRange = maxv-minv;
-	float dx = xRange / (numticks-1);
-	std::vector<float> ticks;
-	ticks.clear();
-	ticks.push_back(minv+dx/4);
-	for (int k=1;k<numticks-1;k++)
-	{
-		float tic = minv + dx * k;
-		ticks.push_back(tic);
-	}
-	ticks.push_back(maxv-dx/4);
-
-	return ticks;
-}
 
 void MatlabLikePlot::setBorderColor(juce::Colour col) 
 {
 	borderColor = col;
 	
-}
-
-void MatlabLikePlot::determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick)
-{
-	int numTicks = (getWidth() < 250) ? 5 : 7;
-	xtick = roundlin(xmin, xmax, numTicks);
-	ytick = roundlin(ymin, ymax, numTicks);
 }
 
 
@@ -251,18 +238,18 @@ void MatlabLikePlot::getRange(float &xmin, float &xmax, float &ymin, float &ymax
 void MatlabLikePlot::setRange(float xmin, float xmax, float ymin, float ymax)
 {
 	// determine tick marks....
-	std::vector<float> xtick, ytick;
-	determineTickLocations(xmin,xmax,ymin,ymax,xtick,ytick);
-
+	int numTicks = (getWidth() < 250) ? 5 : 7;
+	String ampScale = vertAxesComponent->setRange(ymin, ymax,numTicks, drawComponent->getImageMode());
+	String timeScale = horizAxesComponent->setRange(xmin,xmax,numTicks, false);
 	drawComponent->setRange(xmin, xmax, ymin, ymax);
-	drawComponent->setTickMarks(xtick,ytick);
 
-	String ampScale = vertAxesComponent->setRange(ymin, ymax);
-	String timeScale = horizAxesComponent->setRange(xmin,xmax);
+	std::vector<float> xtick, ytick;
+	std::vector<String> xtickLbl, ytickLbl;
+	vertAxesComponent->getTicks(xtick,xtickLbl);
+	horizAxesComponent->getTicks(ytick,ytickLbl);
+
+	drawComponent->setTickMarks(xtick,ytick);
 	drawComponent->setScaleString(ampScale,timeScale);
-	vertAxesComponent->setTicks(ytick);
-	horizAxesComponent->setTicks(xtick);
-	
 }
 
 void MatlabLikePlot::setTitle(String t)
@@ -301,6 +288,7 @@ void MatlabLikePlot::paint(Graphics &g)
 
 void MatlabLikePlot::clearplot()
 {
+	maxImageHeight = 0;
 	drawComponent->clearplot();
 }
 
@@ -339,7 +327,7 @@ AxesComponent::AxesComponent(bool horizontal, bool flip) : horiz(horizontal), fl
 	minv = -1e4;
 	maxv = 1e4;
 	font = Font("Default", 15, Font::plain);
-	setRange(minv,maxv);
+	setRange(minv,maxv,5,false);
 }
 
 void AxesComponent::setFlip(bool state)
@@ -347,7 +335,86 @@ void AxesComponent::setFlip(bool state)
 	flipDirection = state;
 }
 
-String AxesComponent::setRange(float minvalue, float maxvalue)
+void AxesComponent::getTicks(std::vector<float> &tickLocations, std::vector<String> &tickLbl)
+{
+	tickLocations = ticks;
+	tickLbl = ticksLabels;
+}
+
+
+
+std::vector<float> AxesComponent::linspace(float minv, float maxv, int numticks)
+{
+	// generate equi distance points (except first and last one).
+	float xRange = maxv-minv;
+	float dx = xRange / (numticks-1);
+	std::vector<float> ticksLoc;
+	ticksLoc.clear();
+	ticksLoc.push_back(minv+dx/4);
+	for (int k=1;k<numticks-1;k++)
+	{
+		float tic = minv + dx * k;
+		ticksLoc.push_back(tic);
+	}
+	ticksLoc.push_back(maxv-dx/4);
+
+	return ticksLoc;
+}
+
+std::vector<float> AxesComponent::roundlin(float minv, float maxv, int numticks)
+{
+	// generate equi distance points (except first and last one).
+	float xRange = maxv-minv;
+	float dx = xRange / (numticks-1);
+	std::vector<float> ticksLoc;
+	ticksLoc.clear();
+	ticksLoc.push_back((int)(minv+dx/4));
+	for (int k=1;k<numticks-1;k++)
+	{
+		float tic = minv + dx * k;
+		ticksLoc.push_back(int(tic));
+	}
+	ticksLoc.push_back((int)(maxv-dx/4));
+
+	return ticksLoc;
+}
+
+
+void AxesComponent::determineTickLocations(float minV, float maxV, int numTicks, bool imageMode)
+{
+	if (!imageMode)
+	{
+		ticks = linspace(minV, maxV, numTicks);
+		ticksLabels.resize(ticks.size());
+		
+		for (int k=0;k<ticks.size();k++)
+		{
+			String tickString = (numDigits == 0) ? String(int(ticks[k]*gain)) : String(ticks[k]*gain,numDigits);
+			ticksLabels[k] = tickString;
+		}
+	} else
+	{
+		ticks = roundlin(minV, maxV, numTicks);
+		ticksLabels.resize(ticks.size());
+		int numTTLchannels = 8;
+
+		for (int k=0;k<ticks.size();k++)
+		{
+			String tickString;
+			if (ticks[k] <= numTTLchannels)
+				tickString = String("T "+String(ticks[k]));
+			else
+				tickString = String(ticks[k]-numTTLchannels);
+
+			ticksLabels[k] = tickString;
+		}
+	
+	}
+}
+
+
+
+String AxesComponent::setRange(float minvalue, float maxvalue, int numTicks, bool imageMode)
 {
 	minv = minvalue;
 	maxv = maxvalue;
@@ -376,6 +443,7 @@ String AxesComponent::setRange(float minvalue, float maxvalue)
 			selectedTimeScale = 2;
 			numDigits = 2;
 		}
+		determineTickLocations(minvalue, maxvalue, numTicks, imageMode);
 		return timeScale[selectedTimeScale];
 	} else
 	{
@@ -398,15 +466,16 @@ String AxesComponent::setRange(float minvalue, float maxvalue)
 			selectedTimeScale = 2;
 			numDigits = 2;
 		}
+		determineTickLocations(minvalue, maxvalue, numTicks, imageMode);
 		return voltageScale[selectedTimeScale];
 	}
 
 }
 
-void AxesComponent::setTicks(std::vector<float> ticks_)
+void AxesComponent::setTicks(std::vector<float> ticks_, std::vector<String> tickLabels_)
 {
 	ticks = ticks_;
-	
+	ticksLabels = tickLabels_;
 }
 
 void AxesComponent::setFontHeight(int height)
@@ -429,19 +498,17 @@ void AxesComponent::paint(Graphics &g)
 		for (int k=0;k<ticks.size();k++)
 		{
 			float xtickloc = (ticks[k] -minv) / (maxv-minv) * w; 
-			String tickString = (numDigits == 0) ? String(int(ticks[k]*gain)) : String(ticks[k]*gain,numDigits);
-			g.drawText(tickString, xtickloc-ticklabelWidth/2, 0,ticklabelWidth,tickLabelHeight,juce::Justification::centred,true);
+			g.drawText(ticksLabels[k], xtickloc-ticklabelWidth/2, 0,ticklabelWidth,tickLabelHeight,juce::Justification::centred,true);
 		}
 	} else 
 	{
 		for (int k=0;k<ticks.size();k++)
 		{
 			float ytickloc = (ticks[k] -minv) / (maxv-minv) * h; 
-			String tickString = (numDigits == 0) ? String(int(ticks[k]*gain)) : String(ticks[k]*gain,numDigits);
 			if (flipDirection)
-				g.drawText(tickString,0,ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
+				g.drawText(ticksLabels[k],0,ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
 			else
-				g.drawText(tickString,0,h-ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
+				g.drawText(ticksLabels[k],0,h-ytickloc-tickLabelHeight/2,w-3,tickLabelHeight,Justification::right,false);
 	
 	
 		}
@@ -500,9 +567,11 @@ void XYline::smooth(std::vector<float> smoothKernel)
 	y = smoothy;
 }
 
-void XYline::getYRange(double &lowestValue, double &highestValue)
+void XYline::getYRange(float xmin, float xmax, double &lowestValue, double &highestValue)
 {
-	for (int k=0;k<y.size();k++)
+	int startIndex = MIN(numpts,MAX(0, (xmin-x0)/dx));
+	int endIndex = MIN(numpts,MAX(0, (xmax-x0)/dx));
+	for (int k=startIndex;k<endIndex;k++)
 	{
 		lowestValue = MIN(lowestValue,y[k]);
 		highestValue =MAX(highestValue,y[k]);
@@ -746,7 +815,7 @@ void DrawComponent::drawTicks(Graphics &g)
 
 void DrawComponent::plotxy(XYline l)
 {
-	l.getYRange(lowestValue, highestValue);
+	l.getYRange(xmin,xmax,lowestValue, highestValue);
 	lines.push_back(l);
 }
 	
@@ -767,7 +836,7 @@ void DrawComponent::paint(Graphics &g)
 	int h = getHeight();
 
 
-	if (autoRescale)
+	if (autoRescale && !imageMode)
 	{
 		ymin = lowestValue;
 		ymax = highestValue;
@@ -777,7 +846,6 @@ void DrawComponent::paint(Graphics &g)
 	if 	(imageMode && imageSet)
 	{
 		g.drawImage(image,0,0,w,h,0,0,image.getWidth(),image.getHeight());
-	
 	}
 	else {
 
@@ -908,11 +976,23 @@ void DrawComponent::mouseUp(const juce::MouseEvent& event)
 		// first, turn off auto rescale, if it is enabled.
 		setAutoRescale(false); // zoom is now enabled. We can't have auto rescale and zoom at the same time.
 
-		float downX = float(mouseDownX) /(float)plotWidth * rangeX + xmin;
-		float downY = float(plotHeight-(mouseDownY)) /(float)plotHeight * rangeY + ymin;
+		float downX,downY, upX, upY ;
 
-		float upX = float(event.x) /(float)plotWidth * rangeX + xmin;
-		float upY = float(plotHeight-(event.y)) /(float)plotHeight * rangeY + ymin;
+			downX = float(mouseDownX) /(float)plotWidth * rangeX + xmin;
+			upX = float(event.x) /(float)plotWidth * rangeX + xmin;
+
+		if (imageMode)
+		{
+			downY = float((mouseDownY)) /(float)plotHeight * rangeY + ymin;
+			upY = float((event.y)) /(float)plotHeight * rangeY + ymin;
+	
+		}
+		else
+		{
+
+			downY = float(plotHeight-(mouseDownY)) /(float)plotHeight * rangeY + ymin;
+			upY = float(plotHeight-(event.y)) /(float)plotHeight * rangeY + ymin;
+		}
 		
 		// convert mouse down and up position to proper x,y range
 		// save current zoom 
@@ -933,6 +1013,12 @@ void DrawComponent::mouseUp(const juce::MouseEvent& event)
 		xmax = MAX(downX, upX);
 		ymin = MIN(downY, upY);
 		ymax = MAX(downY, upY);
+		if (imageMode)
+		{
+			ymin = MIN(image.getHeight()-1,MAX(0,ymin));
+			ymax = MAX(0,MIN(image.getHeight()-1,ymax));
+		}
+	
 		mlp->setRange(xmin,xmax,ymin,ymax);
 		
 	}
@@ -1069,6 +1155,16 @@ void DrawComponent::drawImage(Image I, float maxValue)
 void DrawComponent::setImageMode(bool state)
 {
 	imageMode = state;
+}
+
+bool DrawComponent::getImageMode()
+{
+	return imageMode;
+}
+
+bool DrawComponent::getImageSet()
+{
+	return imageSet;
 }
 
 void DrawComponent::getRange(float &minx, float &maxx, float &miny, float &maxy)

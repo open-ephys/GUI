@@ -1729,6 +1729,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.startTS = msg.timestamp;
 		  currentTrial.alignTS = 0;
 		  currentTrial.alignTS_hardware = 0;
+		  currentTrial.endTS = 0;
 		  currentTrial.hardwareAlignment = false;
   		  currentTrial.trialInProgress = true;
 		  currentTrial.type = -1;
@@ -1754,7 +1755,8 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 			  currentTrial.outcome = input[1].getIntValue();
 		  }
 
-		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  currentTrial.endTS - currentTrial.startTS <= (numTicksPerSecond * params.maxTrialTimeSeconds))
+		  int64 maxTrialTicks = numTicksPerSecond * params.maxTrialTimeSeconds;
+		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  ((currentTrial.endTS - currentTrial.startTS) <= maxTrialTicks))
 		  {
 			  if (currentTrial.alignTS == 0) 
 			  {
@@ -1762,7 +1764,8 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 			  }
 
 			  double trialLength = (currentTrial.endTS-currentTrial.alignTS)/numTicksPerSecond;
-			  aliveTrials.push(Trial(currentTrial));
+			  if (trialLength <= params.maxTrialTimeSeconds)
+				aliveTrials.push(Trial(currentTrial));
 		  }
 	  } else if (command == "trialtype")
 	  {
@@ -1982,7 +1985,9 @@ void TrialCircularBuffer::addTTLevent(int channel,int64 ttl_timestamp_software, 
 			if (secElapsed > params.ttlSupressionTimeSec)
 			{
 				// simulate a ttl trial 
-				simulateTTLtrial(channel, ttl_timestamp_software);
+				simulateHardwareTrial(ttl_timestamp_software,ttl_timestamp_hardware, TTL_TRIAL_OFFSET + channel, params.ttlTrialLengthSec);
+
+				//simulateTTLtrial(channel, ttl_timestamp_software);
 			}
 			lastTTLts[channel] = tickdiff;
 
@@ -2050,6 +2055,12 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		Trial topTrial = aliveTrials.front();
 		int64 ticksElapsed = software_timestamp - topTrial.endTS;
 		float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
+		if (timeElapsedSec < -10)
+		{
+			// unresolved bug.
+			// 
+			aliveTrials.pop();
+		}
 		if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
 		{
 			aliveTrials.pop();
@@ -2328,12 +2339,21 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageUnitRespons
 					int numTimePoints = x_time.size();
 					for (int trialIter = 0;trialIter < numTrialTypes;trialIter++)
 					{
+						numTrialRepeats[trialIter] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].numTrials;
+						if (numTrialRepeats[trialIter] == 0)
+						{
+							avgResponseMatrix[trialIter].resize(numTimePoints);
+							for (int q=0;q<numTimePoints;q++)
+								avgResponseMatrix[trialIter][q] = 0;
+						} else
+						{
+
 						if (smoothMS > 0)
 							avgResponseMatrix[trialIter] = smooth(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse(), smoothKernel,xminIndex,xmaxIndex);
 						else
 							avgResponseMatrix[trialIter] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].getAverageTrialResponse();
-
-						numTrialRepeats[trialIter] = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs[trialIter].numTrials;
+						}
+						
 					}
 
 					unlockConditions();
@@ -2448,7 +2468,7 @@ int TrialCircularBuffer::getNumTrialTypes(int electrodeID, int unitID)
 
 
 
-juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, float &maxValue)
+juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue)
 {
 	std::vector<float> x_time;
 	int numTrialTypes;
@@ -2465,7 +2485,10 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 		}
 	}
 	int imageWidth = x_time.size();
-	int imageHeight = numTrialTypes;
+	ymin = MAX(0,ymin);
+	ymax = MIN(trialResponseMatrix.size()-1,ymax);
+
+	int imageHeight = ymax-ymin+1;
 	juce::Image I(juce::Image::PixelFormat::RGB, imageWidth, imageHeight, true);
 	juce::Image::BitmapData bitmap(I,0,0,imageWidth,imageHeight,Image::BitmapData::ReadWriteMode::readWrite);
 	if (maxValue < 1e-5)
@@ -2477,7 +2500,7 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 	for (int i=0;i<imageHeight;i++)
 	{
 		int yoffset = 3 * imageWidth;
-		if (numTrialRepeats[i] == 0)
+		if (numTrialRepeats[ymin+i] == 0)
 		{
 			// special case, make all pixels black...
 			// in other words - do nothing :)
@@ -2485,7 +2508,7 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 		{
 			for (int j=0;j<imageWidth;j++)
 			{
-				float normalizedValue = trialResponseMatrix[i][j] / maxValue;
+				float normalizedValue = trialResponseMatrix[ymin+i][j] / maxValue;
 				if (normalizedValue > 1) 
 					normalizedValue = 1.0;
 				int jetIndex = (int)(normalizedValue*63) % 64;

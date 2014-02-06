@@ -1722,8 +1722,10 @@ GenericPlot::GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xy
 	fullScreenMode = false;
 	mlp = new MatlabLikePlot();
 	mlp->setControlButtonsVisibile(false);
-	if (rasterMode)
+	if (rasterMode) {
 		mlp->setImageMode(true);
+		mlp->setAutoRescale(false);
+	}
 	else
 		mlp->setImageMode(false);
 	addAndMakeVisible(mlp);
@@ -1760,8 +1762,7 @@ void GenericPlot::paintSpikeRaster(Graphics &g)
 	{
 		float xmin,xmax,ymin,ymax,maxValue;
 		mlp->getRange(xmin,xmax,ymin,ymax);
-		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax, maxValue);
-		mlp->setRange(xmin,xmax, 1, numTrialTypes);
+		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
 		mlp->drawImage(rasterImage,maxValue);
 	}
 }
@@ -1782,6 +1783,7 @@ void GenericPlot::paintSpikes(Graphics &g)
 
 void GenericPlot::paintLFPraster(Graphics &g)
 {
+
 }
 
 void GenericPlot::paintLFP(Graphics &g)
@@ -1830,6 +1832,7 @@ void GenericPlot::setSmoothState(bool state)
 
 void GenericPlot::setAutoRescale(bool state) 
 {
+	autoRescale = state;
 	mlp->setAutoRescale(state);
 }
 

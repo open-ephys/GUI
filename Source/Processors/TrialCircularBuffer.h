@@ -312,7 +312,7 @@ public:
 																 std::vector<float> &x_time, int &numTrialTypes, 
 																 std::vector<int> &numTrialRepeats, double smoothMS, float xmin, float xmax);
 
-	juce::Image getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, float &maxValue);
+	juce::Image getTrialsAverageUnitResponseAsJuceImage(int electrodeID, int unitID, float guassianStandardDeviationMS, float xmin, float xmax, int ymin, int ymax, float &maxValue);
 	int getNumTrialTypes(int electrodeID, int unitID);
 	void clearUnitStatistics(int electrodeID, int unitID);
 	void clearChanneltatistics(int electrodeID, int channelID);

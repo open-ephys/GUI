@@ -326,6 +326,7 @@ private:
 	bool rasterMode;
 	bool fullScreenMode;
 	bool smoothPlot;
+	bool autoRescale;
 	float guassianStandardDeviationMS;
 	std::vector<float> smoothKernel; 
 };

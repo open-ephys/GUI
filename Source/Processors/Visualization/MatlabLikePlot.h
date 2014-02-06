@@ -52,7 +52,7 @@ public:
 	XYline(float x0_, float ymin, float ymax, juce::Colour color_) ;
 
 	void draw(Graphics &g, float xmin, float xmax, float ymin, float ymax, int width, int height, bool showBounds);
-	void getYRange(double &lowestValue, double &highestValue);
+	void getYRange(float xmin, float xmax, double &lowestValue, double &highestValue);
 	void removeMean();
 	void smooth(std::vector<float> kernel);
 	int getNumPoints();
@@ -99,6 +99,8 @@ public:
 	void drawImage(Image I,float maxValue);
 	void setImageMode(bool state);
 	void getRange(float &minx, float &maxx, float &miny, float &maxy);
+	bool getImageMode();
+	bool getImageSet();
 private:
 	void mouseDown(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
@@ -137,12 +139,16 @@ class AxesComponent : public Component
 public:
 	AxesComponent(bool horizontal, bool flip);
     ~AxesComponent() {}
-	void setTicks(std::vector<float> ticks_);
+	void setTicks(std::vector<float> ticks_, std::vector<String> labels);
 	void paint(Graphics &g);
 	void setFontHeight(int height);
-	String setRange(float minvalue, float maxvalue);
+	void getTicks(std::vector<float> &tickLocations, std::vector<String> &tickLbl);
+	String setRange(float minvalue, float maxvalue, int numTicks, bool imageMode);
 	void setFlip(bool state);
 private:
+	void determineTickLocations(float minV, float maxV, int numTicks, bool imageMode);
+	std::vector<float> linspace(float minv, float maxv, int numticks);
+	std::vector<float> roundlin(float minv, float maxv, int numticks);
 	bool flipDirection;
 	int numDigits;
 	Font font;
@@ -151,6 +157,7 @@ private:
 	bool horiz;
 	float minv,maxv;
 	std::vector<float> ticks;
+	std::vector<String> ticksLabels;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AxesComponent);
 };
 
@@ -182,6 +189,7 @@ public:
 	bool eventsAvail();
 	void mouseDoubleClick(const juce::MouseEvent& event);
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
+	void determineTickLocationsImageMode(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
 private:
 
 	void determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
@@ -193,6 +201,7 @@ private:
 	double lowestValue, highestValue;
 	bool controlButtonsVisible;
 	juce::Colour borderColor;
+	int maxImageHeight;
 	int64 triggeredTS;
 	ScopedPointer<UtilityButton> zoomButton, panButton, verticalShiftButton, dcRemoveButton, frequencyButton,autoRescaleButton, boundsButton;
 	ScopedPointer<AxesComponent> vertAxesComponent,horizAxesComponent;
