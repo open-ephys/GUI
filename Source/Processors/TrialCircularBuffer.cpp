@@ -2045,15 +2045,17 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 	// have post trial information
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
-		Trial topTrial = aliveTrials.front();
-		int64 ticksElapsed = software_timestamp - topTrial.endTS;
-		float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
-	
-		if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
+		for (int k=0;k<aliveTrials.size();k++)
 		{
-			aliveTrials.pop();
-			lastTrialID = topTrial.trialID;
-			updatePSTHwithTrial(&topTrial);
+			Trial topTrial = aliveTrials.front();
+			int64 ticksElapsed = software_timestamp - topTrial.endTS;
+			float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
+			if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
+			{
+				aliveTrials.pop();
+				lastTrialID = topTrial.trialID;
+				updatePSTHwithTrial(&topTrial);
+			}
 		}
 	}
 
