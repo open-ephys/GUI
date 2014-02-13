@@ -521,7 +521,7 @@ void SpikeDisplayNode::writeSpike(const SpikeObject& s, int i)
     packSpike(&s, spikeBuffer, MAX_SPIKE_BUFFER_LEN);
 
     int totalBytes = s.nSamples * s.nChannels * 2 + // account for samples
-                     s.nChannels * 4 +            // acount for threshold and gain
+                     s.nChannels * 2 +  s.nChannels * 4 +           // acount for threshold and gain
                      15;                        // 15 bytes in every SpikeObject
 
 
@@ -554,7 +554,7 @@ void SpikeDisplayNode::writeSpike(const SpikeObject& s, int i)
 String SpikeDisplayNode::generateHeader(int electrodeNum)
 {
     String header = "header.format = 'Open Ephys Data Format'; \n";
-    header += "header.version = 0.2;";
+    header += "header.version = 0.3;";
     header += "header.header_bytes = ";
     header += String(HEADER_SIZE);
     header += ";\n";

@@ -24,6 +24,7 @@
 #ifndef SPIKEOBJECT_H_
 #define SPIKEOBJECT_H_
 
+#include "../../../JuceLibraryCode/JuceHeader.h"
 #include <iostream>
 #include <stdint.h>
 #include <math.h>
@@ -71,7 +72,7 @@ struct SpikeObject
 	float		pcProj[2];
 	uint16_t	samplingFrequencyHz;
     uint16_t    data[MAX_NUMBER_OF_SPIKE_CHANNELS* MAX_NUMBER_OF_SPIKE_CHANNEL_SAMPLES];
-    uint16_t    gain[MAX_NUMBER_OF_SPIKE_CHANNELS];
+    float	    gain[MAX_NUMBER_OF_SPIKE_CHANNELS];
     uint16_t    threshold[MAX_NUMBER_OF_SPIKE_CHANNELS];
 
 };

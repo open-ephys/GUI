@@ -231,10 +231,10 @@ void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool du
 
 	// write event type
 	fwrite(&eventType, 1,1, eventFile); 
-	int16 eventSize = 8+8+2+2+2+2; // ts, ts, sorted id, electrode ID, num channels, num data per channel,
+	int16 eventSize = 8+8+2+2+2+2  + s->nChannels*4; // ts, ts, sorted id, electrode ID, num channels, num data per channel + 4x gains 
 
 	if (dumpWave)
-		eventSize += s->nSamples*s->nChannels;
+		eventSize += 2*(s->nSamples*s->nChannels); // uint16 per samples 
 
 	// write event size
     fwrite(&eventSize, 2,1, eventFile);
@@ -246,12 +246,16 @@ void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool du
 	fwrite(&s->timestamp, 8,1, eventFile);
 	// 3. sorted ID
 	fwrite(&s->sortedId, 2,1, eventFile);
-	// 4. sorted ID
+	// 4. electrod ID
 	fwrite(&s->electrodeID, 2,1, eventFile);
 
-	// 5. num channels
+	// 6. num channels
 	fwrite(&s->nChannels, 2,1, eventFile);
-	// 6. num data points per channel
+
+	// 7. gains
+	fwrite(&s->gain, 4,s->nChannels, eventFile);
+
+	// 7. num data points per channel
 	fwrite(&s->nSamples, 2,1, eventFile);
 	if (dumpWave)
 		fwrite(&s->data, 2,s->nSamples*s->nChannels, eventFile);
@@ -481,7 +485,7 @@ String PeriStimulusTimeHistogramNode::generateHeader()
 {
 
     String header = "header.format = 'Open Ephys Data Format'; \n";
-    header += "header.version = 0.3;";
+    header += "header.version = 0.31;";
     header += "header.header_bytes = ";
     header += String(HEADER_SIZE);
     header += ";\n";

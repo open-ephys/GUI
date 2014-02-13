@@ -1140,7 +1140,7 @@ bool ProjectionAxes::updateSpikeData(const SpikeObject& s)
     return true;
 }
 
-void ProjectionAxes::updateProjectionImage(uint16_t x, uint16_t y, uint16_t gain)
+void ProjectionAxes::updateProjectionImage(uint16_t x, uint16_t y, float gain)
 {
     Graphics g(projectionImage);
 

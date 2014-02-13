@@ -779,7 +779,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
     int chan = *(electrodes[electrodeNumber]->channels+currentChannel);
 
-    s->gain[currentChannel] = (int)(1.0f / channels[chan]->bitVolts)*1000;
+    s->gain[currentChannel] = (1.0f / channels[chan]->bitVolts)*1000;
     s->threshold[currentChannel] = (int) electrodes[electrodeNumber]->thresholds[currentChannel]; // / channels[chan]->bitVolts * 1000;
 
     // cycle through buffer
@@ -792,7 +792,10 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
             // warning -- be careful of bitvolts conversion
 			// do not flip signal (!).
-            s->data[currentIndex] = uint16(getNextSample(electrodes[electrodeNumber]->channels[currentChannel]) / channels[chan]->bitVolts + 32768);
+			float value = getNextSample(electrodes[electrodeNumber]->channels[currentChannel]);
+            s->data[currentIndex] = uint16(value / channels[chan]->bitVolts + 32768);
+			// recovered data
+			//float value2 = (s->data[currentIndex]-32768) /float(s->gain[currentChannel])*1000.0f;
 
             currentIndex++;
             sampleIndex++;
@@ -1031,6 +1034,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
 						// Add spike to drawing buffer....
 						electrode->spikeSort->sortSpike(&newSpike, PCAbeforeBoxes);
+						
 
 						  // transfer buffered spikes to spike plot
 						if (electrode->spikePlot != nullptr) {

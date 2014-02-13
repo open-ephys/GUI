@@ -85,8 +85,8 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
     memcpy(buffer+idx, &(s->data), s->nChannels * s->nSamples * 2);
     idx += s->nChannels * s->nSamples * 2;
 
-    memcpy(buffer+idx, &(s->gain), s->nChannels * 2);
-    idx += s->nChannels * 2;
+    memcpy(buffer+idx, &(s->gain), s->nChannels * 4); // 4 bytes for a float
+    idx += s->nChannels * 4;
 
     memcpy(buffer+idx, &(s->threshold), s->nChannels * 2);
     idx += s->nChannels * 2;
@@ -184,8 +184,8 @@ bool unpackSpike(SpikeObject* s, const uint8_t* buffer, int bufferSize)
 	memcpy(&(s->data), buffer+idx, s->nChannels * s->nSamples * 2);
     idx += s->nChannels * s->nSamples * 2;
 
-    memcpy(&(s->gain), buffer+idx, s->nChannels * 2);
-    idx += s->nChannels * 2;
+    memcpy(&(s->gain), buffer+idx, s->nChannels * 4);
+    idx += s->nChannels * 4;
 
     memcpy(&(s->threshold), buffer+idx, s->nChannels *2);
     idx += s->nChannels * 2;
@@ -330,7 +330,7 @@ void generateEmptySpike(SpikeObject* s, int nChannels, int numSamples)
     int idx = 0;
     for (int i=0; i<s->nChannels; i++)
     {
-        s->gain[i] = 0;
+        s->gain[i] = 0.0;
         s->threshold[i] = 0;
         for (int j=0; j<s->nSamples; j++)
         {
@@ -356,13 +356,19 @@ void printSpike(SpikeObject* s)
 
 float spikeDataBinToMicrovolts(SpikeObject *s, int bin, int ch)
 {
-	return  float(s->data[bin+ch*s->nSamples]-32768)/float(s->gain[ch])*1000.0f;
+	jassert(ch >= 0 && ch < s->nChannels);
+	jassert(bin >= 0 && ch < s->nSamples);
+	float v= float(s->data[bin+ch*s->nSamples]-32768)/float(s->gain[ch])*1000.0f;
+	return v;
 }
 
 
 float spikeDataIndexToMicrovolts(SpikeObject *s, int index)
 {
-	return  float(s->data[index]-32768)/float(s->gain[index / s->nSamples])*1000.0f;
+	int gain_index = index / s->nSamples;
+	jassert(gain_index >= 0 && gain_index < s->nChannels);
+	float v= float(s->data[index]-32768)/float(s->gain[gain_index])*1000.0f;
+	return v;
 }
 
 

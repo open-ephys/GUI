@@ -933,8 +933,8 @@ void WaveformAxes::plotSpike(const SpikeObject& s, Graphics& g)
 
         if (*s.gain != 0)
         {
-            float s1 =h- (h/2 + float(s.data[offset+i]-32768)/float(*s.gain)*1000.0f / (range*2) * h);
-            float s2 =h- (h/2 + float(s.data[offset+i+1]-32768)/float(*s.gain)*1000.0f / (range*2) * h);
+            float s1 =h- (h/2 + float(s.data[offset+i]-32768)/float(*s.gain)*1000.0f / (range) * h);
+            float s2 =h- (h/2 + float(s.data[offset+i+1]-32768)/float(*s.gain)*1000.0f / (range) * h);
 			if (signalFlipped)
 			{
 				s1=h-s1;

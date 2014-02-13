@@ -133,6 +133,13 @@ bool Box::LineSegmentIntersection(PointD p11, PointD p12, PointD p21, PointD p22
 	return (t>=0&&t<=1 &&u>0&&u<=1);
 }
 
+#ifndef MAX
+#define MAX(x,y)((x)>(y))?(x):(y)
+#endif 
+
+#ifndef MIN
+#define MIN(x,y)((x)<(y))?(x):(y)
+#endif 
 
 
 
@@ -151,6 +158,16 @@ bool Box::isWaveFormInside(SpikeObject *so)
 	// no point testing all wave form points. Just ones that are between x and x+w...
 	int BinLeft = microSecondsToSpikeTimeBin(so,x);
 	int BinRight = microSecondsToSpikeTimeBin(so,x+w);
+
+	/*
+	float minValue=1e10, maxValue=1e-10;
+	for (int pt = 0; pt < so->nSamples; pt++)
+	{
+		float v = spikeDataBinToMicrovolts(so, pt, channel);
+		minValue = MIN(minValue,v);
+		maxValue = MAX(maxValue,v);
+	}
+	*/
 
 	for (int pt = BinLeft; pt < BinRight; pt++)
 	{

@@ -342,7 +342,6 @@ private:
 	bool flipSignal;
 
 
-
    void addWaveformToSpikeObject(SpikeObject* s,
                                   int& peakIndex,
                                   int& electrodeNumber,
