@@ -26,7 +26,7 @@
 
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
-#include "../Visualization/MatlabLikePlot.h""
+#include "../Visualization/MatlabLikePlot.h"
 #include "../PeriStimulusTimeHistogramNode.h"
 #include "GenericEditor.h"
 #include "../../UI/UIComponent.h"

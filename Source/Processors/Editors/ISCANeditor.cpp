@@ -164,6 +164,7 @@ ISCANeditor::ISCANeditor(GenericProcessor* parentNode, bool useDefaultParameterE
 
     setEnabledState(false);
 
+
 }
 
 
@@ -256,22 +257,7 @@ void ISCANeditor::buttonCallback(Button* button)
 		} else if (result < 4000)
 		{
 			processor->setCalibrationMode(result-3000);
-			if (result-3000 == 1)
-			{
-				gainX->setVisible(true);
-				gainY->setVisible(true);
-				gainXedt->setVisible(true);
-				gainYedt->setVisible(true);
-
-			} else 
-			{
-				gainX->setVisible(false);
-				gainY->setVisible(false);
-				gainXedt->setVisible(false);
-				gainYedt->setVisible(false);
-
-			}
-
+	
 		}
 
 	}
@@ -303,4 +289,26 @@ ISCANeditor::~ISCANeditor()
 
 }
 
+void ISCANeditor::setCalibrationMode(int mode)
+{
+	ISCANnode *processor  = (ISCANnode*) getProcessor();
 
+		if (mode == 1)
+			{
+				gainX->setVisible(true);
+				gainY->setVisible(true);
+				gainXedt->setVisible(true);
+				gainYedt->setVisible(true);
+
+				gainXedt->setText(String(processor->getGainX(),2),dontSendNotification);
+				gainYedt->setText(String(processor->getGainY(),2),dontSendNotification);
+
+			} else 
+			{
+				gainX->setVisible(false);
+				gainY->setVisible(false);
+				gainXedt->setVisible(false);
+				gainYedt->setVisible(false);
+
+			}
+}

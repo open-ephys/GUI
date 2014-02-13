@@ -1118,11 +1118,16 @@ bool SmartContinuousCircularBuffer::getAlignedDataInterp(std::vector<int> channe
 /*************************/
 SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, int _maxTrialsInMemory, int _sampleRateHz)
 {
+	jassert(maxTrialTimeSeconds > 0);
 	sampleRateHz = _sampleRateHz;
 	int MaxFiringRateHz = 300;
 	maxTrialsInMemory = _maxTrialsInMemory;
 	bufferSize = MaxFiringRateHz * maxTrialTimeSeconds * maxTrialsInMemory;
 	jassert(bufferSize > 0);
+	if (bufferSize == 0)
+	{
+		int dbg = 1;
+	}
 
 	bufferIndex = 0;
 	trialIndex = 0;
@@ -1130,7 +1135,6 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 	numTrialsStored = 0;
 	spikeTimesSoftware.resize(bufferSize);
 	spikeTimesHardware.resize(bufferSize);
-
 	for (int k=0;k<bufferSize;k++) 
 	{
 		spikeTimesSoftware[k] = 0;
@@ -1143,7 +1147,8 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 	{
 		trialID[k] = pointers[k] = 0;
 	}
-
+	jassert(trialID.size() > 0);
+	
 }
 
 void SmartSpikeCircularBuffer::addSpikeToBuffer(int64 spikeTimeSoftware,int64 spikeTimeHardware)
@@ -1735,6 +1740,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.type = -1;
 		  lfpBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
 		  ttlBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
+		  lockPSTH();
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 			{
 				for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
@@ -1742,6 +1748,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 					electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&currentTrial);
 				}
 		  }
+		  unlockPSTH();
 		  if (input.size() > 1) {
 			  currentTrial.type = input[1].getIntValue();
 		  }

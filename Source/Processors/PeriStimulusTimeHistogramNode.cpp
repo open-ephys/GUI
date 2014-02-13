@@ -559,7 +559,6 @@ void PeriStimulusTimeHistogramNode::startRecording()
 {
 	if (!isRecording)
 	{
-		isRecording = true;
         File dataDirectory = recordNode->getDataDirectory();
 
         if (dataDirectory.getFullPathName().length() == 0)
@@ -586,6 +585,8 @@ void PeriStimulusTimeHistogramNode::startRecording()
 		recordingNumber = recordNode->getRecordingNumber();
 		Time t;
 		dumpStartStopRecordEventToDisk(t.getHighResolutionTicks(), true);
+		isRecording = true;
+
 	}
 
 

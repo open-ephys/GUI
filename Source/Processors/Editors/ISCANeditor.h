@@ -88,6 +88,7 @@ public:
     void collapsedStateChanged();
 	void labelTextChanged(Label *label);
 	Visualizer* createNewCanvas();
+	void setCalibrationMode(int mode);
 private:
 	void refreshDevices();
 	ScopedPointer<ToggleButton> communication;

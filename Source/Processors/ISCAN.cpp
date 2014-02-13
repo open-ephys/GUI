@@ -208,6 +208,7 @@ void ISCANnode::setGainY(float gain)
 	gainY = gain;
 }
 
+
 float ISCANnode::getFixationSpotX()
 {
 	return fixateXpos;
@@ -594,6 +595,9 @@ void ISCANnode::loadCustomParametersFromXml()
 				offsetY= mainNode->getDoubleAttribute("offsetY",0);
 				eyeSamplingRateHz = mainNode->getIntAttribute("eyeSamplingRateHz",120);
 				calibrationMode = mainNode->getIntAttribute("calibrationMode",0);
+				ISCANeditor *ed = (ISCANeditor *)getEditor();
+				ed->setCalibrationMode(calibrationMode);
+
 				if (serialCommunication && device != "")
 				{
 					StringArray serialDevices = getDeviceNames();
