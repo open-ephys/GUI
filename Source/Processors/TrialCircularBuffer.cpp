@@ -1485,6 +1485,7 @@ void TrialCircularBuffer::clearDesign()
 			electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.clear();
 		}
 	}
+	dropOutcomes.clear();
 	unlockPSTH();
 	if (params.autoAddTTLconditions)
 		addDefaultTTLConditions(ttlVisible);
@@ -1752,18 +1753,36 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 		  if (input.size() > 1) {
 			  currentTrial.type = input[1].getIntValue();
 		  }
+	  } else if (command == "dropoutcomes")
+	  {
+		  dropOutcomes.clear();
+		  for (int k=1;k<input.size();k++)
+		  {
+			  dropOutcomes.push_back(input[k].getIntValue());
+		  }
+
 	  } else if (command == "trialend") 
 	  {
 		  currentTrial.endTS = msg.timestamp;
 		  currentTrial.trialInProgress = false;
-
-		
 		  if (input.size() > 1) {
 			  currentTrial.outcome = input[1].getIntValue();
 		  }
 
+
+		  // look at trial outcome. If it is in the dropOutcomes list, drop the trial.
+		  bool shouldDrop = false;
+		  for (int k=0;k<dropOutcomes.size();k++)
+		  {
+			  if (dropOutcomes[k] == currentTrial.outcome)
+			  {
+				  shouldDrop = true;
+				  break;
+			  }
+		  }
+
 		  int64 maxTrialTicks = numTicksPerSecond * params.maxTrialTimeSeconds;
-		  if (currentTrial.type >= 0 && currentTrial.startTS > 0 &&  ((currentTrial.endTS - currentTrial.startTS) <= maxTrialTicks))
+		  if (!shouldDrop && currentTrial.type >= 0 && currentTrial.startTS > 0 &&  ((currentTrial.endTS - currentTrial.startTS) <= maxTrialTicks))
 		  {
 			  if (currentTrial.alignTS == 0) 
 			  {

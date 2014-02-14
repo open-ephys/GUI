@@ -328,6 +328,8 @@ public:
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
 private:
+   std::vector<int> dropOutcomes;
+
 	juce::Image getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	
 													std::vector<int> numTrialRepeats,	std::vector<std::vector<float>> trialResponseMatrix, float &maxValue);
 

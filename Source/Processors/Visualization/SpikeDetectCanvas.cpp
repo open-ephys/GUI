@@ -39,12 +39,12 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
 
 
 
-    addUnitButton = new UtilityButton("Add box unit", Font("Small Text", 13, Font::plain));
+    addUnitButton = new UtilityButton("New box unit", Font("Small Text", 13, Font::plain));
     addUnitButton->setRadius(3.0f);
     addUnitButton->addListener(this);
     addAndMakeVisible(addUnitButton);
   
-    addPolygonUnitButton = new UtilityButton("Add polygon unit", Font("Small Text", 13, Font::plain));
+    addPolygonUnitButton = new UtilityButton("New polygon", Font("Small Text", 13, Font::plain));
     addPolygonUnitButton->setRadius(3.0f);
     addPolygonUnitButton->addListener(this);
     addAndMakeVisible(addPolygonUnitButton);
@@ -69,6 +69,18 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
     rePCAButton->addListener(this);
     addAndMakeVisible(rePCAButton);
  
+
+    nextElectrode = new UtilityButton("Next Electrode", Font("Small Text", 13, Font::plain));
+    nextElectrode->setRadius(3.0f);
+    nextElectrode->addListener(this);
+    addAndMakeVisible(nextElectrode);
+ 
+	prevElectrode = new UtilityButton("Prev Electrode", Font("Small Text", 13, Font::plain));
+    prevElectrode->setRadius(3.0f);
+    prevElectrode->addListener(this);
+    addAndMakeVisible(prevElectrode);
+ 
+	
 
     addAndMakeVisible(viewport);
 
@@ -130,17 +142,20 @@ void SpikeDetectCanvas::refreshState()
 
 void SpikeDetectCanvas::resized()
 {
-    viewport->setBounds(0,0,getWidth(),getHeight()-20);
+    viewport->setBounds(130,0,getWidth()-140,getHeight());
 
-    spikeDisplay->setBounds(0,0,getWidth()-scrollBarThickness, spikeDisplay->getTotalHeight());
+    spikeDisplay->setBounds(0,0,getWidth()-140, spikeDisplay->getTotalHeight());
 
-    //clearButton->setBounds(10, getHeight()-20, 100,20);
-	addUnitButton->setBounds(10, getHeight()-20, 100,20);
-	addPolygonUnitButton->setBounds(150, getHeight()-20, 150,20);
-	delUnitButton->setBounds(350, getHeight()-20, 100,20);
-	addBoxButton->setBounds(500, getHeight()-20, 100,20);
-	delBoxButton->setBounds(650, getHeight()-20, 100,20);
-	rePCAButton->setBounds(800, getHeight()-20, 100,20);
+
+	nextElectrode->setBounds(0, 20, 120,30);
+	prevElectrode->setBounds(0, 60, 120,30);
+
+	addUnitButton->setBounds(0, 120, 120,20);
+	addPolygonUnitButton->setBounds(0, 150, 120,20);
+	delUnitButton->setBounds(0, 180, 120,20);
+	addBoxButton->setBounds(0, 210, 120,20);
+	delBoxButton->setBounds(0, 240, 120,20);
+	rePCAButton->setBounds(0, 270, 120,20);
 	
 }
 
@@ -263,7 +278,17 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 	} else if (button == rePCAButton)
 	{
 		processor->getActiveElectrode()->spikeSort->RePCA();
+	} else if (button == nextElectrode)
+	{
+		SpikeDetectorEditor *ed = (SpikeDetectorEditor *)processor->getEditor();
+		ed->setElectrodeComboBox(1);
+	} else  if (button == prevElectrode)
+	{
+		SpikeDetectorEditor *ed = (SpikeDetectorEditor *)processor->getEditor();
+
+		ed->setElectrodeComboBox(-1);
 	}
+
 	repaint();
 
 }

@@ -104,7 +104,7 @@ public:
     SpikeDetector* processor;
 	
     ScopedPointer<UtilityButton> addPolygonUnitButton,
-		addUnitButton, delUnitButton, addBoxButton, delBoxButton, rePCAButton;
+		addUnitButton, delUnitButton, addBoxButton, delBoxButton, rePCAButton,nextElectrode,prevElectrode;
 
 private:
 

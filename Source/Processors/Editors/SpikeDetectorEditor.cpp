@@ -626,6 +626,17 @@ void SpikeDetectorEditor::labelTextChanged(Label* label)
 	}
 }
 
+void SpikeDetectorEditor::setElectrodeComboBox(int direction)
+{
+	int N = electrodeList->getNumItems();
+	int C = electrodeList->getSelectedId();
+	C+=direction;
+	if (C <= 0)
+		C = N;
+	if (C > N)
+		C = 1;
+	electrodeList->setSelectedId(C,false);
+}
 
 void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 {

@@ -166,8 +166,9 @@ public:
 	void refreshElectrodeList(int selected = 0);
 	void setSelectedElectrode(int i);
 	int getSelectedElectrode();
-private:
+	void setElectrodeComboBox(int direction);
 
+private:
     void drawElectrodeButtons(int);
 
     
