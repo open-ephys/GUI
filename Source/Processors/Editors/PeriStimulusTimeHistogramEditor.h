@@ -252,6 +252,7 @@ public:
     ScopedPointer<Viewport> viewport, conditionsViewport;
 	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
 	ScopedPointer<ConditionList> conditionsList;
+	ScopedPointer<UtilityButton> visualizationButton, clearAllButton;
 	float gaussianStandardDeviationMS;
 	int numRows,numCols;
 
@@ -278,6 +279,7 @@ public:
 
 	void saveVisualizerParameters(XmlElement* xml);
 	void loadVisualizerParameters(XmlElement* xml);
+	void visualizationMenu();
 
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;

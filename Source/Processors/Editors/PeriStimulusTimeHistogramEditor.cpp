@@ -149,23 +149,11 @@ void PeriStimulusTimeHistogramEditor::comboBoxChanged(ComboBox* comboBox)
 	}
 }
 
-void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
+void PeriStimulusTimeHistogramEditor::visualizationMenu()
 {
-	VisualizerEditor::buttonEvent(button);
-	if (periStimulusTimeHistogramCanvas == nullptr)
-		return;
+		PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
 
-	PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
-
-	if (button == clearDisplay)
-	{
-		if (processor->trialCircularBuffer != nullptr) {
-			processor->trialCircularBuffer->clearAll();
-			repaint();
-		}
-	} else if (button == visualizationOptions)
-		{
-			PopupMenu m;
+PopupMenu m;
 			m.addItem(1,"Sorted Units",true, showSortedUnits);
 			m.addItem(2,"LFP",true, showLFP);
 			m.addItem(3,"Compact View",true, showCompactView);
@@ -251,6 +239,25 @@ void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
 				double newPostSec = rangeTimes[result-60];
 				processor->modifyTimeRange(params.preSec,newPostSec);
 			}
+}
+
+void PeriStimulusTimeHistogramEditor::buttonEvent(Button* button)
+{
+	VisualizerEditor::buttonEvent(button);
+	if (periStimulusTimeHistogramCanvas == nullptr)
+		return;
+
+	PeriStimulusTimeHistogramNode* processor = (PeriStimulusTimeHistogramNode*) getProcessor();
+
+	if (button == clearDisplay)
+	{
+		if (processor->trialCircularBuffer != nullptr) {
+			processor->trialCircularBuffer->clearAll();
+			repaint();
+		}
+	} else if (button == visualizationOptions)
+		{
+	visualizationMenu();
 	} else if (button == saveOptions)
 	{
 
@@ -399,6 +406,14 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	viewport->setScrollBarsShown(true, true);
 	addAndMakeVisible(viewport);
 
+	
+	visualizationButton = new UtilityButton("Visualization Options",Font("Default", 15, Font::plain));
+	visualizationButton->addListener(this);
+	addAndMakeVisible(visualizationButton);
+
+	clearAllButton = new UtilityButton("Clear all",Font("Default", 15, Font::plain));
+	clearAllButton->addListener(this);
+	addAndMakeVisible(clearAllButton);
 
 	conditionsViewport = new Viewport();
 	conditionsList = new ConditionList(n, conditionsViewport, this);
@@ -424,7 +439,14 @@ void PeriStimulusTimeHistogramCanvas::beginAnimation()
 
 void PeriStimulusTimeHistogramCanvas::buttonClicked(Button* button)
 {
-
+	if (button == visualizationButton)
+	{
+		PeriStimulusTimeHistogramEditor* ed = (PeriStimulusTimeHistogramEditor*) processor->getEditor();
+		ed->visualizationMenu();
+	} else if (button == clearAllButton)
+	{
+		processor->trialCircularBuffer->clearAll();
+	}
 }
 
 void PeriStimulusTimeHistogramCanvas::endAnimation()
@@ -657,7 +679,7 @@ void PeriStimulusTimeHistogramCanvas::resized()
 
 	int scrollBarThickness = viewport->getScrollBarThickness();
 
-	viewport->setBounds(0,0,getWidth()-conditionWidth,getHeight());
+	viewport->setBounds(0,30,getWidth()-conditionWidth,getHeight()-30);
 	int totalHeight = numRows * heightPerElectrodePix;
 	int totalWidth = numCols * widthPerUnit;
 	psthDisplay->setBounds(0,0,totalWidth, totalHeight);
@@ -668,8 +690,11 @@ void PeriStimulusTimeHistogramCanvas::resized()
 		numConditions = processor->trialCircularBuffer->getNumConditions();
 	}
 	
-	conditionsViewport->setBounds(getWidth()-conditionWidth,0,conditionWidth,getHeight());
+	conditionsViewport->setBounds(getWidth()-conditionWidth,30,conditionWidth,getHeight());
 	conditionsList->setBounds(0,0,conditionWidth, 50+20*numConditions);
+
+	visualizationButton->setBounds(20,5,150,20);
+	clearAllButton->setBounds(200,5,150,20);
 }
 
 void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
