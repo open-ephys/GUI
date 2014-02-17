@@ -67,7 +67,8 @@ public:
 	void setTriggerThreshold(double thres);
 	double getTriggerThreshold();
     void updateSettings();
-
+	void setFrequencyAnalyzerMode(bool state);
+	bool getFrequencyAnalyzerMode();
 
     bool enable();
     bool disable();
@@ -84,6 +85,9 @@ public:
 	TrialCircularBuffer *trialCircularBuffer;
 	
 private:
+	
+	void four1(double data[], int nn, int isign);
+
 	int64 totalSamplesProcessed;
 	void allocateTrialCircularBuffer();
 	TriggerTypes triggerType;
@@ -93,6 +97,7 @@ private:
 	int numTTLchannels;
 	int triggerChannel;
 	double triggerThresholduV;
+	bool fft;
 	int64 hardware_timestamp,software_timestamp, numTicksPerSec;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscilloscopeNode);
 

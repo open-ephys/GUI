@@ -198,17 +198,23 @@ ChannelList::ChannelList(OscilloscopeNode* n, Viewport *p, OscilloscopeCanvas*c)
 	channelsTitle->setJustificationType(Justification::centred);
 	channelsTitle->setColour(Label::textColourId, Colours::white);
 	channelsTitle->setColour(Label::backgroundColourId, Colours::darkgrey);
-	
 	addAndMakeVisible(channelsTitle);
 
 
+	freqButton = new ColorButton("Frequency Analyzer", Font("Default", 15, Font::plain));
+    freqButton->setBounds(0,75,200,25);
+	freqButton->setShowEnabled(false);
+	freqButton->addListener(this);
+    addAndMakeVisible(freqButton);
+
+
 	allButton = new ColorButton("All", Font("Default", 20, Font::plain));
-    allButton->setBounds(0,75,100,20);
+    allButton->setBounds(0,100,100,20);
 	allButton->addListener(this);
     addAndMakeVisible(allButton);
 
 	noneButton = new ColorButton("None", Font("Default", 20, Font::plain));
-    noneButton->setBounds(100,75,100,20);
+    noneButton->setBounds(100,100,100,20);
 	noneButton->addListener(this);
     addAndMakeVisible(noneButton);
 	
@@ -325,7 +331,7 @@ void ChannelList::updateButtons()
 	for (int k=0;k<numTTLchannels;k++)
 		{
 			OscilloscopeChannelButton* channelButton = new OscilloscopeChannelButton(this,"TTL "+String(k+1), Font("Default", 20, Font::plain),true,k,channelVisible[k]);
-			channelButton->setBounds(0,100+k*20,200,20);
+			channelButton->setBounds(0,125+k*20,200,20);
 			channelButton->setUserDefinedData(k);
 			addAndMakeVisible(channelButton);
 			channelButtons.add(channelButton);
@@ -334,7 +340,7 @@ void ChannelList::updateButtons()
 	for (int k=0;k<numChannels;k++)
 		{
 			OscilloscopeChannelButton* channelButton = new OscilloscopeChannelButton(this,"CH "+String(k+1), Font("Default", 20, Font::plain),false,k,channelVisible[k+numTTLchannels]);
-			channelButton->setBounds(0,100+(k+numTTLchannels)*20,200,20);
+			channelButton->setBounds(0,125+(k+numTTLchannels)*20,200,20);
 			channelButton->setUserDefinedData(k);
 			addAndMakeVisible(channelButton);
 			channelButtons.add(channelButton);
@@ -412,6 +418,16 @@ void ChannelList::buttonClicked(Button *btn)
 	{
 	} else if (btn == allButton)
 	{
+	} else if (btn == freqButton)
+	{
+		bool newState = !freqButton->getToggleState();
+		freqButton->setToggleState(newState,false);
+		if (newState)
+			freqButton->setColors(juce::Colours::white,juce::Colours::orange);
+		else
+			freqButton->setColors(juce::Colours::white,juce::Colours::darkgrey);
+
+		processor->setFrequencyAnalyzerMode(newState);
 	} else 
 	{
 		OscilloscopeChannelButton *cbtn = (OscilloscopeChannelButton *)btn;
@@ -638,7 +654,16 @@ void OscilloscopeCanvas::paint(Graphics& g)
 			float x0,dx;
 			std::vector<float> y;
 			processor->trialCircularBuffer->getLastTrial(0,k,0,x0,dx,y);
-			oscilloscopePlot->plotxy(XYline(x0,dx,y,  gains[k+numTTLchannels], channelsList->getChannelColor(k+numTTLchannels)));
+			XYline l(x0,dx,y,  gains[k+numTTLchannels], channelsList->getChannelColor(k+numTTLchannels));
+			if (processor->getFrequencyAnalyzerMode())
+			{
+				oscilloscopePlot->plotxy(l.getFFT());
+			} else
+			{
+				oscilloscopePlot->plotxy(l);
+			}
+
+			
 		}
 	}
 	processor->trialCircularBuffer->unlockPSTH();

@@ -62,6 +62,13 @@ MatlabLikePlot::MatlabLikePlot()
 	boundsButton ->addListener(this);
 	addAndMakeVisible(boundsButton);
 
+
+	activateButton = new UtilityButton("*",Font("Default", 15, Font::plain));
+	activateButton ->addListener(this);
+	addAndMakeVisible(activateButton);
+
+	activateButton->setVisible(false);
+
 	autoRescaleButton->setToggleState(true,true);
 	panButton->setToggleState(false,false);
 	dcRemoveButton->setToggleState(false,true);
@@ -77,6 +84,11 @@ MatlabLikePlot::~MatlabLikePlot()
 	removeChildComponent(vertAxesComponent);
 	removeChildComponent(horizAxesComponent);
 	removeChildComponent(drawComponent);
+}
+void MatlabLikePlot::setActivateButtonVisiblilty(bool vis, bool state)
+{
+	activateButton->setVisible(vis);
+	activateButton->setToggleState(state,false);
 }
 
 void MatlabLikePlot::setImageMode(bool state)
@@ -157,6 +169,13 @@ void MatlabLikePlot::buttonClicked(Button *btn)
 	{
 		btn->setToggleState(!prevState,false);
 		drawComponent->setShowBounds(!prevState);
+	} else if (btn == activateButton)
+	{
+		btn->setToggleState(!prevState,false);
+		if (!prevState)
+			addEvent("ActivateON");
+		else
+			addEvent("ActivateOFF");
 	}
 }
 
@@ -164,6 +183,8 @@ void MatlabLikePlot::resized()
 {
 	int w = getWidth();
 	int h = getHeight();
+	if (h == 0 || w == 0)
+		return;
 
 	int heightOffset, AxesWidth = 75,AxesHeight;
 
@@ -187,7 +208,7 @@ void MatlabLikePlot::resized()
 	vertAxesComponent->setBounds(2,heightOffset,AxesWidth-2, h - AxesHeight-heightOffset);
 	horizAxesComponent->setBounds(AxesWidth,h-AxesHeight-2,w - AxesWidth, AxesHeight-2);
 	drawComponent->setBounds(AxesWidth,heightOffset, w-AxesWidth-2,h-AxesHeight-heightOffset);
-
+	activateButton->setBounds(5,5,25-5,heightOffset-5);
 	if (controlButtonsVisible)
 	{
 		zoomButton ->setBounds(AxesWidth,heightOffset-25,80,25);
@@ -283,7 +304,7 @@ void MatlabLikePlot::paint(Graphics &g)
 	g.drawRect(0,0,getWidth(),getHeight(),2);
 	g.setColour(juce::Colours::white);
 	g.setFont(font);
-	g.drawText(title, 0,0,getWidth(),25,juce::Justification::centred,true);
+	g.drawText(title, 30,0,getWidth()-30,25,juce::Justification::centred,true);
 }
 
 void MatlabLikePlot::clearplot()
@@ -648,7 +669,119 @@ float XYline::interp_cubic(float x_sample, bool &inrange)
 	}
 }
 
+/*
+ FFT/IFFT routine. (see pages 507-508 of Numerical Recipes in C)
 
+ Inputs:
+	data : vector of complex* data points of size 2*NFFT+1.
+		* the n'th complex number x(n), for 0 <= n <= length(x)-1, is stored as:
+			data[2*n] = real(x(n))
+			data[2*n+1] = imag(x(n))
+		if length(Nx) < NFFT, the remainder of the array must be padded with zeros
+
+	nn : FFT order NFFT. This MUST be a power of 2 and >= length(x).
+	isign:  if set to 1, 
+				computes the forward FFT
+			if set to -1, 
+				computes Inverse FFT - in this case the output values have
+				to be manually normalized by multiplying with 1/NFFT.
+ Outputs:
+	data[] : The FFT or IFFT results are stored in data, overwriting the input.
+*/
+
+
+	
+void XYline::four1(std::vector<float> &data, int nn, int isign)
+{
+    int n, mmax, m, j, istep, i;
+    double wtemp, wr, wpr, wpi, wi, theta;
+    double tempr, tempi;
+    const double twopi = 6.28318530718;
+    n = nn << 1;
+    j = 1;
+    for (i = 1; i < n; i += 2) {
+	if (j > i) {
+	    tempr = data[j-1];     data[j-1] = data[i-1];     data[i-1] = tempr;
+	    tempr = data[j+1-1]; data[j+1-1] = data[i+1-1]; data[i+1-1] = tempr;
+	}
+	m = n >> 1;
+	while (m >= 2 && j > m) {
+	    j -= m;
+	    m >>= 1;
+	}
+	j += m;
+    }
+    mmax = 2;
+    while (n > mmax) {
+	istep = 2*mmax;
+	theta = twopi/(isign*mmax);
+	wtemp = sin(0.5*theta);
+	wpr = -2.0*wtemp*wtemp;
+	wpi = sin(theta);
+	wr = 1.0;
+	wi = 0.0;
+	for (m = 1; m < mmax; m += 2) {
+	    for (i = m; i <= n; i += istep) {
+		j =i + mmax;
+		tempr = wr*data[j-1]   - wi*data[j+1-1];
+		tempi = wr*data[j+1-1] + wi*data[j-1];
+		data[j-1]   = data[i-1]   - tempr;
+		data[j+1-1] = data[i+1-1] - tempi;
+		data[i-1] += tempr;
+		data[i+1-1] += tempi;
+	    }
+	    wr = (wtemp = wr)*wpr - wi*wpi + wr;
+	    wi = wi*wpr + wtemp*wpi + wi;
+	}
+	mmax = istep;
+    }
+}
+
+
+XYline XYline::getFFT()
+{
+	int Nx = numpts;
+	/* calculate NFFT as the next higher power of 2 >= Nx */
+	int NFFT = (int)pow(2.0, ceil(log((double)Nx)/log(2.0)));
+	std::vector<float> X;
+	X.resize(2*NFFT); // to hold complex 
+
+	/* Storing x(n) in a complex array to make it work with four1. 
+	This is needed even though x(n) is purely real in this case. */
+	for(int i=0; i<Nx; i++)
+	{
+		X[2*i] = y[i];
+		X[2*i+1] = 0.0;
+	}
+	/* pad the remainder of the array with zeros (0 + 0 j) */
+	for(int i=Nx; i<NFFT; i++)
+	{
+		X[2*i] = 0.0;
+		X[2*i+1] = 0.0;
+	}
+
+	/* calculate FFT */
+	four1(X, NFFT, 1);
+	/*
+	printf("\nFFT:\n");
+	for(int i=0; i<NFFT; i++)
+	{
+		printf("X[%d] = (%.2f + j %.2f)\n", i, X[2*i], X[2*i+1]);
+	}
+	*/
+
+	// now convert to power spectrum, and remove the second half of the signal (mirror symmetry of real function).
+	float Fs = 1.0/dx;
+	float df = (NFFT/2+1) / (Fs/2);
+	std::vector<float> powerspectrum;
+	powerspectrum.resize(NFFT/2+1);
+	for (int k=0;k<NFFT/2+1;k++)
+	{
+		powerspectrum[k] = log10(2 *  sqrt(X[2*k]*X[2*k]+ X[2*k+1]*X[2*k+1]));
+	}
+
+	return XYline(0,df, powerspectrum,1.0, color);
+}
 // draw a function.
 // stretch Y such that ymin->0 and ymax->plotHeight
 // and only display points between [xmin and xmax]

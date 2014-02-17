@@ -384,13 +384,9 @@ void PeriStimulusTimeHistogramNode::modifyTimeRange(double preSec_, double postS
 	}
 }
 
-void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
+void PeriStimulusTimeHistogramNode::handleNetworkMessage(StringTS s)
 {
-    
-	if (eventType == NETWORK)
-	{
-		StringTS s(event);
-  		bool redrawNeeded = trialCircularBuffer->parseMessage(s);
+ 		bool redrawNeeded = trialCircularBuffer->parseMessage(s);
 		if (redrawNeeded ){
 			PeriStimulusTimeHistogramEditor* ed = (PeriStimulusTimeHistogramEditor*) getEditor();
 			ed->updateCanvas();
@@ -404,6 +400,14 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			networkEventsHistory.push(s);
 		}
 
+}
+void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
+{
+    
+	if (eventType == NETWORK)
+	{
+		StringTS s(event);
+		handleNetworkMessage(s);
 	}
 	if (eventType == EYE_POSITION)
 	{

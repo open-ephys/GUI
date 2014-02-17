@@ -555,6 +555,7 @@ UnitPSTHs::UnitPSTHs(int ID,TrialCircularBufferParams params_, uint8 R, uint8 G,
 	colorRGB[1] = G;
 	colorRGB[2] = B;
 	redrawNeeded = false;
+	isActive = false;
 }
 
 void UnitPSTHs::informPainted()
@@ -673,7 +674,7 @@ Trial::Trial(const Trial &t)
 	alignTS_hardware = t.alignTS_hardware;
 }
 /***************************/
-ElectrodePSTH::ElectrodePSTH(int ID) : electrodeID(ID)
+ElectrodePSTH::ElectrodePSTH(int ID, String name) : electrodeID(ID), electrodeName(name)
 {
 
 }
@@ -1327,6 +1328,12 @@ std::vector<int> TrialCircularBuffer::getElectrodeChannels(int e)
 	return electrodesPSTH[e].channels;
 }
 
+String TrialCircularBuffer::getElectrodeName(int e)
+{
+	return electrodesPSTH[e].electrodeName;
+}
+
+
 TrialCircularBufferParams TrialCircularBuffer::getParams()
 {
 	return params;
@@ -1580,7 +1587,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 	for (int electrodeIter=0;electrodeIter<electrodes.size();electrodeIter++)
 	{
 
-		ElectrodePSTH electrodePSTH(electrodes[electrodeIter]->electrodeID);
+		ElectrodePSTH electrodePSTH(electrodes[electrodeIter]->electrodeID,electrodes[electrodeIter]->name);
 		int numChannels = electrodes[electrodeIter]->numChannels;
 		  
 		for (int k=0;k<numChannels;k++) {
@@ -1632,7 +1639,7 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 {
 	lockPSTH();
-	ElectrodePSTH e(electrode->electrodeID);
+	ElectrodePSTH e(electrode->electrodeID,electrode->name);
 	int numChannels = electrode->numChannels;
 
 	for (int k=0;k<numChannels;k++) 
@@ -2136,8 +2143,9 @@ std::vector<XYline> TrialCircularBuffer::getElectrodeConditionCurves(int electro
 	return lines;
 }
 
-juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
+bool TrialCircularBuffer::getUnitActiveState(int electrodeID, int unitID)
 {
+	lockPSTH();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2146,13 +2154,59 @@ juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
 			{
 				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 				{
-					return juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
-										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
-										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]);
+					bool state = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isActive;
+					unlockPSTH();
+					return state;
 				}
 			}
 		}
 	}
+	unlockPSTH();
+	return false;
+}
+
+void TrialCircularBuffer::setUnitActiveState(int electrodeID, int unitID, bool state)
+{
+	lockPSTH();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isActive = state;
+					unlockPSTH();
+					return;
+				}
+			}
+		}
+	}
+	unlockPSTH();
+}
+
+juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
+{
+	lockPSTH();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					juce::Colour col = juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
+										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
+										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]);
+					unlockPSTH();
+					return col ;
+				}
+			}
+		}
+	}
+	unlockPSTH();
 	return juce::Colours::black;
 }
 

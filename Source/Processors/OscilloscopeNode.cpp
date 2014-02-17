@@ -41,13 +41,39 @@ OscilloscopeNode::OscilloscopeNode() : GenericProcessor("Oscilloscope")
 	totalSamplesProcessed = 0;
 	Time t;
 	numTicksPerSec = t.getHighResolutionTicksPerSecond();
+	fft = false;
 }
+
+
+
+
+/************************************************
+* FFT code from the book Numerical Recipes in C *
+* Visit www.nr.com for the licence.             *
+************************************************/
+
+// The following line must be defined before including math.h to correctly define M_PI
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 int OscilloscopeNode::getTriggerChannel()
 {
 	return triggerChannel;
 }
 
+void OscilloscopeNode::setFrequencyAnalyzerMode(bool state)
+{
+	fft = state;
+}
+
+
+bool OscilloscopeNode::getFrequencyAnalyzerMode()
+{
+	return fft;
+}
 bool OscilloscopeNode::isTTLtrigger()
 {
 	return triggerByTTL;

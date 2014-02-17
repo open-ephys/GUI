@@ -280,7 +280,6 @@ public:
 	void saveVisualizerParameters(XmlElement* xml);
 	void loadVisualizerParameters(XmlElement* xml);
 	void visualizationMenu();
-
 private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
@@ -295,7 +294,7 @@ private:
 class GenericPlot : public Component
 {
 public:
-	GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType, 
+	GenericPlot(String name,	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType, 
 					TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool _rasterMode);
 	void resized();
 	void paint(Graphics &g);
@@ -330,6 +329,7 @@ private:
 	bool smoothPlot;
 	bool autoRescale;
 	float guassianStandardDeviationMS;
+	String plotName;
 	std::vector<float> smoothKernel; 
 };
 

@@ -84,7 +84,7 @@ private:
 
 	ScopedPointer<Label> triggerTitle,channelsTitle;
 	ScopedPointer<ComboBox> triggerCombo;
-	ScopedPointer<ColorButton> allButton,noneButton, slopeButton;
+	ScopedPointer<ColorButton> allButton,noneButton, slopeButton,freqButton;
 	OwnedArray<OscilloscopeChannelButton> channelButtons;
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelList);
 };

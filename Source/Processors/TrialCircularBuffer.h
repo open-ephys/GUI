@@ -205,7 +205,7 @@ public:
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
-	
+	bool isActive;
 	bool redrawNeeded;
 	TrialCircularBufferParams params;
 };
@@ -244,13 +244,15 @@ public:
 class ElectrodePSTH
 {
 public:
-	ElectrodePSTH(int ID);
+	ElectrodePSTH(int ID, String name);
 	void updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer);
 	int electrodeID;
+	String electrodeName;
 	std::vector<int> channels;
 	std::vector<UnitPSTHs> unitsPSTHs;
 	std::vector<ChannelPSTHs> channelsPSTHs;
 	std::vector<TTL_PSTHs> ttlPSTHs;
+	
 };
 
 struct ttlStatus
@@ -294,6 +296,10 @@ public:
 	void removeElectrode(int electrodeID);
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
+	
+	bool getUnitActiveState(int electrodeID, int unitID);
+	void setUnitActiveState(int electrodeID, int unitID, bool state);
+	String getElectrodeName(int electrodeID);
 	void setHardwareTriggerAlignmentChannel(int k);
 	TrialCircularBufferParams getParams();
 	int getNumElectrodes();

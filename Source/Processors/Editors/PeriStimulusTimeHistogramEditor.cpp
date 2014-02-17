@@ -558,6 +558,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 		int offset = 0;
 		bool plottedSomething = false;
 		int electrodeID = processor->trialCircularBuffer->getElectrodeID(e);
+		String electrodeName = processor->trialCircularBuffer->getElectrodeName(e);
 
 		if (showLFP) {
 			std::vector<int> channels = processor->trialCircularBuffer->getElectrodeChannels(e);
@@ -567,7 +568,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 				GenericPlot *newplot;
 				if (compactView)
 				{
-					newplot = new GenericPlot(psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
+					String plotName = electrodeName+" Ch:"+String(1+u);
+					newplot = new GenericPlot(plotName,psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 					channels[u],
 					plotCounter,row,rasterMode);
@@ -583,7 +585,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 					}
 				} else 
 				{
-					newplot = new GenericPlot(psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
+					String plotName = electrodeName+":Ch "+String(1+u);
+					newplot = new GenericPlot(plotName,psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 					electrodeID,
 					channels[u],
 					u,row,rasterMode);
@@ -611,7 +614,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 					GenericPlot *newplot;
 					if (compactView)
 					{
-					    newplot = new GenericPlot(psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
+						String plotName = electrodeName+" Unit:"+String(1+u);
+					    newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),
 						plotCounter,row,rasterMode);
@@ -626,7 +630,8 @@ void PeriStimulusTimeHistogramCanvas::update()
 						}
 					} else
 					{
-					newplot = new GenericPlot(psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
+						String plotName = electrodeName+" Unit:"+String(1+u);
+					newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),
 						offset+u,row,rasterMode);
@@ -659,8 +664,6 @@ void PeriStimulusTimeHistogramCanvas::update()
 		processor->trialCircularBuffer->unlockPSTH();
 		return;		
 	}
-	resized();
-
 
 	psthDisplay->resized();
 	psthDisplay->repaint();
@@ -771,11 +774,19 @@ void PeriStimulusTimeHistogramDisplay::resized()
 	// draw n by m grid
 	for (int k=0;k<psthPlots.size();k++)
 	{
-		
-		psthPlots[k]->setBounds(psthPlots[k]->getRow() * canvas->widthPerUnit,
-			psthPlots[k]->getCol() * canvas->heightPerElectrodePix,
-			canvas->widthPerUnit,
-			canvas->heightPerElectrodePix);
+		if (psthPlots[k]->isFullScreen())
+		{
+				int newSize = MIN(canvas->screenWidth,canvas->screenHeight);
+		setBounds(0,0,newSize,newSize);
+		psthPlots[k]->setBounds(0,0,newSize-30,newSize-30);
+
+		} else
+		{
+			psthPlots[k]->setBounds(psthPlots[k]->getRow() * canvas->widthPerUnit,
+				psthPlots[k]->getCol() * canvas->heightPerElectrodePix,
+				canvas->widthPerUnit,
+				canvas->heightPerElectrodePix);
+		}
 
 	}
 }
@@ -1740,9 +1751,9 @@ void ConditionList::buttonClicked(Button *btn)
 // All raster plots will be handled by another class (?)
 // 
 
-GenericPlot::GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType_, 
+GenericPlot::GenericPlot(	String name,PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType_, 
 						 TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool rasterMode_) :  tcb(tcb_), electrodeID(electrodeID_), plotID(plotID_),
-						 plotType(plotType_), subID(subID_), row(row_), col(col_), rasterMode(rasterMode_),display(dsp)
+						 plotType(plotType_), subID(subID_), row(row_), col(col_), rasterMode(rasterMode_),display(dsp),plotName(name)
 {
 	fullScreenMode = false;
 	mlp = new MatlabLikePlot();
@@ -1754,17 +1765,19 @@ GenericPlot::GenericPlot(	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xy
 	else
 		mlp->setImageMode(false);
 
-
+	
 	addAndMakeVisible(mlp);
 
+	mlp->setTitle(plotName);	
 	if (plotType == SPIKE_PLOT) 
 	{
-		mlp->setTitle("Unit "+String(electrodeID)+":"+String(subID));
+		//mlp->setTitle("Unit "+String(electrodeID)+":"+String(subID));
 		mlp->setBorderColor(tcb->getUnitColor(electrodeID, subID));
+		mlp->setActivateButtonVisiblilty(true, tcb->getUnitActiveState(electrodeID, subID));
 	}
 	else if (plotType == LFP_PLOT)
 	{
-		mlp->setTitle("Ch "+String(electrodeID)+":"+String(subID));
+	//	mlp->setTitle("Ch "+String(electrodeID)+":"+String(subID));
 		mlp->setBorderColor(juce::Colours::white);
 	}
 
@@ -1911,5 +1924,17 @@ void GenericPlot::handleEventFromMatlabLikePlot(String event)
 	{
 		// full screen toggle
 		display->focusOnPlot(plotID);
-	} 
+	}  else if (event == "ActivateON")
+	{
+		tcb->setUnitActiveState(electrodeID, subID,true);
+		// post this as a network message as well
+		StringTS s("ActivateUnit "+String(electrodeID)+" "+String(subID));
+		display->processor->handleNetworkMessage(s);
+	} else if (event == "ActivateOFF")
+	{
+		tcb->setUnitActiveState(electrodeID, subID,false);
+		// post this as a network message as well
+		StringTS s("DeactivateUnit "+String(electrodeID)+" "+String(subID));
+		display->processor->handleNetworkMessage(s);
+	}
 }

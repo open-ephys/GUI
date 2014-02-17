@@ -88,6 +88,7 @@ public:
 	int spikeSavingMode;
 	bool saveNetworkEventsWhenNotRecording;
 	
+	void handleNetworkMessage(StringTS s);
 private:
 
 	FILE* eventFile;

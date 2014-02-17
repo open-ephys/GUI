@@ -50,13 +50,15 @@ public:
 
 	// for pure vertical lines
 	XYline(float x0_, float ymin, float ymax, juce::Colour color_) ;
-
+	XYline getFFT();
 	void draw(Graphics &g, float xmin, float xmax, float ymin, float ymax, int width, int height, bool showBounds);
 	void getYRange(float xmin, float xmax, double &lowestValue, double &highestValue);
 	void removeMean();
 	void smooth(std::vector<float> kernel);
 	int getNumPoints();
 private:
+	void four1(std::vector<float> &data, int nn, int isign);
+
 	float interp(float x_sample, bool &inrange);
 	float interp_bilinear(float x_sample, bool &inrange);
 
@@ -190,6 +192,8 @@ public:
 	void mouseDoubleClick(const juce::MouseEvent& event);
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	void determineTickLocationsImageMode(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
+	void setActivateButtonVisiblilty(bool vis,bool state);
+
 private:
 
 	void determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
@@ -203,7 +207,7 @@ private:
 	juce::Colour borderColor;
 	int maxImageHeight;
 	int64 triggeredTS;
-	ScopedPointer<UtilityButton> zoomButton, panButton, verticalShiftButton, dcRemoveButton, frequencyButton,autoRescaleButton, boundsButton;
+	ScopedPointer<UtilityButton> zoomButton, panButton, verticalShiftButton, dcRemoveButton, frequencyButton,autoRescaleButton, boundsButton,activateButton;
 	ScopedPointer<AxesComponent> vertAxesComponent,horizAxesComponent;
 	ScopedPointer<DrawComponent> drawComponent;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatlabLikePlot);
