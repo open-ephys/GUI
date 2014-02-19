@@ -68,7 +68,7 @@ public:
 
 private:
 	void updateThresholdLineVisibility();
-
+	float saved_xmin,saved_xmax,saved_ymin,saved_ymax;
 	int defaultTTLgainIndex,defaultCHgainIndex;
 	std::vector<float> gainValues;
 

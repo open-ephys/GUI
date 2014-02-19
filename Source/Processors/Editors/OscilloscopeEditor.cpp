@@ -426,11 +426,15 @@ void ChannelList::buttonClicked(Button *btn)
 		{
 			freqButton->setColors(juce::Colours::white,juce::Colours::orange);
 			OscilloscopeEditor* ed = (OscilloscopeEditor*)processor->getEditor();
+			ed->oscilloscopeCanvas->oscilloscopePlot->getRange(saved_xmin,saved_xmax,saved_ymin,saved_ymax);
 			ed->oscilloscopeCanvas->oscilloscopePlot->setRange(0,100,0,50,false);
 			ed->oscilloscopeCanvas->oscilloscopePlot->setAutoRescale(true);
 		}
 		else {
 			freqButton->setColors(juce::Colours::white,juce::Colours::darkgrey);
+			OscilloscopeEditor* ed = (OscilloscopeEditor*)processor->getEditor();
+			ed->oscilloscopeCanvas->oscilloscopePlot->setRange(saved_xmin,saved_xmax,saved_ymin,saved_ymax,false);
+			ed->oscilloscopeCanvas->oscilloscopePlot->setAutoRescale(true);
 		}
 
 		processor->setFrequencyAnalyzerMode(newState);
