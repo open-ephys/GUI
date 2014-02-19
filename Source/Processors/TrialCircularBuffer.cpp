@@ -1160,6 +1160,7 @@ SmartSpikeCircularBuffer::SmartSpikeCircularBuffer(float maxTrialTimeSeconds, in
 
 void SmartSpikeCircularBuffer::addSpikeToBuffer(int64 spikeTimeSoftware,int64 spikeTimeHardware)
 {
+	jassert(bufferSize > 0);
 	spikeTimesHardware[bufferIndex] = spikeTimeHardware;
 	spikeTimesSoftware[bufferIndex] = spikeTimeSoftware;
 	bufferIndex = (bufferIndex+1) % bufferSize;
@@ -1171,6 +1172,7 @@ void SmartSpikeCircularBuffer::addSpikeToBuffer(int64 spikeTimeSoftware,int64 sp
 
 void SmartSpikeCircularBuffer::addTrialStartToBuffer(Trial *t)
 {
+	jassert(trialIndex >= 0);
 	trialID[trialIndex] = t->trialID;
 	pointers[trialIndex] = bufferIndex;
 	trialIndex = (trialIndex+1) % maxTrialsInMemory;
@@ -1447,19 +1449,13 @@ void TrialCircularBuffer::clearAll()
 		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
 		{
 			electrodesPSTH[i].channelsPSTHs[ch].redrawNeeded = true;
-			for (int psth=0;psth<electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs.size();psth++)
-			{
-				electrodesPSTH[i].channelsPSTHs[ch].conditionPSTHs[psth].clear();
-			}
+			electrodesPSTH[i].channelsPSTHs[ch].clearStatistics();
 		}
 
 		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
 		{
 			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
-			for (int psth=0;psth<electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.size();psth++)
-			{
-				electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs[psth].clear();
-			}
+			electrodesPSTH[i].unitsPSTHs[u].clearStatistics();
 		}
 	}
 	unlockPSTH();
@@ -1862,6 +1858,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 
 void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 {
+	lockPSTH();
 	for (int e=0;e<electrodesPSTH.size();e++)
 	{
 		if (electrodesPSTH[e].electrodeID == newSpike.electrodeID)
@@ -1871,6 +1868,7 @@ void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 				if (electrodesPSTH[e].unitsPSTHs[u].unitID == newSpike.sortedId)
 				{
 					electrodesPSTH[e].unitsPSTHs[u].addSpikeToBuffer(newSpike.timestamp_software,newSpike.timestamp);
+					unlockPSTH();
 					return;
 				}
 			}
@@ -1878,7 +1876,7 @@ void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 		}
 	}
 	// get got a sorted spike event before we got the information about the new unit?!?!?!
-	
+	unlockPSTH();
 }
 
 
@@ -2069,48 +2067,6 @@ std::vector<std::vector<bool>> TrialCircularBuffer::reconstructTTLchannels(int64
 	return contdata;
 }
 
-void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
-{
-	// first, update LFP circular buffers
-	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
-
-	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
-	if (params.reconstructTTL) {
-		std::vector<std::vector<bool>> reconstructedTTLs = reconstructTTLchannels(hardware_timestamp,nSamples);
-		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
-	}
-
-	// now, check if a trial finished, and enough time has elapsed so we also
-	// have post trial information
-	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
-	{
-		for (int k=0;k<aliveTrials.size();k++)
-		{
-			Trial topTrial = aliveTrials.front();
-			int64 ticksElapsed = software_timestamp - topTrial.endTS;
-			float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
-
-			bool trialEndedAndEnoughDataInBuffer;
-
-			if (!topTrial.hardwareAlignment)
-			{
-				trialEndedAndEnoughDataInBuffer = timeElapsedSec > params.postSec + 0.1;
-			} else
-			{
-				 // add 100 ms (safety measure. jitter shouldn't be more than 3-4 ms)
-				trialEndedAndEnoughDataInBuffer = hardware_timestamp+nSamples > topTrial.alignTS_hardware+ (params.postSec + 0.1)*params.sampleRate;
-			}
-
-			if (trialEndedAndEnoughDataInBuffer)
-			{
-				aliveTrials.pop();
-				lastTrialID = topTrial.trialID;
-				updatePSTHwithTrial(&topTrial);
-			}
-		}
-	}
-
-}
 
 int TrialCircularBuffer::getNumberAliveTrials()
 {
@@ -2925,17 +2881,49 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 }
 
 
-	/*
-		ImagePixelData A(juce::Image::PixelFormat::RGB,);
 
 
-		tcb->getTrialsAverageUnitResponse(electrodeID, subID);
-	int imageDimX = lines[0].getNumPoints();
-	int imageDimY = lines[0].getNumPoints();
 
-	
-	rasterImage = Image(Image::RGB, imageDim, imageDim, true);
-	rasterImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),Colours::black);
-    Graphics gi(rasterImage);
-    g.drawImage(rasterImage, 0, 0, getWidth(), getHeight(), 0, 0, rangeX, rangeY);
-	*/
+void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
+{
+	// first, update LFP circular buffers
+	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+
+	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
+	if (params.reconstructTTL) {
+		std::vector<std::vector<bool>> reconstructedTTLs = reconstructTTLchannels(hardware_timestamp,nSamples);
+		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
+	}
+
+	// now, check if a trial finished, and enough time has elapsed so we also
+	// have post trial information
+	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
+	{
+		for (int k=0;k<aliveTrials.size();k++)
+		{
+			Trial topTrial = aliveTrials.front();
+			int64 ticksElapsed = software_timestamp - topTrial.endTS;
+			float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
+
+			bool trialEndedAndEnoughDataInBuffer;
+
+			if (!topTrial.hardwareAlignment)
+			{
+				//trialEndedAndEnoughDataInBuffer = timeElapsedSec > params.postSec + 0.1;
+				trialEndedAndEnoughDataInBuffer = software_timestamp > topTrial.alignTS + (params.postSec + 0.1)*numTicksPerSecond;
+			} else
+			{
+				 // add 100 ms (safety measure. jitter shouldn't be more than 3-4 ms)
+				trialEndedAndEnoughDataInBuffer = hardware_timestamp+nSamples > topTrial.alignTS_hardware+ (params.postSec + 0.1)*params.sampleRate;
+			}
+
+			if (trialEndedAndEnoughDataInBuffer)
+			{
+				aliveTrials.pop();
+				lastTrialID = topTrial.trialID;
+				updatePSTHwithTrial(&topTrial);
+			}
+		}
+	}
+
+}
