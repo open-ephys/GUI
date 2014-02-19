@@ -453,6 +453,32 @@ void SpikeDetector::updateSinks(Electrode* electrode)
 	}
 }
 
+void SpikeDetector::updateSinks(int electrodeID, String NewName)
+{
+	// inform sinks about an electrode name change
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		String s = p[k]->getName();
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			if (node->trialCircularBuffer != nullptr)
+			{
+					// add electrode
+					node->trialCircularBuffer->updateElectrodeName(electrodeID, NewName);
+					(((PeriStimulusTimeHistogramEditor *) node->getEditor()))->updateCanvas();
+			}
+		}
+		if (p[k]->getName() == "Spike Viewer")
+		{
+			SpikeDisplayNode* node = (SpikeDisplayNode*)p[k];
+			node->syncWithSpikeDetector();
+		}
+	}
+}
+
 
 void SpikeDetector::updateSinks(int electrodeID)
 {
@@ -594,6 +620,7 @@ void SpikeDetector::setElectrodeName(int index, String newName)
 {
 	mut.enter();
     electrodes[index-1]->name = newName;
+	updateSinks(electrodes[index-1]->electrodeID, newName);
 	mut.exit();
 }
 

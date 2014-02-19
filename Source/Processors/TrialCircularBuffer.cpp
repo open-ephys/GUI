@@ -460,10 +460,12 @@ Condition::Condition(String Name, std::vector<int> types, std::vector<int> outco
 ChannelPSTHs::ChannelPSTHs(int ID, TrialCircularBufferParams params_) : channelID(ID), params(params_)
 {
 	redrawNeeded = true;
+	numTrials = 0;
 }
 
 void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid, Trial *trial)
 {
+	numTrials++;
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
 
@@ -544,7 +546,7 @@ void ChannelPSTHs::clearStatistics()
 		conditionPSTHs[k].clear();
 	}
 	trialPSTHs.clear();
-	
+	numTrials=0;
 }
 
 /***********************************************/
@@ -556,6 +558,7 @@ UnitPSTHs::UnitPSTHs(int ID,TrialCircularBufferParams params_, uint8 R, uint8 G,
 	colorRGB[2] = B;
 	redrawNeeded = false;
 	isActive = false;
+	numTrials = 0;
 }
 
 void UnitPSTHs::informPainted()
@@ -575,6 +578,7 @@ void UnitPSTHs::clearStatistics()
 		conditionPSTHs[k].clear();
 	}
 	trialPSTHs.clear();
+	numTrials = 0;
 }
 
 void UnitPSTHs::addSpikeToBuffer(int64 spikeTimestampSoftware, int64 spikeTimestampHardware)
@@ -610,6 +614,7 @@ void UnitPSTHs::getRange(float &xmin, float &xmax, float &ymin, float &ymax)
 void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdating, Trial* trial)
 {
 	redrawNeeded = true;
+	numTrials++;
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
 
@@ -676,12 +681,13 @@ Trial::Trial(const Trial &t)
 /***************************/
 ElectrodePSTH::ElectrodePSTH(int ID, String name) : electrodeID(ID), electrodeName(name)
 {
-
+	
 }
 
 void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer)
 {
 	// compute trial aligned lfp for all channels 
+	
 	std::vector<float> valid;
 	std::vector<std::vector<float> > alignedLFP;
 	// resample all electrode channels 
@@ -2396,6 +2402,21 @@ void TrialCircularBuffer::clearChanneltatistics(int electrodeID, int channelID)
 }
 
 
+void TrialCircularBuffer::updateElectrodeName(int electrodeID, String newName)
+{
+lockPSTH();
+
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			electrodesPSTH[electrodeIndex].electrodeName = newName;
+			unlockPSTH();
+			return;
+		}
+	}
+	unlockPSTH();
+}
 
  std::vector<float> TrialCircularBuffer::buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS)
 {
@@ -2717,9 +2738,10 @@ int TrialCircularBuffer::getNumTrialTypesInChannel(int electrodeID, int channelI
 				{
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
+					int N= electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs.size();
 					unlockConditions();
 					unlockPSTH();
-					return electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs.size();
+					return N;
 
 				}
 			}
@@ -2747,9 +2769,10 @@ int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 				{
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
+					int N= electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs.size();
 					unlockConditions();
 					unlockPSTH();
-					return electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs.size();
+					return N;
 
 				}
 			}
@@ -2761,6 +2784,65 @@ int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 }
 
 
+
+int TrialCircularBuffer::getNumTrialsInChannel(int electrodeID, int channelID)
+{
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					int N = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].numTrials;
+					unlockConditions();
+					unlockPSTH();
+					return N;
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return 0;
+}
+
+
+
+int TrialCircularBuffer::getNumTrialsInUnit(int electrodeID, int unitID)
+{
+	lockPSTH();
+	lockConditions();
+	bool fisrtTime = true;
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					// great. we found our unit.
+					// now iterate over trial and build the matrix.
+					int N = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].numTrials;
+					unlockConditions();
+					unlockPSTH();
+					return N;
+
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return 0;
+}
 
 juce::Image TrialCircularBuffer::getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	std::vector<int> numTrialRepeats,	std::vector<std::vector<float>> trialResponseMatrix, float &maxValue)
 {

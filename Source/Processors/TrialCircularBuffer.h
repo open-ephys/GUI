@@ -207,6 +207,7 @@ public:
 	int unitID;
 	bool isActive;
 	bool redrawNeeded;
+	int numTrials;
 	TrialCircularBufferParams params;
 };
 
@@ -223,7 +224,7 @@ public:
 	std::vector<PSTH> conditionPSTHs;
 	std::vector<PSTH> trialPSTHs;
 	TrialCircularBufferParams params;
-
+	int numTrials;
 	bool redrawNeeded;
 };
 
@@ -296,7 +297,8 @@ public:
 	void removeElectrode(int electrodeID);
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
-	
+	int getNumTrialsInChannel(int electrodeID, int channelID);
+	int getNumTrialsInUnit(int electrodeID, int unitID);
 	void getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)	;
 	void getUnitConditionRange(int electrodeID, int unitID, double &xmin, double &xmax);
 	bool getUnitActiveState(int electrodeID, int unitID);
@@ -332,7 +334,7 @@ public:
 	void clearUnitStatistics(int electrodeID, int unitID);
 	void clearChanneltatistics(int electrodeID, int channelID);
 	 std::vector<float> buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS);
-
+	 void updateElectrodeName(int electrodeID, String newName);
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
 	int getNumberAliveTrials();

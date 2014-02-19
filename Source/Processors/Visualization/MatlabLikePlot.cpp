@@ -372,6 +372,11 @@ String MatlabLikePlot::getLastEvent()
 	recentEvents.pop_back();
 	return  e;
 }
+void MatlabLikePlot::setAuxiliaryString(String S)
+{
+	drawComponent->setAuxiliaryString(S);
+}
+
 void MatlabLikePlot::addEvent(String e)
 {
 		recentEvents.push_front(e);
@@ -1088,7 +1093,7 @@ DrawComponent::DrawComponent(MatlabLikePlot *mlp_) : mlp(mlp_)
 	ampScale = "";
 	timeScale = "";
 	maxImageValue = 0;
-
+	auxString = "";
 
 	font = Font("Default", 12, Font::plain);
 	setMode(ZOOM); // default mode
@@ -1139,7 +1144,8 @@ void DrawComponent::drawTicks(Graphics &g)
 void DrawComponent::plotxy(XYline l)
 {
 	l.getYRange(xmin,xmax,lowestValue, highestValue);
-	lines.push_back(l);
+	if (abs(lowestValue) < 1e10 && abs(highestValue) < 1e10)
+		lines.push_back(l);
 }
 	
 void DrawComponent::clearplot()
@@ -1228,6 +1234,12 @@ void DrawComponent::paint(Graphics &g)
 		g.setFont(Font("Default", 20, Font::plain));
 		g.setColour(juce::Colours::lightgreen);
 		g.drawText("Trig'd",w-80,2,60,20,juce::Justification::right,false);
+	}
+	if (auxString != "")
+	{
+		g.setFont(Font("Default", 12, Font::plain));
+		g.setColour(juce::Colours::white);
+		g.drawText(auxString,w-100,2,80,20,juce::Justification::right,false);
 	}
 
 }
@@ -1498,6 +1510,11 @@ void DrawComponent::setImageMode(bool state)
 bool DrawComponent::getImageMode()
 {
 	return imageMode;
+}
+
+void  DrawComponent::setAuxiliaryString(String s)
+{
+	auxString = s;
 }
 
 bool DrawComponent::getImageSet()

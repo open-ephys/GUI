@@ -203,7 +203,7 @@ protected:
 class WaveformAxes : public GenericDrawAxes
 {
 public:
-    WaveformAxes(SpikeDetector *p,int channel);
+    WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int channel);
     ~WaveformAxes() {}
 
 	
@@ -223,6 +223,7 @@ public:
     void mouseExit(const MouseEvent& event);
     void mouseDown(const MouseEvent& event);
     void mouseDrag(const MouseEvent& event);
+	void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel);
 	void mouseUp(const MouseEvent& event);
 
     void setRange(float);
@@ -274,6 +275,7 @@ private:
 
 	std::vector<BoxUnit> units;
 	SpikeDetector* processor;
+	SpikeHistogramPlot* spikeHistogramPlot;
     MouseCursor::StandardCursorType cursorType;
 
 };
@@ -297,7 +299,7 @@ public:
 	void mouseMove(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
 	bool keyPressed(const KeyPress& key);
-
+	void mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel);
 	void redraw(bool subsample);
 	
 	void updateUnits(std::vector<PCAUnit> _units);
@@ -305,6 +307,8 @@ public:
 	void buttonClicked(Button* button);
 	
 	void drawUnit(Graphics &g, PCAUnit unit);
+	void rangeDown();
+	void rangeUp();
 
 private:
 	float prevx,prevy;
@@ -361,7 +365,7 @@ public:
 	
 	void setPolygonDrawingMode(bool on);
 	void setPCARange(float p1min, float p2min, float p1max, float p2max);
-
+	void modifyRange(int index,bool up);
 	void updateUnitsFromProcessor();
     void processSpikeObject(const SpikeObject& s);
 

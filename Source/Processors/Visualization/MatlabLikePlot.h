@@ -105,6 +105,7 @@ public:
 	void getRange(float &minx, float &maxx, float &miny, float &maxy);
 	bool getImageMode();
 	bool getImageSet();
+	void setAuxiliaryString(String s);
 private:
 	void mouseDown(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
@@ -122,6 +123,7 @@ private:
 	double lowestValue, highestValue;
 	MatlabLikePlot *mlp;
 	String ampScale, timeScale;
+	String auxString;
 	Font font;
 	void drawTicks(Graphics &g);
 	void paint(Graphics &g);
@@ -190,6 +192,7 @@ public:
 	void addEvent(String e);
 	void resized();
 	String getLastEvent();
+	void setAuxiliaryString(String S);
 	void setImageMode(bool state);
 	bool eventsAvail();
 	void mouseDoubleClick(const juce::MouseEvent& event);

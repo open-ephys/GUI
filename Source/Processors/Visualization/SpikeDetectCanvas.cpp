@@ -645,7 +645,7 @@ void SpikeHistogramPlot::initAxes()
 
     for (int i = 0; i < nWaveAx; i++)
     {
-        WaveformAxes* wAx = new WaveformAxes(processor, i);
+        WaveformAxes* wAx = new WaveformAxes(this,processor, i);
 		wAx->setDetectorThreshold( processor->getActiveElectrode()->thresholds[i]);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
@@ -715,13 +715,37 @@ void SpikeHistogramPlot::resized()
 
 }
 
-void SpikeHistogramPlot::buttonClicked(Button* button)
+void SpikeHistogramPlot::modifyRange(int index,bool up)
 {
-    UtilityButton* buttonThatWasClicked = (UtilityButton*) button;
+	const int NUM_RANGE = 7;
+	float range_array[NUM_RANGE] = {100,250,500,750,1000,1250,1500};
+	String label;
+	for (int k=0;k<NUM_RANGE;k++)
+	{
+		if ( abs(ranges[index] - range_array[k]) < 0.1)
+		{
+			int newIndex;
+			if (up)
+				newIndex  = (k + 1) % NUM_RANGE;
+			else
+			{
+				newIndex  = (k - 1);
+				if (newIndex < 0)
+					newIndex  = NUM_RANGE-1;
+			}
+			ranges.set(index, range_array[newIndex]);
+			String label = String(range_array[newIndex],0);
+			rangeButtons[index]->setLabel(label);
+		    setLimitsOnAxes();
+			return;
+		}
 
-    int index = rangeButtons.indexOf(buttonThatWasClicked);
-    String label;
+	}
+	// we shoudl never reach here.
+	jassert(false);
+	return ;
 
+	/*
     if (ranges[index] == 250.0f)
     {
         ranges.set(index, 500.0f);
@@ -742,10 +766,15 @@ void SpikeHistogramPlot::buttonClicked(Button* button)
         ranges.set(index, 250.0f);
         label = "250";
     }
+	*/
+}
 
-    buttonThatWasClicked->setLabel(label);
+void SpikeHistogramPlot::buttonClicked(Button* button)
+{
+    UtilityButton* buttonThatWasClicked = (UtilityButton*) button;
 
-    setLimitsOnAxes();
+    int index = rangeButtons.indexOf(buttonThatWasClicked);
+	modifyRange(index,true);
 
 }
 
@@ -957,7 +986,7 @@ double GenericDrawAxes::ad16ToUv(int x, int gain)
 // --------------------------------------------------
 
 
-WaveformAxes::WaveformAxes(SpikeDetector *p,int _channel) : GenericDrawAxes(channel),
+WaveformAxes::WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int _channel) : GenericDrawAxes(channel),spikeHistogramPlot(plt),
     processor(p),
 	channel(_channel),
 	drawGrid(true), 
@@ -989,6 +1018,16 @@ WaveformAxes::WaveformAxes(SpikeDetector *p,int _channel) : GenericDrawAxes(chan
 
         spikeBuffer.add(so);
     }
+}
+
+void WaveformAxes::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel)
+{
+	// weirdly enough, sometimes we get twice of this event even though a single wheel move was made...
+	if (wheel.deltaY < 0)
+		spikeHistogramPlot->modifyRange(channel, true);
+	else
+		spikeHistogramPlot->modifyRange(channel, false);
+
 }
 
 void WaveformAxes::setSignalFlip(bool state)
@@ -2034,10 +2073,8 @@ bool PCAProjectionAxes::keyPressed(const KeyPress& key)
 	return false;
 }
 
-void PCAProjectionAxes::buttonClicked(Button* button)
+void PCAProjectionAxes::rangeDown()
 {
-	    if (button == rangeDownButton)
-		{
 			float range0 = pcaMax[0]-pcaMin[0];
 			float range1 = pcaMax[1]-pcaMin[1];
 			pcaMin[0] = pcaMin[0] - 0.1 * range0;
@@ -2045,10 +2082,10 @@ void PCAProjectionAxes::buttonClicked(Button* button)
 			pcaMin[1] = pcaMin[1] - 0.1 * range1;
 			pcaMax[1] = pcaMax[1] + 0.1 * range1;
 			setPCARange(pcaMin[0], pcaMin[1], pcaMax[0], pcaMax[1]);
-		} 
+}
 
-		else if  (button == rangeUpButton)
-		{
+void PCAProjectionAxes::rangeUp()
+{
 			float range0 = pcaMax[0]-pcaMin[0];
 			float range1 = pcaMax[1]-pcaMin[1];
 			pcaMin[0] = pcaMin[0] + 0.1 * range0;
@@ -2057,6 +2094,27 @@ void PCAProjectionAxes::buttonClicked(Button* button)
 			pcaMax[1] = pcaMax[1] - 0.1 * range1;
 
 			setPCARange(pcaMin[0], pcaMin[1], pcaMax[0], pcaMax[1]);
+
+}
+
+void PCAProjectionAxes::buttonClicked(Button* button)
+{
+	    if (button == rangeDownButton)
+		{
+			rangeDown();
+		} 
+
+		else if  (button == rangeUpButton)
+		{
+			rangeUp();
 		}
 
+}
+
+void PCAProjectionAxes::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel)
+{
+	if (wheel.deltaY > 0)
+		rangeDown();
+	else
+		rangeUp();
 }

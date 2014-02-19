@@ -674,7 +674,7 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
       
             processor->setElectrodeName(lastId, comboBox->getText());
             refreshElectrodeList();
-
+			 
         }
 		else
         {

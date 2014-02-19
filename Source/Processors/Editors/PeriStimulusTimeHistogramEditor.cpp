@@ -1892,6 +1892,9 @@ void GenericPlot::paintSpikeRaster(Graphics &g)
 	int numTrialTypes = tcb->getNumTrialTypesInUnit(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
+		int numTrials = tcb->getNumTrialsInUnit(electrodeID, subID);
+		mlp->setAuxiliaryString( String(numTrials) + " trials");
+
 		float xmin,xmax,ymin,ymax,maxValue;
 		mlp->getRange(xmin,xmax,ymin,ymax);
 		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
@@ -1902,6 +1905,9 @@ void GenericPlot::paintSpikeRaster(Graphics &g)
 void GenericPlot::paintSpikes(Graphics &g)
 {
 	std::vector<XYline> lines = tcb->getUnitConditionCurves(electrodeID, subID);
+	int numTrials = tcb->getNumTrialsInUnit(electrodeID, subID);
+	mlp->setAuxiliaryString( String(numTrials) + " trials");
+
 	mlp->clearplot();
 	for (int k=0;k<lines.size();k++)
 	{
@@ -1918,6 +1924,9 @@ void GenericPlot::paintLFPraster(Graphics &g)
 	int numTrialTypes = tcb->getNumTrialTypesInChannel(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
+		int numTrials = tcb->getNumTrialsInChannel(electrodeID, subID);
+		mlp->setAuxiliaryString( String(numTrials) + " trials");
+
 		float xmin,xmax,ymin,ymax,maxValue;
 		mlp->getRange(xmin,xmax,ymin,ymax);
 		juce::Image rasterImage = tcb->getTrialsAverageChannelResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
@@ -1929,6 +1938,10 @@ void GenericPlot::paintLFP(Graphics &g)
 {
 	std::vector<XYline> lines = tcb->getElectrodeConditionCurves(electrodeID, subID);
 	mlp->clearplot();
+
+	int numTrials = tcb->getNumTrialsInChannel(electrodeID, subID);
+	mlp->setAuxiliaryString( String(numTrials) + " trials");
+
 	for (int k=0;k<lines.size();k++)
 	{
 		if (smoothPlot)
