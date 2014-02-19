@@ -99,6 +99,8 @@ class Electrode
         int* channels;
 	    double* thresholds;
         bool* isActive;
+		double *voltageScale;
+
 		SpikeHistogramPlot* spikePlot;
 		SpikeSortBoxes* spikeSort;
 		PCAcomputingThread *computingThread;
@@ -288,8 +290,8 @@ public:
 	bool getFlipSignalState();
 	void setFlipSignalState(bool state);
 	void startRecording();
-
-
+	std::vector<float> getElectrodeVoltageScales(int electrodeID);
+	void setElectrodeVoltageScale(int electrodeID, int index, float newvalue);
 	Array<Electrode*> getElectrodes();
 
     std::vector<String> electrodeTypes;

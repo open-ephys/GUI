@@ -379,7 +379,7 @@ public:
 	void setSelectedUnitAndbox(int unitID, int boxID);
     int nChannels;
 
-    void initAxes();
+    void initAxes(std::vector<float> scales);
     void getBestDimensions(int*, int*);
 
     void clear();
@@ -394,11 +394,12 @@ public:
     //void setDetectorThresholdForChannel(int, float);
 
 private:
+	void modifyRange(std::vector<float> values);
 
     int plotType;
     int nWaveAx;
     int nProjAx;
-
+	int electrodeID;
     bool limitsChanged;
 
     double limits[MAX_N_CHAN][2];

@@ -671,13 +671,14 @@ void SpikeDetectorEditor::comboBoxChanged(ComboBox* comboBox)
 
         if (ID == 0)
         {
-      
+			// modify electrode name
             processor->setElectrodeName(lastId, comboBox->getText());
             refreshElectrodeList();
 			 
         }
 		else
         {
+			// switch to a new electrode.
 			SpikeDetector* processor = (SpikeDetector*) getProcessor();
             lastId = ID;
 			Electrode * e= processor->setCurrentElectrodeIndex(ID-1);

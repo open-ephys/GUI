@@ -60,12 +60,6 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
     delUnitButton->addListener(this);
     addAndMakeVisible(delUnitButton);
 
-	/*
-    delBoxButton = new UtilityButton("Del box", Font("Small Text", 13, Font::plain));
-    addBoxButton->setRadius(3.0f);
-    delBoxButton->addListener(this);
-    addAndMakeVisible(delBoxButton);
- */
     rePCAButton = new UtilityButton("Re-PCA", Font("Small Text", 13, Font::plain));
     rePCAButton->setRadius(3.0f);
     rePCAButton->addListener(this);
@@ -124,7 +118,7 @@ void SpikeDetectCanvas::update()
 		// Plot only active electrode
 		int currentElectrode = processor->getCurrentElectrodeIndex();
 			electrode = processor->getActiveElectrode();
-			SpikeHistogramPlot* sp = spikeDisplay->addSpikePlot(processor->getNumberOfChannelsForElectrode(currentElectrode), currentElectrode,
+			SpikeHistogramPlot* sp = spikeDisplay->addSpikePlot(processor->getNumberOfChannelsForElectrode(currentElectrode), electrode->electrodeID,
 				processor->getNameForElectrode(currentElectrode));
 			processor->addSpikePlotForElectrode(sp, currentElectrode);
 			electrode->spikePlot->setFlipSignal(processor->getFlipSignalState());
@@ -158,7 +152,6 @@ void SpikeDetectCanvas::resized()
 	delUnitButton->setBounds(0, 210, 120,20);
 	
 
-	//delBoxButton->setBounds(0, 240, 120,20);
 	rePCAButton->setBounds(0, 240, 120,20);
 	
 }
@@ -410,12 +403,12 @@ void SpikeThresholdDisplay::removePlots()
 
 }
 
-SpikeHistogramPlot* SpikeThresholdDisplay::addSpikePlot(int numChannels, int electrodeNum, String name_)
+SpikeHistogramPlot* SpikeThresholdDisplay::addSpikePlot(int numChannels, int electrodeID, String name_)
 {
 
     std::cout << "Adding new spike plot." << std::endl;
 
-    SpikeHistogramPlot* spikePlot = new SpikeHistogramPlot(processor,canvas, electrodeNum, 1000 + numChannels, name_);
+    SpikeHistogramPlot* spikePlot = new SpikeHistogramPlot(processor,canvas, electrodeID, 1000 + numChannels, name_);
     spikePlots.add(spikePlot);
     addAndMakeVisible(spikePlot);
 
@@ -471,8 +464,8 @@ void SpikeThresholdDisplay::plotSpike(const SpikeObject& spike, int electrodeNum
 
 // ----------------------------------------------------------------
 
-SpikeHistogramPlot::SpikeHistogramPlot(SpikeDetector *prc,SpikeDetectCanvas* sdc, int elecNum, int p, String name_) :
-    processor(prc), canvas(sdc), isSelected(false), electrodeNumber(elecNum),  plotType(p),
+SpikeHistogramPlot::SpikeHistogramPlot(SpikeDetector *prc,SpikeDetectCanvas* sdc, int electrodeID_, int p, String name_) :
+    processor(prc), canvas(sdc), isSelected(false), electrodeID(electrodeID_),  plotType(p),
     limitsChanged(true), name(name_)
 
 {
@@ -518,11 +511,12 @@ SpikeHistogramPlot::SpikeHistogramPlot(SpikeDetector *prc,SpikeDetectCanvas* sdc
             nChannels = 1;
     }
 
-    initAxes();
+	std::vector<float> scales = processor->getElectrodeVoltageScales(electrodeID);
+    initAxes(scales);
 
     for (int i = 0; i < nChannels; i++)
     {
-        UtilityButton* rangeButton = new UtilityButton("250", Font("Small Text", 10, Font::plain));
+        UtilityButton* rangeButton = new UtilityButton(String(scales[i],0), Font("Small Text", 10, Font::plain));
         rangeButton->setRadius(3.0f);
         rangeButton->addListener(this);
         addAndMakeVisible(rangeButton);
@@ -638,7 +632,7 @@ void SpikeHistogramPlot::deselect()
     isSelected = false;
 }
 
-void SpikeHistogramPlot::initAxes()
+void SpikeHistogramPlot::initAxes(std::vector<float> scales)
 {
 	mut.enter();
     initLimits();
@@ -649,7 +643,7 @@ void SpikeHistogramPlot::initAxes()
 		wAx->setDetectorThreshold( processor->getActiveElectrode()->thresholds[i]);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
-        ranges.add(250.0f); // default range is 250 microvolts
+        ranges.add(scales[i]); 
     }
 
 	PCAProjectionAxes* pAx = new PCAProjectionAxes(processor);
@@ -715,6 +709,34 @@ void SpikeHistogramPlot::resized()
 
 }
 
+
+
+void SpikeHistogramPlot::modifyRange(std::vector<float> values)
+{
+	const int NUM_RANGE = 7;
+	float range_array[NUM_RANGE] = {100,250,500,750,1000,1250,1500};
+	String label;
+	int newIndex = 0;
+
+	for (int index = 0; index < nChannels;index++)
+	{
+		for (int k=0;k<NUM_RANGE;k++)
+		{
+			if ( abs(values[index] - range_array[k]) < 0.1)
+			{
+				newIndex = k;
+				break;
+			}
+		}
+
+		ranges.set(index, range_array[newIndex]);
+		String label = String(range_array[newIndex],0);
+		rangeButtons[index]->setLabel(label);
+	}
+    setLimitsOnAxes();
+}
+
+
 void SpikeHistogramPlot::modifyRange(int index,bool up)
 {
 	const int NUM_RANGE = 7;
@@ -737,6 +759,8 @@ void SpikeHistogramPlot::modifyRange(int index,bool up)
 			String label = String(range_array[newIndex],0);
 			rangeButtons[index]->setLabel(label);
 		    setLimitsOnAxes();
+
+			processor->setElectrodeVoltageScale(electrodeID, index, range_array[newIndex]);
 			return;
 		}
 
@@ -745,28 +769,6 @@ void SpikeHistogramPlot::modifyRange(int index,bool up)
 	jassert(false);
 	return ;
 
-	/*
-    if (ranges[index] == 250.0f)
-    {
-        ranges.set(index, 500.0f);
-        label = "500";
-    }
-	 else if (ranges[index] == 500.0f)
-    {
-        ranges.set(index, 1000.0f);
-        label = "1000";
-    }
-    else if (ranges[index] == 1000.0f)
-    {
-        ranges.set(index, 100.0f);
-        label = "100";
-    }
-    else if (ranges[index] == 100.0f)
-    {
-        ranges.set(index, 250.0f);
-        label = "250";
-    }
-	*/
 }
 
 void SpikeHistogramPlot::buttonClicked(Button* button)

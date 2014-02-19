@@ -219,18 +219,12 @@ void SpikeDetector::updateSettings()
 	mut.exit();
 }
 
-/*
-Electrode::Electrode(PCAcomputingThread *pth)
-{
-	spikePlot = nullptr;
-	computingThread = pth;
-}*/
 
 Electrode::~Electrode()
 {
 	delete thresholds;
     delete isActive;
-
+	delete voltageScale;
     delete channels;
 	delete spikeSort;
 }
@@ -249,6 +243,7 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
     thresholds = new double[numChannels];
     isActive = new bool[numChannels];
     channels = new int[numChannels];
+	voltageScale = new double[numChannels];
 	depthOffsetMM = 0.0;
 
 	advancerID = -1;
@@ -258,13 +253,14 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
         channels[i] = _channels[i];
 		thresholds[i] = default_threshold;
 		isActive[i] = true;
+		voltageScale[i] = 500;
     }
 	spikePlot = nullptr;
 	if (computingThread != nullptr)
 		spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
 	else
 		spikeSort = nullptr;
-
+	
     isMonitored = false;
 }
 
@@ -278,6 +274,44 @@ void Electrode::resizeWaveform(int numPre, int numPost)
 	//spikePlot = nullptr;
 	spikeSort->resizeWaveform(prePeakSamples+postPeakSamples);
 
+}
+
+void SpikeDetector::setElectrodeVoltageScale(int electrodeID, int index, float newvalue)
+{
+	std::vector<float> values;
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == electrodeID)
+		{
+			electrodes[k]->voltageScale[index] = newvalue;
+			mut.exit();
+			return;
+		}
+	}
+	mut.exit();
+}
+
+
+std::vector<float> SpikeDetector::getElectrodeVoltageScales(int electrodeID)
+{
+	std::vector<float> values;
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == electrodeID)
+		{
+			values.resize(electrodes[k]->numChannels);
+			for (int i=0;i<electrodes[k]->numChannels;i++)
+			{
+				values[i] = electrodes[k]->voltageScale[i];
+			}
+			mut.exit();
+			return values;
+		}
+	}
+	mut.exit();
+	return values;
 }
 
 void SpikeDetector::setElectrodeAdvancerOffset(int i, double v)
