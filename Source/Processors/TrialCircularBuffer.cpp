@@ -2083,7 +2083,19 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 			Trial topTrial = aliveTrials.front();
 			int64 ticksElapsed = software_timestamp - topTrial.endTS;
 			float timeElapsedSec = float(ticksElapsed)/ numTicksPerSecond;
-			if (timeElapsedSec > params.postSec + 0.1) // add 100 ms (safety measure. jittershouldn't be more than 3-4 ms)
+
+			bool trialEndedAndEnoughDataInBuffer;
+
+			if (!topTrial.hardwareAlignment)
+			{
+				trialEndedAndEnoughDataInBuffer = timeElapsedSec > params.postSec + 0.1;
+			} else
+			{
+				 // add 100 ms (safety measure. jitter shouldn't be more than 3-4 ms)
+				trialEndedAndEnoughDataInBuffer = hardware_timestamp+nSamples > topTrial.alignTS_hardware+ (params.postSec + 0.1)*params.sampleRate;
+			}
+
+			if (trialEndedAndEnoughDataInBuffer)
 			{
 				aliveTrials.pop();
 				lastTrialID = topTrial.trialID;
@@ -2092,6 +2104,11 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		}
 	}
 
+}
+
+int TrialCircularBuffer::getNumberAliveTrials()
+{
+	return aliveTrials.size();
 }
 
 int TrialCircularBuffer::getLastTrialID()
@@ -2230,7 +2247,6 @@ std::vector<XYline> TrialCircularBuffer::getUnitConditionCurves(int electrodeID,
 						if (!electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
 							continue;
 						
-						
 						juce::Colour lineColor = juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
 									 electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
 									 electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]);
@@ -2252,6 +2268,86 @@ std::vector<XYline> TrialCircularBuffer::getUnitConditionCurves(int electrodeID,
 	unlockConditions();
 	unlockPSTH();
 	return lines;
+}
+
+
+void TrialCircularBuffer::getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)
+{
+	lockPSTH();
+	lockConditions();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
+				{
+					// great. we found our electrode.
+					// now iterate over conditions and build lines.
+					xmin = 1e10;
+					xmax = -1e10;
+			
+					for (int cond=0;cond<electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
+					{
+						if (!electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
+							continue;
+
+						float xmin_,xmax_,ymin_,ymax_;
+						electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].getRange(xmin_,xmax_,ymin_,ymax_);
+						xmin = MIN(xmin,xmin_);
+						xmax = MAX(xmax,xmax_);
+	
+						}
+
+					unlockConditions();
+					unlockPSTH();
+					return;
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
+	return;
+}
+
+
+void TrialCircularBuffer::getUnitConditionRange(int electrodeID, int unitID, double &xmin, double &xmax)
+{
+	lockPSTH();
+	lockConditions();
+	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
+	{
+		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
+		{
+			for (int entryindex = 0; entryindex < electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
+			{
+				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
+				{
+					// great. we found our unit.
+					// now iterate over conditions and build lines.
+					xmin = 1e10;
+					xmax = -1e10;
+					for (int cond=0;cond<electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
+					{
+						if (!electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
+							continue;
+						float xmin_,xmax_,ymin_,ymax_;
+						electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].getRange(xmin_,xmax_,ymin_,ymax_);
+						xmin = MIN(xmin,xmin_);
+						xmax = MAX(xmax,xmax_);
+					}
+
+					unlockConditions();
+					unlockPSTH();
+					return;
+				}
+			}
+		}
+	}
+	unlockConditions();
+	unlockPSTH();
 }
 
 void TrialCircularBuffer::clearUnitStatistics(int electrodeID, int unitID)
@@ -2668,6 +2764,14 @@ int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 
 juce::Image TrialCircularBuffer::getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	std::vector<int> numTrialRepeats,	std::vector<std::vector<float>> trialResponseMatrix, float &maxValue)
 {
+	if (trialResponseMatrix.size() == 0)
+	{
+		int imageWidth = 200, imageHeight = 200;
+		juce::Image I(juce::Image::PixelFormat::RGB, imageWidth, imageHeight, true);
+		juce::Image::BitmapData bitmap(I,0,0,imageWidth,imageHeight,Image::BitmapData::ReadWriteMode::readWrite);
+		return I;
+	}
+
 	// normalize response matrix to maximum across all trial types.
 	maxValue = -1e10;
 	double minValue = 1e10;

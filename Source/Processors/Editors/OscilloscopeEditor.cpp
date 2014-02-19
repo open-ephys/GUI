@@ -423,9 +423,15 @@ void ChannelList::buttonClicked(Button *btn)
 		bool newState = !freqButton->getToggleState();
 		freqButton->setToggleState(newState,false);
 		if (newState)
+		{
 			freqButton->setColors(juce::Colours::white,juce::Colours::orange);
-		else
+			OscilloscopeEditor* ed = (OscilloscopeEditor*)processor->getEditor();
+			ed->oscilloscopeCanvas->oscilloscopePlot->setRange(0,100,0,50,false);
+			ed->oscilloscopeCanvas->oscilloscopePlot->setAutoRescale(true);
+		}
+		else {
 			freqButton->setColors(juce::Colours::white,juce::Colours::darkgrey);
+		}
 
 		processor->setFrequencyAnalyzerMode(newState);
 	} else 
@@ -657,7 +663,8 @@ void OscilloscopeCanvas::paint(Graphics& g)
 			XYline l(x0,dx,y,  gains[k+numTTLchannels], channelsList->getChannelColor(k+numTTLchannels));
 			if (processor->getFrequencyAnalyzerMode())
 			{
-				oscilloscopePlot->plotxy(l.getFFT());
+				XYline lf = l.getFFT();
+				oscilloscopePlot->plotxy(lf);
 			} else
 			{
 				oscilloscopePlot->plotxy(l);

@@ -212,7 +212,7 @@ void OscilloscopeNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, in
 		trialCircularBuffer->process(buffer,nSamples,hardware_timestamp,software_timestamp);
 		totalSamplesProcessed+=nSamples;
 		// add the first auto trigger only after we made sure we have enough data to display the "prev"
-		if (triggerType == AUTO && totalSamplesProcessed > 2*params.preSec * params.sampleRate)
+		if (triggerType == AUTO && totalSamplesProcessed > 2*params.preSec * params.sampleRate && trialCircularBuffer->getNumberAliveTrials() == 0)
 			{
 				trialCircularBuffer->simulateHardwareTrial(software_timestamp, hardware_timestamp,1, 0);
 			} else

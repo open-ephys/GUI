@@ -227,12 +227,15 @@ public:
 	void setLFPvisibility(bool visible);
 	void setSpikesVisibility(bool visible);
 	void setSmoothPSTH(bool smooth);
-	void setSmoothing(float _gaussianStandardDeviationMS);
+	void setSmoothing(float _gaussianStandardDeviationMS, bool state);
 	void setAutoRescale(bool state);
 	void setCompactView(bool compact);
 	void setMatchRange(bool on);
+	bool getMatchRange();
 	void setParameter(int, float) {}
 	void setParameter(int, int, int, float) {}
+
+	void setRange(double xmin, double xmax, double ymin, double ymax, xyPlotTypes plotType);
 
     void startRecording() { } // unused
     void stopRecording() { } // unused
@@ -252,7 +255,7 @@ public:
     ScopedPointer<Viewport> viewport, conditionsViewport;
 	ScopedPointer<PeriStimulusTimeHistogramDisplay> psthDisplay;
 	ScopedPointer<ConditionList> conditionsList;
-	ScopedPointer<UtilityButton> visualizationButton, clearAllButton;
+	ScopedPointer<UtilityButton> visualizationButton, clearAllButton,zoomButton,panButton,resetAxesButton;
 	float gaussianStandardDeviationMS;
 	int numRows,numCols;
 
@@ -284,7 +287,7 @@ private:
 	PeriStimulusTimeHistogramCanvas *periStimulusTimeHistogramCanvas;
     Font font;
 	ScopedPointer<ComboBox> hardwareTrialAlignment;
-	ScopedPointer<UtilityButton> visibleConditions, saveOptions, clearDisplay,visualizationOptions;
+	ScopedPointer<UtilityButton> visibleConditions, saveOptions, clearDisplay,visualizationOptions ;
 	ScopedPointer<Label> hardwareTrigger;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PeriStimulusTimeHistogramEditor);
 
@@ -295,7 +298,7 @@ class GenericPlot : public Component
 {
 public:
 	GenericPlot(String name,	PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType, 
-					TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool _rasterMode);
+					TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool _rasterMode, bool inPanMode);
 	void resized();
 	void paint(Graphics &g);
 	int getRow() {return row;}
@@ -306,8 +309,14 @@ public:
 	void setSmoothState(bool state);
 	void setAutoRescale(bool state);
 	void buildSmoothKernel(float gaussianStandardDeviationMS);
+	xyPlotTypes getPlotType();
+	void setMode( DrawComponentMode mode);
 	
+	void setXRange(double xmin, double xmax);
+	void setYRange(double ymin,double ymax);
+
 	void handleEventFromMatlabLikePlot(String event);
+	void resetAxes();
 private:
 	void paintSpikeRaster(Graphics &g);
 	void paintSpikes(Graphics &g);
@@ -328,6 +337,7 @@ private:
 	bool fullScreenMode;
 	bool smoothPlot;
 	bool autoRescale;
+	bool inPanMode;
 	float guassianStandardDeviationMS;
 	String plotName;
 	std::vector<float> smoothKernel; 

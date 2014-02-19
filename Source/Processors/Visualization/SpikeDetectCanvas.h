@@ -107,7 +107,7 @@ public:
 		addUnitButton, delUnitButton, addBoxButton, delBoxButton, rePCAButton,nextElectrode,prevElectrode;
 
 private:
-
+	void removeUnitOrBox();
     ScopedPointer<SpikeThresholdDisplay> spikeDisplay;
     ScopedPointer<Viewport> viewport;
 

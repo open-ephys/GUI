@@ -58,6 +58,7 @@ public:
 	int getNumPoints();
 private:
 	void four1(std::vector<float> &data, int nn, int isign);
+	void four1(double data[], int nn, int isign);
 
 	float interp(float x_sample, bool &inrange);
 	float interp_bilinear(float x_sample, bool &inrange);
@@ -90,6 +91,7 @@ public:
 	void plotxy(XYline l);
 	void setRange(float xmin, float xmax, float ymin, float ymax);
 	void setYRange(double lowestValue, double highestValue);
+	void setRangeLimit(float xmin_limit,float xmax_limit,float ymin_limit,float ymax_limit);
 	void clearplot();
 	void setAutoRescale(bool state);
 	void setScaleString(String ampScale, String timeScale);
@@ -126,6 +128,7 @@ private:
 	std::vector<XYline> lines;
 	Image image;
 	float xmin,xmax,ymin,ymax;
+
 	bool imageMode, imageSet;
 	bool horiz0,vert0;
 	bool thresholdLineVisibility,overThresholdLine;
@@ -145,7 +148,7 @@ public:
 	void paint(Graphics &g);
 	void setFontHeight(int height);
 	void getTicks(std::vector<float> &tickLocations, std::vector<String> &tickLbl);
-	String setRange(float minvalue, float maxvalue, int numTicks, bool imageMode);
+	String setRange(float minvalue, float maxvalue, int numTicks, bool imageMode, bool firingRateMode);
 	void setFlip(bool state);
 private:
 	void determineTickLocations(float minV, float maxV, int numTicks, bool imageMode);
@@ -174,7 +177,7 @@ public:
 	void setBorderColor(juce::Colour col);
 	void plotxy(XYline l);
 	void setAutoRescale(bool state);
-	void setRange(float xmin, float xmax, float ymin, float ymax);
+	void setRange(float xmin, float xmax, float ymin, float ymax,bool sendMessage);
 	void clearplot();
 	void setTitle(String t);
 	void paint(Graphics &g);
@@ -193,10 +196,15 @@ public:
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	void determineTickLocationsImageMode(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
 	void setActivateButtonVisiblilty(bool vis,bool state);
-
+	void setMode(DrawComponentMode mode);
+	void setRangeLimit(float xmin_limit, float xmax_limit, float ymin_limit, float ymax_limit);
+	void getRangeLimit(float &xmin_limit_, float &xmax_limit_ ,float &ymin_limit_ , float &ymax_limit_);
+	void setFiringRateMode(bool state);
 private:
-
+	float xmin_limit,xmax_limit,ymin_limit,ymax_limit;
+	float xmin,xmax,ymin,ymax;
 	void determineTickLocations(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
+	bool firingRateMode;
 	Font font;
 	std::list<String> recentEvents;
 	std::vector<float> roundlin(float minv, float maxv, int numticks);

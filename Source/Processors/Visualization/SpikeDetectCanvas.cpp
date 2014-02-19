@@ -49,21 +49,23 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
     addPolygonUnitButton->addListener(this);
     addAndMakeVisible(addPolygonUnitButton);
  
-    delUnitButton = new UtilityButton("Del unit", Font("Small Text", 13, Font::plain));
-    delUnitButton->setRadius(3.0f);
-    delUnitButton->addListener(this);
-    addAndMakeVisible(delUnitButton);
-  
+ 
     addBoxButton = new UtilityButton("Add box", Font("Small Text", 13, Font::plain));
     addBoxButton->setRadius(3.0f);
     addBoxButton->addListener(this);
     addAndMakeVisible(addBoxButton);
-  
+
+    delUnitButton = new UtilityButton("Delete", Font("Small Text", 13, Font::plain));
+    delUnitButton->setRadius(3.0f);
+    delUnitButton->addListener(this);
+    addAndMakeVisible(delUnitButton);
+
+	/*
     delBoxButton = new UtilityButton("Del box", Font("Small Text", 13, Font::plain));
     addBoxButton->setRadius(3.0f);
     delBoxButton->addListener(this);
     addAndMakeVisible(delBoxButton);
- 
+ */
     rePCAButton = new UtilityButton("Re-PCA", Font("Small Text", 13, Font::plain));
     rePCAButton->setRadius(3.0f);
     rePCAButton->addListener(this);
@@ -152,10 +154,12 @@ void SpikeDetectCanvas::resized()
 
 	addUnitButton->setBounds(0, 120, 120,20);
 	addPolygonUnitButton->setBounds(0, 150, 120,20);
-	delUnitButton->setBounds(0, 180, 120,20);
-	addBoxButton->setBounds(0, 210, 120,20);
-	delBoxButton->setBounds(0, 240, 120,20);
-	rePCAButton->setBounds(0, 270, 120,20);
+	addBoxButton->setBounds(0, 180, 120,20);
+	delUnitButton->setBounds(0, 210, 120,20);
+	
+
+	//delBoxButton->setBounds(0, 240, 120,20);
+	rePCAButton->setBounds(0, 240, 120,20);
 	
 }
 
@@ -186,12 +190,111 @@ void SpikeDetectCanvas::processSpikeEvents()
 
 }
 
+
+
+
+
+void SpikeDetectCanvas::removeUnitOrBox()
+{
+		int electrodeID = processor->getActiveElectrode()->electrodeID;
+		int unitID, boxID;
+		processor->getActiveElectrode()->spikePlot->getSelectedUnitAndbox(unitID, boxID);
+		bool selectNewBoxUnit = false;
+		bool selectNewPCAUnit = false;
+		if (unitID > 0)
+		{
+			if (boxID >= 0)
+			{
+				 // box unit
+				int numBoxes = processor->getActiveElectrode()->spikeSort->getNumBoxes(unitID);
+				if (numBoxes > 1)
+				{
+					// delete box, but keep unit
+					processor->getActiveElectrode()->spikeSort->removeBoxFromUnit(unitID, boxID);
+					electrode->spikePlot->updateUnitsFromProcessor();
+					electrode->spikePlot->setSelectedUnitAndbox(unitID,0); 
+				} else 
+				{
+					// delete unit
+					processor->getActiveElectrode()->spikeSort->removeUnit(unitID);
+					electrode->spikePlot->updateUnitsFromProcessor();
+					processor->removeUnit(electrodeID, unitID);
+
+					std::vector<BoxUnit> boxunits = processor->getActiveElectrode()->spikeSort->getBoxUnits();
+					std::vector<PCAUnit> pcaunits = processor->getActiveElectrode()->spikeSort->getPCAUnits();
+					if (boxunits.size() > 0)
+					{
+						selectNewBoxUnit = true;
+					}
+					else if (pcaunits.size() > 0)
+					{
+							selectNewPCAUnit = true;
+					} else
+					{
+						electrode->spikePlot->setSelectedUnitAndbox(-1,-1);
+					}
+				}
+			} else
+			{
+				// pca unit
+				processor->getActiveElectrode()->spikeSort->removeUnit(unitID);
+				electrode->spikePlot->updateUnitsFromProcessor();
+				processor->removeUnit(electrodeID, unitID);
+
+				std::vector<BoxUnit> boxunits = processor->getActiveElectrode()->spikeSort->getBoxUnits();
+				std::vector<PCAUnit> pcaunits = processor->getActiveElectrode()->spikeSort->getPCAUnits();
+				if (pcaunits.size() > 0)
+				{
+						selectNewPCAUnit = true;
+				} else
+				if (boxunits.size() > 0)
+				{
+					selectNewBoxUnit = true;
+				}
+				else 
+				{
+					electrode->spikePlot->setSelectedUnitAndbox(-1,-1);
+				}
+
+
+			}
+			if (selectNewPCAUnit)
+			{
+				// set new selected unit to be the last existing unit
+				std::vector<PCAUnit> u = processor->getActiveElectrode()->spikeSort->getPCAUnits();
+				if (u.size() > 0)
+				{
+					electrode->spikePlot->setSelectedUnitAndbox(u[u.size()-1].getUnitID(),-1);
+				} else 
+				{
+					electrode->spikePlot->setSelectedUnitAndbox(-1,-1);
+				}
+			}
+			if (selectNewBoxUnit)
+			{
+				// set new selected unit to be the last existing unit
+				std::vector<BoxUnit> u = processor->getActiveElectrode()->spikeSort->getBoxUnits();
+				if (u.size() > 0)
+				{
+					electrode->spikePlot->setSelectedUnitAndbox(u[u.size()-1].getUnitID(),0);
+				} else 
+				{
+					electrode->spikePlot->setSelectedUnitAndbox(-1,-1);
+				}
+			}
+
+
+
+		}
+
+}
+
 bool SpikeDetectCanvas::keyPressed(const KeyPress& key)
 {
 
     KeyPress c = KeyPress::createFromDescription("c");
-
-	 KeyPress e = KeyPress::createFromDescription("escape");
+    KeyPress e = KeyPress::createFromDescription("escape");
+	KeyPress d = KeyPress::createFromDescription("delete");
         
     if (key.isKeyCode(c.getKeyCode())) // C
     {
@@ -199,11 +302,13 @@ bool SpikeDetectCanvas::keyPressed(const KeyPress& key)
 
         std::cout << "Clearing display" << std::endl;
         return true;
-    }
-	      
-    if (key.isKeyCode(e.getKeyCode())) // C
+    } else  if (key.isKeyCode(e.getKeyCode())) // ESC
     {
         spikeDisplay->setPolygonMode(false);
+        return true;
+    } else  if (key.isKeyCode(d.getKeyCode())) // Delete
+    {
+		removeUnitOrBox();
         return true;
     }
 
@@ -237,27 +342,8 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 
 	}else if (button == delUnitButton)
 	{
-		int electrodeID = processor->getActiveElectrode()->electrodeID;
-		
-		processor->getActiveElectrode()->spikePlot->getSelectedUnitAndbox(unitID, boxID);
-		if (unitID > 0)
-		{
-			processor->getActiveElectrode()->spikeSort->removeUnit(unitID);
-			electrode->spikePlot->updateUnitsFromProcessor();
+			removeUnitOrBox();
 
-			processor->removeUnit(electrodeID, unitID);
-
-			// set new selected unit to be the last existing unit
-			std::vector<BoxUnit> u = processor->getActiveElectrode()->spikeSort->getBoxUnits();
-			if (u.size() > 0)
-			{
-				electrode->spikePlot->setSelectedUnitAndbox(u[u.size()-1].getUnitID(),0);
-			} else 
-			{
-				electrode->spikePlot->setSelectedUnitAndbox(-1,-1);
-			}
-
-		}
 	} else if (button == addBoxButton)
 	{
 		processor->getActiveElectrode()->spikePlot->getSelectedUnitAndbox(unitID, boxID);
@@ -267,15 +353,8 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 			electrode->spikePlot->updateUnitsFromProcessor();
 		}
 	}
-	 else if (button == delBoxButton)
-	{
-	processor->getActiveElectrode()->spikePlot->getSelectedUnitAndbox(unitID, boxID);
-		if (unitID > 0) 
-		{
-			processor->getActiveElectrode()->spikeSort->removeBoxFromUnit(unitID, boxID);
-			electrode->spikePlot->updateUnitsFromProcessor();
-		}
-	} else if (button == rePCAButton)
+	
+	 else if (button == rePCAButton)
 	{
 		processor->getActiveElectrode()->spikeSort->RePCA();
 	} else if (button == nextElectrode)

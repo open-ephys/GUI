@@ -133,7 +133,7 @@ void PeriStimulusTimeHistogramEditor::loadVisualizerParameters(XmlElement* xml)
 				periStimulusTimeHistogramCanvas->setCompactView(showCompactView);
 				periStimulusTimeHistogramCanvas->setAutoRescale(showAutoRescale);
 				periStimulusTimeHistogramCanvas->setMatchRange(showMatchRange);
-				periStimulusTimeHistogramCanvas->setSmoothing(smoothingMS);
+				periStimulusTimeHistogramCanvas->setSmoothing(smoothingMS,true);
 				periStimulusTimeHistogramCanvas->setRasterMode(showRasters);
 			}
 		}
@@ -194,7 +194,7 @@ PopupMenu m;
 
 			m.addSubMenu("Range", rangeTimeMenu,true);
 			m.addItem(5,"Auto Rescale",true, showAutoRescale);
-			m.addItem(6,"Match range",false, showMatchRange);
+			m.addItem(6,"Match range",true, showMatchRange);
 			m.addItem(8,"Bar Graph",false, false);
 			m.addItem(9,"2D Heat map",false, false);
 			const int result = m.show();
@@ -228,7 +228,7 @@ PopupMenu m;
 			if (result >= 40 && result <= 47)
 			{
 				smoothingMS = SmoothingFactors[result-40];
-				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40]);
+				periStimulusTimeHistogramCanvas->setSmoothing(SmoothingFactors[result-40],result-40>0);
 			} else if (result >= 50 && result <= 54)
 			{
 				// this will require killing 
@@ -395,6 +395,7 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	inFocusedMode = false;
 	showLFP = true;
 	showSpikes = true;
+	matchRange = false;
 	smoothPlots = true;
 	autoRescale = true;
 	compactView = false;
@@ -420,6 +421,23 @@ PeriStimulusTimeHistogramCanvas::PeriStimulusTimeHistogramCanvas(PeriStimulusTim
 	conditionsViewport->setViewedComponent(conditionsList, false);
 	conditionsViewport->setScrollBarsShown(true, true);
 	addAndMakeVisible(conditionsViewport);
+
+	zoomButton = new UtilityButton("Zoom",Font("Default", 15, Font::plain));
+	zoomButton->addListener(this);
+	zoomButton->setColour(Label::textColourId, Colours::white);
+	addAndMakeVisible(zoomButton);
+	panButton = new UtilityButton("Pan",Font("Default", 15, Font::plain));
+	panButton->addListener(this);
+	panButton->setColour(Label::textColourId, Colours::white);
+	panButton->setToggleState(true,false);
+
+	addAndMakeVisible(panButton);
+	resetAxesButton = new UtilityButton("Reset Axes",Font("Default", 15, Font::plain));
+	resetAxesButton->addListener(this);
+	resetAxesButton->setColour(Label::textColourId, Colours::white);
+	addAndMakeVisible(resetAxesButton);
+
+
 	resized();
 	update();
 
@@ -446,6 +464,28 @@ void PeriStimulusTimeHistogramCanvas::buttonClicked(Button* button)
 	} else if (button == clearAllButton)
 	{
 		processor->trialCircularBuffer->clearAll();
+	} else if (button == zoomButton)
+	{
+		zoomButton->setToggleState(true,false);
+		panButton->setToggleState(false,false);
+		for (int k=0;k<psthDisplay->psthPlots.size();k++)
+		{
+			psthDisplay->psthPlots[k]->setMode(ZOOM);
+		}
+	} else if (button == panButton)
+	{
+		zoomButton->setToggleState(false,false);
+		panButton->setToggleState(true,false);
+		for (int k=0;k<psthDisplay->psthPlots.size();k++)
+		{
+			psthDisplay->psthPlots[k]->setMode(PAN);
+		}
+	} else if (button == resetAxesButton)
+	{
+		for (int k=0;k<psthDisplay->psthPlots.size();k++)
+		{
+			psthDisplay->psthPlots[k]->resetAxes();
+		}
 	}
 }
 
@@ -474,12 +514,19 @@ void PeriStimulusTimeHistogramCanvas::setSpikesVisibility(bool visible)
 	update();
 }
 
-void PeriStimulusTimeHistogramCanvas::setSmoothing(float _gaussianStandardDeviationMS)
+void PeriStimulusTimeHistogramCanvas::setSmoothing(float _gaussianStandardDeviationMS, bool smooth_enabled)
 {
 	gaussianStandardDeviationMS=_gaussianStandardDeviationMS;
 	for (int k=0;k<	psthDisplay->psthPlots.size();k++)
 	{
+	if (smooth_enabled)
+	{
 		psthDisplay->psthPlots[k]->buildSmoothKernel(gaussianStandardDeviationMS);
+		psthDisplay->psthPlots[k]->setSmoothState(true);
+	} else
+	{
+		psthDisplay->psthPlots[k]->setSmoothState(false);
+	}
 		psthDisplay->psthPlots[k]->repaint();
 	}
 
@@ -505,7 +552,12 @@ void PeriStimulusTimeHistogramCanvas::setCompactView(bool compact)
 void PeriStimulusTimeHistogramCanvas::setMatchRange(bool on)
 {
 	matchRange = on;
-	update();
+	//update();
+}
+
+bool PeriStimulusTimeHistogramCanvas::getMatchRange()
+{
+	return matchRange;
 }
 
 void PeriStimulusTimeHistogramCanvas::setAutoRescale(bool state)
@@ -515,6 +567,22 @@ void PeriStimulusTimeHistogramCanvas::setAutoRescale(bool state)
 	{
 		psthDisplay->psthPlots[k]->setAutoRescale(autoRescale);
 		psthDisplay->psthPlots[k]->repaint();
+	}
+}
+
+void PeriStimulusTimeHistogramCanvas::setRange(double xmin, double xmax, double ymin, double ymax, xyPlotTypes plotType)
+{
+
+	for (int k=0;k<	psthDisplay->psthPlots.size();k++)
+	{
+		if (psthDisplay->psthPlots[k]->getPlotType() == plotType)
+		{
+			psthDisplay->psthPlots[k]->setXRange(xmin,xmax);
+			psthDisplay->psthPlots[k]->setYRange(ymin,ymax);
+		} else
+		{
+			psthDisplay->psthPlots[k]->setXRange(xmin,xmax);
+		}
 	}
 }
 
@@ -532,9 +600,10 @@ void PeriStimulusTimeHistogramCanvas::update()
 	// clear all XY plots and create new ones...
 	// delete all existing plots.
 	// lock psth
+	bool inPanMode = panButton->getToggleState();
 
-	heightPerElectrodePix = 200;
-	widthPerUnit = 200;
+	heightPerElectrodePix = 300;
+	widthPerUnit = 300;
 	int maxUnitsPerRow = (screenWidth-conditionWidth)/ widthPerUnit;
 	updateNeeded = false;
 	for (int k=0; k < psthDisplay->psthPlots.size();k++)
@@ -572,7 +641,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					newplot = new GenericPlot(plotName,psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 					channels[u],
-					plotCounter,row,rasterMode);
+					plotCounter,row,rasterMode,inPanMode);
 
 					plotCounter++;
 					numCols++;
@@ -589,7 +658,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					newplot = new GenericPlot(plotName,psthDisplay,++plotID,LFP_PLOT,processor->trialCircularBuffer,
 					electrodeID,
 					channels[u],
-					u,row,rasterMode);
+					u,row,rasterMode,inPanMode);
 					numCols = max(numCols,u);
 
 				}
@@ -618,7 +687,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					    newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),
-						plotCounter,row,rasterMode);
+						plotCounter,row,rasterMode,inPanMode);
 						plotCounter++;
 						numCols++;
 						numCols = min(maxUnitsPerRow,numCols);
@@ -634,7 +703,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),
-						offset+u,row,rasterMode);
+						offset+u,row,rasterMode,inPanMode);
 						numCols = max(numCols,offset+u);
 					}
 					newplot->setSmoothState(smoothPlots);
@@ -668,6 +737,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	psthDisplay->resized();
 	psthDisplay->repaint();
 	psthDisplay->refresh();
+	resized();
 	repaint();
 
 	processor->trialCircularBuffer->unlockPSTH();
@@ -698,6 +768,13 @@ void PeriStimulusTimeHistogramCanvas::resized()
 
 	visualizationButton->setBounds(20,5,150,20);
 	clearAllButton->setBounds(200,5,150,20);
+
+
+	zoomButton->setBounds(360,5,60,20);
+	panButton->setBounds(440,5,60,20);
+	resetAxesButton->setBounds(510,5,150,20);
+
+
 }
 
 void PeriStimulusTimeHistogramCanvas::paint(Graphics& g)
@@ -1752,12 +1829,19 @@ void ConditionList::buttonClicked(Button *btn)
 // 
 
 GenericPlot::GenericPlot(	String name,PeriStimulusTimeHistogramDisplay* dsp, int plotID_, xyPlotTypes plotType_, 
-						 TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool rasterMode_) :  tcb(tcb_), electrodeID(electrodeID_), plotID(plotID_),
-						 plotType(plotType_), subID(subID_), row(row_), col(col_), rasterMode(rasterMode_),display(dsp),plotName(name)
+						 TrialCircularBuffer *tcb_, int electrodeID_, int subID_, int row_, int col_, bool rasterMode_, bool panM) :  tcb(tcb_), electrodeID(electrodeID_), plotID(plotID_),
+						 plotType(plotType_), subID(subID_), row(row_), col(col_), rasterMode(rasterMode_),display(dsp),plotName(name),inPanMode(panM)
 {
 	fullScreenMode = false;
 	mlp = new MatlabLikePlot();
 	mlp->setControlButtonsVisibile(false);
+	TrialCircularBufferParams params =  tcb->getParams();
+
+	if (inPanMode)
+		mlp->setMode(DrawComponentMode::PAN);
+	else
+		mlp->setMode(DrawComponentMode::ZOOM);
+
 	if (rasterMode) {
 		mlp->setImageMode(true);
 		mlp->setAutoRescale(false);
@@ -1772,13 +1856,16 @@ GenericPlot::GenericPlot(	String name,PeriStimulusTimeHistogramDisplay* dsp, int
 	if (plotType == SPIKE_PLOT) 
 	{
 		//mlp->setTitle("Unit "+String(electrodeID)+":"+String(subID));
+		mlp->setFiringRateMode(true);
 		mlp->setBorderColor(tcb->getUnitColor(electrodeID, subID));
 		mlp->setActivateButtonVisiblilty(true, tcb->getUnitActiveState(electrodeID, subID));
+		mlp->setRangeLimit(-params.preSec,params.postSec+params.maxTrialTimeSeconds,0,1e3);
 	}
 	else if (plotType == LFP_PLOT)
 	{
 	//	mlp->setTitle("Ch "+String(electrodeID)+":"+String(subID));
 		mlp->setBorderColor(juce::Colours::white);
+		mlp->setRangeLimit(-params.preSec,params.postSec+params.maxTrialTimeSeconds,-1e3,1e3);
 	}
 
 	guassianStandardDeviationMS = 5; // default smoothing
@@ -1786,6 +1873,11 @@ GenericPlot::GenericPlot(	String name,PeriStimulusTimeHistogramDisplay* dsp, int
 	
 	smoothPlot = plotType == SPIKE_PLOT; // don't smooth LFPs
 	fullScreenMode = false;
+}
+
+xyPlotTypes GenericPlot::getPlotType()
+{
+	return plotType;
 }
 
 void GenericPlot::resized()
@@ -1883,6 +1975,66 @@ void GenericPlot::setAutoRescale(bool state)
 	mlp->setAutoRescale(state);
 }
 
+void GenericPlot::setXRange(double xmin, double xmax)
+{
+	float curr_minx,curr_miny,curr_maxx,curr_maxy;
+	mlp->getRange(curr_minx,curr_maxx,curr_miny,curr_maxy);
+	mlp->setRange(xmin,xmax,curr_miny,curr_maxy,false);
+}
+
+void GenericPlot::setYRange(double ymin,double ymax)
+{
+	float curr_minx,curr_miny,curr_maxx,curr_maxy;
+	mlp->getRange(curr_minx,curr_maxx,curr_miny,curr_maxy);
+	mlp->setRange(curr_minx,curr_maxx, ymin,ymax,false);
+}
+
+
+void GenericPlot::setMode( DrawComponentMode mode)
+{
+	mlp->setMode(mode);
+}
+
+void GenericPlot::resetAxes()
+{
+	TrialCircularBufferParams params =  tcb->getParams();
+	if (plotType == SPIKE_PLOT) 
+	{
+		std::vector<XYline> lines = tcb->getUnitConditionCurves(electrodeID, subID);
+		double trial_xmin, trial_xmax;
+		tcb->getUnitConditionRange(electrodeID, subID, trial_xmin, trial_xmax);
+
+		float xmin,xmax;
+		double ymin,ymax;
+		float highestY=0;
+		for (int k=0;k<lines.size();k++)
+		{
+			lines[k].getYRange(xmin,xmax,ymin,ymax);
+			highestY = MAX(highestY, ymax);
+		}
+		mlp->setRange(trial_xmin, trial_xmax,0,highestY,false);
+
+	}
+	else if (plotType == LFP_PLOT)
+	{
+		double trial_xmin, trial_xmax;
+		tcb->getElectrodeConditionRange(electrodeID, subID, trial_xmin, trial_xmax);
+
+		std::vector<XYline> lines = tcb->getElectrodeConditionCurves(electrodeID, subID);
+		float xmin,xmax;
+		double ymin,ymax;
+		float highestY=-1e10,lowestY=1e10;
+		for (int k=0;k<lines.size();k++)
+		{
+			lines[k].getYRange(xmin,xmax,ymin,ymax);
+			highestY = MAX(highestY, ymax);
+			lowestY = MIN(lowestY, ymin);
+		}
+
+		mlp->setRange(trial_xmin, trial_xmax,lowestY,highestY,false);
+	}
+}
+
 void GenericPlot::buildSmoothKernel(float gaussianStandardDeviationMS_)
 {
 	guassianStandardDeviationMS = gaussianStandardDeviationMS_;
@@ -1907,7 +2059,9 @@ void GenericPlot::buildSmoothKernel(float gaussianStandardDeviationMS_)
 
 void GenericPlot::handleEventFromMatlabLikePlot(String event)
 {
-	if (event == "DblkClickRight")
+	std::vector<String> command = StringTS(event).splitString(' ');
+	//addEvent("NewRange "+String(xmin)+" "+String(xmax)+" "+String(ymin)+" "+String(ymax));
+	if (command[0] == "DblkClickRight")
 	{
 
 		if (plotType == SPIKE_PLOT) 
@@ -1920,21 +2074,31 @@ void GenericPlot::handleEventFromMatlabLikePlot(String event)
 		}
 
 	} else 
-	if (event == "DblkClickLeft")
+	if (command[0] == "DblkClickLeft")
 	{
 		// full screen toggle
 		display->focusOnPlot(plotID);
-	}  else if (event == "ActivateON")
+	}  else if (command[0] == "ActivateON")
 	{
 		tcb->setUnitActiveState(electrodeID, subID,true);
 		// post this as a network message as well
 		StringTS s("ActivateUnit "+String(electrodeID)+" "+String(subID));
 		display->processor->handleNetworkMessage(s);
-	} else if (event == "ActivateOFF")
+	} else if (command[0] == "ActivateOFF")
 	{
 		tcb->setUnitActiveState(electrodeID, subID,false);
 		// post this as a network message as well
 		StringTS s("DeactivateUnit "+String(electrodeID)+" "+String(subID));
 		display->processor->handleNetworkMessage(s);
+	} else if (command[0] == "NewRange")
+	{
+		if (display->canvas->getMatchRange())
+		{
+			double xmin = command[1].getDoubleValue();
+			double xmax = command[2].getDoubleValue();
+			double ymin = command[3].getDoubleValue();
+			double ymax = command[4].getDoubleValue();
+			display->canvas->setRange(xmin,xmax,ymin,ymax,plotType);
+		}
 	}
 }

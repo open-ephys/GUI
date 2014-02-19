@@ -247,6 +247,7 @@ public:
 	bool addBoxToUnit(int channel, int unitID, Box B);
 	bool removeBoxFromUnit(int unitID, int boxIndex);
 	int getNumBoxes(int unitID);
+	std::vector<Box> getUnitBoxes(int unitID);
 	std::vector<BoxUnit> getBoxUnits();
 	std::vector<PCAUnit> getPCAUnits();
 

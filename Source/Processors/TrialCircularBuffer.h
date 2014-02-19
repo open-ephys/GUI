@@ -297,6 +297,8 @@ public:
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
 	
+	void getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)	;
+	void getUnitConditionRange(int electrodeID, int unitID, double &xmin, double &xmax);
 	bool getUnitActiveState(int electrodeID, int unitID);
 	void setUnitActiveState(int electrodeID, int unitID, bool state);
 	String getElectrodeName(int electrodeID);
@@ -333,6 +335,7 @@ public:
 
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
+	int getNumberAliveTrials();
 private:
    std::vector<int> dropOutcomes;
 

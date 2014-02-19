@@ -1251,6 +1251,25 @@ bool  SpikeSortBoxes::removeBoxFromUnit(int unitID, int boxIndex)
  return false;
 }
 
+std::vector<Box> SpikeSortBoxes::getUnitBoxes(int unitID)
+{
+	std::vector<Box> boxes;
+	 StartCriticalSection();
+	for (int k=0;k< boxUnits.size();k++)
+	{
+		  if ( boxUnits[k].getUnitID() == unitID)
+		  {
+			  
+			  boxes = boxUnits[k].getBoxes();
+			  EndCriticalSection();
+			  return boxes;
+		  }
+	}
+	EndCriticalSection();
+	return boxes;
+}
+
+
 int SpikeSortBoxes::getNumBoxes(int unitID)
 {
 		 StartCriticalSection();

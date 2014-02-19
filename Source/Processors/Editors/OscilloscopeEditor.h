@@ -26,7 +26,7 @@
 
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
-#include "../Visualization/MatlabLikePlot.h""
+#include "../Visualization/MatlabLikePlot.h"
 #include "GenericEditor.h"
 #include "../OscilloscopeNode.h"
 #include "../../UI/UIComponent.h"
@@ -169,9 +169,9 @@ public:
 	void buttonEvent(Button* button);
 	void saveVisualizerParameters(XmlElement* xml);
 	void loadVisualizerParameters(XmlElement* xml);
+	OscilloscopeCanvas *oscilloscopeCanvas;
 
 private:
-	OscilloscopeCanvas *oscilloscopeCanvas;
     Font font;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscilloscopeEditor);

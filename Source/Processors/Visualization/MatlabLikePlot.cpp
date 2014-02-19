@@ -32,10 +32,17 @@ MatlabLikePlot::MatlabLikePlot()
 	drawComponent = new DrawComponent(this);
 	addAndMakeVisible(drawComponent);
 	font = Font("Default", 15, Font::plain);
-    float xmin = -0.5;
-	float xmax = 0.5;
-	float ymin = -1e3;
-	float ymax = 1e3;
+    xmin = -0.5;
+	xmax = 0.5;
+	ymin = -1e3;
+	ymax = 1e3;
+	firingRateMode = false;
+
+	xmin_limit = -1e10;
+	xmax_limit = 1e10;
+	ymin_limit = -1e10;
+	ymax_limit = 1e10;
+
 	maxImageHeight = 0;
 	title = "";
 	borderColor = juce::Colours::white;
@@ -76,7 +83,39 @@ MatlabLikePlot::MatlabLikePlot()
 	boundsButton->setToggleState(false,true);
 	//ScopedPointer<UtilityButton> zoomButton, panButton, verticalShiftButton, , frequencyButton;
 
-	setRange(xmin,xmax,ymin,ymax);
+	setRange(xmin,xmax,ymin,ymax,false);
+}
+
+void MatlabLikePlot::setRangeLimit(float xmin_limit_, float xmax_limit_ ,float ymin_limit_ , float ymax_limit_)
+{
+	xmin_limit = xmin_limit_;
+	xmax_limit = xmax_limit_;
+	ymin_limit = ymin_limit_;
+	ymax_limit = ymax_limit_;
+	setRange(xmin,xmax,ymin,ymax,false);
+}
+void MatlabLikePlot::setFiringRateMode(bool state)
+{
+	firingRateMode = state;
+}
+
+void MatlabLikePlot::getRangeLimit(float &xmin_limit_, float &xmax_limit_ ,float &ymin_limit_ , float &ymax_limit_)
+{
+	xmin_limit_ = xmin_limit;
+	xmax_limit_ = xmax_limit;
+	ymin_limit_ = ymin_limit;
+	ymax_limit_ = ymax_limit;
+}
+
+void MatlabLikePlot::setMode(DrawComponentMode mode)
+{
+	if (mode == DrawComponentMode::ZOOM)
+	{
+		zoomButton->setToggleState(true,true);
+	} else if (mode == DrawComponentMode::PAN)
+	{
+		panButton->setToggleState(true,true);
+	}
 }
 
 MatlabLikePlot::~MatlabLikePlot()
@@ -106,7 +145,7 @@ void MatlabLikePlot::drawImage(Image I, float maxValue)
 	{
 		// first time we draw an image / new image size. Set the y scale properly!
 		maxImageHeight = I.getHeight();
-		setRange(xmin,xmax,0,I.getHeight()-1);
+		setRange(xmin,xmax,0,I.getHeight()-1,false);
 	}
 
 	drawComponent->drawImage(I,maxValue);
@@ -256,21 +295,30 @@ void MatlabLikePlot::getRange(float &xmin, float &xmax, float &ymin, float &ymax
 	drawComponent->getRange(xmin, xmax, ymin, ymax);
 }
 
-void MatlabLikePlot::setRange(float xmin, float xmax, float ymin, float ymax)
+void MatlabLikePlot::setRange(float xmin_, float xmax_, float ymin_, float ymax_, bool sendMessage)
 {
+
+	xmin = MIN(xmax_limit, MAX(xmin_limit,xmin_));
+	xmax = MAX(xmin_limit, MIN(xmax_limit,xmax_));
+
+	ymin = MIN(ymax_limit, MAX(ymin_limit,ymin_));
+	ymax = MAX(ymin_limit, MIN(ymax_limit,ymax_));
+
 	// determine tick marks....
 	int numTicks = (getWidth() < 250) ? 5 : 7;
-	String ampScale = vertAxesComponent->setRange(ymin, ymax,numTicks, drawComponent->getImageMode());
-	String timeScale = horizAxesComponent->setRange(xmin,xmax,numTicks, false);
+	String ampScale = vertAxesComponent->setRange(ymin, ymax,numTicks, drawComponent->getImageMode(), firingRateMode);
+	String timeScale = horizAxesComponent->setRange(xmin,xmax,numTicks, false, false);
 	drawComponent->setRange(xmin, xmax, ymin, ymax);
 
 	std::vector<float> xtick, ytick;
 	std::vector<String> xtickLbl, ytickLbl;
-	vertAxesComponent->getTicks(xtick,xtickLbl);
-	horizAxesComponent->getTicks(ytick,ytickLbl);
+	vertAxesComponent->getTicks(ytick,ytickLbl);
+	horizAxesComponent->getTicks(xtick,xtickLbl);
 
 	drawComponent->setTickMarks(xtick,ytick);
 	drawComponent->setScaleString(ampScale,timeScale);
+	if (sendMessage)
+		addEvent("NewRange "+String(xmin)+" "+String(xmax)+" "+String(ymin)+" "+String(ymax));
 }
 
 void MatlabLikePlot::setTitle(String t)
@@ -348,7 +396,7 @@ AxesComponent::AxesComponent(bool horizontal, bool flip) : horiz(horizontal), fl
 	minv = -1e4;
 	maxv = 1e4;
 	font = Font("Default", 15, Font::plain);
-	setRange(minv,maxv,5,false);
+	setRange(minv,maxv,5,false,false);
 }
 
 void AxesComponent::setFlip(bool state)
@@ -435,7 +483,7 @@ void AxesComponent::determineTickLocations(float minV, float maxV, int numTicks,
 
 
 
-String AxesComponent::setRange(float minvalue, float maxvalue, int numTicks, bool imageMode)
+String AxesComponent::setRange(float minvalue, float maxvalue, int numTicks, bool imageMode,bool firingRateMode)
 {
 	minv = minvalue;
 	maxv = maxvalue;
@@ -468,24 +516,37 @@ String AxesComponent::setRange(float minvalue, float maxvalue, int numTicks, boo
 		return timeScale[selectedTimeScale];
 	} else
 	{
-		// values are given in uV
-		if (maxv-minv < 1000) {
-			// stay in uV
-			selectedTimeScale = 0;
-			gain = 1;
-			numDigits = 0;
-		} else if (maxv-minv > 1000 && maxv-minv < 1000000)
+		if(firingRateMode)
 		{
-			// convert to mV
-			gain = 1e-3; // convert to mV
-			selectedTimeScale = 1;
-			numDigits = 1;
+			gain = 1;
+			if (maxv-minv < 10)  
+				numDigits = 1;
+			else
+				numDigits = 0;
+
+			determineTickLocations(minvalue, maxvalue, numTicks, false);
+			return "Hz";
 		} else 
 		{
-			// convert to V
-			gain = 1e-6; // convert to V
-			selectedTimeScale = 2;
-			numDigits = 2;
+			// values are given in uV
+			if (maxv-minv < 1000) {
+				// stay in uV
+				selectedTimeScale = 0;
+				gain = 1;
+				numDigits = 0;
+			} else if (maxv-minv > 1000 && maxv-minv < 1000000)
+			{
+				// convert to mV
+				gain = 1e-3; // convert to mV
+				selectedTimeScale = 1;
+				numDigits = 1;
+			} else 
+			{
+				// convert to V
+				gain = 1e-6; // convert to V
+				selectedTimeScale = 2;
+				numDigits = 2;
+			}
 		}
 		determineTickLocations(minvalue, maxvalue, numTicks, imageMode);
 		return voltageScale[selectedTimeScale];
@@ -687,7 +748,6 @@ float XYline::interp_cubic(float x_sample, bool &inrange)
 				to be manually normalized by multiplying with 1/NFFT.
  Outputs:
 	data[] : The FFT or IFFT results are stored in data, overwriting the input.
-*/
 
 
 	
@@ -741,34 +801,28 @@ void XYline::four1(std::vector<float> &data, int nn, int isign)
 XYline XYline::getFFT()
 {
 	int Nx = numpts;
-	/* calculate NFFT as the next higher power of 2 >= Nx */
+	// calculate NFFT as the next higher power of 2 >= Nx 
 	int NFFT = (int)pow(2.0, ceil(log((double)Nx)/log(2.0)));
 	std::vector<float> X;
 	X.resize(2*NFFT); // to hold complex 
 
-	/* Storing x(n) in a complex array to make it work with four1. 
-	This is needed even though x(n) is purely real in this case. */
+	// Storing x(n) in a complex array to make it work with four1. 
+	//This is needed even though x(n) is purely real in this case. 
 	for(int i=0; i<Nx; i++)
 	{
 		X[2*i] = y[i];
 		X[2*i+1] = 0.0;
 	}
-	/* pad the remainder of the array with zeros (0 + 0 j) */
+	// pad the remainder of the array with zeros (0 + 0 j) 
 	for(int i=Nx; i<NFFT; i++)
 	{
 		X[2*i] = 0.0;
 		X[2*i+1] = 0.0;
 	}
 
-	/* calculate FFT */
+	// calculate FFT 
 	four1(X, NFFT, 1);
-	/*
-	printf("\nFFT:\n");
-	for(int i=0; i<NFFT; i++)
-	{
-		printf("X[%d] = (%.2f + j %.2f)\n", i, X[2*i], X[2*i+1]);
-	}
-	*/
+
 
 	// now convert to power spectrum, and remove the second half of the signal (mirror symmetry of real function).
 	float Fs = 1.0/dx;
@@ -782,6 +836,140 @@ XYline XYline::getFFT()
 
 	return XYline(0,df, powerspectrum,1.0, color);
 }
+
+*/
+
+
+
+
+
+/************************************************
+* FFT code from the book Numerical Recipes in C *
+* Visit www.nr.com for the licence.             *
+************************************************/
+
+// The following line must be defined before including math.h to correctly define M_PI
+
+#define PI	3.14159265359	/* pi to machine precision, defined in math.h */
+#define TWOPI	(2.0*PI)
+
+/*
+ FFT/IFFT routine. (see pages 507-508 of Numerical Recipes in C)
+
+ Inputs:
+	data[] : array of complex* data points of size 2*NFFT+1.
+		data[0] is unused,
+		* the n'th complex number x(n), for 0 <= n <= length(x)-1, is stored as:
+			data[2*n+1] = real(x(n))
+			data[2*n+2] = imag(x(n))
+		if length(Nx) < NFFT, the remainder of the array must be padded with zeros
+
+	nn : FFT order NFFT. This MUST be a power of 2 and >= length(x).
+	isign:  if set to 1, 
+				computes the forward FFT
+			if set to -1, 
+				computes Inverse FFT - in this case the output values have
+				to be manually normalized by multiplying with 1/NFFT.
+ Outputs:
+	data[] : The FFT or IFFT results are stored in data, overwriting the input.
+*/
+
+void XYline::four1(double data[], int nn, int isign)
+{
+    int n, mmax, m, j, istep, i;
+    double wtemp, wr, wpr, wpi, wi, theta;
+    double tempr, tempi;
+    
+    n = nn << 1;
+    j = 1;
+    for (i = 1; i < n; i += 2) {
+	if (j > i) {
+	    tempr = data[j];     data[j] = data[i];     data[i] = tempr;
+	    tempr = data[j+1]; data[j+1] = data[i+1]; data[i+1] = tempr;
+	}
+	m = n >> 1;
+	while (m >= 2 && j > m) {
+	    j -= m;
+	    m >>= 1;
+	}
+	j += m;
+    }
+    mmax = 2;
+    while (n > mmax) {
+	istep = 2*mmax;
+	theta = TWOPI/(isign*mmax);
+	wtemp = sin(0.5*theta);
+	wpr = -2.0*wtemp*wtemp;
+	wpi = sin(theta);
+	wr = 1.0;
+	wi = 0.0;
+	for (m = 1; m < mmax; m += 2) {
+	    for (i = m; i <= n; i += istep) {
+		j =i + mmax;
+		tempr = wr*data[j]   - wi*data[j+1];
+		tempi = wr*data[j+1] + wi*data[j];
+		data[j]   = data[i]   - tempr;
+		data[j+1] = data[i+1] - tempi;
+		data[i] += tempr;
+		data[i+1] += tempi;
+	    }
+	    wr = (wtemp = wr)*wpr - wi*wpi + wr;
+	    wi = wi*wpr + wtemp*wpi + wi;
+	}
+	mmax = istep;
+    }
+}
+
+/******************************************/
+
+XYline XYline::getFFT()
+{
+	int Nx = numpts;
+	// calculate NFFT as the next higher power of 2 >= Nx 
+	int NFFT = (int)pow(2.0, ceil(log((double)Nx)/log(2.0)));
+
+	int i;
+
+	double *data_aug;
+
+	/* calculate NFFT as the next higher power of 2 >= Nx */
+	NFFT = (int)pow(2.0, ceil(log((double)Nx)/log(2.0)));
+
+	/* allocate memory for NFFT complex numbers (note the +1) */
+	data_aug = (double *) malloc((2*NFFT+1) * sizeof(double));
+
+	/* Storing x(n) in a complex array to make it work with four1. 
+	This is needed even though x(n) is purely real in this case. */
+	for(i=0; i<Nx; i++)
+	{
+		data_aug[2*i+1] = y[i];
+		data_aug[2*i+2] = 0.0;
+	}
+	/* pad the remainder of the array with zeros (0 + 0 j) */
+	for(i=Nx; i<NFFT; i++)
+	{
+		data_aug[2*i+1] = 0.0;
+		data_aug[2*i+2] = 0.0;
+	}
+
+	four1(data_aug, NFFT, 1);
+
+
+	// now convert to power spectrum, and remove the second half of the signal (mirror symmetry of real function).
+	float Fs = 1.0/dx;
+	float df =((Fs/2)/(NFFT/2));
+	std::vector<float> powerspectrum;
+	powerspectrum.resize(NFFT/2+1);
+	for (int k=0;k<NFFT/2+1;k++)
+	{
+		powerspectrum[k] = sqrt(data_aug[2*k+1]/NFFT*data_aug[2*k+1]/NFFT+ data_aug[2*k+2]/NFFT*data_aug[2*k+2]/NFFT);
+	}
+	delete data_aug;
+
+	return XYline(0,df, powerspectrum,1.0, color);
+}
+
+
 // draw a function.
 // stretch Y such that ymin->0 and ymax->plotHeight
 // and only display points between [xmin and xmax]
@@ -853,7 +1041,7 @@ void XYline::draw(Graphics &g, float xmin, float xmax, float ymin, float ymax, i
 		{
 			double minV = 1e10;
 			double maxV = -1e10;
-			for (int k=bins[i];k<bins[i+1];k++)
+			for (int k=bins[i];k<=bins[i+1];k++)
 			{
 				minV = MIN(y[k],minV);
 				maxV = MAX(y[k],maxV);
@@ -900,6 +1088,8 @@ DrawComponent::DrawComponent(MatlabLikePlot *mlp_) : mlp(mlp_)
 	ampScale = "";
 	timeScale = "";
 	maxImageValue = 0;
+
+
 	font = Font("Default", 12, Font::plain);
 	setMode(ZOOM); // default mode
 }
@@ -973,7 +1163,7 @@ void DrawComponent::paint(Graphics &g)
 	{
 		ymin = lowestValue;
 		ymax = highestValue;
-		mlp->setRange(xmin,xmax,ymin,ymax);
+		mlp->setRange(xmin,xmax,ymin,ymax,false);
 	}
 
 	if 	(imageMode && imageSet)
@@ -1077,13 +1267,22 @@ void DrawComponent::mouseDoubleClick(const juce::MouseEvent& event)
 
 void DrawComponent::mouseWheelMove(const MouseEvent &event, const MouseWheelDetails &wheel)
 {
-	
-	double yRange = (ymax-ymin);
-	float sn = (wheel.deltaY > 0 )? -1 : 1;
-	ymin -= 0.1 * sn *yRange;
-	ymax += 0.1 * sn * yRange;
+	if (mode == PAN)
+	{
+		double xRange = (xmax-xmin);
+		float sn = (wheel.deltaY > 0 )? -1 : 1;
+		xmin -= 0.1 * sn *xRange;
+		xmax += 0.1 * sn * xRange;
 
-	mlp->setRange(xmin,xmax,ymin,ymax);
+	} else
+	{
+		double yRange = (ymax-ymin);
+		float sn = (wheel.deltaY > 0 )? -1 : 1;
+		ymin -= 0.1 * sn *yRange;
+		ymax += 0.1 * sn * yRange;
+	}
+
+	mlp->setRange(xmin,xmax,ymin,ymax,true);
 	
 }
 
@@ -1152,7 +1351,7 @@ void DrawComponent::mouseUp(const juce::MouseEvent& event)
 			ymax = MAX(0,MIN(image.getHeight()-1,ymax));
 		}
 	
-		mlp->setRange(xmin,xmax,ymin,ymax);
+		mlp->setRange(xmin,xmax,ymin,ymax,true);
 		
 	}
 }
@@ -1172,16 +1371,22 @@ void DrawComponent::mouseDrag(const juce::MouseEvent& event)
 	{
 
 		float range0 = xmax-xmin;
-		float range1 = ymax-ymin;
+	//	float range1 = ymax-ymin;
 
 		float dx = -float(event.x-mousePrevX) / w*range0;
-		float dy = float(event.y-mousePrevY) / h*range1;
+		//float dy = float(event.y-mousePrevY) / h*range1;
 
+		float xmin_limit, xmax_limit, ymin_limit, ymax_limit;
+		mlp->getRangeLimit(xmin_limit, xmax_limit, ymin_limit, ymax_limit);
+		
+		if (xmin+dx >=xmin_limit && xmax +dx <=xmax_limit)
+		{
 		xmin+=dx;
-		ymin+=dy;
+	//	ymin+=dy;
 		xmax+=dx;
-		ymax+=dy;
-		mlp->setRange(xmin,xmax,ymin,ymax);
+	//	ymax+=dy;
+		mlp->setRange(xmin,xmax,ymin,ymax,true);
+		}
 		mousePrevX = event.x;
 		mousePrevY = event.y;
 	}
@@ -1217,7 +1422,7 @@ void DrawComponent::mouseDown(const juce::MouseEvent& event)
 			xmax = prevZoom.xmax;
 			ymin = prevZoom.ymin;
 			ymax = prevZoom.ymax;
-			mlp->setRange(xmin,xmax,ymin,ymax);
+			mlp->setRange(xmin,xmax,ymin,ymax,true);
 			
 		}
 
