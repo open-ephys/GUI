@@ -87,9 +87,10 @@ public:
 
     /** Turns recording on and off for a particular channel.
 
-        Channel numbers are absolute (based on RecordNode channel mapping).
+       Channel numbers are absolute (based on RecordNode channel mapping).
     */
     void setChannelStatus(Channel* ch, bool status);
+
 
     /** Used to clear all connections prior to the start of acquisition.
     */

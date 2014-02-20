@@ -292,6 +292,9 @@ public:
 	void startRecording();
 	std::vector<float> getElectrodeVoltageScales(int electrodeID);
 	void setElectrodeVoltageScale(int electrodeID, int index, float newvalue);
+	bool isSelectedElectrodeRecorded(int channel);
+	std::vector<int> getElectrodeChannels(int ID);
+
 	Array<Electrode*> getElectrodes();
 
     std::vector<String> electrodeTypes;

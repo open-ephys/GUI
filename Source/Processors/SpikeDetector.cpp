@@ -1111,7 +1111,6 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 							electrode->spikePlot->processSpikeObject(newSpike);
 						}
 
-//						editor->addSpikeToBuffer(newSpike);
                             addSpikeEvent(&newSpike, events, peakIndex);
 
                         // advance the sample index
@@ -1309,6 +1308,23 @@ double SpikeDetector::getSelectedElectrodeDepth()
 
 	double currentAdvancerPos = getAdvancerPosition(electrodes[currentElectrode]->advancerID);
 	return electrodes[currentElectrode]->depthOffsetMM + currentAdvancerPos;
+}
+
+bool SpikeDetector::isSelectedElectrodeRecorded(int channel_index)
+{
+	if (electrodes.size() == 0)
+	return false;
+	int channel = electrodes[currentElectrode]->channels[channel_index];
+	RecordNode* recordNode = getProcessorGraph()->getRecordNode();
+	
+	StringArray names;
+	Array<bool> recording;
+	recordNode->getChannelNamesAndRecordingStatus(names, recording);
+	if (channel >= 0 && channel < recording.size())
+		return recording[channel];
+
+	return false;
+	//return electrodes[currentElectrode]->depthOffsetMM + currentAdvancerPos;
 }
 
 void SpikeDetector::saveCustomParametersToXml(XmlElement* parentElement)
@@ -1540,6 +1556,32 @@ int SpikeDetector::getCurrentElectrodeIndex()
 Electrode* SpikeDetector::getElectrode(int i)
 {
 	return electrodes[i];
+}
+
+
+std::vector<int> SpikeDetector::getElectrodeChannels(int ID)
+{
+	std::vector<int> ch;
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == ID)
+		{
+
+			ch.resize(electrodes[k]->numChannels);
+			for (int j=0;j<electrodes[k]->numChannels;j++)
+			{
+				ch[j] = electrodes[k]->channels[j];
+			}
+
+			return ch;
+			mut.exit();
+		}
+
+			
+	}
+	mut.exit();
+	return ch;
 }
 
 Electrode* SpikeDetector::setCurrentElectrodeIndex(int i)

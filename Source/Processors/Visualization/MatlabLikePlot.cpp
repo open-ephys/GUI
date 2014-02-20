@@ -1130,13 +1130,15 @@ void DrawComponent::drawTicks(Graphics &g)
 	{
 		// convert to screen coordinates.
 		float tickloc = (xtick[k]- xmin) / rangeX * plotWidth;
-		g.drawLine(tickloc,plotHeight,tickloc,plotHeight-(tickHeight),tickThickness);
+		if (abs(tickloc) < 1e10)
+			g.drawLine(tickloc,plotHeight,tickloc,plotHeight-(tickHeight),tickThickness);
 	}
 	for (int k=0;k < ytick.size();k++)
 	{
 		// convert to screen coordinates.
 		float tickloc = (ytick[k]- ymin) / rangeY * plotHeight;
-		g.drawLine(0,plotHeight-tickloc,tickHeight,plotHeight-tickloc, tickThickness);
+		if (abs(tickloc) < 1e10)
+			g.drawLine(0,plotHeight-tickloc,tickHeight,plotHeight-tickloc, tickThickness);
 	}
 }
 
@@ -1181,7 +1183,8 @@ void DrawComponent::paint(Graphics &g)
 		// now draw curves.
 		for (int k=0;k<lines.size();k++) 
 		{
-			lines[k].draw(g,xmin,xmax,ymin,ymax,w,h,showBounds);
+			if (abs(ymin) < 1e10 & abs(ymax) < 1e10)
+				lines[k].draw(g,xmin,xmax,ymin,ymax,w,h,showBounds);
 		}
 		if (lines.size() > 0)
 		{
@@ -1383,10 +1386,10 @@ void DrawComponent::mouseDrag(const juce::MouseEvent& event)
 	{
 
 		float range0 = xmax-xmin;
-	//	float range1 = ymax-ymin;
+		float range1 = ymax-ymin;
 
 		float dx = -float(event.x-mousePrevX) / w*range0;
-		//float dy = float(event.y-mousePrevY) / h*range1;
+		float dy = float(event.y-mousePrevY) / h*range1;
 
 		float xmin_limit, xmax_limit, ymin_limit, ymax_limit;
 		mlp->getRangeLimit(xmin_limit, xmax_limit, ymin_limit, ymax_limit);
@@ -1394,9 +1397,9 @@ void DrawComponent::mouseDrag(const juce::MouseEvent& event)
 		if (xmin+dx >=xmin_limit && xmax +dx <=xmax_limit)
 		{
 		xmin+=dx;
-	//	ymin+=dy;
+		ymin+=dy;
 		xmax+=dx;
-	//	ymax+=dy;
+		ymax+=dy;
 		mlp->setRange(xmin,xmax,ymin,ymax,true);
 		}
 		mousePrevX = event.x;

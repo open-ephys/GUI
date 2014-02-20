@@ -639,7 +639,7 @@ void SpikeHistogramPlot::initAxes(std::vector<float> scales)
 
     for (int i = 0; i < nWaveAx; i++)
     {
-        WaveformAxes* wAx = new WaveformAxes(this,processor, i);
+		WaveformAxes* wAx = new WaveformAxes(this,processor, electrodeID, i);
 		wAx->setDetectorThreshold( processor->getActiveElectrode()->thresholds[i]);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
@@ -988,7 +988,7 @@ double GenericDrawAxes::ad16ToUv(int x, int gain)
 // --------------------------------------------------
 
 
-WaveformAxes::WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int _channel) : GenericDrawAxes(channel),spikeHistogramPlot(plt),
+WaveformAxes::WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int electrodeID_, int _channel) : GenericDrawAxes(channel),spikeHistogramPlot(plt),electrodeID(electrodeID_),
     processor(p),
 	channel(_channel),
 	drawGrid(true), 
@@ -1010,6 +1010,7 @@ WaveformAxes::WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int _channe
     addMouseListener(this, true);
 
     thresholdColour = Colours::red;
+
 
     font = Font("Small Text",10,Font::plain);
 	int numSamples = 40;
@@ -1638,6 +1639,16 @@ void WaveformAxes::paint(Graphics& g)
 
     g.setColour(Colours::white);
     plotSpike(spikeBuffer[spikeIndex], g);
+
+	bool isRecorded = processor->isSelectedElectrodeRecorded(channel);
+	if (!isRecorded)
+	{
+		String d = "NOT RECORDED";
+		g.setFont(Font("Small Text", 15, Font::plain));
+		g.setColour(Colours::red);
+ 	g.drawText(d,getWidth()-140,10,120,25,Justification::right,false);
+
+	}
 
 
     spikesReceivedSinceLastRedraw = 0;

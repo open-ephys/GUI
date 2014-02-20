@@ -40,7 +40,7 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 	int IDmodule = (ID-1) % 32; // ID can't be zero
 	const int colors[32][3] = {
 
-		{26, 188, 156},
+	{26, 188, 156},
 	{46, 204, 113},
 	{52, 152, 219},
 	{155, 89, 182},
@@ -48,7 +48,8 @@ void setDefaultColors(uint8 &R, uint8 &G, uint8 &B, int ID)
 	{52, 73, 94},
 	{230, 126, 34},
 	{231, 76, 60},
-	{22, 160, 133},
+	//{22, 160, 133},
+	{255, 0, 0},
 	{39, 174, 96},
 	{41, 128, 185},
 	{142, 68, 173},
@@ -1291,9 +1292,11 @@ TrialCircularBuffer::TrialCircularBuffer()
 
 void TrialCircularBuffer::getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y)
 {
+	lockPSTH();
 	x0 = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].binTime[0];
 	dx = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getDx();
 	y = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getLastTrial();
+	unlockPSTH();
 }
 
 Condition TrialCircularBuffer::getCondition(int conditionIndex)
@@ -1303,7 +1306,10 @@ Condition TrialCircularBuffer::getCondition(int conditionIndex)
 
 int TrialCircularBuffer::getNumTrialsInCondition(int electrodeIndex, int channelIndex, int conditionIndex)
 {
-	return electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].numTrials;
+	lockPSTH();
+	int N = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].numTrials;
+	unlockPSTH();
+	return N;
 }
 
 int TrialCircularBuffer::getNumConditions()
@@ -1313,12 +1319,18 @@ int TrialCircularBuffer::getNumConditions()
 
 int TrialCircularBuffer::getNumUnitsInElectrode(int electrodeIndex)
 {
-	return electrodesPSTH[electrodeIndex].unitsPSTHs.size();
+	lockPSTH();
+	int N = electrodesPSTH[electrodeIndex].unitsPSTHs.size();
+	unlockPSTH();
+	return N;
 }
 
 int TrialCircularBuffer::getUnitID(int electrodeIndex, int unitIndex)
 {
-	return electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID;
+	lockPSTH();
+	int N= electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID;
+	unlockPSTH();
+	return N;
 }
 
 int TrialCircularBuffer::getNumElectrodes()
@@ -1935,39 +1947,14 @@ void TrialCircularBuffer::reallocate(int numChannels)
 	ttlBuffer->reallocate(numChannels);
 
 }
-/*
 
-void TrialCircularBuffer::simulateTrial(int64 ttl_timestamp_software, int trialType, float lengthSec)
-{
-	Trial ttlTrial;
-	ttlTrial.trialID = ++trialCounter;
-	ttlTrial.startTS = ttl_timestamp_software;
-	ttlTrial.alignTS = ttl_timestamp_software;
-	ttlTrial.alignTS_hardware = 0;
-	ttlTrial.endTS = ttl_timestamp_software + int64(lengthSec*numTicksPerSecond);
-	ttlTrial.outcome = 0;
-	ttlTrial.trialInProgress = false;
-	ttlTrial.type = trialType;
-	ttlTrial.hardwareAlignment = false;
-	lfpBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
-	ttlBuffer->addTrialStartToSmartBuffer(ttlTrial.trialID);
-	for (int i=0;i<electrodesPSTH.size();i++) 
-	{
-		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
-		{
-			electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&ttlTrial);
-		}
-	}
-	aliveTrials.push(ttlTrial);
-}
-
-*/
 void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, int trialType, float lengthSec)
 {
 	int64 tickdiff = ttl_timestamp_software- lastSimulatedTrialTS;
 	float secElapsed = float(tickdiff) / numTicksPerSecond;
 	if (secElapsed > params.ttlSupressionTimeSec)
 	{
+		lockPSTH();
 		Trial ttlTrial;
 		ttlTrial.trialID = ++trialCounter;
 		ttlTrial.startTS = ttl_timestamp_software;
@@ -1989,6 +1976,7 @@ void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int
 		}
 		aliveTrials.push(ttlTrial);
 		lastSimulatedTrialTS = ttl_timestamp_software;
+		unlockPSTH();
 	}
 }
 
@@ -2051,6 +2039,7 @@ std::vector<std::vector<bool>> TrialCircularBuffer::reconstructTTLchannels(int64
 			ttlStatus tmp = ttlQueue.front();
 			if (tmp.ts <= currTS)
 			{
+				jassert(tmp.channel >= 0 && tmp.channel < ttlChannelStatus.size());
 				ttlChannelStatus[tmp.channel] = tmp.value;
 				ttlQueue.pop();
 			} else {

@@ -203,7 +203,7 @@ protected:
 class WaveformAxes : public GenericDrawAxes
 {
 public:
-    WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p,int channel);
+    WaveformAxes(SpikeHistogramPlot *plt, SpikeDetector *p, int electrodeID_, int channel);
     ~WaveformAxes() {}
 
 	
@@ -241,6 +241,7 @@ public:
 //	int selectedUnit, selectedBox;
 
 private:
+	int electrodeID;
 	bool signalFlipped;
 	bool bDragging ;
     Colour waveColour;
@@ -353,7 +354,7 @@ private:
 class SpikeHistogramPlot : public Component, Button::Listener
 {
 public:
-    SpikeHistogramPlot(SpikeDetector *, SpikeDetectCanvas*, int elecNum, int plotType, String name_);
+    SpikeHistogramPlot(SpikeDetector *, SpikeDetectCanvas*, int electrodeID, int plotType, String name_);
     virtual ~SpikeHistogramPlot();
 
     void paint(Graphics& g);
