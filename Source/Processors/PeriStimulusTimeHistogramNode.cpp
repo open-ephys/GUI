@@ -417,9 +417,11 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 	        const uint8* dataptr = event.getRawData();
 			memcpy(&pos.x, dataptr+4,8);
 			memcpy(&pos.y, dataptr+4+8,8);
-			memcpy(&pos.pupil, dataptr+4+8+8,8);
-			memcpy(&pos.software_timestamp, dataptr+4+8+8+8,8);
-			memcpy(&pos.hardware_timestamp, dataptr+4+8+8+8+8,8);
+			memcpy(&pos.xc, dataptr+4+8+8,8);
+			memcpy(&pos.yc, dataptr+4+8+8+8,8);
+			memcpy(&pos.pupil, dataptr+4+8+8+8+8,8);
+			memcpy(&pos.software_timestamp, dataptr+4+8+8+8+8+8,8);
+			memcpy(&pos.hardware_timestamp, dataptr+4+8+8+8+8+8+8,8);
 			dumpEyeTrackingEventToDisk(pos);
 		}
 	}
