@@ -198,7 +198,7 @@ public:
 	void mouseDoubleClick(const juce::MouseEvent& event);
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	void determineTickLocationsImageMode(float xmin, float xmax,float ymin,float ymax,std::vector<float> &xtick, std::vector<float> &ytick);
-	void setActivateButtonVisiblilty(bool vis,bool state);
+	void setActivateButtonVisiblilty(bool vis,int id);
 	void setMode(DrawComponentMode mode);
 	void setRangeLimit(float xmin_limit, float xmax_limit, float ymin_limit, float ymax_limit);
 	void getRangeLimit(float &xmin_limit_, float &xmax_limit_ ,float &ymin_limit_ , float &ymax_limit_);

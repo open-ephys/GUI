@@ -558,10 +558,26 @@ UnitPSTHs::UnitPSTHs(int ID,TrialCircularBufferParams params_, uint8 R, uint8 G,
 	colorRGB[1] = G;
 	colorRGB[2] = B;
 	redrawNeeded = false;
-	isActive = false;
 	numTrials = 0;
+	uniqueIntervalID = -1;
 }
 
+void UnitPSTHs::startUniqueInterval(int uniqueCode)
+{
+	uniqueIntervalID = uniqueCode;
+}
+
+void UnitPSTHs::stopUniqueInterval()
+{
+	uniqueIntervalID = -1;
+}
+
+int UnitPSTHs::getUniqueInterval()
+{
+	return uniqueIntervalID;
+}
+
+	
 void UnitPSTHs::informPainted()
 {
 	redrawNeeded = false;
@@ -1288,6 +1304,7 @@ TrialCircularBuffer::TrialCircularBuffer()
 	hardwareTriggerAlignmentChannel = -1;
 	lastSimulatedTrialTS = 0;
 	lastTrialID = 0;
+	uniqueIntervalID = 0;
 }
 
 void TrialCircularBuffer::getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y)
@@ -1374,6 +1391,8 @@ TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : pa
 	trialCounter = 0;
 	lastSimulatedTrialTS = 0;
 	lastTrialID = 0;
+	hardwareTriggerAlignmentChannel = -1;
+	uniqueIntervalID = 0;
 	// sampling them should be at least 600 Hz (Nyquist!)
 	// We typically sample everything at 30000, so a sub-sampling by a factor of 50 should be good
 	int subSample = params.sampleRate/ params.desiredSamplingRateHz;
@@ -2111,7 +2130,7 @@ std::vector<XYline> TrialCircularBuffer::getElectrodeConditionCurves(int electro
 	return lines;
 }
 
-bool TrialCircularBuffer::getUnitActiveState(int electrodeID, int unitID)
+int TrialCircularBuffer::getUnitUniqueInterval(int electrodeID, int unitID)
 {
 	lockPSTH();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
@@ -2122,18 +2141,18 @@ bool TrialCircularBuffer::getUnitActiveState(int electrodeID, int unitID)
 			{
 				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 				{
-					bool state = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isActive;
+					int id = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].uniqueIntervalID;
 					unlockPSTH();
-					return state;
+					return id;
 				}
 			}
 		}
 	}
 	unlockPSTH();
-	return false;
+	return -1;
 }
 
-void TrialCircularBuffer::setUnitActiveState(int electrodeID, int unitID, bool state)
+int TrialCircularBuffer::setUnitUniqueInterval(int electrodeID, int unitID, bool state)
 {
 	lockPSTH();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
@@ -2144,14 +2163,21 @@ void TrialCircularBuffer::setUnitActiveState(int electrodeID, int unitID, bool s
 			{
 				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 				{
-					electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isActive = state;
+					int id = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].uniqueIntervalID;
+					if (state) {
+						uniqueIntervalID++;
+						electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].uniqueIntervalID = uniqueIntervalID;
+						id = uniqueIntervalID;
+					}
+					
 					unlockPSTH();
-					return;
+					return id;
 				}
 			}
 		}
 	}
 	unlockPSTH();
+	return -1;
 }
 
 juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)

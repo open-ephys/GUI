@@ -198,6 +198,9 @@ public:
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	bool isNewDataAvailable();
 	void informPainted();
+	void startUniqueInterval(int uniqueCode);
+	void stopUniqueInterval();
+	int getUniqueInterval();
 
 	std::vector<PSTH> conditionPSTHs;
 	std::vector<PSTH> trialPSTHs;
@@ -205,10 +208,11 @@ public:
 	SmartSpikeCircularBuffer spikeBuffer;
 	uint8 colorRGB[3];
 	int unitID;
-	bool isActive;
+	int uniqueIntervalID;
 	bool redrawNeeded;
 	int numTrials;
 	TrialCircularBufferParams params;
+
 };
 
 class ChannelPSTHs 
@@ -301,8 +305,9 @@ public:
 	int getNumTrialsInUnit(int electrodeID, int unitID);
 	void getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)	;
 	void getUnitConditionRange(int electrodeID, int unitID, double &xmin, double &xmax);
-	bool getUnitActiveState(int electrodeID, int unitID);
-	void setUnitActiveState(int electrodeID, int unitID, bool state);
+	int setUnitUniqueInterval(int electrodeID, int unitID, bool state);
+	int getUnitUniqueInterval(int electrodeID, int unitID);
+
 	String getElectrodeName(int electrodeID);
 	void setHardwareTriggerAlignmentChannel(int k);
 	TrialCircularBufferParams getParams();
@@ -356,6 +361,7 @@ private:
 	String designName;
 	int hardwareTriggerAlignmentChannel;
 	int64 lastSimulatedTrialTS;
+	int uniqueIntervalID;
 	std::vector<int64> lastTTLts;
 	std::vector<bool> ttlChannelStatus;
 	std::queue<Trial> aliveTrials;

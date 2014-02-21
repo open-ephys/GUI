@@ -1858,7 +1858,8 @@ GenericPlot::GenericPlot(	String name,PeriStimulusTimeHistogramDisplay* dsp, int
 		//mlp->setTitle("Unit "+String(electrodeID)+":"+String(subID));
 		mlp->setFiringRateMode(true);
 		mlp->setBorderColor(tcb->getUnitColor(electrodeID, subID));
-		mlp->setActivateButtonVisiblilty(true, tcb->getUnitActiveState(electrodeID, subID));
+		int uniqueIntervalID = tcb->getUnitUniqueInterval(electrodeID, subID);
+		mlp->setActivateButtonVisiblilty(true, uniqueIntervalID);
 		mlp->setRangeLimit(-params.preSec,params.postSec+params.maxTrialTimeSeconds,0,1e3);
 	}
 	else if (plotType == LFP_PLOT)
@@ -2091,17 +2092,21 @@ void GenericPlot::handleEventFromMatlabLikePlot(String event)
 	{
 		// full screen toggle
 		display->focusOnPlot(plotID);
-	}  else if (command[0] == "ActivateON")
+	}  else if (command[0] == "StartInterval")
 	{
-		tcb->setUnitActiveState(electrodeID, subID,true);
+
+
+		int uniqueIntervalID = tcb->setUnitUniqueInterval(electrodeID, subID,true);
+		mlp->setActivateButtonVisiblilty(true, uniqueIntervalID);
 		// post this as a network message as well
-		StringTS s("ActivateUnit "+String(electrodeID)+" "+String(subID));
+		StringTS s("UnitIntervalStart "+String(electrodeID)+" "+String(subID)+" "+String(uniqueIntervalID));
 		display->processor->handleNetworkMessage(s);
-	} else if (command[0] == "ActivateOFF")
+	} else if (command[0] == "StopInterval")
 	{
-		tcb->setUnitActiveState(electrodeID, subID,false);
+		int uniqueIntervalID = tcb->setUnitUniqueInterval(electrodeID, subID,false);
+		mlp->setActivateButtonVisiblilty(true, -1);
 		// post this as a network message as well
-		StringTS s("DeactivateUnit "+String(electrodeID)+" "+String(subID));
+		StringTS s("UnitIntervalStop "+String(electrodeID)+" "+String(subID) + " "+String(uniqueIntervalID));
 		display->processor->handleNetworkMessage(s);
 	} else if (command[0] == "NewRange")
 	{

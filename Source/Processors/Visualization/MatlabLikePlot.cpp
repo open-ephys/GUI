@@ -124,10 +124,15 @@ MatlabLikePlot::~MatlabLikePlot()
 	removeChildComponent(horizAxesComponent);
 	removeChildComponent(drawComponent);
 }
-void MatlabLikePlot::setActivateButtonVisiblilty(bool vis, bool state)
+
+void MatlabLikePlot::setActivateButtonVisiblilty(bool vis, int id)
 {
 	activateButton->setVisible(vis);
-	activateButton->setToggleState(state,false);
+	activateButton->setToggleState(id > 0,false);
+	if (id > 0)
+		activateButton->setLabel(String(id));
+	else
+		activateButton->setLabel("*");
 }
 
 void MatlabLikePlot::setImageMode(bool state)
@@ -212,9 +217,9 @@ void MatlabLikePlot::buttonClicked(Button *btn)
 	{
 		btn->setToggleState(!prevState,false);
 		if (!prevState)
-			addEvent("ActivateON");
+			addEvent("StartInterval");
 		else
-			addEvent("ActivateOFF");
+			addEvent("StopInterval");
 	}
 }
 

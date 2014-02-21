@@ -8,11 +8,11 @@ end
 
 % Recurse over child nodes. This could run into problems 
 % with very deeply nested trees.
-try
-   theStruct = parseChildNodes(tree);
-catch
-   error('Unable to parse XML file %s.',filename);
-end
+  theStruct = parseChildNodes(tree);
+  
+  
+  return;
+  
 % ----- Local function PARSECHILDNODES -----
 function children = parseChildNodes(theNode)
 % Recurse over node children.
@@ -28,7 +28,8 @@ if theNode.hasChildNodes
 
     for count = 1:numChildNodes
         theChild = childNodes.item(count-1);
-        children(count) = makeStructFromNode(theChild);
+        strctA = makeStructFromNode(theChild);
+        children(count) = strctA;
     end
 end% ----- Local function MAKESTRUCTFROMNODE -----
 function nodeStruct = makeStructFromNode(theNode)
