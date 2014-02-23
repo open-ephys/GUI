@@ -1955,6 +1955,7 @@ void GenericPlot::paintLFP(Graphics &g)
 
 void GenericPlot::paint(Graphics &g)
 {
+
 	if (mlp->eventsAvail())
 	{
 		String lastEvent = mlp->getLastEvent();
@@ -1975,6 +1976,7 @@ void GenericPlot::paint(Graphics &g)
 		else
 			paintLFP(g);
 	}
+	
 }
 
 

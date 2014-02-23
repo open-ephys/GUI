@@ -92,8 +92,8 @@ void PeriStimulusTimeHistogramNode::allocateTrialCircularBuffer()
 	params.numChannels = getNumInputs();
 	params.numTTLchannels = 8;
 	params.sampleRate = getSampleRate();
-	params.maxTrialTimeSeconds = 10.0;
-	params.preSec = 0.5;
+	params.maxTrialTimeSeconds = 5.0;
+	params.preSec = 0.1;
 	params.postSec = 0.5;
 	params.maxTrialsInMemory = 200;
 	params.binResolutionMS = 1;

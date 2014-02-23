@@ -1401,11 +1401,14 @@ void DrawComponent::mouseDrag(const juce::MouseEvent& event)
 		
 		if (xmin+dx >=xmin_limit && xmax +dx <=xmax_limit)
 		{
-		xmin+=dx;
-		ymin+=dy;
-		xmax+=dx;
-		ymax+=dy;
-		mlp->setRange(xmin,xmax,ymin,ymax,true);
+			xmin+=dx;
+			xmax+=dx;
+			if (!imageMode)
+			{
+				ymax+=dy;
+				ymin+=dy;
+			}
+			mlp->setRange(xmin,xmax,ymin,ymax,true);
 		}
 		mousePrevX = event.x;
 		mousePrevY = event.y;
