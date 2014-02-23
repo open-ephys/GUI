@@ -1,11 +1,8 @@
-function [TTLs, Spikes,AllWaveforms,acNetworkEvents,...
-                networkEventsTS,trialTable,...
-                strctHardwareSoftwareSync,strctLocalRemoteSync,EyePos] = load_events_version_0_3(filename, verbose)
-
+function [strctDataFromEvents] = load_events_version_0_31(filename, verbose)
 %
 % [data, timestamps, info] = load_open_ephys_data(filename)
 %
-%   Loads continuous, event, or spike data files into Matlab.
+%   parses the event file saved by PSTH module
 %
 %   Inputs:
 %
@@ -14,12 +11,18 @@ function [TTLs, Spikes,AllWaveforms,acNetworkEvents,...
 %
 %   Outputs:
 %
-%     data: either an array continuous samples, a matrix of spike waveforms,
-%           or an array of event channels
-%
-%     timestamps: in seconds
-%
-%     info: structure with header and other information
+% 
+% strctDataFromEvents, contains the following fields:
+% 
+% strctDataFromEvents.TTLs : [channel,risingEdge, softwareTS, hardwareTS]
+% strctDataFromEvents.Spikes = [softwareTS, hardwareTS, electrodeID, sortedID]
+% strctDataFromEvents.AllWaveforms = [number of spikes X waveform data]
+% strctDataFromEvents.acNetworkEvents = cell array of the strings passed via the network events module
+% strctDataFromEvents.networkEventsTS = timestamps of the network events
+% strctDataFromEvents.trialTable = [trial type, trial start TS, trial align TS, trial end TS, trial outcome] (all TS are in software)
+% strctDataFromEvents.strctSoftwareHardwareSync = structure used to convert between software & hardware TS
+% strctDataFromEvents.strctLocalRemoteSync = structure used to convert TS between two computers 
+% strctDataFromEvents.headerInfo = information about sampling rate, etc.
 %
 %
 %
@@ -35,7 +38,7 @@ function [TTLs, Spikes,AllWaveforms,acNetworkEvents,...
 %
 %     ------------------------------------------------------------------
 %
-%     Copyright (C) 2013 Open Ephys
+%     Copyright (C) 2014 Open Ephys
 %
 %     ------------------------------------------------------------------
 %
@@ -51,6 +54,7 @@ function [TTLs, Spikes,AllWaveforms,acNetworkEvents,...
 %
 %     <http://www.gnu.org/licenses/>.
 %
+
 fid = fopen(filename);
 %filesize = getfilesize(fid);
 
@@ -59,13 +63,9 @@ NUM_HEADER_BYTES = 1024;
 
 % constants for pre-allocating matrices:
 MAX_NUMBER_OF_SPIKES = 1e6;
-MAX_NUMBER_OF_RECORDS = 1e4;
-MAX_NUMBER_OF_CONTINUOUS_SAMPLES = 10e6;
 MAX_NUMBER_OF_TIMESTAMPS = 1e6;
 MAX_NUMBER_OF_EYE_POSITION = 200 * 60 * 60 * 10; % 10 hours worth of data
 MAX_NUMBER_OF_TTLS = 1e6;
-MAX_NUMBER_OF_EVENTS = 1e6;
-SPIKE_PREALLOC_INTERVAL = 1e6;
 MAX_NUMBER_OF_NETWORK_EVENTS = 1e6;
 
 %-----------------------------------------------------------------------
@@ -112,6 +112,9 @@ Spikes = zeros(MAX_NUMBER_OF_SPIKES,4);
 eyeCounter = 1;
 while (1)
     index=index+1;
+    if (mod(index,10000) == 0)
+        fprintf('Passed event %d\n',index);
+    end
     eventTy= fread(fid, 1, 'uint8=>uint8');
     if isempty(eventTy)
         break;
@@ -149,7 +152,7 @@ while (1)
             
             numPts = fread(fid,1,'int16=>int16');
             if (eventSize(index) > 8+8+2+2+2+2)
-                Waveform = fread(fid,numPts*numChannels,'uint16=>uint16');
+                Waveform = fread(fid,numPts*numChannels,'uint16=>double');
             end
             if (spikeCounter == 1)
                AllWaveforms = zeros(MAX_NUMBER_OF_SPIKES, length(Waveform(:)));
@@ -205,13 +208,14 @@ TimestampHardware = TimestampHardware(1:timestampCounter-1);
 % robust fit has trouble with very large values.
 % so we remove the offset and then regress
 [SyncCoeff]=robustfit(TimstampSoftware(:)-TimstampSoftware(1),TimestampHardware(:)-TimestampHardware(1));
-strctHardwareSoftwareSync.coeff = SyncCoeff;
-strctHardwareSoftwareSync.sourceT0 = TimstampSoftware(1);
-strctHardwareSoftwareSync.targetT0 = TimestampHardware(1);
+strctSoftwareHardwareSync.coeff = SyncCoeff;
+strctSoftwareHardwareSync.sourceT0 = TimstampSoftware(1);
+strctSoftwareHardwareSync.targetT0 = TimestampHardware(1);
 
 if (verbose)
     figure(1);
     clf;
+    subplot(2,1,1);
     plot(TimstampSoftware-TimstampSoftware(1),TimestampHardware-TimestampHardware(1),'.');
     JitterMS = 1e3/ header.sampleRate*(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1)) -  (TimestampHardware-TimestampHardware(1))) ;
     hold on;
@@ -219,6 +223,10 @@ if (verbose)
     title(sprintf('hardware-software synchronization. Avg jitter %.3f (ms)',mean(JitterMS)));
     xlabel('Software timestamp');
     ylabel('Hardware timestamp');
+    subplot(2,1,2);
+    plot(JitterMS);
+    xlabel('Timestamp index');
+    ylabel('Jitter (ms)');
 end
 
 %% Software-Software Synchronization 
@@ -247,10 +255,15 @@ if ~isempty(localComputerTS)
         JitterMS = 1e3*(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1)) -  (remoteComputerTS-remoteComputerTS(1))) ;
         figure(2);
         clf;
+        subplot(2,1,1);
         plot(localComputerTS-localComputerTS(1),remoteComputerTS-remoteComputerTS(1),'b.');
         hold on;
         plot(localComputerTS-localComputerTS(1),(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1))),'r');
-        title(sprintf('local-remote computer synchronization. Avg jitter %.3f (ms)',mean(JitterMS)));
+        title(sprintf('local-remote computer synchronization. Avg jitter %.3f (ms), median (%.3f)',mean(JitterMS),median(JitterMS)));
+        subplot(2,1,2);
+        plot(JitterMS);
+        xlabel('Timestamp index');
+        ylabel('Jitter (ms)');
     end
 else
     strctLocalRemoteSync = [];
@@ -263,11 +276,12 @@ if ~isempty(Spikes)
         clf;
         [sortedUnits,~,mapToUnits] = unique(Spikes(:,3:4),'rows');
         n=ceil(sqrt(size(sortedUnits,1)));
-        tm = [-8:31]/30000*1e3;
+        tm = [-8:31]/info.header.sampleRate*1e3;
         for k=1:size(sortedUnits,1)
             subplot(n,n,k);
             unitWaveforms_uV = double(AllWaveforms(mapToUnits==k,:));
-            plot(tm,unitWaveforms_uV','color',[0.5 0.5 0.5]);
+            numToPlot = min(size(unitWaveforms_uV,1),100);
+            plot(tm,unitWaveforms_uV(1:numToPlot,:)','color',[0.5 0.5 0.5]);
             hold on;
             plot(tm,mean(unitWaveforms_uV),'k','LineWidth',2);
             title(sprintf('Electrode %d, Unit %d',sortedUnits(k,1),sortedUnits(k,2)));
@@ -334,35 +348,35 @@ for k=1:length(acNetworkEvents)
       
 end
 
-
-%% Build trial aligned responses.
-% Build a raster [-200..500] ms relative to trial alignment 
-iBeforeMS = -200;
-iAfterMS = 500;
-if ~isempty(sortedUnits) && ~isempty(trialTable) && ~isempty(strctHardwareSoftwareSync)
-    trialAlignTShardware = timeZoneChange(strctHardwareSoftwareSync, trialTable(:,3),0); % software->hardware
-    
-    numUnits = size(sortedUnits,1);
-    for unitIter=1:numUnits
-        relevantSpikeTimesHardware = Spikes( mapToUnits == unitIter,2);
-        
-        % Ignore trial outcome. Just aggregate according to trial type
-        [a2bRaster,periStimulusRangeMS] = buildRaster(relevantSpikeTimesHardware/header.sampleRate, trialAlignTShardware/header.sampleRate, iBeforeMS, iAfterMS);
-        
-        % First, build a large 1-ms resolution raster matrix
-        
-        
-        [uniqueTrialTypes,~,mapToUniqueTrialType]=unique(trialTable(:,1));
-        numUniqueTrials = length(uniqueTrialTypes);
-        averageRaster = zeros(numUniqueTrials, length(periStimulusRangeMS));
-        for k=1:numUniqueTrials
-            relevantTrials = find(mapToUniqueTrialType == k);
-            if ~isempty(relevantTrials)
-                averageRaster(k,:)=mean(a2bRaster(relevantTrials,:),1);
-            end
-        end
-    end
-end
+% 
+% %% Build trial aligned responses.
+% % Build a raster [-200..500] ms relative to trial alignment 
+% iBeforeMS = -200;
+% iAfterMS = 500;
+% if ~isempty(sortedUnits) && ~isempty(trialTable) && ~isempty(strctSoftwareHardwareSync)
+%     trialAlignTShardware = timeZoneChange(strctSoftwareHardwareSync, trialTable(:,3),0); % software->hardware
+%     
+%     numUnits = size(sortedUnits,1);
+%     for unitIter=1:numUnits
+%         relevantSpikeTimesHardware = Spikes( mapToUnits == unitIter,2);
+%         
+%         % Ignore trial outcome. Just aggregate according to trial type
+%         [a2bRaster,periStimulusRangeMS] = buildRaster(relevantSpikeTimesHardware/header.sampleRate, trialAlignTShardware/header.sampleRate, iBeforeMS, iAfterMS);
+%         
+%         % First, build a large 1-ms resolution raster matrix
+%         
+%         
+%         [uniqueTrialTypes,~,mapToUniqueTrialType]=unique(trialTable(:,1));
+%         numUniqueTrials = length(uniqueTrialTypes);
+%         averageRaster = zeros(numUniqueTrials, length(periStimulusRangeMS));
+%         for k=1:numUniqueTrials
+%             relevantTrials = find(mapToUniqueTrialType == k);
+%             if ~isempty(relevantTrials)
+%                 averageRaster(k,:)=mean(a2bRaster(relevantTrials,:),1);
+%             end
+%         end
+%     end
+% end
 
 % figure(11);
 % clf;
@@ -393,25 +407,70 @@ end
 %% Build Advancers matrix
 
 % reconstruct the position of each advancer
-NEW_ADVANCER_MSG = 'NewAdvancer';
 NEW_ADVANCER_POS_MSG = 'NewAdvancerPosition';
-NEW_ADVANCER_CONTAINER_MSG = 'NewAdvancerContainer';
+ADVANCER_POS_STATUS_MSG = 'AdancerPositionStatus';
+
+advancerTable = zeros(0,3);
 for k=1:length(acNetworkEvents)
       if strncmpi(acNetworkEvents{k},NEW_ADVANCER_POS_MSG,length(NEW_ADVANCER_POS_MSG))
-          
-      else
-          if strncmpi(acNetworkEvents{k},NEW_ADVANCER_CONTAINER_MSG,length(NEW_ADVANCER_CONTAINER_MSG))
-          acNetworkEvents{k}
-          else 
-                if strncmpi(acNetworkEvents{k},NEW_ADVANCER_MSG,length(NEW_ADVANCER_MSG))
-            acNetworkEvents{k}
-                end 
-          end
-      end      
+          acParts = fnSplitString(acNetworkEvents{k},' ');
+          advancerID = str2num(acParts{2});
+          depthMM = str2num(acParts{3});
+          timeStamp = networkEventsTS(k);
+          advancerTable = [advancerTable; [advancerID,depthMM,timeStamp]];
+      end
+      if strncmpi(acNetworkEvents{k},ADVANCER_POS_STATUS_MSG,length(ADVANCER_POS_STATUS_MSG))
+          acParts = fnSplitString(acNetworkEvents{k},' ');
+          advancerID = str2num(acParts{3});
+          depthMM = str2num(acParts{4});
+          timeStamp = networkEventsTS(k);
+          advancerTable = [advancerTable; [advancerID,depthMM,timeStamp]];
+      end
 end
 
 
 
+%% Eye calibration
+EYE_CALIBRATION_MSG = 'CalibrateEyePosition';
+calibrationEvents = zeros(0,7); %[software_timestamp, fixation_x, fixation_y, screen_x, screen_y, eyepos_x, eyepos_y]
+for k=1:length(acNetworkEvents)
+      if strncmpi(acNetworkEvents{k},EYE_CALIBRATION_MSG,length(EYE_CALIBRATION_MSG))
+          acParts = fnSplitString(acNetworkEvents{k},' ');
+          pt2fFixationSpotPos = [str2num(acParts{2}),str2num(acParts{3})];
+          pt2fScreenSize = [str2num(acParts{4}),str2num(acParts{5})];
+          timeStamp = networkEventsTS(k);
+          calibrationEvents = [calibrationEvents; [timeStamp,pt2fFixationSpotPos,pt2fScreenSize,0,0]];
+      end
+end
+% fill in the eye position...
+try
+    calibrationEvents(:, 6) = interp1(EyePos(:,6),EyePos(:,1), calibrationEvents(:,1));
+    calibrationEvents(:, 7) = interp1(EyePos(:,6),EyePos(:,2), calibrationEvents(:,1));
+catch
+end
+
+% 
+% [x,y,xc,yc,p,double(softwareTS),double(hardwareTS)];
+% 
+% clc
+% for k=1:length(acNetworkEvents)
+%     if ~(strncmpi(acNetworkEvents{k},'Trial',5)) && ~(strncmpi(acNetworkEvents{k},'Kofiko',6)) && ~(strncmpi(acNetworkEvents{k},'NewAdvancerPosition',length('NewAdvancerPosition'))) && ...
+%         ~(strncmpi(acNetworkEvents{k},'ProcessorCommunication Advancer',length('ProcessorCommunication Advancer'))) 
+%         fprintf('%s\n',acNetworkEvents{k});
+%     end
+% end
+
+
+
+strctDataFromEvents.TTLs = TTLs;
+strctDataFromEvents.Spikes = Spikes;
+strctDataFromEvents.AllWaveforms = AllWaveforms;
+strctDataFromEvents.acNetworkEvents = acNetworkEvents;
+strctDataFromEvents.networkEventsTS = networkEventsTS;
+strctDataFromEvents.trialTable = trialTable;
+strctDataFromEvents.strctSync.strctSoftwareHardwareSync = strctSoftwareHardwareSync;
+strctDataFromEvents.strctSync.strctLocalRemoteSync = strctLocalRemoteSync;
+strctDataFromEvents.headerInfo = info.header;
 return
 
 
