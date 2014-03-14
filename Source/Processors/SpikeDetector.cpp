@@ -235,6 +235,12 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
 		computingThread = pth;
 
 	name = _name;
+	/*
+	PCArange[0] = -250;
+	PCArange[1] = -250;
+	PCArange[2] = 250;
+	PCArange[3] = 250;
+	*/
 
     numChannels = _numChannels;
     prePeakSamples = pre;
@@ -291,7 +297,46 @@ void SpikeDetector::setElectrodeVoltageScale(int electrodeID, int index, float n
 	}
 	mut.exit();
 }
+/*
+void SpikeDetector::setElectrodePCArange(int electrodeID, float minX,float maxX,float minY,float maxY)
+{
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == electrodeID)
+		{
+			electrodes[k]->PCArange[0] = minX; 
+			electrodes[k]->PCArange[1] = minY; 
+			electrodes[k]->PCArange[2] = maxX; 
+			electrodes[k]->PCArange[3] = maxY; 
+			mut.exit();
+			return ;
+		}
+	}
+	mut.exit();
+	return ;
+}
 
+void SpikeDetector::getElectrodePCArange(int electrodeID, float &minX,float &maxX,float &minY,float &maxY)
+{
+	mut.enter();
+	for (int k=0;k<electrodes.size();k++)
+	{
+		if (electrodes[k]->electrodeID == electrodeID)
+		{
+	
+			minX = electrodes[k]->PCArange[0];
+			minY = electrodes[k]->PCArange[1];
+			maxX = electrodes[k]->PCArange[2];
+			maxY = electrodes[k]->PCArange[3];
+			mut.exit();
+			return ;
+		}
+	}
+	mut.exit();
+	return ;
+}
+*/
 
 std::vector<float> SpikeDetector::getElectrodeVoltageScales(int electrodeID)
 {
@@ -983,6 +1028,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)
 {
+	//printf("Entering Spike Detector::process\n");
 	mut.enter();
 	uint16_t samplingFrequencyHz = getSampleRate();//buffer.getSamplingFrequency();
     // cycle through electrodes
@@ -1164,6 +1210,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
 
 	mut.exit();
+	//printf("Exitting Spike Detector::process\n");
 }
 
 float SpikeDetector::getNextSample(int& chan)

@@ -21,11 +21,15 @@
 
 */
 
+#include "../../JuceLibraryCode/JuceHeader.h"
 #include <stdio.h>
 #include "TrialCircularBuffer.h"
 #include "SpikeDetector.h"
 #include "Channel.h"
 #include <string>
+#include "tictoc.h"
+TicToc tictoc;
+
 
 TrialCircularBufferParams::TrialCircularBufferParams()
 {
@@ -207,10 +211,16 @@ void PSTH::clear()
 
 void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
-	
+
+	tictoc.Tic(16);
 	Time t;
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
+
+	tictoc.Tic(30);
 	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, mod_pre_sec, mod_post_sec);
+	tictoc.Toc(31);
+
+	tictoc.Tic(32);
 	std::vector<float> instantaneousSpikesRate;
 	instantaneousSpikesRate.resize(numBins);
 	for (int k = 0; k < numBins; k++)
@@ -251,13 +261,15 @@ void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 		ymax = MAX(ymax,avgResponse[k]);
 		ymin = MIN(ymin,avgResponse[k]);
 	}
+	tictoc.Toc(32);
+
 	// keep existing trial
 	if (prevTrials.size()+1 > params.maxTrialsInMemory)
 	{
 		prevTrials.pop_back();
 	}
 	prevTrials.push_front(instantaneousSpikesRate);
-	
+	tictoc.Toc(16);
 
 }
 
@@ -269,7 +281,7 @@ void PSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
 	yMin = ymin;
 }
 
-void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
+void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<bool> valid)
 {
 	
 	numTrials++;
@@ -464,7 +476,7 @@ ChannelPSTHs::ChannelPSTHs(int ID, TrialCircularBufferParams params_) : channelI
 	numTrials = 0;
 }
 
-void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid, Trial *trial)
+void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<bool> valid, Trial *trial)
 {
 	numTrials++;
 	if (conditionsNeedUpdating.size() == 0)
@@ -635,6 +647,8 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
 
+	tictoc.Tic(14);
+
 	for (int k=0;k<conditionPSTHs.size();k++) {
 		for (int j=0;j<conditionsNeedUpdating.size();j++) 
 		{
@@ -646,9 +660,10 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 	}
 
+	
 	if (params.buildTrialsPSTH)
 	{
-
+		tictoc.Tic(15);
 		// update individual trial PSTH
 		int modifiedTrialType;
 		if (trial->type >= TTL_TRIAL_OFFSET)
@@ -670,8 +685,9 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 		// now update
 		trialPSTHs[modifiedTrialType].updatePSTH(&spikeBuffer, trial);
+		tictoc.Toc(15);
 	}
-
+	tictoc.Toc(14);
 }
 
 /********************/
@@ -696,28 +712,74 @@ Trial::Trial(const Trial &t)
 	alignTS_hardware = t.alignTS_hardware;
 }
 /***************************/
+ElectrodePSTH::ElectrodePSTH()
+{
+	threadpool = nullptr;
+}
+
 ElectrodePSTH::ElectrodePSTH(int ID, String name) : electrodeID(ID), electrodeName(name)
 {
-	
+	/*
+	// create a thread pool
+	int numCpus = SystemStats::getNumCpus();
+	// create a thead pool to analyze incoming trials
+	threadpool = new ThreadPool(numCpus);
+	*/
 }
+
+ElectrodePSTH::~ElectrodePSTH()
+{
+	/*
+	delete threadpool;
+	threadpool = nullptr;
+	*/
+}
+
+ElectrodePSTHlfpJob::ElectrodePSTHlfpJob(ElectrodePSTH *psth_, int ch_, std::vector<int> *conditionsNeedUpdate_, Trial *trial_, std::vector<float> *alignedLFP_, std::vector<bool> *valid_) : ThreadPoolJob("LFPjob"),
+	psth(psth_),ch(ch_),conditionsNeedUpdate(conditionsNeedUpdate_),trial(trial_),alignedLFP(alignedLFP_),valid(valid_)
+{
+}
+
+juce::ThreadPoolJob::JobStatus ElectrodePSTHlfpJob::runJob()
+{
+	psth->UpdateChannelConditionWithLFP(ch,conditionsNeedUpdate,trial,alignedLFP,valid);
+	return jobHasFinished;
+}
+
+void ElectrodePSTH::UpdateChannelConditionWithLFP(int ch, std::vector<int> *conditionsNeedUpdate, Trial *trial, std::vector<float>* alignedLFP,std::vector<bool> *valid)
+{
+	channelsPSTHs[ch].updateConditionsWithLFP(*conditionsNeedUpdate, *alignedLFP, *valid, trial);
+}
+
 
 void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer)
 {
 	// compute trial aligned lfp for all channels 
 	
-	std::vector<float> valid;
+	std::vector<bool> valid;
 	std::vector<std::vector<float> > alignedLFP;
+
+	tictoc.Tic(6);
 	// resample all electrode channels 
+
+	tictoc.Tic(18);
 	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].conditionPSTHs[0].binTime,
 		channelsPSTHs[0].params, alignedLFP,valid);
+
+	tictoc.Toc(18);
 	// now we can average data
+	tictoc.Tic(7);
 	if (success)
 	{
 		for (int ch=0;ch<channelsPSTHs.size();ch++)
-		{
-			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid, trial);
-		}
+			{
+				channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid, trial);
+			}
+	//			ElectrodePSTHlfpJob *job = new ElectrodePSTHlfpJob(this,ch,&conditionsNeedUpdate,trial, &(alignedLFP[ch]), &valid);
 	}
+	tictoc.Toc(7);
+
+	tictoc.Toc(6);
 
 }
 
@@ -754,7 +816,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   TrialCircularBufferParams params,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid)
+									std::vector<bool> &valid)
 {
 	if (!params.approximate) 
 	{
@@ -945,7 +1007,7 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 bool SmartContinuousCircularBuffer::getAlignedDataInterp(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid)
+									std::vector<bool> &valid)
 {
 	// to update a condition's continuous data psth, we will first find 
 	// data samples in the vicinity of the trial, and then interpolate at the
@@ -1296,15 +1358,18 @@ TrialCircularBuffer::~TrialCircularBuffer()
 	delete ttlBuffer;
 	ttlBuffer = nullptr;
 	electrodesPSTH.clear();
-
+	delete threadpool;
+	threadpool = nullptr;
 }
 TrialCircularBuffer::TrialCircularBuffer()
 {
 	lfpBuffer = ttlBuffer = nullptr;
+	threadpool = nullptr;
 	hardwareTriggerAlignmentChannel = -1;
 	lastSimulatedTrialTS = 0;
 	lastTrialID = 0;
 	uniqueIntervalID = 0;
+	useThreads = true;
 }
 
 void TrialCircularBuffer::getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y)
@@ -1385,7 +1450,7 @@ TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : pa
 {
 	Time t;
 	numTicksPerSecond = t.getHighResolutionTicksPerSecond();
-	
+	useThreads = true;
 	conditionCounter = 0;
 	firstTime = true;
 	trialCounter = 0;
@@ -1405,7 +1470,9 @@ TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : pa
 		ttlChannelStatus[k] = false;
 		lastTTLts[k] = 0;
 	}
-
+	int numCpus = SystemStats::getNumCpus();
+	// create a thead pool to analyze incoming trials
+	threadpool = new ThreadPool(numCpus);
 	clearDesign();
 }
 
@@ -1768,7 +1835,24 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 	  bool redrawNeeded = false;
 	  std::vector<String> input = msg.splitString(' ');
 	  String command = input[0].toLowerCase();
-	  
+	if (command == "tictoc_print")
+	{
+		if (useThreads)
+			printf("******** Using threads to analyze trials\n");
+		else 
+			printf("******** NOT Using threads to analyze trials\n");
+
+		tictoc.print();
+	}
+	if (command == "tictoc_clear")
+	{
+		tictoc.clear();
+	} 
+	if (command == "flip_thread_usage")
+	{
+		useThreads = !useThreads;
+	}
+
  if (command == "trialstart")
 	  {
 		  currentTrial.trialID = ++trialCounter;
@@ -1919,6 +2003,15 @@ bool TrialCircularBuffer::contains(std::vector<int> v, int x)
 	return false;
 }
 
+void TrialCircularBuffer::updateLFPwithTrial(int electrodeIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial)
+{
+	electrodesPSTH[electrodeIndex].updateChannelsConditionsWithLFP(*conditionsNeedUpdate,trial, lfpBuffer); 
+}
+
+void TrialCircularBuffer::updateSpikeswithTrial(int electrodeIndex, int unitIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial)
+{
+	electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].updateConditionsWithSpikes(*conditionsNeedUpdate,trial); 
+}
 
 void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 {
@@ -1944,16 +2037,49 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 		return;
 	}
 
-
-	// update both spikes and LFP PSTHs 
-	for (int i=0;i<electrodesPSTH.size();i++) 
+	if (!useThreads)
 	{
-		electrodesPSTH[i].updateChannelsConditionsWithLFP(conditionsNeedUpdating,trial, lfpBuffer);
-		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
-		{
-			electrodesPSTH[i].unitsPSTHs[u].updateConditionsWithSpikes(conditionsNeedUpdating,trial);
+		// these two parts can be fully distributed along several threads because they are completely independent.
 
+		tictoc.Tic(23);
+		for (int i=0;i<electrodesPSTH.size();i++) 
+		{
+			electrodesPSTH[i].updateChannelsConditionsWithLFP(conditionsNeedUpdating,trial, lfpBuffer); // timer 6 -> 7,18
 		}
+		// update both spikes and LFP PSTHs 
+		for (int i=0;i<electrodesPSTH.size();i++) 
+		{
+			for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			{
+				electrodesPSTH[i].unitsPSTHs[u].updateConditionsWithSpikes(conditionsNeedUpdating,trial); // timer 14,15
+			}
+		}
+		tictoc.Toc(23);
+
+	} else {
+		tictoc.Tic(24);
+		int cnt = 0;
+		int numElectrodes = electrodesPSTH.size();
+		for (int i=0;i<numElectrodes;i++) 
+		{
+			TrialCircularBufferThread *job = new TrialCircularBufferThread(this,&conditionsNeedUpdating,trial,cnt++,0,i,-1);
+			threadpool->addJob(job, true);
+			for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			{
+				TrialCircularBufferThread *job = new TrialCircularBufferThread(this,&conditionsNeedUpdating,trial,cnt++,1,i,u);
+				threadpool->addJob(job, true);
+			}
+		}
+
+		while (threadpool->getNumJobs() > 0)
+		{
+			#if JUCE_WINDOWS
+				Sleep(2); // sleep 2 ms
+			#else
+				usleep(2000);
+			#endif
+		}
+		tictoc.Toc(24);
 	}
 
 	unlockPSTH();
@@ -2901,17 +3027,26 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
-	// first, update LFP circular buffers
-	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+	//printf("Entering TrialCircularBuffer::process\n");
+	
+	tictoc.Tic(0);
 
+	// first, update LFP circular buffers
+	tictoc.Tic(1);
+	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+	tictoc.Toc(1);
+
+	tictoc.Tic(2);
 	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
 	if (params.reconstructTTL) {
 		std::vector<std::vector<bool>> reconstructedTTLs = reconstructTTLchannels(hardware_timestamp,nSamples);
 		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
 	}
+	tictoc.Toc(2);
 
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
+	tictoc.Tic(3);
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
 		for (int k=0;k<aliveTrials.size();k++)
@@ -2936,9 +3071,33 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 			{
 				aliveTrials.pop();
 				lastTrialID = topTrial.trialID;
+				tictoc.Tic(4);
 				updatePSTHwithTrial(&topTrial);
+				tictoc.Toc(4);
 			}
 		}
 	}
+	tictoc.Toc(3);
 
+	tictoc.Toc(0);
+	//printf("Exitting TrialCircularBuffer::process\n");
+}
+
+
+TrialCircularBufferThread::TrialCircularBufferThread(TrialCircularBuffer *tcb_,  std::vector<int> *conditions, Trial* trial_, int jobID_, int jobType_, int electrodeID_, int subID_) : ThreadPoolJob("Job "+String(jobID)),
+	tcb(tcb_),jobID(jobID_), jobType(jobType_), electrodeID(electrodeID_), subID(subID_), trial(trial_), conditionsNeedUpdate(conditions)
+{
+
+}
+
+juce::ThreadPoolJob::JobStatus TrialCircularBufferThread::runJob()
+{
+	if (jobType == 0)
+	{
+		tcb->updateLFPwithTrial(electrodeID,conditionsNeedUpdate,trial);
+	} else if (jobType == 1)
+	{
+		tcb->updateSpikeswithTrial(electrodeID,subID,conditionsNeedUpdate,trial);
+	}
+	return jobHasFinished;
 }

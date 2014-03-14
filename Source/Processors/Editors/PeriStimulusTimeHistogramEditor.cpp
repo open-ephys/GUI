@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "PeriStimulusTimeHistogramEditor.h"
 #include "../../UI/EditorViewport.h"
 #include "../TrialCircularBuffer.h"
+#include "../tictoc.h"
 #include <stdio.h>
 
 //FileSearchPathListComponent::paintListBoxItem	
@@ -1890,6 +1891,7 @@ void GenericPlot::resized()
 
 void GenericPlot::paintSpikeRaster(Graphics &g)
 {
+	//tictoc.Tic(16);
 	int numTrialTypes = tcb->getNumTrialTypesInUnit(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
@@ -1901,10 +1903,12 @@ void GenericPlot::paintSpikeRaster(Graphics &g)
 		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
 		mlp->drawImage(rasterImage,maxValue);
 	}
+	//tictoc.Toc(17);
 }
 
 void GenericPlot::paintSpikes(Graphics &g)
 {
+	//tictoc.Tic(15);
 	std::vector<XYline> lines = tcb->getUnitConditionCurves(electrodeID, subID);
 	int numTrials = tcb->getNumTrialsInUnit(electrodeID, subID);
 	mlp->setAuxiliaryString( String(numTrials) + " trials");
@@ -1918,10 +1922,12 @@ void GenericPlot::paintSpikes(Graphics &g)
 		}
 		mlp->plotxy(lines[k]);
 	}
+	//tictoc.Toc(15);
 }
 
 void GenericPlot::paintLFPraster(Graphics &g)
 {
+	//tictoc.Tic(14);
 	int numTrialTypes = tcb->getNumTrialTypesInChannel(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
@@ -1933,10 +1939,12 @@ void GenericPlot::paintLFPraster(Graphics &g)
 		juce::Image rasterImage = tcb->getTrialsAverageChannelResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
 		mlp->drawImage(rasterImage,maxValue);
 	}
+	//tictoc.Toc(14);
 }
 
 void GenericPlot::paintLFP(Graphics &g)
 {
+	//tictoc.Tic(13);
 	std::vector<XYline> lines = tcb->getElectrodeConditionCurves(electrodeID, subID);
 	mlp->clearplot();
 
@@ -1951,11 +1959,13 @@ void GenericPlot::paintLFP(Graphics &g)
 		}
 		mlp->plotxy(lines[k]);
 	}
+	//tictoc.Toc(13);
 }
 
 void GenericPlot::paint(Graphics &g)
 {
-
+	//printf("Entering GenericPlot::paint\n");
+	//tictoc.Tic(12);
 	if (mlp->eventsAvail())
 	{
 		String lastEvent = mlp->getLastEvent();
@@ -1976,7 +1986,8 @@ void GenericPlot::paint(Graphics &g)
 		else
 			paintLFP(g);
 	}
-	
+	//printf("Exitting GenericPlot::paint\n");
+	//tictoc.Toc(12);
 }
 
 

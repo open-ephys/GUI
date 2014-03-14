@@ -1861,8 +1861,8 @@ void PCAProjectionAxes::setPCARange(float p1min, float p2min, float p1max, float
 	pcaMax[0] = p1max;
 	pcaMax[1] = p2max;
 	rangeSet = true;
-    
     redrawSpikes = true;
+	processor->getActiveElectrode()->spikeSort->setPCArange(p1min,p2min, p1max,  p2max);
 
 }
 
@@ -1956,6 +1956,7 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 			pcaMin[1]+=dy;
 			pcaMax[0]+=dx;
 			pcaMax[1]+=dy;
+			processor->getActiveElectrode()->spikeSort->setPCArange(pcaMin[0],pcaMin[1], pcaMax[0],  pcaMax[1]);
 
 			// draw polygon
 			prevx = event.x;

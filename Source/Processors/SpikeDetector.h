@@ -100,6 +100,7 @@ class Electrode
 	    double* thresholds;
         bool* isActive;
 		double *voltageScale;
+		//float PCArange[4];
 
 		SpikeHistogramPlot* spikePlot;
 		SpikeSortBoxes* spikeSort;
@@ -291,6 +292,9 @@ public:
 	void setFlipSignalState(bool state);
 	void startRecording();
 	std::vector<float> getElectrodeVoltageScales(int electrodeID);
+	//void getElectrodePCArange(int electrodeID, float &minX,float &maxX,float &minY,float &maxY);
+	//void setElectrodePCArange(int electrodeID, float minX,float maxX,float minY,float maxY);
+
 	void setElectrodeVoltageScale(int electrodeID, int index, float newvalue);
 	bool isSelectedElectrodeRecorded(int channel);
 	std::vector<int> getElectrodeChannels(int ID);

@@ -760,17 +760,13 @@ void SpikeDetectorEditor::drawElectrodeButtons(int ID)
         cElectrodeButton* button = new cElectrodeButton(processor->getChannel(ID,i)+1);
         electrodeButtons.add(button);
 
-        
-
 		if (i == 0) {
 			activeChannels.add(processor->getChannel(ID,i));
 			thresholds.add(processor->getChannelThreshold(ID,i));
 		}
 
 		button->setToggleState(i == 0, false);
-
 		button->setBounds(155+(column++)*width, 60+row*height, width, 15);
-
 		addAndMakeVisible(button);
         button->addListener(this);
 

@@ -28,6 +28,7 @@
 #include "ISCAN.h"
 #include <stdio.h>
 
+#include "tictoc.h"
 
 PeriStimulusTimeHistogramNode::PeriStimulusTimeHistogramNode()
     : GenericProcessor("PSTH"), displayBufferSize(5),  redrawRequested(false)
@@ -155,7 +156,7 @@ void PeriStimulusTimeHistogramNode::toggleConditionVisibility(int cond)
 
 void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
-
+	//printf("Entering PeriStimulusTimeHistogramNode::process\n");
 	// Update internal statistics 
     checkForEvents(events); 
 	
@@ -174,7 +175,7 @@ void PeriStimulusTimeHistogramNode::process(AudioSampleBuffer& buffer, MidiBuffe
     {
         redrawRequested = false;
     }
-
+	//printf("Exitting PeriStimulusTimeHistogramNode::process\n");
 }
 
 
@@ -403,11 +404,15 @@ void PeriStimulusTimeHistogramNode::handleNetworkMessage(StringTS s)
 }
 void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
-    
+    //tictoc.Tic(9);
+
 	if (eventType == NETWORK)
 	{
+	    //tictoc.Tic(10);
+
 		StringTS s(event);
 		handleNetworkMessage(s);
+		//tictoc.Toc(10);
 	}
 	if (eventType == EYE_POSITION)
 	{
@@ -483,6 +488,8 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
 			}
         }
     }
+   // tictoc.Toc(9);
+
 }
 
 

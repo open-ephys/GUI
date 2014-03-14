@@ -895,6 +895,15 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	  p2max = pc2max;
   }
 
+  void SpikeSortBoxes::setPCArange(float p1min,float p2min, float p1max,  float p2max)
+  {
+	  pc1min=p1min;
+	  pc2min=p2min;
+	  pc1max=p1max;
+	  pc2max=p2max;
+  }
+
+
   void SpikeSortBoxes::resetJobStatus()
   {
 	  bPCAjobFinished = false;

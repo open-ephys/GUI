@@ -1842,6 +1842,9 @@
     <ClCompile Include="..\..\Source\Processors\Editors\ISCANeditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\tictoc.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\AccessClass.h">
@@ -3532,6 +3535,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\ImageIcon.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\tictoc.h">
+      <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
