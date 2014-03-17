@@ -305,10 +305,11 @@ public:
 	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, bool rise,bool simulateTrial);
 	void addDefaultTTLConditions(Array<bool> visibility);
 	void addCondition(std::vector<String> input);
-	void lockConditions();
-	void unlockConditions();
-	void lockPSTH();
-	void unlockPSTH();
+	//void lockConditions();
+	//void unlockConditions();
+	//void lockPSTH();
+	//void unlockPSTH();
+
 	void reallocate(int numChannels);
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
@@ -366,6 +367,8 @@ public:
 	// thread job functions
 	void updateLFPwithTrial(int electrodeIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial);
 	void updateSpikeswithTrial(int electrodeIndex, int unitIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial);
+
+	CriticalSection psthMutex;//conditionMutex
 private:
 	bool useThreads;
    std::vector<int> dropOutcomes;
@@ -380,7 +383,7 @@ private:
 	float numTicksPerSecond;
 	int trialCounter;
 	int conditionCounter;
-	CriticalSection conditionMutex, psthMutex;
+	
 	Trial currentTrial;
 	String designName;
 	int hardwareTriggerAlignmentChannel;
