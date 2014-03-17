@@ -1106,6 +1106,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                         sampleIndex -= (electrode->prePeakSamples+1);
 
                         SpikeObject newSpike;
+						newSpike.sortedId = 0; // unsorted.
                         newSpike.timestamp = peakIndex;
 						newSpike.electrodeID = electrode->electrodeID;
                         newSpike.source = i;

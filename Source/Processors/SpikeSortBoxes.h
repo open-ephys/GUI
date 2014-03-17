@@ -262,8 +262,8 @@ public:
 	void saveCustomParametersToXml(XmlElement *electrodeNode);
 	void loadCustomParametersFromXml(XmlElement *electrodeNode);
 private:
-	void  StartCriticalSection();
-	void  EndCriticalSection();
+	//void  StartCriticalSection();
+	//void  EndCriticalSection();
 
 	int numChannels, waveformLength;
 	int selectedUnit, selectedBox;
