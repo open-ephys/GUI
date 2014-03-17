@@ -2084,7 +2084,7 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 	if (!useThreads)
 	{
 		// these two parts can be fully distributed along several threads because they are completely independent.
-		printf("Calling updatePSTHwithTrial::update without streads\n");
+		//printf("Calling updatePSTHwithTrial::update without streads\n");
 
 		tictoc.Tic(23);
 		for (int i=0;i<electrodesPSTH.size();i++) 
@@ -2100,13 +2100,13 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 			}
 		}
 		tictoc.Toc(23);
-		printf("Finished updatePSTHwithTrial::update without streads\n");
+		//printf("Finished updatePSTHwithTrial::update without streads\n");
 
 	} else {
 		tictoc.Tic(24);
 		int cnt = 0;
 		int numElectrodes = electrodesPSTH.size();
-		printf("Calling updatePSTHwithTrial::update with threads\n");
+		//printf("Calling updatePSTHwithTrial::update with threads\n");
 
 		for (int i=0;i<numElectrodes;i++) 
 		{
@@ -2119,7 +2119,7 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 			}
 		}
 
-		printf("Calling updatePSTHwithTrial::Waiting for jobs\n");
+		//printf("Calling updatePSTHwithTrial::Waiting for jobs\n");
 
 		while (threadpool->getNumJobs() > 0)
 		{
@@ -2130,7 +2130,7 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 			#endif
 		}
 		tictoc.Toc(24);
-		printf("Finished updatePSTHwithTrial::Waiting for jobs\n");
+		//printf("Finished updatePSTHwithTrial::Waiting for jobs\n");
 
 	}
 
@@ -3117,18 +3117,18 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
-	printf("Entering TrialCircularBuffer::process\n");
+	//printf("Entering TrialCircularBuffer::process\n");
 	
 	tictoc.Tic(0);
 
 	// first, update LFP circular buffers
-	printf("Entering lfpBuffer->update\n");
+	//printf("Entering lfpBuffer->update\n");
 	tictoc.Tic(1);
 	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
 	tictoc.Toc(1);
-	printf("Exitting lfpBuffer->update\n");
+	//printf("Exitting lfpBuffer->update\n");
 
-		printf("Entering reconstructedTTLs\n");
+	//printf("Entering reconstructedTTLs\n");
 	tictoc.Tic(2);
 	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
 	if (params.reconstructTTL) {
@@ -3136,14 +3136,14 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
 	}
 	tictoc.Toc(2);
-	printf("Exitting reconstructedTTLs\n");
+	//printf("Exitting reconstructedTTLs\n");
 
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
 	tictoc.Tic(3);
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
-		printf("Entering alive loop\n");
+		//printf("Entering alive loop\n");
 		for (int k=0;k<aliveTrials.size();k++)
 		{
 			Trial topTrial = aliveTrials.front();
@@ -3166,19 +3166,19 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 			{
 				aliveTrials.pop();
 				lastTrialID = topTrial.trialID;
-				printf("Entering updatePSTHwithTrial\n");
+				//printf("Entering updatePSTHwithTrial\n");
 				tictoc.Tic(4);
 				updatePSTHwithTrial(&topTrial);
 				tictoc.Toc(4);
-				printf("Exitting updatePSTHwithTrial\n");
+				//printf("Exitting updatePSTHwithTrial\n");
 			}
 		}
-		printf("Exitting alive loop\n");
+		//printf("Exitting alive loop\n");
 	}
 	tictoc.Toc(3);
 
 	tictoc.Toc(0);
-	printf("Exitting TrialCircularBuffer::process\n");
+	//printf("Exitting TrialCircularBuffer::process\n");
 }
 
 
