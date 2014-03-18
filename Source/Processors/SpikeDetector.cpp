@@ -28,7 +28,7 @@
 #include "Channel.h"
 #include "SpikeDisplayNode.h"
 #include "PeriStimulusTimeHistogramNode.h"
-#include "Editors\PeriStimulusTimeHistogramEditor.h"
+#include "Editors/PeriStimulusTimeHistogramEditor.h"
 class spikeSorter;
 
 SpikeDetector::SpikeDetector()
