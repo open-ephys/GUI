@@ -134,12 +134,12 @@ public:
 	bool getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 									TrialCircularBufferParams params,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid);
+									std::vector<bool> &valid);
 
 	bool getAlignedDataInterp(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid);
+									std::vector<bool> &valid);
 
 	void addTrialStartToSmartBuffer(int trialID);
 	int trialptr;
@@ -159,7 +159,7 @@ public:
 	double getDx();
 	void clear();
 	void updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial);
-	void updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid);
+	void updatePSTH(std::vector<float> alignedLFP,std::vector<bool> valid);
 
 	std::vector<float> getAverageTrialResponse();
 	std::vector<float> getLastTrial();
@@ -219,7 +219,7 @@ class ChannelPSTHs
 {
 public:
 	ChannelPSTHs(int channelID, TrialCircularBufferParams params);
-	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<float> valid, Trial *trial);
+	void updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> lfpData, std::vector<bool> valid, Trial *trial);
 	void clearStatistics();
 	void getRange(float &xmin, float &xmax, float &ymin, float &ymax);
 	bool isNewDataAvailable();
@@ -249,8 +249,11 @@ public:
 class ElectrodePSTH
 {
 public:
+	ElectrodePSTH();
 	ElectrodePSTH(int ID, String name);
+	~ElectrodePSTH();
 	void updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer);
+	void UpdateChannelConditionWithLFP(int ch, std::vector<int> *conditionsNeedUpdate, Trial *trial, std::vector<float>* alignedLFP,std::vector<bool> *valid);
 	int electrodeID;
 	String electrodeName;
 	std::vector<int> channels;
@@ -258,7 +261,23 @@ public:
 	std::vector<ChannelPSTHs> channelsPSTHs;
 	std::vector<TTL_PSTHs> ttlPSTHs;
 	
+	ThreadPool *threadpool; // used for multi-channel electrodes only
 };
+
+class ElectrodePSTHlfpJob : public ThreadPoolJob
+{
+public:
+	ElectrodePSTHlfpJob(ElectrodePSTH *psth_, int ch_, std::vector<int> *conditionsNeedUpdate_, Trial *trial_, std::vector<float> *alignedLFP_, std::vector<bool> *valid_);
+	JobStatus runJob();
+
+	ElectrodePSTH *psth;
+	int ch;
+	std::vector<int> *conditionsNeedUpdate;
+	Trial *trial;
+	std::vector<float> *alignedLFP;
+	std::vector<bool> *valid;
+};
+
 
 struct ttlStatus
 {
@@ -286,10 +305,11 @@ public:
 	void addTTLevent(int channel,int64 ttl_timestamp_software,int64 ttl_timestamp_hardware, bool rise,bool simulateTrial);
 	void addDefaultTTLConditions(Array<bool> visibility);
 	void addCondition(std::vector<String> input);
-	void lockConditions();
-	void unlockConditions();
-	void lockPSTH();
-	void unlockPSTH();
+	//void lockConditions();
+	//void unlockConditions();
+	//void lockPSTH();
+	//void unlockPSTH();
+
 	void reallocate(int numChannels);
 	void simulateTTLtrial(int channel, int64 ttl_timestamp_software);
 	void clearDesign();
@@ -343,7 +363,14 @@ public:
 	juce::Colour getUnitColor(int electrodeID, int unitID);
 	int getLastTrialID();
 	int getNumberAliveTrials();
+
+	// thread job functions
+	void updateLFPwithTrial(int electrodeIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial);
+	void updateSpikeswithTrial(int electrodeIndex, int unitIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial);
+
+	CriticalSection psthMutex;//conditionMutex
 private:
+	bool useThreads;
    std::vector<int> dropOutcomes;
 
 	juce::Image getTrialsAverageResponseAsJuceImage(int  ymin, int ymax,	std::vector<float> x_time,	int numTrialTypes,	
@@ -356,7 +383,7 @@ private:
 	float numTicksPerSecond;
 	int trialCounter;
 	int conditionCounter;
-	CriticalSection conditionMutex, psthMutex;
+	
 	Trial currentTrial;
 	String designName;
 	int hardwareTriggerAlignmentChannel;
@@ -371,7 +398,21 @@ private:
 	SmartContinuousCircularBuffer *ttlBuffer;
 	std::queue<ttlStatus> ttlQueue;
 	TrialCircularBufferParams params;
-  
+	ThreadPool *threadpool;
+};
+
+class TrialCircularBufferThread : public ThreadPoolJob
+{
+public:
+	TrialCircularBufferThread(TrialCircularBuffer *tcb_, std::vector<int> *conditions, Trial* trial_, int jobID_, int jobType_, int electrodeID_, int subID_);
+	JobStatus runJob();
+	TrialCircularBuffer *tcb;
+	Trial *trial;
+	std::vector<int> *conditionsNeedUpdate;
+	int jobID;
+	int jobType;
+	int electrodeID;
+	int subID;
 };
 
 

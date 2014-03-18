@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "PeriStimulusTimeHistogramEditor.h"
 #include "../../UI/EditorViewport.h"
 #include "../TrialCircularBuffer.h"
+#include "../tictoc.h"
 #include <stdio.h>
 
 //FileSearchPathListComponent::paintListBoxItem	
@@ -614,7 +615,9 @@ void PeriStimulusTimeHistogramCanvas::update()
 	if (processor->trialCircularBuffer == nullptr)
 		return;
 
-	processor->trialCircularBuffer->lockPSTH();
+	const ScopedLock myScopedLock (processor->trialCircularBuffer->psthMutex);
+
+	//processor->trialCircularBuffer->lockPSTH();
 	numElectrodes = processor->trialCircularBuffer->getNumElectrodes();
 	int maxUnitsPerElectrode = 0;
 	int row = 0;
@@ -730,7 +733,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	
 	if (maxUnitsPerElectrode == 0 && !showLFP) {
 		// nothing to be drawn...
-		processor->trialCircularBuffer->unlockPSTH();
+		//processor->trialCircularBuffer->unlockPSTH();
 		return;		
 	}
 
@@ -740,7 +743,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 	resized();
 	repaint();
 
-	processor->trialCircularBuffer->unlockPSTH();
+	//processor->trialCircularBuffer->unlockPSTH();
 	conditionsList->updateConditionButtons();
 }
 
@@ -917,799 +920,6 @@ void PeriStimulusTimeHistogramDisplay::focusOnPlot(int plotID)
 	
 }
 
-/******************************************/
-/*
-XYPlot::XYPlot(PeriStimulusTimeHistogramDisplay *dsp, int _plotID, xyPlotTypes _plotType, TrialCircularBuffer *_tcb, int _electrodeID, int _unitID, int _row, int _col, bool _rasterMode) :
-	tcb(_tcb), electrodeID(_electrodeID), unitID(_unitID), row(_row), col(_col),plotType(_plotType), plotID(_plotID), display(dsp),rasterMode(_rasterMode)
-{
-	font = Font("Default", 15, Font::plain);
-	guassianStandardDeviationMS = 5; // default smoothing
-	buildSmoothKernel(guassianStandardDeviationMS); 
-	
-	smoothPlot = plotType == SPIKE_PLOT; // don't smooth LFPs
-	autoRescale = true;
-	firstTime = true;
-	fullScreenMode = false;
-	zooming = false;
-}
-
-void XYPlot::mouseUp(const juce::MouseEvent& event)
-{
-	if (zooming)
-	{
-		zooming = false;
-		// first, turn off auto rescale, if it is enabled.
-		display->setAutoRescale(false); // zoom is now enabled. We can't have auto rescale and zoom at the same time.
-
-		float downX = float(mouseDownX-x0) /(float)plotWidth * rangeX + xmin;
-		float downY = float(plotHeight-(mouseDownY-y0)) /(float)plotHeight * rangeY + ymin;
-
-		float upX = float(event.x-x0) /(float)plotWidth * rangeX + xmin;
-		float upY = float(plotHeight-(event.y-y0)) /(float)plotHeight * rangeY + ymin;
-		
-		// convert mouse down and up position to proper x,y range
-		// save current zoom 
-		if ( ( fabs(downX-upX) < 0.01) ||  ( fabs(downY-upY) < 0.01) )
-		{
-			// do not zoom more. probably just incorrect click
-			return;
-		}
-		zoom CurrentZoom;
-		CurrentZoom.xmin=xmin;
-		CurrentZoom.ymin=ymin;
-		CurrentZoom.xmax=xmax;
-		CurrentZoom.ymax=ymax;
-		zoomMemory.push_back(CurrentZoom);
-
-		xmin = MIN(downX, upX);
-		xmax = MAX(downX, upX);
-		ymin = MIN(downY, upY);
-		ymax = MAX(downY, upY);
-		repaint();
-	}
-}
-
-void XYPlot::mouseDrag(const juce::MouseEvent& event)
-{
-	mouseDragX = event.x;
-	mouseDragY = event.y;
-
-	repaint();
-}
-
-
-void XYPlot::mouseDown(const juce::MouseEvent& event)
-{
-	if (event.mods.isRightButtonDown())
-	{
-		if (zoomMemory.size() > 0)
-		{
-			zoom prevZoom = zoomMemory.back();
-			zoomMemory.pop_back();
-			xmin = prevZoom.xmin;
-			xmax = prevZoom.xmax;
-			ymin = prevZoom.ymin;
-			ymax = prevZoom.ymax;
-			repaint();
-		}
-
-	} else if (event.mods.isLeftButtonDown())
-	{
-		mouseDownX = event.x;
-		mouseDownY = event.y;
-		mouseDragX = event.x;
-		mouseDragY = event.y;
-
-		zooming = true;
-	}
-}
-
-void XYPlot::resized()
-{
-
-}
-
-
-
-std::vector<int> XYPlot::histc(std::vector<float> xi, std::vector<float> x)
-{
-	std::vector<int> aiInd(xi.size());
-
-	int i = 0;
-	int j = 0;
-	int N = x.size();
-	while (i < xi.size()) 
-	{
-		if (xi[i] < x[j] || xi[i] > x[N-1])
-		{
-			aiInd[i] = -1;
-			i++;
-			continue;
-		}
-		if (j + 1 < N && xi[i] >= x[j] && xi[i] < x[j + 1])
-		{
-			aiInd[i] = j;
-			i++;
-			continue;
-		}
-		j++;
-		if (j > N - 1)
-			j = N - 1;
-	}
-	return aiInd;
-}
-
-std::vector<float> XYPlot::diff(std::vector<float> x)
-{
-	std::vector<float> d(x.size()-1);
-	for (int k = 0; k < x.size() - 1; k++)
-	{
-		d[k] = x[k + 1] - x[k];
-	}
-	return d;
-}
-
-
-void XYPlot::interp1(std::vector<float> x, std::vector<float>y, std::vector<float> xi, std::vector<float> &yi, std::vector<bool> &valid, float &min, float &max)
-{
-	// linear interpolate
-	int N = x.size();
-	int M = xi.size();
-
-	valid.resize(xi.size());
-	yi.resize(xi.size());
-
-	if (x.size()== 0)
-		return;
-
-	std::vector<int> ind = histc(xi, x);
-	std::vector<float> h = diff(x);
-	min = 1e10;
-	max = -1e10;
-
-	for (int i = 0; i < xi.size(); i++)
-	{
-		if (ind[i] < 0)
-		{
-			// invalid entry
-			valid[i] = false;
-			yi[i] = 0;
-			continue;
-		}
-		valid[i] = true;
-
-		double s = (xi[i] - x[ind[i]]) / h[ind[i]];
-		yi[i] = y[ind[i]] + s * (y[ind[i] + 1] - y[ind[i]]);
-		min = MIN(min,yi[i]);
-		max = MAX(max, yi[i]);
-	}
-
-
-
-}
-
-bool XYPlot::getSmoothState()
-{
-	return smoothPlot;
-}
-
-void XYPlot::setSmoothState(bool enable)
-{
-	smoothPlot = enable;
-}
-
-bool XYPlot::getAutoRescale()
-{
-	return autoRescale;
-}
-
-void XYPlot::setAutoRescale(bool enable)
-{
-	autoRescale = enable;
-}
-
-std::vector<float> XYPlot::smooth(std::vector<float> x)
-{
-	std::vector<float> smoothx;
-	smoothx.resize(x.size());
-
-	int numKernelBins = smoothKernel.size();
-	int zeroIndex = (numKernelBins-1)/2;
-	int numXbins = x.size();
-	for (int k=0;k<numXbins;k++)
-	{
-		float response = 0;
-		for (int j=-zeroIndex;j<zeroIndex;j++)
-		{
-			if (k+j >=0 && k+j < numXbins)
-				response+=x[k+j] * smoothKernel[j+zeroIndex];
-		}
-		smoothx[k] = response;
-	}
-	return smoothx;
-}
-
-void XYPlot::toggleFullScreen(bool fullScreenOn)
-{
-	fullScreenMode = fullScreenOn;
-}
-
-bool XYPlot::isFullScreen()
-{
-	return fullScreenMode;
-}
-
-
-
-void XYPlot::mouseDoubleClick(const juce::MouseEvent& event)
-{
-	if (event.mods.isRightButtonDown())
-	{
-		tcb->lockPSTH();
-		for (int electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
-		{
-			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
-			{
-				if (plotType == SPIKE_PLOT)
-				{
-					for (int unitIndex = 0; unitIndex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();unitIndex++)
-					{
-						if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID == unitID)
-						{
-							tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].clearStatistics();
-							break;
-						}
-					}
-				} else 
-				{
-					for (int Index = 0; Index < tcb->electrodesPSTH[electrodeIndex].channels.size();Index++)
-					{
-						if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].channelID  == unitID)
-						{
-							tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[Index].clearStatistics();
-							break;
-						}
-					}
-
-				}
-			}
-		}
-		tcb->unlockPSTH();
-		repaint();
-	} else 
-	if (event.mods.isLeftButtonDown())
-	{
-		// full screen toggle
-		display->focusOnPlot(plotID);
-	}
-}
-
-void XYPlot::buildSmoothKernel(float _guassianStandardDeviationMS)
-{
-	guassianStandardDeviationMS = _guassianStandardDeviationMS;
-	// assume each bin correponds to one millisecond.
-	// build the gaussian kernel
-	int numKernelBins = 2*(int)(guassianStandardDeviationMS*3.5)+1; // +- 3.5 standard deviations.
-	int zeroIndex = (numKernelBins-1)/2;
-	smoothKernel.resize(numKernelBins); 
-	float sumZ = 0;
-	for (int k=0;k<numKernelBins;k++) 
-	{
-		float z = float(k-zeroIndex);
-		smoothKernel[k] = exp(- (z*z)/(2*guassianStandardDeviationMS*guassianStandardDeviationMS));
-		sumZ+=smoothKernel[k];
-	}
-	// normalize kernel
-	for (int k=0;k<numKernelBins;k++) 
-	{
-		smoothKernel[k] /= sumZ;
-	}
-}
-
-
-bool XYPlot::findIndices(int &electrodeIndex, int &entryindex, bool findUnitOrChannel)
-{
-	if (findUnitOrChannel)
-	{
-		// find unit
-		for (electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
-		{
-			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
-			{
-				for (entryindex = 0; entryindex < tcb->electrodesPSTH[electrodeIndex].unitsPSTHs.size();entryindex++)
-				{
-					if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
-					{
-						return true;
-					}
-				}
-
-			}
-		}
-	} else 
-	{
-		// find channel
-		for (electrodeIndex=0;electrodeIndex<	tcb->electrodesPSTH.size();electrodeIndex++)
-		{
-			if (tcb->electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
-			{
-				for (entryindex = 0; entryindex < tcb->electrodesPSTH[electrodeIndex].channelsPSTHs.size();entryindex++)
-				{
-					if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == unitID)
-					{
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-void XYPlot::paintPlotNameAndRect(Graphics &g)
-{
-
-	 w = getWidth();
-	 h = getHeight();
-	// draw a bounding box of the plot.
-	 x0;
-
-	if (w >= 300) {
-		font = Font("Default", 15, Font::plain);
-		x0 = 60;
-	} else if (w >= 250)
-	{
-		font = Font("Default", 10, Font::plain);
-		x0 = 50;
-	} else 
-	{
-		font = Font("Default", 8, Font::plain);
-		x0 = 30;
-	}
-
-	 y0 = 30;
-
-	 plotWidth  = getWidth()-1.5*x0;
-	 plotHeight = getHeight()-2*y0;
-
-	g.setColour(Colours::black);
-	g.fillRect(x0,y0, plotWidth,plotHeight);
-	g.setColour(Colours::white);
-	g.drawRect(x0,y0, plotWidth,plotHeight);
-
-	g.setFont(font);
-	String axesName;
-	if (plotType == SPIKE_PLOT) 
-	{
-		axesName = String("Unit ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+ 
-			String(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID);
-	} else  if (plotType == LFP_PLOT) 
-	{
-		axesName = String("LFP ")+String(tcb->electrodesPSTH[electrodeIndex].electrodeID)+":"+
-			String(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID);
-	}
-
-	g.drawText(axesName,plotWidth/2,10,plotWidth/2,20,Justification::centred,false);
-
-
-	// keep a fixed amount of pixels for axes labels
-	if (plotType == SPIKE_PLOT) 
-	{
-		g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]));
-	} else
-	{
-		g.setColour(Colours::white);
-	}
-
-	g.drawRect(0,0,w,h,2);
-
-
-	g.setColour(Colours::white);
-	// plot the x axis
-	g.drawLine(x0,h-y0,x0+plotWidth,h-y0, 1);
-	// plot the y axis
-	g.drawLine(x0,h-y0,x0,h-(y0+plotHeight),1);
-}
-
-
-void XYPlot::computeSamplePositions(float &xmin, float &xmax)
-{
-	 subsample = 5; // subsample every 5 pixels to speed things up.
-
-	 // reduce range so we don't see the effects of convolving with the kernel outside function values.
-
-	if (autoRescale && smoothPlot && (xmax-xmin > 14*guassianStandardDeviationMS/1e3)) {
-			xmin += 7*guassianStandardDeviationMS/1e3;
-			xmax -= 7*guassianStandardDeviationMS/1e3;
-	}
-
-	// finally, draw the function....
-	// first, generate the sample positions
-	int numSamplePoints = plotWidth/subsample;
-	samplePositions.clear();
-	samplePositions.resize(numSamplePoints);
-
-	for (int k=0;k<numSamplePoints;k++)
-	{
-		samplePositions[k] = (float(k)/(numSamplePoints-1)) * (xmax-xmin) + xmin;
-		// which corresponds to pixel location subsample*k
-	}
-}
-
-
-void XYPlot::sampleConditionsForLFP(float &minY, float &maxY)
-{
-
-	std::vector<float> smooth_res;
-	int numConditions = tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();
-
-	interpolatedConditions.clear();
-	interpolatedConditions.resize(numConditions);
-	interpolatedConditionsValid.resize(numConditions);
-	conditionMaxY.clear();
-	conditionMinY.clear();
-	conditionMaxY.resize(numConditions);
-	conditionMinY.resize(numConditions);
-	minY = 1e10;
-	maxY = -1e10;
-	
-	for (int cond=0;cond<numConditions;cond++)
-	{
-
-		if (tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0 &&
-			tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
-		{
-			
-			if (smoothPlot) {
-				smooth_res = smooth(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse());
-
-				interp1(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
-					smooth_res,
-					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
-			}
-			else 
-			{
-				interp1(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
-					tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse(),
-					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
-			}
-			minY = MIN(minY, conditionMinY[cond]);
-			maxY = MAX(maxY, conditionMaxY[cond]);
-		}
-	}
-}
-
-
-void XYPlot::sampleConditions(float &minY, float &maxY)
-{
-	std::vector<float> smooth_res;
-	int numConditions = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();
-
-	interpolatedConditions.clear();
-	interpolatedConditions.resize(numConditions);
-	interpolatedConditionsValid.resize(numConditions);
-	conditionMaxY.clear();
-	conditionMinY.clear();
-	conditionMaxY.resize(numConditions);
-	conditionMinY.resize(numConditions);
-	minY = 1e10;
-	maxY = -1e10;
-
-	for (int cond=0;cond<numConditions;cond++)
-	{
-
-		if (tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].numTrials > 0 &&
-			tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
-		{
-			
-			if (smoothPlot) {
-				smooth_res = smooth(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse());
-
-				interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
-					smooth_res,
-					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
-			}
-			else 
-			{
-				interp1(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].binTime, 
-					tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].getAverageTrialResponse(),
-					samplePositions,  interpolatedConditions[cond],  interpolatedConditionsValid[cond],conditionMinY[cond],conditionMaxY[cond]);
-			}
-			minY = MIN(minY, conditionMinY[cond]);
-			maxY = MAX(maxY, conditionMaxY[cond]);
-		}
-	}
-}
-
-void XYPlot::plotTicks(Graphics &g, float xmin, float xmax, float ymin, float ymax)
-{
-	// determine tick position
-	axesRange[0] = xmin;
-	axesRange[1] = ymin;
-	axesRange[2] = xmax;
-	axesRange[3] = ymax;
-	
-	rangeX = (axesRange[2]-axesRange[0]);
-	rangeY = (axesRange[3]-axesRange[1]);
-	int numXTicks = 5;
-	int numYTicks = 5;
-
-	// determine tick positions.
-	std::vector<float> tickX,tickY;
-	tickX.resize(numXTicks);
-	tickY.resize(numYTicks);
-	for (int k=0;k<numXTicks;k++)
-	{
-		tickX[k] = float(k)/(numXTicks-1) * rangeX +axesRange[0];
-	}
-	for (int k=0;k<numYTicks;k++)
-	{
-		tickY[k] = float(k)/(numYTicks-1) * rangeY +axesRange[1];
-	}
-
-	int tickHeight = 6;
-	float tickThickness = 2;
-
-
-	float ticklabelWidth = float(plotWidth)/numXTicks;
-	int tickLabelHeight = 20;
-	// plot the tick marks and corresponding text.
-	for (int k=0;k<numXTicks;k++)
-	{
-		// convert to screen coordinates.
-		float tickloc = x0+(tickX[k]- axesRange[0]) / rangeX * plotWidth;
-		g.drawLine(tickloc,h-y0,tickloc,h-(y0+tickHeight),tickThickness);
-
-		String tickLabel;
-		if (axesRange[0] > 0.2)
-			tickLabel = String(tickX[k],1);
-		else
-			tickLabel = String(tickX[k],2);
-
-		if (k > 0)
-			g.drawText(tickLabel,tickloc-ticklabelWidth/2,h-(y0),ticklabelWidth,tickLabelHeight,Justification::centred,false);
-		else
-			g.drawText(tickLabel,tickloc,h-(y0),ticklabelWidth,tickLabelHeight,Justification::left,false);
-
-	}
-	for (int k=1;k<numYTicks;k++)
-	{
-		// convert to screen coordinates.
-		float tickloc = y0+(tickY[k]- axesRange[1]) / rangeY * plotHeight;
-		g.drawLine(x0,h-tickloc,x0+tickHeight,h-tickloc, tickThickness);
-
-
-		String tickLabel;
-		if (axesRange[1] > 0.2)
-			tickLabel = String(tickY[k],1);
-		else
-			tickLabel = String(tickY[k],2);
-
-		g.drawText(tickLabel,x0-ticklabelWidth-3,h-tickloc-tickLabelHeight/2,ticklabelWidth,tickLabelHeight,Justification::right,false);
-
-	}
-}
-
-int XYPlot::getPlotID()
-{
-	return plotID;
-}
-
-
-void XYPlot::paintSpikes(Graphics &g)
-{
-	// 1. Find the corresponding data.
-	// 2. smooth if needed.
-	// 3. find the drawing range.
-	// 4. interpolate
-	// 5. draw.
-	bool newdata = false;
-	tcb->lockPSTH();
-	if (!findIndices(electrodeIndex, entryindex,true))
-	{
-		tcb->unlockPSTH();
-		return;
-	}
-	paintPlotNameAndRect(g);
-
-	if (autoRescale)
-	{
-		xmin=0;
-		xmax=0;
-		ymax=-1e10;
-		ymin = 1e10;
-		tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
-	}
-
-	// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
-	if (fabs(xmax-xmin)<1e-4   || fabs(ymax-ymin) < 1e-4)
-	{
-		tcb->unlockPSTH();
-		return;
-	}
-
-	computeSamplePositions(xmin, xmax);
-
-	float minConditionValue, maxConditionValue;
-	sampleConditions(minConditionValue,maxConditionValue);
-	if (autoRescale)
-	{
-		ymin = 0 ;
-		ymax = maxConditionValue ;
-	}
-
-	if (fabs(ymax-ymin) < 1e-4)
-	{
-		tcb->unlockPSTH();
-		return;
-	}
-
-	plotTicks(g,xmin, xmax, ymin, ymax);
-
-	// plot zero line
-	float fx0 = (0-axesRange[0])/rangeX * plotWidth;
-	g.setColour(juce::Colours::grey);
-	g.drawLine(fx0,y0,fx0,y0+plotHeight,1);
-		
-	//g.drawLine(
-//	newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
-
-	int numSamplePoints = plotWidth/subsample;
-	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs.size();cond++)
-	{
-		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].visible)
-			continue;
-
-			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
-				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
-				tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]));
-
-			for (int k=0;k<numSamplePoints-1;k++) 
-			{
-				// remap f_xi to pixels!
-				float fx_pix = MIN(plotHeight, MAX(0,(interpolatedConditions[cond][k]-axesRange[1])/rangeY * plotHeight));
-				float fxp1_pix = MIN(plotHeight,MAX(0,(interpolatedConditions[cond][k+1]-axesRange[1])/rangeY * plotHeight));
-				if (interpolatedConditionsValid[cond][k] && interpolatedConditionsValid[cond][k+1])
-					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
-			}
-
-	}
-	tcb->unlockPSTH();
-
-}
-
-
-void XYPlot::paintLFP(Graphics &g)
-{
-	// 1. Find the corresponding data.
-	// 2. smooth if needed.
-	// 3. find the drawing range.
-	// 4. interpolate
-	// 5. draw.
-	bool newdata = false;
-	tcb->lockPSTH();
-	if (!findIndices(electrodeIndex, entryindex,false))
-	{
-		tcb->unlockPSTH();
-		return;
-	}
-	paintPlotNameAndRect(g);
-
-	if (autoRescale)
-	{
-		xmin=0;
-		xmax=0;
-		ymax=-1e10;
-		ymin = 1e10;
-		
-		tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].getRange(xmin, xmax, ymin,ymax);
-		// use only xmin and xmax to reduce the sampling interval. xmax will be determined by the longest observed trial.
-	}
-	if (fabs(xmax-xmin)<1e-4   || fabs(ymax-ymin) < 1e-4)
-		{
-			tcb->unlockPSTH();
-			return;
-		}
-
-	computeSamplePositions(xmin, xmax);
-
-	float minConditionValue, maxConditionValue;
-	sampleConditionsForLFP(minConditionValue,maxConditionValue);
-	if (autoRescale)
-	{
-		ymin =minConditionValue;
-		ymax = maxConditionValue ;
-	}
-
-	if (fabs(ymax-ymin) < 1e-4)
-	{
-		tcb->unlockPSTH();
-		return;
-	}
-
-
-	plotTicks(g,xmin, xmax, ymin, ymax);
-
-//	newdata = tcb->electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].isNewDataAvailable();
-	float fx0 = (0-axesRange[0])/rangeX * plotWidth;
-
-	g.setColour(juce::Colours::grey);
-	g.drawLine(fx0,y0,fx0,y0+plotHeight,1);
-
-	int numSamplePoints = plotWidth/subsample;
-	for (int cond=0;cond<tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs.size();cond++)
-	{
-		if (interpolatedConditions[cond].size() == 0 || !tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].visible)
-			continue;
-
-			g.setColour(juce::Colour(tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[0],
-				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[1],
-				tcb->electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].conditionPSTHs[cond].colorRGB[2]));
-
-			for (int k=0;k<numSamplePoints-1;k++) 
-			{
-				// remap f_xi to pixels!
-				float fx_pix = MIN(plotHeight, MAX(0,(interpolatedConditions[cond][k]-axesRange[1])/rangeY * plotHeight));
-				float fxp1_pix = MIN(plotHeight,MAX(0,(interpolatedConditions[cond][k+1]-axesRange[1])/rangeY * plotHeight));
-				if (interpolatedConditionsValid[cond][k] && interpolatedConditionsValid[cond][k+1])
-					g.drawLine(x0+subsample*k, h-fx_pix-y0, x0+subsample*(k+1), h-fxp1_pix-y0);
-			}
-
-	}
-	tcb->unlockPSTH();
-
-
-	//repaint();
-}
-
-void XYPlot::paintSpikeRaster(Graphics &g)
-{
-	
-	//rasterImage = Image(Image::RGB, imageDim, imageDim, true);
-	//rasterImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),Colours::black);
-    // Graphics gi(rasterImage);
-    //  g.drawImage(rasterImage, 0, 0, getWidth(), getHeight(), 0, 0, rangeX, rangeY);
-
-
-}
-
-void XYPlot::paintLFPraster(Graphics &g)
-{
-}
-
-
-void XYPlot::paint(Graphics &g)
-{
-	if (plotType == SPIKE_PLOT)
-	{
-		if (rasterMode)
-			paintSpikeRaster(g);
-		else
-			paintSpikes(g);
-	}
-	else if (plotType == LFP_PLOT)
-	{
-		if (rasterMode)
-			paintLFPraster(g);
-		else
-			paintLFP(g);
-	}
-
-	if (zooming)
-	{
-		g.setColour(juce::Colours::white);
-		int width = abs(mouseDownX-mouseDragX);
-		int height= abs(mouseDownY-mouseDragY);
-		if (width > 0 & height > 0)
-			g.drawRect(MIN(mouseDownX,mouseDragX),MIN(mouseDownY,mouseDragY),width,height,2);
-	}
-
-}
-*/
-
-
 /***********************************/
 ConditionList::ConditionList(PeriStimulusTimeHistogramNode* n, Viewport *p, PeriStimulusTimeHistogramCanvas*c) :
 	processor(n), viewport(p), canvas(c)
@@ -1739,7 +949,8 @@ void ConditionList::updateConditionButtons()
 {
 	if (processor->trialCircularBuffer != nullptr)
 	{
-		processor->trialCircularBuffer->lockConditions();
+		const ScopedLock myScopedLock (processor->trialCircularBuffer->psthMutex);
+		//processor->trialCircularBuffer->lockConditions();
 		conditionButtons.clear();
 		for (int k=0;k<processor->trialCircularBuffer->getNumConditions();k++)
 		{
@@ -1758,7 +969,7 @@ void ConditionList::updateConditionButtons()
 			conditionButtons.add(conditionButton);
 		}
 
-		processor->trialCircularBuffer->unlockConditions();
+		//processor->trialCircularBuffer->unlockConditions();
 	}
 }
 
@@ -1788,26 +999,28 @@ void ConditionList::buttonClicked(Button *btn)
 	{
 		if (processor->trialCircularBuffer != nullptr)
 		{
-			processor->trialCircularBuffer->lockConditions();
+			//processor->trialCircularBuffer->lockConditions();
+			const ScopedLock myScopedLock (processor->trialCircularBuffer->psthMutex);
 			for (int k=0;k<processor->trialCircularBuffer->getNumConditions();k++)
 			{
 				processor->trialCircularBuffer->modifyConditionVisibility(k,false);
 				conditionButtons[k]->setEnabledState(false);
 			}
-			processor->trialCircularBuffer->unlockConditions();
+			//processor->trialCircularBuffer->unlockConditions();
 		}
 
 	} else if (btn == allButton)
 	{
 		if (processor->trialCircularBuffer != nullptr)
 		{
-			processor->trialCircularBuffer->lockConditions();
+			const ScopedLock myScopedLock (processor->trialCircularBuffer->psthMutex);
+			//processor->trialCircularBuffer->lockConditions();
 			for (int k=0;k<processor->trialCircularBuffer->getNumConditions();k++)
 			{
 				processor->trialCircularBuffer->modifyConditionVisibility(k,true);
 				conditionButtons[k]->setEnabledState(true);
 			}
-			processor->trialCircularBuffer->unlockConditions();
+			//processor->trialCircularBuffer->unlockConditions();
 		}
 
 	} else 
@@ -1890,6 +1103,7 @@ void GenericPlot::resized()
 
 void GenericPlot::paintSpikeRaster(Graphics &g)
 {
+	//tictoc.Tic(16);
 	int numTrialTypes = tcb->getNumTrialTypesInUnit(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
@@ -1901,10 +1115,12 @@ void GenericPlot::paintSpikeRaster(Graphics &g)
 		juce::Image rasterImage = tcb->getTrialsAverageUnitResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
 		mlp->drawImage(rasterImage,maxValue);
 	}
+	//tictoc.Toc(17);
 }
 
 void GenericPlot::paintSpikes(Graphics &g)
 {
+	//tictoc.Tic(15);
 	std::vector<XYline> lines = tcb->getUnitConditionCurves(electrodeID, subID);
 	int numTrials = tcb->getNumTrialsInUnit(electrodeID, subID);
 	mlp->setAuxiliaryString( String(numTrials) + " trials");
@@ -1918,10 +1134,12 @@ void GenericPlot::paintSpikes(Graphics &g)
 		}
 		mlp->plotxy(lines[k]);
 	}
+	//tictoc.Toc(15);
 }
 
 void GenericPlot::paintLFPraster(Graphics &g)
 {
+	//tictoc.Tic(14);
 	int numTrialTypes = tcb->getNumTrialTypesInChannel(electrodeID, subID);
 	if (numTrialTypes > 0)
 	{
@@ -1933,10 +1151,12 @@ void GenericPlot::paintLFPraster(Graphics &g)
 		juce::Image rasterImage = tcb->getTrialsAverageChannelResponseAsJuceImage(electrodeID, subID,guassianStandardDeviationMS,xmin,xmax,ymin, ymax,  maxValue);
 		mlp->drawImage(rasterImage,maxValue);
 	}
+	//tictoc.Toc(14);
 }
 
 void GenericPlot::paintLFP(Graphics &g)
 {
+	//tictoc.Tic(13);
 	std::vector<XYline> lines = tcb->getElectrodeConditionCurves(electrodeID, subID);
 	mlp->clearplot();
 
@@ -1951,11 +1171,13 @@ void GenericPlot::paintLFP(Graphics &g)
 		}
 		mlp->plotxy(lines[k]);
 	}
+	//tictoc.Toc(13);
 }
 
 void GenericPlot::paint(Graphics &g)
 {
-
+	//printf("Entering GenericPlot::paint\n");
+	//tictoc.Tic(12);
 	if (mlp->eventsAvail())
 	{
 		String lastEvent = mlp->getLastEvent();
@@ -1976,7 +1198,8 @@ void GenericPlot::paint(Graphics &g)
 		else
 			paintLFP(g);
 	}
-	
+	//printf("Exitting GenericPlot::paint\n");
+	//tictoc.Toc(12);
 }
 
 
@@ -2020,8 +1243,8 @@ void GenericPlot::resetAxes()
 		double trial_xmin, trial_xmax;
 		tcb->getUnitConditionRange(electrodeID, subID, trial_xmin, trial_xmax);
 
-		float xmin,xmax;
-		double ymin,ymax;
+		float xmin=0,xmax=0;
+		double ymin=0,ymax=0;
 		float highestY=0;
 		for (int k=0;k<lines.size();k++)
 		{

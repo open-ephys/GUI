@@ -371,6 +371,7 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 {
 
 	//std::cout << "NETWORK NODE" << std::endl;
+	//printf("Entering NetworkEvents::process\n");
 
 	checkForEvents(events);
 	//simulateDesignAndTrials(events);
@@ -385,7 +386,7 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 	 }
 	 lock.exit();
 	 nSamples = -10; // make sure this is not processed;
-	
+	//printf("Exitting NetworkEvents::process\n");	
 }
 
 

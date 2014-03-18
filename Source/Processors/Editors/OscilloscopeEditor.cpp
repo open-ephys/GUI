@@ -641,7 +641,6 @@ void OscilloscopeCanvas::paint(Graphics& g)
 
 	oscilloscopePlot->clearplot();
 	std::vector<int> channels = processor->trialCircularBuffer->getElectrodeChannels(0);
-	int n = channels.size();
 	int numTTLchannels = 8;
 	std::vector<float> gains = channelsList->getChannelsGain();
 	std::vector<bool> vis = channelsList->getChannelsVisibility();
@@ -653,9 +652,12 @@ void OscilloscopeCanvas::paint(Graphics& g)
 		oscilloscopePlot->setTriggered();
 	}
 
-	processor->trialCircularBuffer->lockPSTH();
 
-	int getLastTrialID();
+	const ScopedLock myScopedLock (processor->trialCircularBuffer->psthMutex);
+
+	//processor->trialCircularBuffer->lockPSTH();
+	int n = channels.size();
+
 	for (int k=0;k<n;k++)
 	{
 		int nTrials = processor->trialCircularBuffer->getNumTrialsInCondition(0,k,0);
@@ -677,7 +679,7 @@ void OscilloscopeCanvas::paint(Graphics& g)
 			
 		}
 	}
-	processor->trialCircularBuffer->unlockPSTH();
+	//processor->trialCircularBuffer->unlockPSTH();
 }
 
 void OscilloscopeCanvas::refresh()

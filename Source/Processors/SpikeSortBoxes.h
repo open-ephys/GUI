@@ -239,6 +239,7 @@ public:
 	int addBoxUnit(int channel, Box B);
 
     void getPCArange(float &p1min,float &p2min, float &p1max,  float &p2max);
+	void setPCArange(float p1min,float p2min, float p1max,  float p2max);
 	void resetJobStatus();
 	bool isPCAfinished();
 
@@ -261,8 +262,8 @@ public:
 	void saveCustomParametersToXml(XmlElement *electrodeNode);
 	void loadCustomParametersFromXml(XmlElement *electrodeNode);
 private:
-	void  StartCriticalSection();
-	void  EndCriticalSection();
+	//void  StartCriticalSection();
+	//void  EndCriticalSection();
 
 	int numChannels, waveformLength;
 	int selectedUnit, selectedBox;

@@ -616,7 +616,8 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 
   	void SpikeSortBoxes::resizeWaveform(int numSamples)
 	{
-		StartCriticalSection();
+		const ScopedLock myScopedLock (mut);
+		//StartCriticalSection();
 		waveformLength = numSamples;
 		delete pc1;
 		delete pc2;
@@ -639,7 +640,7 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 		{
 			boxUnits[k].resizeWaveform(waveformLength);
 		}
-  	    EndCriticalSection();
+  	    //EndCriticalSection();
 	}
 
 
@@ -895,6 +896,15 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 	  p2max = pc2max;
   }
 
+  void SpikeSortBoxes::setPCArange(float p1min,float p2min, float p1max,  float p2max)
+  {
+	  pc1min=p1min;
+	  pc2min=p2min;
+	  pc1max=p1max;
+	  pc2max=p2max;
+  }
+
+
   void SpikeSortBoxes::resetJobStatus()
   {
 	  bPCAjobFinished = false;
@@ -913,24 +923,26 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 
   void SpikeSortBoxes::addPCAunit(PCAUnit unit)
   {
-	  StartCriticalSection();
+	  const ScopedLock myScopedLock (mut);
+	  //StartCriticalSection();
 	  pcaUnits.push_back(unit);
-	  EndCriticalSection();
+	  //EndCriticalSection();
   }
 
   // Adds a new unit with a single box at some default location.
   // returns the unit id
   int SpikeSortBoxes::addBoxUnit(int channel)
   {
-  	  StartCriticalSection();
+	  const ScopedLock myScopedLock (mut);
+  	  //StartCriticalSection();
 	  int unusedID = generateUnitID();
 	  BoxUnit unit(unusedID);
 	  boxUnits.push_back(unit);
 	  setSelectedUnitAndbox(unusedID, 0);
-	  EndCriticalSection();
+	  //EndCriticalSection();
 	  return unusedID;
   }
-
+/*
 void  SpikeSortBoxes::StartCriticalSection()
 {
 	mut.enter();
@@ -940,15 +952,16 @@ void  SpikeSortBoxes::EndCriticalSection()
 {
 	mut.exit();
 }
-
+*/
   int SpikeSortBoxes::addBoxUnit(int channel, Box B)
   {
-	  StartCriticalSection();
+	  const ScopedLock myScopedLock (mut);
+	  //StartCriticalSection();
 	  int unusedID = generateUnitID();
 	  BoxUnit unit(B, unusedID);
 	  boxUnits.push_back(unit);
 	  setSelectedUnitAndbox(unusedID, 0);
-	  EndCriticalSection();
+	  //EndCriticalSection();
 	  return unusedID;
   }
 
@@ -1015,13 +1028,14 @@ void  SpikeSortBoxes::EndCriticalSection()
 
 bool SpikeSortBoxes::removeUnit(int unitID)
 {
-	 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	 //StartCriticalSection();
 	for (int k=0;k<boxUnits.size();k++)
 	  {
 		  if ( boxUnits[k].getUnitID() == unitID)
 		  {
 			  boxUnits.erase(boxUnits.begin()+k);
-			  EndCriticalSection();
+			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1031,19 +1045,20 @@ bool SpikeSortBoxes::removeUnit(int unitID)
 		if ( pcaUnits[k].getUnitID() == unitID)
 		{
 			pcaUnits.erase(pcaUnits.begin()+k);
-			EndCriticalSection();
+			//EndCriticalSection();
 			return true;
 		}
 	}
 
-	 EndCriticalSection();
+	// EndCriticalSection();
 	return false;
 
 }
 
 bool SpikeSortBoxes::addBoxToUnit(int channel, int unitID)
 {
-	 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	 //StartCriticalSection();
 	 		for (int k=0;k<boxUnits.size();k++)
 	  {
 		  if ( boxUnits[k].getUnitID() == unitID)
@@ -1054,60 +1069,65 @@ bool SpikeSortBoxes::addBoxToUnit(int channel, int unitID)
 			  B.channel = channel;
 			  boxUnits[k].addBox(B);
 			  setSelectedUnitAndbox(unitID, boxUnits[k].lstBoxes.size()-1);
-			   EndCriticalSection();
+			  // EndCriticalSection();
 			  return true;
 		  }
 	  }
- EndCriticalSection();
+// EndCriticalSection();
 	  return false;
 }
 
 		
 bool SpikeSortBoxes::addBoxToUnit(int channel, int unitID, Box B)
 {
-	 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	 //StartCriticalSection();
       for (int k=0;k<boxUnits.size();k++)
 	  {
 		  if ( boxUnits[k].getUnitID() == unitID)
 		  {
 			  boxUnits[k].addBox(B);
-			   EndCriticalSection();
+			  // EndCriticalSection();
 			  return true;
 		  }
 	  }
- EndCriticalSection();
+ //EndCriticalSection();
 	  return false;
 }
 
 std::vector<BoxUnit> SpikeSortBoxes::getBoxUnits()
 {
-	StartCriticalSection();
+	//StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
 	std::vector<BoxUnit> unitsCopy = boxUnits;
-	EndCriticalSection();
+	//EndCriticalSection();
 	return unitsCopy;
 }
 
 
 std::vector<PCAUnit> SpikeSortBoxes::getPCAUnits()
 {
-	StartCriticalSection();
+	//StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
 	std::vector<PCAUnit> unitsCopy = pcaUnits;
-	EndCriticalSection();
+	//EndCriticalSection();
 	return unitsCopy;
 }
 
 void SpikeSortBoxes::updatePCAUnits(std::vector<PCAUnit> _units)
 {
-	StartCriticalSection();
+	//StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
 	pcaUnits = _units;
-	EndCriticalSection();
+	//EndCriticalSection();
 }
 
 void SpikeSortBoxes::updateBoxUnits(std::vector<BoxUnit> _units)
 {
-	StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	//StartCriticalSection();
 	boxUnits = _units;
-	EndCriticalSection();
+	//EndCriticalSection();
 }
 
 
@@ -1116,7 +1136,8 @@ void SpikeSortBoxes::updateBoxUnits(std::vector<BoxUnit> _units)
 // tests whether a candidate spike belongs to one of the defined units
 bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 {
-  StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+  //StartCriticalSection();
   if (PCAfirst) {
 
 	  for (int k=0;k<pcaUnits.size();k++)
@@ -1128,7 +1149,7 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = pcaUnits[k].ColorRGB[1];
 			  so->color[2] = pcaUnits[k].ColorRGB[2];
 			  //pcaUnits[k].updateWaveform(so);
-			  EndCriticalSection();
+			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1141,7 +1162,7 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = boxUnits[k].ColorRGB[1];
 			  so->color[2] = boxUnits[k].ColorRGB[2];
 			  boxUnits[k].updateWaveform(so);
-			  EndCriticalSection();
+			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1156,7 +1177,7 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = boxUnits[k].ColorRGB[1];
 			  so->color[2] = boxUnits[k].ColorRGB[2];
 			  boxUnits[k].updateWaveform(so);
-			  EndCriticalSection();
+			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1169,14 +1190,14 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = pcaUnits[k].ColorRGB[1];
 			  so->color[2] = pcaUnits[k].ColorRGB[2];
 			  //pcaUnits[k].updateWaveform(so);
-			  EndCriticalSection();
+			 // EndCriticalSection();
 			  return true;
 		  }
 	  }
 
   }
 
-   EndCriticalSection();
+  // EndCriticalSection();
 	  return false;
 	
 }
@@ -1234,56 +1255,59 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 
 bool  SpikeSortBoxes::removeBoxFromUnit(int unitID, int boxIndex)
 {
-	 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	 //StartCriticalSection();
 	for (int k=0;k<boxUnits.size();k++)
 	{
 		  if ( boxUnits[k].getUnitID() == unitID)
 		  {
 			  bool s= boxUnits[k].deleteBox(boxIndex);
 			  setSelectedUnitAndbox(-1,-1);
-			  EndCriticalSection();  
+			  //EndCriticalSection();  
 			  return s;
 		  }
 
 	}
 	
- EndCriticalSection();            
+ //EndCriticalSection();            
  return false;
 }
 
 std::vector<Box> SpikeSortBoxes::getUnitBoxes(int unitID)
 {
 	std::vector<Box> boxes;
-	 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+	 //StartCriticalSection();
 	for (int k=0;k< boxUnits.size();k++)
 	{
 		  if ( boxUnits[k].getUnitID() == unitID)
 		  {
 			  
 			  boxes = boxUnits[k].getBoxes();
-			  EndCriticalSection();
+			 // EndCriticalSection();
 			  return boxes;
 		  }
 	}
-	EndCriticalSection();
+	//EndCriticalSection();
 	return boxes;
 }
 
 
 int SpikeSortBoxes::getNumBoxes(int unitID)
 {
-		 StartCriticalSection();
+	const ScopedLock myScopedLock (mut);
+		// StartCriticalSection();
 	for (int k=0;k< boxUnits.size();k++)
 	{
 		  if ( boxUnits[k].getUnitID() == unitID)
 		  {
 			  
 			  int n =boxUnits[k].getNumBoxes();
-			  EndCriticalSection();
+			 // EndCriticalSection();
 			  return n;
 		  }
 	}
-	EndCriticalSection();
+	//EndCriticalSection();
 	return -1;
 }
         

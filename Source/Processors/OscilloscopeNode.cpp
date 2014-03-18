@@ -203,6 +203,8 @@ void OscilloscopeNode::allocateTrialCircularBuffer()
 
 void OscilloscopeNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)
 {
+	//printf("Entering OscilloscopeNode::process\n");
+
     checkForEvents(events); 
 
 	if (trialCircularBuffer  == nullptr && getSampleRate() > 0 && getNumInputs() > 0)  
@@ -244,6 +246,7 @@ void OscilloscopeNode::process(AudioSampleBuffer& buffer, MidiBuffer& events, in
 			}
 		}
 	}
+	//printf("Exitting OscilloscopeNode::process\n");
 }
 
 void OscilloscopeNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)

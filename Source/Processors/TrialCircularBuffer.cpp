@@ -21,11 +21,15 @@
 
 */
 
+#include "../../JuceLibraryCode/JuceHeader.h"
 #include <stdio.h>
 #include "TrialCircularBuffer.h"
 #include "SpikeDetector.h"
 #include "Channel.h"
 #include <string>
+#include "tictoc.h"
+TicToc tictoc;
+
 
 TrialCircularBufferParams::TrialCircularBufferParams()
 {
@@ -207,10 +211,16 @@ void PSTH::clear()
 
 void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 {
-	
+
+	tictoc.Tic(16);
 	Time t;
 	float ticksPerSec =t.getHighResolutionTicksPerSecond();
+
+	tictoc.Tic(30);
 	std::vector<int64> alignedSpikes = spikeBuffer->getAlignedSpikes(trial, mod_pre_sec, mod_post_sec);
+	tictoc.Toc(31);
+
+	tictoc.Tic(32);
 	std::vector<float> instantaneousSpikesRate;
 	instantaneousSpikesRate.resize(numBins);
 	for (int k = 0; k < numBins; k++)
@@ -251,13 +261,15 @@ void PSTH::updatePSTH(SmartSpikeCircularBuffer *spikeBuffer, Trial *trial)
 		ymax = MAX(ymax,avgResponse[k]);
 		ymin = MIN(ymin,avgResponse[k]);
 	}
+	tictoc.Toc(32);
+
 	// keep existing trial
 	if (prevTrials.size()+1 > params.maxTrialsInMemory)
 	{
 		prevTrials.pop_back();
 	}
 	prevTrials.push_front(instantaneousSpikesRate);
-	
+	tictoc.Toc(16);
 
 }
 
@@ -269,7 +281,7 @@ void PSTH::getRange(float &xMin, float &xMax, float &yMin, float &yMax)
 	yMin = ymin;
 }
 
-void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<float> valid)
+void PSTH::updatePSTH(std::vector<float> alignedLFP,std::vector<bool> valid)
 {
 	
 	numTrials++;
@@ -464,7 +476,7 @@ ChannelPSTHs::ChannelPSTHs(int ID, TrialCircularBufferParams params_) : channelI
 	numTrials = 0;
 }
 
-void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<float> valid, Trial *trial)
+void ChannelPSTHs::updateConditionsWithLFP(std::vector<int> conditionsNeedUpdating, std::vector<float> alignedLFP, std::vector<bool> valid, Trial *trial)
 {
 	numTrials++;
 	if (conditionsNeedUpdating.size() == 0)
@@ -635,6 +647,8 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 	if (conditionsNeedUpdating.size() == 0)
 		return ;
 
+	tictoc.Tic(14);
+
 	for (int k=0;k<conditionPSTHs.size();k++) {
 		for (int j=0;j<conditionsNeedUpdating.size();j++) 
 		{
@@ -646,9 +660,10 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 	}
 
+	
 	if (params.buildTrialsPSTH)
 	{
-
+		tictoc.Tic(15);
 		// update individual trial PSTH
 		int modifiedTrialType;
 		if (trial->type >= TTL_TRIAL_OFFSET)
@@ -670,8 +685,9 @@ void UnitPSTHs::updateConditionsWithSpikes(std::vector<int> conditionsNeedUpdati
 		}
 		// now update
 		trialPSTHs[modifiedTrialType].updatePSTH(&spikeBuffer, trial);
+		tictoc.Toc(15);
 	}
-
+	tictoc.Toc(14);
 }
 
 /********************/
@@ -696,28 +712,74 @@ Trial::Trial(const Trial &t)
 	alignTS_hardware = t.alignTS_hardware;
 }
 /***************************/
+ElectrodePSTH::ElectrodePSTH()
+{
+	threadpool = nullptr;
+}
+
 ElectrodePSTH::ElectrodePSTH(int ID, String name) : electrodeID(ID), electrodeName(name)
 {
-	
+	/*
+	// create a thread pool
+	int numCpus = SystemStats::getNumCpus();
+	// create a thead pool to analyze incoming trials
+	threadpool = new ThreadPool(numCpus);
+	*/
 }
+
+ElectrodePSTH::~ElectrodePSTH()
+{
+	/*
+	delete threadpool;
+	threadpool = nullptr;
+	*/
+}
+
+ElectrodePSTHlfpJob::ElectrodePSTHlfpJob(ElectrodePSTH *psth_, int ch_, std::vector<int> *conditionsNeedUpdate_, Trial *trial_, std::vector<float> *alignedLFP_, std::vector<bool> *valid_) : ThreadPoolJob("LFPjob"),
+	psth(psth_),ch(ch_),conditionsNeedUpdate(conditionsNeedUpdate_),trial(trial_),alignedLFP(alignedLFP_),valid(valid_)
+{
+}
+
+juce::ThreadPoolJob::JobStatus ElectrodePSTHlfpJob::runJob()
+{
+	psth->UpdateChannelConditionWithLFP(ch,conditionsNeedUpdate,trial,alignedLFP,valid);
+	return jobHasFinished;
+}
+
+void ElectrodePSTH::UpdateChannelConditionWithLFP(int ch, std::vector<int> *conditionsNeedUpdate, Trial *trial, std::vector<float>* alignedLFP,std::vector<bool> *valid)
+{
+	channelsPSTHs[ch].updateConditionsWithLFP(*conditionsNeedUpdate, *alignedLFP, *valid, trial);
+}
+
 
 void ElectrodePSTH::updateChannelsConditionsWithLFP(std::vector<int> conditionsNeedUpdate, Trial *trial, SmartContinuousCircularBuffer *lfpBuffer)
 {
 	// compute trial aligned lfp for all channels 
 	
-	std::vector<float> valid;
+	std::vector<bool> valid;
 	std::vector<std::vector<float> > alignedLFP;
+
+	tictoc.Tic(6);
 	// resample all electrode channels 
+
+	tictoc.Tic(18);
 	bool success = lfpBuffer->getAlignedData(channels,trial,&channelsPSTHs[0].conditionPSTHs[0].binTime,
 		channelsPSTHs[0].params, alignedLFP,valid);
+
+	tictoc.Toc(18);
 	// now we can average data
+	tictoc.Tic(7);
 	if (success)
 	{
 		for (int ch=0;ch<channelsPSTHs.size();ch++)
-		{
-			channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid, trial);
-		}
+			{
+				channelsPSTHs[ch].updateConditionsWithLFP(conditionsNeedUpdate, alignedLFP[ch], valid, trial);
+			}
+	//			ElectrodePSTHlfpJob *job = new ElectrodePSTHlfpJob(this,ch,&conditionsNeedUpdate,trial, &(alignedLFP[ch]), &valid);
 	}
+	tictoc.Toc(7);
+
+	tictoc.Toc(6);
 
 }
 
@@ -754,7 +816,7 @@ SmartContinuousCircularBuffer::SmartContinuousCircularBuffer(int NumCh, float Sa
 bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   TrialCircularBufferParams params,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid)
+									std::vector<bool> &valid)
 {
 	if (!params.approximate) 
 	{
@@ -945,7 +1007,7 @@ bool SmartContinuousCircularBuffer::getAlignedData(std::vector<int> channels, Tr
 bool SmartContinuousCircularBuffer::getAlignedDataInterp(std::vector<int> channels, Trial *trial, std::vector<float> *timeBins,
 												   float preSec, float postSec,
 									std::vector<std::vector<float> > &output,
-									std::vector<float> &valid)
+									std::vector<bool> &valid)
 {
 	// to update a condition's continuous data psth, we will first find 
 	// data samples in the vicinity of the trial, and then interpolate at the
@@ -1296,24 +1358,28 @@ TrialCircularBuffer::~TrialCircularBuffer()
 	delete ttlBuffer;
 	ttlBuffer = nullptr;
 	electrodesPSTH.clear();
-
+	delete threadpool;
+	threadpool = nullptr;
 }
 TrialCircularBuffer::TrialCircularBuffer()
 {
 	lfpBuffer = ttlBuffer = nullptr;
+	threadpool = nullptr;
 	hardwareTriggerAlignmentChannel = -1;
 	lastSimulatedTrialTS = 0;
 	lastTrialID = 0;
 	uniqueIntervalID = 0;
+	useThreads = true;
 }
 
 void TrialCircularBuffer::getLastTrial(int electrodeIndex, int channelIndex, int conditionIndex, float &x0, float &dx, std::vector<float> &y)
 {
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+	//lockPSTH();
 	x0 = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].binTime[0];
 	dx = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getDx();
 	y = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].getLastTrial();
-	unlockPSTH();
+	//unlockPSTH();
 }
 
 Condition TrialCircularBuffer::getCondition(int conditionIndex)
@@ -1323,9 +1389,10 @@ Condition TrialCircularBuffer::getCondition(int conditionIndex)
 
 int TrialCircularBuffer::getNumTrialsInCondition(int electrodeIndex, int channelIndex, int conditionIndex)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	int N = electrodesPSTH[electrodeIndex].channelsPSTHs[channelIndex].conditionPSTHs[conditionIndex].numTrials;
-	unlockPSTH();
+	//unlockPSTH();
 	return N;
 }
 
@@ -1336,17 +1403,19 @@ int TrialCircularBuffer::getNumConditions()
 
 int TrialCircularBuffer::getNumUnitsInElectrode(int electrodeIndex)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	int N = electrodesPSTH[electrodeIndex].unitsPSTHs.size();
-	unlockPSTH();
+	//unlockPSTH();
 	return N;
 }
 
 int TrialCircularBuffer::getUnitID(int electrodeIndex, int unitIndex)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	int N= electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].unitID;
-	unlockPSTH();
+	//unlockPSTH();
 	return N;
 }
 
@@ -1385,7 +1454,7 @@ TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : pa
 {
 	Time t;
 	numTicksPerSecond = t.getHighResolutionTicksPerSecond();
-	
+	useThreads = true;
 	conditionCounter = 0;
 	firstTime = true;
 	trialCounter = 0;
@@ -1405,14 +1474,16 @@ TrialCircularBuffer::TrialCircularBuffer(TrialCircularBufferParams params_) : pa
 		ttlChannelStatus[k] = false;
 		lastTTLts[k] = 0;
 	}
-
+	int numCpus = SystemStats::getNumCpus();
+	// create a thead pool to analyze incoming trials
+	threadpool = new ThreadPool(numCpus);
 	clearDesign();
 }
 
 
 
 
-
+/*
 void TrialCircularBuffer::lockPSTH()
 {
 	psthMutex.enter();
@@ -1433,6 +1504,7 @@ void TrialCircularBuffer::unlockConditions()
 {
 	conditionMutex.exit();
 }
+*/
 
 void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 {
@@ -1447,12 +1519,14 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 
 		   std::vector<String> input = simulatedConditionString.splitString(' ');
  		  Condition newcondition(input,numExistingConditions+1+channel);
-		  lockConditions();
+		  //lockConditions();
+		  //const ScopedLock myScopedLock (conditionMutex);
+		  const ScopedLock myScopedLock (psthMutex);
 		  newcondition.conditionID = ++conditionCounter;
 		  conditions.push_back(newcondition);
-		  unlockConditions();
+		  //unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes
-		  lockPSTH();
+		  //lockPSTH();
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
@@ -1465,7 +1539,7 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID,params,visibility[channel]));
 			  }
 		  }
-		  unlockPSTH();
+		  //unlockPSTH();
 		  
 	  }
 
@@ -1473,8 +1547,8 @@ void TrialCircularBuffer::addDefaultTTLConditions(Array<bool> visibility)
 
 void TrialCircularBuffer::clearAll()
 {
-
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+	//lockPSTH();
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
 		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
@@ -1489,13 +1563,15 @@ void TrialCircularBuffer::clearAll()
 			electrodesPSTH[i].unitsPSTHs[u].clearStatistics();
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 
 }
 
 void TrialCircularBuffer::clearDesign()
 {
-	lockConditions();
+	//lockConditions();
+	//const ScopedLock myScopedLock (conditionMutex);
+	const ScopedLock myScopedLock (psthMutex);
 	// keep ttl visibility status
 	Array<bool> ttlVisible;
 	if (conditions.size() > 0)
@@ -1510,9 +1586,9 @@ void TrialCircularBuffer::clearDesign()
 
 	conditions.clear();
 	conditionCounter = 0;
-	unlockConditions();
+	//unlockConditions();
 	// clear conditions from all units
-	lockPSTH();
+	//lockPSTH();
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
 		for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
@@ -1526,14 +1602,17 @@ void TrialCircularBuffer::clearDesign()
 		}
 	}
 	dropOutcomes.clear();
-	unlockPSTH();
+	//unlockPSTH();
 	if (params.autoAddTTLconditions)
 		addDefaultTTLConditions(ttlVisible);
 }
 
 void TrialCircularBuffer::modifyConditionVisibilityusingConditionID(int condID, bool newstate)
 {
-	lockConditions();
+	//lockConditions();
+	//const ScopedLock myScopedLock (conditionMutex);
+	const ScopedLock myScopedLock (psthMutex);
+
 	for (int k=0;k<conditions.size();k++) {
 		if (conditions[k].conditionID == condID)
 		{
@@ -1541,13 +1620,15 @@ void TrialCircularBuffer::modifyConditionVisibilityusingConditionID(int condID, 
 			break;
 		}
 	}
-	unlockConditions();
+	//unlockConditions();
 }
 
 void TrialCircularBuffer::modifyConditionVisibility(int cond, bool newstate)
 {
 	// now add a new psth for this condition for all sorted units on all electrodes
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
+//	lockPSTH();
 	conditions[cond].visible = newstate;
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
@@ -1563,13 +1644,15 @@ void TrialCircularBuffer::modifyConditionVisibility(int cond, bool newstate)
 			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
 		}
 	}
-	unlockPSTH();
+//	unlockPSTH();
 }
 
 void TrialCircularBuffer::toggleConditionVisibility(int cond)
 {
 	// now add a new psth for this condition for all sorted units on all electrodes
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
+	//lockPSTH();
 	conditions[cond].visible = !conditions[cond].visible;
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
@@ -1585,15 +1668,18 @@ void TrialCircularBuffer::toggleConditionVisibility(int cond)
 			electrodesPSTH[i].unitsPSTHs[u].redrawNeeded = true;
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 	// inform editor repaint is needed
 
 }
 
 void TrialCircularBuffer::channelChange(int electrodeID, int channelindex, int newchannel)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	for (int i=0;i<electrodesPSTH.size();i++) 
 	{
 		if (electrodesPSTH[i].electrodeID == electrodeID)
@@ -1607,14 +1693,17 @@ void TrialCircularBuffer::channelChange(int electrodeID, int channelindex, int n
 		}
 	}
 	
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 }
 
 void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electrode *> electrodes)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	// note. This will erase all existing internal structures. Only call this in the constructor.
 	electrodesPSTH.clear();
 	for (int electrodeIter=0;electrodeIter<electrodes.size();electrodeIter++)
@@ -1665,13 +1754,15 @@ void TrialCircularBuffer::syncInternalDataStructuresWithSpikeSorter(Array<Electr
 		  }
 		  electrodesPSTH.push_back(electrodePSTH);
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 }
 
 void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
 	ElectrodePSTH e(electrode->electrodeID,electrode->name);
 	int numChannels = electrode->numChannels;
 
@@ -1704,13 +1795,15 @@ void TrialCircularBuffer::addNewElectrode(Electrode *electrode)
 				addNewUnit(electrode->electrodeID, PcaUnits[pcaIter].UnitID, PcaUnits[pcaIter].ColorRGB[0],PcaUnits[pcaIter].ColorRGB[1],PcaUnits[pcaIter].ColorRGB[2]);
 			}
 		}
-	unlockPSTH();
+	//unlockPSTH();
 }
 
 void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b)
 {
 	// build a new PSTH for all defined conditions
-	lockPSTH();
+	//lockPSTH();
+		const ScopedLock myScopedLock (psthMutex);
+
 	UnitPSTHs unitPSTHs(unitID, params,r,g,b);
 	for (int k=0;k<conditions.size();k++)
 	{
@@ -1722,13 +1815,15 @@ void  TrialCircularBuffer::addNewUnit(int electrodeID, int unitID, uint8 r,uint8
 			break;
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 
 }
 
 void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
 {
-  lockPSTH();
+  //lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
   for (int e =0;e<electrodesPSTH.size();e++)
   {
 	  if (electrodesPSTH[e].electrodeID == electrodeID)
@@ -1742,14 +1837,16 @@ void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
 		  }
 	  }
   }
-  unlockPSTH();
+ // unlockPSTH();
 
 }
 
 
 void TrialCircularBuffer::removeElectrode(int electrodeID)
 {
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
+//	lockPSTH();
 	for (int e =0;e<electrodesPSTH.size();e++)
 	{
 		if (electrodesPSTH[e].electrodeID == electrodeID)
@@ -1758,7 +1855,7 @@ void TrialCircularBuffer::removeElectrode(int electrodeID)
 			break;
 		}
 	}
-	unlockPSTH();
+//	unlockPSTH();
 }
 
 
@@ -1768,7 +1865,24 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 	  bool redrawNeeded = false;
 	  std::vector<String> input = msg.splitString(' ');
 	  String command = input[0].toLowerCase();
-	  
+	if (command == "tictoc_print")
+	{
+		if (useThreads)
+			printf("******** Using threads to analyze trials\n");
+		else 
+			printf("******** NOT Using threads to analyze trials\n");
+
+		tictoc.print();
+	}
+	if (command == "tictoc_clear")
+	{
+		tictoc.clear();
+	} 
+	if (command == "flip_thread_usage")
+	{
+		useThreads = !useThreads;
+	}
+
  if (command == "trialstart")
 	  {
 		  currentTrial.trialID = ++trialCounter;
@@ -1781,7 +1895,9 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 		  currentTrial.type = -1;
 		  lfpBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
 		  ttlBuffer->addTrialStartToSmartBuffer(currentTrial.trialID);
-		  lockPSTH();
+		  const ScopedLock myScopedLock (psthMutex);
+
+		  //lockPSTH();
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 			{
 				for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
@@ -1789,7 +1905,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 					electrodesPSTH[i].unitsPSTHs[u].addTrialStartToSmartBuffer(&currentTrial);
 				}
 		  }
-		  unlockPSTH();
+		  //unlockPSTH();
 		  if (input.size() > 1) {
 			  currentTrial.type = input[1].getIntValue();
 		  }
@@ -1861,12 +1977,16 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 	  {
 		  int numExistingConditions = conditions.size();
 		  Condition newcondition(input,numExistingConditions+1);
-		  lockConditions();
+
+		  const ScopedLock myScopedLock (psthMutex);
+		  //const ScopedLock myScopedLock (conditionMutex);
+
+		  //lockConditions();
 		  newcondition.conditionID = ++conditionCounter;
 		  conditions.push_back(newcondition);
-		  unlockConditions();
+		  //unlockConditions();
 		  // now add a new psth for this condition for all sorted units on all electrodes
-		  lockPSTH();
+		  //lockPSTH();
 		  for (int i=0;i<electrodesPSTH.size();i++) 
 		  {
 			  for (int ch=0;ch<electrodesPSTH[i].channelsPSTHs.size();ch++)
@@ -1879,7 +1999,7 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 				  electrodesPSTH[i].unitsPSTHs[u].conditionPSTHs.push_back(PSTH(newcondition.conditionID, params, newcondition.visible));
 			  }
 		  }
-		  unlockPSTH();
+		  //unlockPSTH();
 		  // inform editor repaint is needed
 		  redrawNeeded = true;
 
@@ -1889,7 +2009,8 @@ bool TrialCircularBuffer::parseMessage(StringTS msg)
 
 void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	for (int e=0;e<electrodesPSTH.size();e++)
 	{
 		if (electrodesPSTH[e].electrodeID == newSpike.electrodeID)
@@ -1899,7 +2020,7 @@ void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 				if (electrodesPSTH[e].unitsPSTHs[u].unitID == newSpike.sortedId)
 				{
 					electrodesPSTH[e].unitsPSTHs[u].addSpikeToBuffer(newSpike.timestamp_software,newSpike.timestamp);
-					unlockPSTH();
+					//unlockPSTH();
 					return;
 				}
 			}
@@ -1907,7 +2028,7 @@ void TrialCircularBuffer::addSpikeToSpikeBuffer(SpikeObject newSpike)
 		}
 	}
 	// get got a sorted spike event before we got the information about the new unit?!?!?!
-	unlockPSTH();
+//	unlockPSTH();
 }
 
 
@@ -1919,12 +2040,28 @@ bool TrialCircularBuffer::contains(std::vector<int> v, int x)
 	return false;
 }
 
+void TrialCircularBuffer::updateLFPwithTrial(int electrodeIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial)
+{
+	electrodesPSTH[electrodeIndex].updateChannelsConditionsWithLFP(*conditionsNeedUpdate,trial, lfpBuffer); 
+}
+
+void TrialCircularBuffer::updateSpikeswithTrial(int electrodeIndex, int unitIndex, std::vector<int> *conditionsNeedUpdate, Trial *trial)
+{
+	electrodesPSTH[electrodeIndex].unitsPSTHs[unitIndex].updateConditionsWithSpikes(*conditionsNeedUpdate,trial); 
+}
 
 void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 {
-	lockConditions();
-	lockPSTH();
-
+	//printf("Calling updatePSTHwithTrial::lock conditions started\n");
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+	//
+	//lockConditions();
+	//printf("Calling updatePSTHwithTrial::lock PSTH started\n");
+	//lockPSTH();
+	//printf("Finished updatePSTHwithTrial::lock PSTH started\n");
+//	printf("Calling updatePSTHwithTrial::lock conditions finished \n");
+	
 	// find out which conditions need to be updated
 	std::vector<int> conditionsNeedUpdating;
 	for (int c=0;c<conditions.size();c++)
@@ -1938,26 +2075,67 @@ void TrialCircularBuffer::updatePSTHwithTrial(Trial *trial)
 	if (conditionsNeedUpdating.size() == 0)
 	{
 		// none of the conditions match. nothing to update.
-		unlockPSTH();
-		unlockConditions();
+		//unlockPSTH();
+		//unlockConditions();
 
 		return;
 	}
 
-
-	// update both spikes and LFP PSTHs 
-	for (int i=0;i<electrodesPSTH.size();i++) 
+	if (!useThreads)
 	{
-		electrodesPSTH[i].updateChannelsConditionsWithLFP(conditionsNeedUpdating,trial, lfpBuffer);
-		for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
-		{
-			electrodesPSTH[i].unitsPSTHs[u].updateConditionsWithSpikes(conditionsNeedUpdating,trial);
+		// these two parts can be fully distributed along several threads because they are completely independent.
+		//printf("Calling updatePSTHwithTrial::update without streads\n");
 
+		tictoc.Tic(23);
+		for (int i=0;i<electrodesPSTH.size();i++) 
+		{
+			electrodesPSTH[i].updateChannelsConditionsWithLFP(conditionsNeedUpdating,trial, lfpBuffer); // timer 6 -> 7,18
 		}
+		// update both spikes and LFP PSTHs 
+		for (int i=0;i<electrodesPSTH.size();i++) 
+		{
+			for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			{
+				electrodesPSTH[i].unitsPSTHs[u].updateConditionsWithSpikes(conditionsNeedUpdating,trial); // timer 14,15
+			}
+		}
+		tictoc.Toc(23);
+		//printf("Finished updatePSTHwithTrial::update without streads\n");
+
+	} else {
+		tictoc.Tic(24);
+		int cnt = 0;
+		int numElectrodes = electrodesPSTH.size();
+		//printf("Calling updatePSTHwithTrial::update with threads\n");
+
+		for (int i=0;i<numElectrodes;i++) 
+		{
+			TrialCircularBufferThread *job = new TrialCircularBufferThread(this,&conditionsNeedUpdating,trial,cnt++,0,i,-1);
+			threadpool->addJob(job, true);
+			for (int u=0;u<electrodesPSTH[i].unitsPSTHs.size();u++)
+			{
+				TrialCircularBufferThread *job = new TrialCircularBufferThread(this,&conditionsNeedUpdating,trial,cnt++,1,i,u);
+				threadpool->addJob(job, true);
+			}
+		}
+
+		//printf("Calling updatePSTHwithTrial::Waiting for jobs\n");
+
+		while (threadpool->getNumJobs() > 0)
+		{
+			#if JUCE_WINDOWS
+				Sleep(2); // sleep 2 ms
+			#else
+				usleep(2000);
+			#endif
+		}
+		tictoc.Toc(24);
+		//printf("Finished updatePSTHwithTrial::Waiting for jobs\n");
+
 	}
 
-	unlockPSTH();
-	unlockConditions();
+	//unlockPSTH();
+	//unlockConditions();
 }
 
 void TrialCircularBuffer::reallocate(int numChannels)
@@ -1973,7 +2151,8 @@ void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int
 	float secElapsed = float(tickdiff) / numTicksPerSecond;
 	if (secElapsed > params.ttlSupressionTimeSec)
 	{
-		lockPSTH();
+		const ScopedLock myScopedLock (psthMutex);
+		//lockPSTH();
 		Trial ttlTrial;
 		ttlTrial.trialID = ++trialCounter;
 		ttlTrial.startTS = ttl_timestamp_software;
@@ -1995,7 +2174,7 @@ void TrialCircularBuffer::simulateHardwareTrial(int64 ttl_timestamp_software,int
 		}
 		aliveTrials.push(ttlTrial);
 		lastSimulatedTrialTS = ttl_timestamp_software;
-		unlockPSTH();
+		//unlockPSTH();
 	}
 }
 
@@ -2089,8 +2268,11 @@ int TrialCircularBuffer::getLastTrialID()
 std::vector<XYline> TrialCircularBuffer::getElectrodeConditionCurves(int electrodeID, int channelID)
 {
 	std::vector<XYline> lines;
-	lockPSTH();
-	lockConditions();
+
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+	//lockPSTH();
+	//lockConditions();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2117,22 +2299,24 @@ std::vector<XYline> TrialCircularBuffer::getElectrodeConditionCurves(int electro
 						lines.push_back(l);
 					}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return lines;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return lines;
 }
 
 int TrialCircularBuffer::getUnitUniqueInterval(int electrodeID, int unitID)
 {
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
+	//lockPSTH();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2142,19 +2326,20 @@ int TrialCircularBuffer::getUnitUniqueInterval(int electrodeID, int unitID)
 				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 				{
 					int id = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].uniqueIntervalID;
-					unlockPSTH();
+					//unlockPSTH();
 					return id;
 				}
 			}
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 	return -1;
 }
 
 int TrialCircularBuffer::setUnitUniqueInterval(int electrodeID, int unitID, bool state)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2170,19 +2355,20 @@ int TrialCircularBuffer::setUnitUniqueInterval(int electrodeID, int unitID, bool
 						id = uniqueIntervalID;
 					}
 					
-					unlockPSTH();
+					//unlockPSTH();
 					return id;
 				}
 			}
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 	return -1;
 }
 
 juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
 {
-	lockPSTH();
+	//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2194,21 +2380,23 @@ juce::Colour TrialCircularBuffer::getUnitColor(int electrodeID, int unitID)
 					juce::Colour col = juce::Colour(electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[0],
 										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[1],
 										electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].colorRGB[2]);
-					unlockPSTH();
+					//unlockPSTH();
 					return col ;
 				}
 			}
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 	return juce::Colours::black;
 }
 
 std::vector<XYline> TrialCircularBuffer::getUnitConditionCurves(int electrodeID, int unitID)
 {
 	std::vector<XYline> lines;
-	lockPSTH();
-	lockConditions();
+	//lockPSTH();
+	//lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2234,24 +2422,27 @@ std::vector<XYline> TrialCircularBuffer::getUnitConditionCurves(int electrodeID,
 						lines.push_back(l);
 					}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return lines;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return lines;
 }
 
 
 void TrialCircularBuffer::getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2277,23 +2468,26 @@ void TrialCircularBuffer::getElectrodeConditionRange(int electrodeID, int channe
 	
 						}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return;
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return;
 }
 
 
 void TrialCircularBuffer::getUnitConditionRange(int electrodeID, int unitID, double &xmin, double &xmax)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
@@ -2316,20 +2510,22 @@ void TrialCircularBuffer::getUnitConditionRange(int electrodeID, int unitID, dou
 						xmax = MAX(xmax,xmax_);
 					}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return;
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 }
 
 void TrialCircularBuffer::clearUnitStatistics(int electrodeID, int unitID)
 {
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+
+	//lockPSTH();
 
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2340,19 +2536,20 @@ void TrialCircularBuffer::clearUnitStatistics(int electrodeID, int unitID)
 				if (electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].unitID == unitID)
 				{
 					electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].clearStatistics();
-					unlockPSTH();
+					//unlockPSTH();
 					return;
 
 				}
 			}
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 }
 
 void TrialCircularBuffer::clearChanneltatistics(int electrodeID, int channelID)
 {
-	lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
+//	lockPSTH();
 
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2363,30 +2560,31 @@ void TrialCircularBuffer::clearChanneltatistics(int electrodeID, int channelID)
 				if (electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].channelID == channelID)
 				{
 					electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].clearStatistics();
-					unlockPSTH();
+					//unlockPSTH();
 					return;
 				}
 			}
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 }
 
 
 void TrialCircularBuffer::updateElectrodeName(int electrodeID, String newName)
 {
-lockPSTH();
+//lockPSTH();
+	const ScopedLock myScopedLock (psthMutex);
 
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
 		if (electrodesPSTH[electrodeIndex].electrodeID == electrodeID)
 		{
 			electrodesPSTH[electrodeIndex].electrodeName = newName;
-			unlockPSTH();
+			//unlockPSTH();
 			return;
 		}
 	}
-	unlockPSTH();
+	//unlockPSTH();
 }
 
  std::vector<float> TrialCircularBuffer::buildSmoothKernel(float guassianStandardDeviationMS, float binSizeInMS)
@@ -2451,8 +2649,11 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageUnitRespons
 	if (smoothMS > 0)
 		smoothKernel = buildSmoothKernel(smoothMS, 1.0);
 
-	lockPSTH();
-	lockConditions();
+	//lockPSTH();
+	//lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2514,16 +2715,16 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageUnitRespons
 						
 					}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return avgResponseMatrix;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return avgResponseMatrix;
 }
 
@@ -2549,8 +2750,11 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageChannelResp
 	if (smoothMS > 0)
 		smoothKernel = buildSmoothKernel(smoothMS, 1.0);
 
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2612,16 +2816,16 @@ std::vector<std::vector<float>> TrialCircularBuffer::getTrialsAverageChannelResp
 						
 					}
 
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return avgResponseMatrix;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return avgResponseMatrix;
 }
 const uint8 jet_colors_64[64][3] = {
@@ -2696,8 +2900,11 @@ const uint8 jet_colors_64[64][3] = {
 
 int TrialCircularBuffer::getNumTrialTypesInChannel(int electrodeID, int channelID)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2710,16 +2917,16 @@ int TrialCircularBuffer::getNumTrialTypesInChannel(int electrodeID, int channelI
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
 					int N= electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].trialPSTHs.size();
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return N;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return 0;
 }
 
@@ -2727,8 +2934,11 @@ int TrialCircularBuffer::getNumTrialTypesInChannel(int electrodeID, int channelI
 int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 {
 
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2741,16 +2951,16 @@ int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
 					int N= electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].trialPSTHs.size();
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return N;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return 0;
 }
 
@@ -2758,8 +2968,11 @@ int TrialCircularBuffer::getNumTrialTypesInUnit(int electrodeID, int unitID)
 
 int TrialCircularBuffer::getNumTrialsInChannel(int electrodeID, int channelID)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2772,15 +2985,15 @@ int TrialCircularBuffer::getNumTrialsInChannel(int electrodeID, int channelID)
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
 					int N = electrodesPSTH[electrodeIndex].channelsPSTHs[entryindex].numTrials;
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return N;
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return 0;
 }
 
@@ -2788,8 +3001,11 @@ int TrialCircularBuffer::getNumTrialsInChannel(int electrodeID, int channelID)
 
 int TrialCircularBuffer::getNumTrialsInUnit(int electrodeID, int unitID)
 {
-	lockPSTH();
-	lockConditions();
+	const ScopedLock myScopedLock (psthMutex);
+	//const ScopedLock myScopedLock (conditionMutex);
+
+	//lockPSTH();
+	//lockConditions();
 	bool fisrtTime = true;
 	for (int electrodeIndex=0;electrodeIndex<electrodesPSTH.size();electrodeIndex++)
 	{
@@ -2802,16 +3018,16 @@ int TrialCircularBuffer::getNumTrialsInUnit(int electrodeID, int unitID)
 					// great. we found our unit.
 					// now iterate over trial and build the matrix.
 					int N = electrodesPSTH[electrodeIndex].unitsPSTHs[entryindex].numTrials;
-					unlockConditions();
-					unlockPSTH();
+					//unlockConditions();
+					//unlockPSTH();
 					return N;
 
 				}
 			}
 		}
 	}
-	unlockConditions();
-	unlockPSTH();
+	//unlockConditions();
+	//unlockPSTH();
 	return 0;
 }
 
@@ -2901,19 +3117,33 @@ juce::Image TrialCircularBuffer::getTrialsAverageUnitResponseAsJuceImage(int ele
 
 void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 hardware_timestamp,int64 software_timestamp)
 {
-	// first, update LFP circular buffers
-	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+	//printf("Entering TrialCircularBuffer::process\n");
+	
+	tictoc.Tic(0);
 
+	// first, update LFP circular buffers
+	//printf("Entering lfpBuffer->update\n");
+	tictoc.Tic(1);
+	lfpBuffer->update(buffer, hardware_timestamp,software_timestamp, nSamples);
+	tictoc.Toc(1);
+	//printf("Exitting lfpBuffer->update\n");
+
+	//printf("Entering reconstructedTTLs\n");
+	tictoc.Tic(2);
 	// for oscilloscope purposes, it is easier to reconstruct TTL chnages to "continuous" form.
 	if (params.reconstructTTL) {
 		std::vector<std::vector<bool>> reconstructedTTLs = reconstructTTLchannels(hardware_timestamp,nSamples);
 		ttlBuffer->update(reconstructedTTLs,hardware_timestamp,software_timestamp,nSamples);
 	}
+	tictoc.Toc(2);
+	//printf("Exitting reconstructedTTLs\n");
 
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
+	tictoc.Tic(3);
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
+		//printf("Entering alive loop\n");
 		for (int k=0;k<aliveTrials.size();k++)
 		{
 			Trial topTrial = aliveTrials.front();
@@ -2936,9 +3166,36 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 			{
 				aliveTrials.pop();
 				lastTrialID = topTrial.trialID;
+				//printf("Entering updatePSTHwithTrial\n");
+				tictoc.Tic(4);
 				updatePSTHwithTrial(&topTrial);
+				tictoc.Toc(4);
+				//printf("Exitting updatePSTHwithTrial\n");
 			}
 		}
+		//printf("Exitting alive loop\n");
 	}
+	tictoc.Toc(3);
 
+	tictoc.Toc(0);
+	//printf("Exitting TrialCircularBuffer::process\n");
+}
+
+
+TrialCircularBufferThread::TrialCircularBufferThread(TrialCircularBuffer *tcb_,  std::vector<int> *conditions, Trial* trial_, int jobID_, int jobType_, int electrodeID_, int subID_) : ThreadPoolJob("Job "+String(jobID)),
+	tcb(tcb_),jobID(jobID_), jobType(jobType_), electrodeID(electrodeID_), subID(subID_), trial(trial_), conditionsNeedUpdate(conditions)
+{
+
+}
+
+juce::ThreadPoolJob::JobStatus TrialCircularBufferThread::runJob()
+{
+	if (jobType == 0)
+	{
+		tcb->updateLFPwithTrial(electrodeID,conditionsNeedUpdate,trial);
+	} else if (jobType == 1)
+	{
+		tcb->updateSpikeswithTrial(electrodeID,subID,conditionsNeedUpdate,trial);
+	}
+	return jobHasFinished;
 }

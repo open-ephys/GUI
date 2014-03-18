@@ -291,6 +291,7 @@
     <ClCompile Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.cpp" />
     <ClCompile Include="..\..\Source\Processors\AdvancerNode.cpp" />
     <ClCompile Include="..\..\Source\Processors\NetworkEvents.cpp" />
+    <ClCompile Include="..\..\Source\Processors\tictoc.cpp" />
     <ClCompile Include="..\..\Source\Processors\TrialCircularBuffer.cpp" />
     <ClCompile Include="..\..\Source\Processors\NetworkSink.cpp" />
     <ClCompile Include="..\..\Source\Processors\NetworkSinkProcotol.pb.cc" />
@@ -1507,6 +1508,7 @@
     <ClInclude Include="..\..\Source\Processors\PeriStimulusTimeHistogramNode.h" />
     <ClInclude Include="..\..\Source\Processors\AdvancerNode.h" />
     <ClInclude Include="..\..\Source\Processors\NetworkEvents.h" />
+    <ClInclude Include="..\..\Source\Processors\tictoc.h" />
     <ClInclude Include="..\..\Source\Processors\TrialCircularBuffer.h" />
     <ClInclude Include="..\..\Source\Processors\NetworkSink.h" />
     <ClInclude Include="..\..\Source\Processors\NetworkSinkProcotol.pb.h" />

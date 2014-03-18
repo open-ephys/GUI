@@ -370,6 +370,7 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 							MidiBuffer& events,
 							int& nSamples)
 {
+	//printf("Entering ISCAN::process\n");
 	checkForEvents(events);
 	
 	// read samples and pass them as midi events.
@@ -380,7 +381,7 @@ void ISCANnode::process(AudioSampleBuffer& buffer,
 	{
 		process_analogCommunication(events,buffer,nSamples);
 	}
-
+	//printf("Exitting ISCAN::process\n");
 //	 nSamples = -10; // make sure this is not processed;
 	
 }
