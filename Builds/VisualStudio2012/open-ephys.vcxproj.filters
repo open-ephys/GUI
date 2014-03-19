@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="open-ephys">
@@ -414,6 +415,9 @@
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\tictoc.cpp">
+      <Filter>open-ephys\Source\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\OscilloscopeNode.cpp">
       <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
@@ -543,6 +547,12 @@
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ISCANeditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\LfpTriggeredAverageEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
@@ -550,6 +560,15 @@
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\SerialInputEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ElectrodeButtons.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ChannelMappingEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\FileReaderEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\PhaseDetectorEditor.cpp">
@@ -570,6 +589,15 @@
     <ClCompile Include="..\..\Source\Processors\Editors\ResamplingNodeEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\FPGAOutputEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ArduinoOutputEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ChannelSelector.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\ParameterEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
@@ -582,7 +610,13 @@
     <ClCompile Include="..\..\Source\Processors\Editors\MergerEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\ImageIcon.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\WiFiOutputEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\EventNodeEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Editors\SignalGeneratorEditor.cpp">
@@ -600,6 +634,15 @@
     <ClCompile Include="..\..\Source\Processors\Editors\SpikeDetectorEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\AudioEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\FilterEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Editors\GenericEditor.cpp">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\DataThreads\rhythm-api\okFrontPanelDLL.cpp">
       <Filter>open-ephys\Source\Processors\DataThreads\rhythm-api</Filter>
     </ClCompile>
@@ -612,7 +655,13 @@
     <ClCompile Include="..\..\Source\Processors\DataThreads\rhythm-api\rhd2000registers.cpp">
       <Filter>open-ephys\Source\Processors\DataThreads\rhythm-api</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\DataThreads\RHD2000Thread.cpp">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\DataThreads\FileReaderThread.cpp">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\DataThreads\FPGAThread.cpp">
       <Filter>open-ephys\Source\Processors\DataThreads</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\DataThreads\DataBuffer.cpp">
@@ -786,6 +835,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\juce_linux_Midi.cpp">
       <Filter>Juce Modules\juce_audio_devices\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\juce_mac_AudioCDBurner.mm">
+      <Filter>Juce Modules\juce_audio_devices\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\juce_mac_AudioCDReader.mm">
+      <Filter>Juce Modules\juce_audio_devices\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\juce_mac_CoreAudio.cpp">
       <Filter>Juce Modules\juce_audio_devices\native</Filter>
     </ClCompile>
@@ -881,6 +936,9 @@
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.cpp">
       <Filter>Juce Modules\juce_audio_processors\format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.mm">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
@@ -1107,6 +1165,21 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_linux_Threads.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Files.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Network.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Strings.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_SystemStats.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_mac_Threads.mm">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\native\juce_posix_NamedPipe.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
@@ -1191,7 +1264,13 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_android_Messaging.cpp">
       <Filter>Juce Modules\juce_events\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_ios_MessageManager.mm">
+      <Filter>Juce Modules\juce_events\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_linux_Messaging.cpp">
+      <Filter>Juce Modules\juce_events\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_mac_MessageManager.mm">
       <Filter>Juce Modules\juce_events\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_events\native\juce_win32_Messaging.cpp">
@@ -1297,6 +1376,12 @@
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_linux_Fonts.cpp">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_mac_Fonts.mm">
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp">
@@ -1641,6 +1726,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_android_Windowing.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_ios_Windowing.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_linux_Clipboard.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
@@ -1648,6 +1739,21 @@
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_linux_Windowing.cpp">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_FileChooser.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_MainMenu.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_NSViewComponentPeer.mm">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_mac_Windowing.mm">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_basics\native\juce_win32_DragAndDrop.cpp">
@@ -1698,13 +1804,25 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_linux_SystemTrayIcon.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_linux_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_mac_WebBrowserComponent.mm">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
@@ -1741,6 +1859,12 @@
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\native\juce_android_CameraDevice.cpp">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\native\juce_mac_CameraDevice.mm">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\native\juce_mac_QuickTimeMovieComponent.mm">
       <Filter>Juce Modules\juce_video\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\native\juce_win32_CameraDevice.cpp">
@@ -1796,54 +1920,6 @@
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.cpp">
       <Filter>Juce Library Code</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\DataThreads\FPGAThread.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\DataThreads\RHD2000Thread.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\AdvancerEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ArduinoOutputEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\AudioEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ChannelMappingEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ChannelSelector.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ElectrodeButtons.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\EventNodeEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\FileReaderEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\FilterEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\FPGAOutputEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\GenericEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ImageIcon.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\ISCANeditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\tictoc.cpp">
-      <Filter>open-ephys\Source\Processors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1924,6 +2000,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\tictoc.h">
+      <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\OscilloscopeNode.h">
       <Filter>open-ephys\Source\Processors</Filter>
@@ -2060,6 +2139,9 @@
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\ISCANeditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
@@ -2070,6 +2152,15 @@
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\SerialInputEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ElectrodeButtons.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ChannelMappingEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\FileReaderEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\PhaseDetectorEditor.h">
@@ -2090,6 +2181,15 @@
     <ClInclude Include="..\..\Source\Processors\Editors\ResamplingNodeEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\FPGAOutputEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ArduinoOutputEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ChannelSelector.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\ParameterEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
@@ -2102,7 +2202,13 @@
     <ClInclude Include="..\..\Source\Processors\Editors\MergerEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\ImageIcon.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\WiFiOutputEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\EventNodeEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Editors\SignalGeneratorEditor.h">
@@ -2120,6 +2226,15 @@
     <ClInclude Include="..\..\Source\Processors\Editors\SpikeDetectorEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\AudioEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\FilterEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\Editors\GenericEditor.h">
+      <Filter>open-ephys\Source\Processors\Editors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\DataThreads\rhythm-api\okFrontPanelDLL.h">
       <Filter>open-ephys\Source\Processors\DataThreads\rhythm-api</Filter>
     </ClInclude>
@@ -2131,6 +2246,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\DataThreads\rhythm-api\rhd2000registers.h">
       <Filter>open-ephys\Source\Processors\DataThreads\rhythm-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\RHD2000Thread.h">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\FileReaderThread.h">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\FPGAThread.h">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\DataThreads\DataBuffer.h">
       <Filter>open-ephys\Source\Processors\DataThreads</Filter>
@@ -3490,54 +3614,6 @@
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>Juce Library Code</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\DataThreads\FileReaderThread.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\DataThreads\FPGAThread.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\DataThreads\RHD2000Thread.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\AdvancerEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\ArduinoOutputEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\AudioEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\ChannelMappingEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\ChannelSelector.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\ElectrodeButtons.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\EventNodeEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\FileReaderEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\FilterEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\FPGAOutputEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\GenericEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\ImageIcon.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\tictoc.h">
-      <Filter>open-ephys\Source\Processors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

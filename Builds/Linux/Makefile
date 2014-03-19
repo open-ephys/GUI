@@ -63,6 +63,7 @@ OBJECTS := \
   $(OBJDIR)/RootFinder_239a995f.o \
   $(OBJDIR)/State_22979684.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/tictoc_459a4709.o \
   $(OBJDIR)/OscilloscopeNode_c021b3e0.o \
   $(OBJDIR)/NotchFilterNode_2542f9ad.o \
   $(OBJDIR)/ISCAN_d4969b61.o \
@@ -301,6 +302,11 @@ $(OBJDIR)/State_22979684.o: ../../Source/Dsp/State.cpp
 $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/tictoc_459a4709.o: ../../Source/Processors/tictoc.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling tictoc.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/OscilloscopeNode_c021b3e0.o: ../../Source/Processors/OscilloscopeNode.cpp
