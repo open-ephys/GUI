@@ -503,9 +503,15 @@ Visualizer* OscilloscopeEditor::createNewCanvas()
     getUIComponent()->registerAnimatedComponent(listener);
 	return oscilloscopeCanvas;
 }
+void OscilloscopeEditor::update()
+{
+	if (oscilloscopeCanvas != nullptr)
+		oscilloscopeCanvas->update();
+}
 
 void OscilloscopeEditor::updateCanvas()
 {
+
 /*	if (periStimulusTimeHistogramCanvas != nullptr) {
 		periStimulusTimeHistogramCanvas->updateNeeded = true;
 		periStimulusTimeHistogramCanvas->repaint();
@@ -580,18 +586,7 @@ void OscilloscopeCanvas::refreshState()
 
 void OscilloscopeCanvas::update()
 {
-/*
-	resized();
-
-
-	psthDisplay->resized();
-	psthDisplay->repaint();
-	psthDisplay->refresh();
-	repaint();
-
-	processor->trialCircularBuffer->unlockPSTH();
-	conditionsList->updateConditionButtons();
-	*/
+	channelsList->updateButtons();
 }
 
 

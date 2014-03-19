@@ -170,7 +170,7 @@ public:
 	void saveVisualizerParameters(XmlElement* xml);
 	void loadVisualizerParameters(XmlElement* xml);
 	OscilloscopeCanvas *oscilloscopeCanvas;
-
+	void update();
 private:
     Font font;
 

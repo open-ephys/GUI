@@ -498,7 +498,7 @@ String PeriStimulusTimeHistogramNode::generateHeader()
 {
 
     String header = "header.format = 'Open Ephys Data Format'; \n";
-    header += "header.version = 0.31;";
+    header += "header.version = 0.32;";
     header += "header.header_bytes = ";
     header += String(HEADER_SIZE);
     header += ";\n";
@@ -531,6 +531,12 @@ String PeriStimulusTimeHistogramNode::generateHeader()
 	}
 
     header += ";\n";
+
+	Time t;
+    header += "header.ticksPerSec = ";
+	header += String(t.getHighResolutionTicksPerSecond());
+    header += ";\n";
+
     header = header.paddedRight(' ', HEADER_SIZE);
     return header;
 
