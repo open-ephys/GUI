@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <algorithm>
 #include "SpikeSortBoxes.h"
+#include "SpikeDetector.h"
 
 PointD::PointD()
 {
@@ -208,13 +209,12 @@ void BoxUnit::setDefaultColors(uint8_t col[3], int ID)
 	col[2] = colors[IDmodule][2];
 }
 
-BoxUnit::BoxUnit(int ID)
+BoxUnit::BoxUnit(int ID, int localID_): UnitID(ID), localID(localID_)
 {
-	UnitID = ID;
 	Active = false;
 	Activated_TS_S = -1;
-	setDefaultColors(ColorRGB, UnitID);
-	Box B(50, -20 - ID*20, 300, 40);
+	setDefaultColors(ColorRGB, localID);
+	Box B(50, -20 - localID*20, 300, 40);
 	addBox(B);
 }
 
@@ -223,9 +223,8 @@ void BoxUnit::resizeWaveform(int newlength)
 	WaveformStat.resizeWaveform(newlength);
 }
 
-BoxUnit::BoxUnit(Box B, int ID)
+BoxUnit::BoxUnit(Box B, int ID, int localID_) : UnitID(ID), localID(localID_)
 {
-	UnitID = ID;
 	addBox(B);
 }
 
@@ -348,6 +347,10 @@ int BoxUnit::getUnitID()
 	return UnitID;
 }
 
+int BoxUnit::getLocalID()
+{
+	return localID;
+}
 
 
 /************************/
@@ -584,8 +587,9 @@ void BoxUnit::updateWaveform(SpikeObject *so)
 
 /***********************************************/
 
-  SpikeSortBoxes::SpikeSortBoxes(PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength)
+  SpikeSortBoxes::SpikeSortBoxes(UniqueIDgenerator *uniqueIDgenerator_,PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength)
   {
+	 uniqueIDgenerator = uniqueIDgenerator_;
 	 computingThread = pth;
 	 pc1 = pc2 = nullptr;
 	 bufferSize = 200;
@@ -935,8 +939,8 @@ void BoxUnit::updateWaveform(SpikeObject *so)
   {
 	  const ScopedLock myScopedLock (mut);
   	  //StartCriticalSection();
-	  int unusedID = generateUnitID();
-	  BoxUnit unit(unusedID);
+	  int unusedID = uniqueIDgenerator->generateUniqueID(); //generateUnitID();
+	  BoxUnit unit(unusedID,generateLocalID());
 	  boxUnits.push_back(unit);
 	  setSelectedUnitAndbox(unusedID, 0);
 	  //EndCriticalSection();
@@ -957,8 +961,8 @@ void  SpikeSortBoxes::EndCriticalSection()
   {
 	  const ScopedLock myScopedLock (mut);
 	  //StartCriticalSection();
-	  int unusedID = generateUnitID();
-	  BoxUnit unit(B, unusedID);
+	  int unusedID = uniqueIDgenerator->generateUniqueID(); //generateUnitID();
+	  BoxUnit unit(B, unusedID,generateLocalID());
 	  boxUnits.push_back(unit);
 	  setSelectedUnitAndbox(unusedID, 0);
 	  //EndCriticalSection();
@@ -989,9 +993,8 @@ void  SpikeSortBoxes::EndCriticalSection()
 		}
   }
 
-
-  int SpikeSortBoxes::generateUnitID()
-  {
+    int SpikeSortBoxes::generateLocalID()
+	{
 	  // finds the first unused ID and return it
 	  
 	  int ID = 1;
@@ -1001,7 +1004,7 @@ void  SpikeSortBoxes::EndCriticalSection()
 		  bool used=false;
 		for (int k=0;k<boxUnits.size();k++)
 		{
-			if (boxUnits[k].getUnitID() == ID)
+			if (boxUnits[k].getLocalID() == ID)
 			{
 				used = true;
 				break;
@@ -1009,7 +1012,7 @@ void  SpikeSortBoxes::EndCriticalSection()
 		}
 		for (int k=0;k<pcaUnits.size();k++)
 		{
-			if (pcaUnits[k].getUnitID() == ID)
+			if (pcaUnits[k].getLocalID() == ID)
 			{
 				used = true;
 				break;
@@ -1021,6 +1024,13 @@ void  SpikeSortBoxes::EndCriticalSection()
 		else
 			break;
 	  }
+	  return ID;
+	}
+
+  int SpikeSortBoxes::generateUnitID()
+  {
+	
+	  int ID = uniqueIDgenerator->generateUniqueID();
 	  return ID;
 }
 
@@ -1668,16 +1678,16 @@ PCAUnit::PCAUnit()
 
 }
 
-PCAUnit::PCAUnit(int ID): UnitID(ID)
+PCAUnit::PCAUnit(int ID, int localID_): UnitID(ID),localID(localID_)
 {
-	BoxUnit::setDefaultColors(ColorRGB, UnitID);
+	BoxUnit::setDefaultColors(ColorRGB, localID);
 };
 
 PCAUnit::~PCAUnit()
 {
 }
 
-PCAUnit::PCAUnit(cPolygon B, int ID) : UnitID(ID)
+PCAUnit::PCAUnit(cPolygon B, int ID, int localID_) : UnitID(ID), localID(localID_)
 {
 	poly = B;
 }
@@ -1686,6 +1696,11 @@ int PCAUnit::getUnitID()
 {
 	return UnitID;
 }
+int PCAUnit::getLocalID()
+{
+	return localID;
+}
+
 bool PCAUnit::isPointInsidePolygon(PointD p)
 {
 		return poly.isPointInside(p);

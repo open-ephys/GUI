@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <queue>
 class PCAcomputingThread;
-
+class UniqueIDgenerator;
 class PointD
 {
 public:
@@ -116,8 +116,8 @@ class BoxUnit
 {
 public:
 	BoxUnit();
-	BoxUnit(int ID);
-	BoxUnit(Box B, int ID);
+	BoxUnit(int ID, int localID);
+	BoxUnit(Box B, int ID, int localID);
 	bool isWaveFormInsideAllBoxes(SpikeObject *so);
 	bool isActivated();
 	void activateUnit();
@@ -136,11 +136,13 @@ public:
 	void MoveBox(int boxid, int dx, int dy);
 	std::vector<Box> getBoxes();
 	int getUnitID();
+	int getLocalID();
 	void updateWaveform(SpikeObject *so);
 	static void setDefaultColors(uint8_t col[3], int ID);
 	void resizeWaveform(int newlength);
 public:
 	int UnitID;
+	int localID; // used internally, for colors and position.
 	std::vector<Box> lstBoxes;
 	uint8_t ColorRGB[3];
 	RunningStats WaveformStat;
@@ -202,15 +204,17 @@ class PCAUnit
 {
 public:
 	PCAUnit();
-	PCAUnit(int ID);
-	PCAUnit(cPolygon B, int ID);
+	PCAUnit(int ID, int localID);
+	PCAUnit(cPolygon B, int ID, int localID_);
 	~PCAUnit();
 	int getUnitID();
+	int getLocalID();
 	bool isWaveFormInsidePolygon(SpikeObject *so);
 	bool isPointInsidePolygon(PointD p);
 	void resizeWaveform(int newlength);
 public:
 	int UnitID;
+	int localID; // used internally, for colors and position.
 	cPolygon poly;
 	uint8_t ColorRGB[3];
 	//RunningStats WaveformStat;
@@ -225,7 +229,7 @@ public:
 class SpikeSortBoxes
 {
 public:
-	SpikeSortBoxes(PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength);
+	SpikeSortBoxes(UniqueIDgenerator *uniqueIDgenerator_, PCAcomputingThread *pth, int numch, double SamplingRate, int WaveFormLength);
 	~SpikeSortBoxes();
 
 	void resizeWaveform(int numSamples);
@@ -256,6 +260,7 @@ public:
 	void updateBoxUnits(std::vector<BoxUnit> _units);
 	void updatePCAUnits(std::vector<PCAUnit> _units);
 	int generateUnitID();
+    int generateLocalID();
 
     void setSelectedUnitAndbox(int unitID, int boxID);
 	void getSelectedUnitAndbox(int &unitID, int &boxid);
@@ -264,7 +269,7 @@ public:
 private:
 	//void  StartCriticalSection();
 	//void  EndCriticalSection();
-
+	UniqueIDgenerator* uniqueIDgenerator;
 	int numChannels, waveformLength;
 	int selectedUnit, selectedBox;
 	CriticalSection mut;

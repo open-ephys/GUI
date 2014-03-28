@@ -194,7 +194,7 @@ void OscilloscopeNode::allocateTrialCircularBuffer()
 		for (int k=0;k<numCh;k++)
 			dummyChannels[k]=k;
 
-		Electrode *e = new Electrode(0,nullptr, "Dummy",numCh, dummyChannels, 0, 8, 32, getSampleRate());
+		Electrode *e = new Electrode(0,nullptr,nullptr, "Dummy",numCh, dummyChannels, 0, 8, 32, getSampleRate());
 		// build a single condition
 		trialCircularBuffer->parseMessage(StringTS("addcondition name trigger trialtypes 1 visible 1"));
 		trialCircularBuffer->addNewElectrode(e);

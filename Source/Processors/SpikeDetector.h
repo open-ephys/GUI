@@ -76,11 +76,21 @@ public:
 
 class PCAjob;
 class PCAcomputingThread;
+class UniqueIDgenerator
+{
+public:
+	UniqueIDgenerator() {globalUniqueID=0;}
+	int generateUniqueID() {return ++globalUniqueID;};
+	void setUniqueID(int ID) {globalUniqueID= ID;}
+	int getLastUniqueID() {return globalUniqueID;}
+private:
+	int globalUniqueID;
+};
 
 class Electrode
 {
 	public:
-		Electrode(int electrodeID, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
+		Electrode(int electrodeID, UniqueIDgenerator *uniqueIDgenerator_, PCAcomputingThread *pth,String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate );
         ~Electrode();
 
 
@@ -105,7 +115,7 @@ class Electrode
 		SpikeHistogramPlot* spikePlot;
 		SpikeSortBoxes* spikeSort;
 		PCAcomputingThread *computingThread;
-
+		UniqueIDgenerator *uniqueIDgenerator;
         bool isMonitored;
 };
 
@@ -138,6 +148,8 @@ public:
 
 
 class StringTS;
+
+
 
 class SpikeDetector : public GenericProcessor
 {
@@ -304,6 +316,10 @@ public:
     std::vector<String> electrodeTypes;
 
 private:
+	UniqueIDgenerator uniqueIDgenerator;
+	long uniqueSpikeID;
+	SpikeObject prevSpike;
+
 	void addElectrode(Electrode* newElectrode);
 	void increaseUniqueProbeID(String type);
 	int getUniqueProbeID(String type);
@@ -311,8 +327,8 @@ private:
 	float ticksPerSec;
 	int uniqueID;
 	std::queue<StringTS> eventQueue;
-    /** Reference to a continuous buffer. */
-    AudioSampleBuffer& dataBuffer;
+    /** pointer to a continuous buffer. */
+    AudioSampleBuffer* dataBuffer;
 
     float getDefaultThreshold();
 

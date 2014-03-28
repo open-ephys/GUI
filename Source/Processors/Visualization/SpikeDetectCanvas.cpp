@@ -2063,7 +2063,7 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
 	}
 	if (inPolygonDrawingMode)
 	{
-		drawnUnit = PCAUnit(processor->getActiveElectrode()->spikeSort->generateUnitID());
+		drawnUnit = PCAUnit(processor->getActiveElectrode()->spikeSort->generateUnitID(),processor->getActiveElectrode()->spikeSort->generateLocalID());
 		drawnPolygon.push_back(PointD(event.x,event.y));
 	} else {
 		if (isOverUnit > 0)

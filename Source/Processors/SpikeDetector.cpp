@@ -33,14 +33,12 @@ class spikeSorter;
 
 SpikeDetector::SpikeDetector()
     : GenericProcessor("Spike Detector"),
-      overflowBuffer(2,100), dataBuffer(overflowBuffer),
+	overflowBuffer(2,100), dataBuffer(nullptr),
       overflowBufferSize(100), currentElectrode(-1),
 	  numPreSamples(8),numPostSamples(32)
 {
-    //// the standard form:
-	uniqueID = 0;
-    //// the technically correct form (Greek cardinal prefixes):
-
+	uniqueID = 0; // for electrode count
+	uniqueSpikeID = 0;
 	juce::Time timer;
 	ticksPerSec = (float) timer.getHighResolutionTicksPerSecond();
 	electrodeTypes.clear();
@@ -190,31 +188,14 @@ void SpikeDetector::updateSettings()
 	double ContinuousBufferLengthSec = 5;
 	channelBuffers = new ContinuousCircularBuffer(numChannels,SamplingRate,1, ContinuousBufferLengthSec);
 	 
-	
-	/** this code was used to sync SpikeDisplayNode  */
-	
-	/*
-    for (int i = 0; i < electrodes.size(); i++)
-    {
-
-        Channel* ch = new Channel(this, i);
-        ch->isEventChannel = true;
-        ch->eventType = SPIKE_BASE_CODE + electrodes[i]->numChannels;
-        ch->name = electrodes[i]->name;
-        eventChannels.add(ch);
-    } */
-
 	// instead, we pass things now in this new form:
 	for (int k = 0; k < electrodes.size(); k++)
 	{
 		String eventlog = "NewElectrode "+String(electrodes[k]->electrodeID) + " "+String(electrodes[k]->numChannels)+" ";
 		for (int j=0;j<electrodes[k]->numChannels;j++)
 			eventlog += String(electrodes[k]->channels[j])+ " "+electrodes[k]->name;
-
 		addNetworkEventToQueue(StringTS(eventlog));
 	}
-	
-
 	
 	mut.exit();
 }
@@ -229,11 +210,11 @@ Electrode::~Electrode()
 	delete spikeSort;
 }
 
-Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate )
+Electrode::Electrode(int ID, UniqueIDgenerator *uniqueIDgenerator_, PCAcomputingThread *pth, String _name, int _numChannels, int *_channels, float default_threshold, int pre, int post, float samplingRate )
 {
 	electrodeID = ID;
 		computingThread = pth;
-
+	uniqueIDgenerator = uniqueIDgenerator_;
 	name = _name;
 	/*
 	PCArange[0] = -250;
@@ -263,7 +244,7 @@ Electrode::Electrode(int ID, PCAcomputingThread *pth, String _name, int _numChan
     }
 	spikePlot = nullptr;
 	if (computingThread != nullptr)
-		spikeSort = new SpikeSortBoxes(computingThread,numChannels, samplingRate, pre+post);
+		spikeSort = new SpikeSortBoxes(uniqueIDgenerator,computingThread,numChannels, samplingRate, pre+post);
 	else
 		spikeSort = nullptr;
 	
@@ -621,7 +602,7 @@ bool SpikeDetector::addElectrode(int nChans, String name, double Depth)
 	for (int k=0;k<nChans;k++)
 		channels[k] = firstChan+k;
 
-	Electrode* newElectrode = new Electrode(++uniqueID,&computingThread,name, nChans,channels, getDefaultThreshold(), 
+	Electrode* newElectrode = new Electrode(++uniqueID,&uniqueIDgenerator,&computingThread,name, nChans,channels, getDefaultThreshold(), 
 		numPreSamples,numPostSamples, getSampleRate());
 
 	newElectrode->depthOffsetMM = Depth;
@@ -1028,12 +1009,13 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                             MidiBuffer& events,
                             int& nSamples)
 {
+	
 	//printf("Entering Spike Detector::process\n");
 	mut.enter();
 	uint16_t samplingFrequencyHz = getSampleRate();//buffer.getSamplingFrequency();
     // cycle through electrodes
     Electrode* electrode;
-    dataBuffer = buffer;
+    dataBuffer = &buffer;
 	
 	
     checkForEvents(events); // find latest's packet timestamps
@@ -1069,6 +1051,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
                 if (*(electrode->isActive+chan))
                 {
+					//float v = getNextSample(currentChannel);
 
                     int currentChannel = electrode->channels[chan];
 
@@ -1109,6 +1092,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 						newSpike.sortedId = 0; // unsorted.
                         newSpike.timestamp = peakIndex;
 						newSpike.electrodeID = electrode->electrodeID;
+						newSpike.channel = chan;
                         newSpike.source = i;
                         newSpike.nChannels = electrode->numChannels;
 						newSpike.samplingFrequencyHz = samplingFrequencyHz;
@@ -1123,19 +1107,19 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                                                      peakIndex,
                                                      i,
                                                      channel);
-
-                            // if (*(electrode->isActive+currentChannel))
-                            // {
-
-                            //     createSpikeEvent(peakIndex,       // peak index
-                            //                      i,               // electrodeNumber
-                            //                      currentChannel,  // channel number
-                            //                      events);         // event buffer
-
-
-                            // } // end if channel is active
-
                         }
+
+						/*
+						bool perfectMatch = true;
+						for (int k=0;k<40;k++) {
+							perfectMatch = perfectMatch & (prevSpike.data[k] == newSpike.data[k]);
+						}
+						if (perfectMatch)
+						{
+							int x;
+							x++;
+						}
+						*/
 
                        //for (int xxx = 0; xxx < 1000; xxx++) // overload with spikes for testing purposes
 						electrode->spikeSort->projectOnPrincipalComponents(&newSpike);
@@ -1158,8 +1142,9 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 							electrode->spikePlot->processSpikeObject(newSpike);
 						}
 
-                            addSpikeEvent(&newSpike, events, peakIndex);
 
+                            addSpikeEvent(&newSpike, events, peakIndex);
+							//prevSpike = newSpike;
                         // advance the sample index
                         sampleIndex = peakIndex + electrode->postPeakSamples;
 
@@ -1172,6 +1157,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
         } // end cycle through samples
 
+		//float vv = getNextSample(currentChannel);
         electrode->lastBufferIndex = sampleIndex - nSamples; // should be negative
 
         //jassert(electrode->lastBufferIndex < 0);
@@ -1198,6 +1184,7 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                                     buffer, i,
                                     nSamples-overflowBufferSize,
                                     overflowBufferSize);
+
 
             useOverflowBuffer = true;
         }
@@ -1237,8 +1224,8 @@ float SpikeDetector::getNextSample(int& chan)
         //  useOverflowBuffer = false;
         // std::cout << "  sample index " << sampleIndex << "from regular buffer" << std::endl;
 
-        if (sampleIndex < dataBuffer.getNumSamples())
-            return (*dataBuffer.getSampleData(chan, sampleIndex));
+        if (sampleIndex < dataBuffer->getNumSamples())
+            return (*dataBuffer->getSampleData(chan, sampleIndex));
         else
             return 0;
     }
@@ -1268,7 +1255,7 @@ float SpikeDetector::getCurrentSample(int& chan)
     {
         //  useOverflowBuffer = false;
         // std::cout << "  sample index " << sampleIndex << "from regular buffer" << std::endl;
-        return (*dataBuffer.getSampleData(chan, sampleIndex - 1));
+        return (*dataBuffer->getSampleData(chan, sampleIndex - 1));
     }
     //} else {
 
@@ -1500,7 +1487,7 @@ void SpikeDetector::loadCustomParametersFromXml()
 								isActive[channelIndex] = channelNode->getBoolAttribute("isActive");
 							}
 						}
-						Electrode* newElectrode = new Electrode(electrodeID, &computingThread, electrodeName, channelsPerElectrode, channels,getDefaultThreshold(),
+						Electrode* newElectrode = new Electrode(electrodeID, &uniqueIDgenerator,&computingThread, electrodeName, channelsPerElectrode, channels,getDefaultThreshold(),
 							numPreSamples,numPostSamples, getSampleRate());
 						for (int k=0;k<channelsPerElectrode;k++)
 						{

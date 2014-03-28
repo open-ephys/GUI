@@ -185,7 +185,7 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
 		static float counter = 0;
 
 		float Amplitude = 500;
-		bool ramps = false;
+		bool ramps = true;
 		static bool rampup = true;
 		for (int k=0;k<samplesNeeded;k++)
 		{
@@ -197,7 +197,7 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
 			if (rampup)
 			{
 				counter+=1;
-				if (counter >=1000)
+				if (counter >=2000)
 					rampup = false;
 			} else 
 			{

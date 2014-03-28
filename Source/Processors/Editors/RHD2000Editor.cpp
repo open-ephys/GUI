@@ -28,14 +28,143 @@
 
 #include "../DataThreads/RHD2000Thread.h"
 
+/*
+
+FPGAchannel::FPGAchannel(FPGAchannelList *cl, String label_, Font font_, int channel_, bool initialState) :
+    label(label_), font(font_), channel(channel_), channelList(cl)
+{
+	gainUpButton = new ColorButton(">", font);
+	gainUpButton->setShowEnabled(false);
+	gainUpButton->setColors(Colours::white, getDefaultColor(channel));
+	gainUpButton->addListener(this);
+	addAndMakeVisible(gainUpButton);
+
+	gainDownButton = new ColorButton("<", font);
+	gainDownButton->setShowEnabled(false);
+	gainDownButton->setColors(Colours::white, getDefaultColor(channel));
+	gainDownButton->addListener(this);
+	addAndMakeVisible(gainDownButton);
+
+	gainResetButton = new ColorButton("R", font);
+	gainResetButton->setShowEnabled(false);
+	gainResetButton->setColors(Colours::white, getDefaultColor(channel));
+	gainResetButton->addListener(this);
+	addAndMakeVisible(gainResetButton);
+
+	channelNameButton = new ColorButton(label, font);
+	channelNameButton->setShowEnabled(true);
+	channelNameButton->setColors(Colours::white, getDefaultColor(channel));
+	channelNameButton->addListener(this);
+	channelNameButton->setEnabledState(initialState);
+	addAndMakeVisible(channelNameButton);
+
+
+	userDefinedData = -1;
+    setEnabledState(true);
+}
+
+void FPGAchannel::buttonClicked(Button *btn)
+{
+	ColorButton* cbtn = (ColorButton*) btn;
+	
+
+	if (cbtn == gainResetButton) {
+		// reset gain
+		channelList->setChannelDefaultGain(channel,ttlChannel);
+	} else if (cbtn == gainUpButton) {
+		// increase gain
+		channelList->increaseChannelGain(channel,ttlChannel);
+	} else if (cbtn == gainDownButton) {
+		// decrease gain
+		channelList->decreaseChannelGain(channel,ttlChannel);
+	} else	if (cbtn == channelNameButton) { // toggle visibility
+			bool prevState = cbtn->getEnabledState();
+			cbtn->setEnabledState(!prevState);
+			channelList->setChannelsVisibility(channel,ttlChannel,!prevState);
+		}
+}
+
+void FPGAchannel::setEnabledState(bool state)
+{
+
+    isEnabled = state;
+
+    repaint();
+}
+
+void FPGAchannel::setUserDefinedData(int d)
+{
+	userDefinedData = d;
+}
+int FPGAchannel::getUserDefinedData()
+{
+	return userDefinedData;
+}
+
+void FPGAchannel::resized()
+{
+	channelNameButton->setBounds(0,0,100,getHeight());
+	gainDownButton->setBounds(100,0,40,getHeight());
+	gainResetButton->setBounds(140,0,20,getHeight());
+	gainUpButton->setBounds(160,0,40,getHeight());
+}
+
+*/
+
+FPGAcanvas::FPGAcanvas(GenericProcessor* n) : processor(n)
+{
+
+}
+
+FPGAcanvas::~FPGAcanvas()
+{
+}
+
+void FPGAcanvas::paint(Graphics& g)
+{
+	g.fillAll(Colours::grey);
+
+}
+
+void FPGAcanvas::refresh()
+{
+}
+
+void FPGAcanvas::refreshState()
+{
+}
+
+void FPGAcanvas::beginAnimation()
+{
+}
+
+void FPGAcanvas::endAnimation()
+{
+}
+
+void FPGAcanvas::update()
+{
+	// create channel buttons (name, gain, recording, impedance, ... ?)
+
+}
+
+void FPGAcanvas::resized()
+{
+}
+void FPGAcanvas::buttonClicked(Button* button)
+{
+}
+
+
+
 RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
                              RHD2000Thread* board_,
                              bool useDefaultParameterEditors
                             )
-    : GenericEditor(parentNode, useDefaultParameterEditors), board(board_)
+							: VisualizerEditor(parentNode, useDefaultParameterEditors), board(board_)
 {
     desiredWidth = 330;
-
+	tabText = "FPGA";
     // add headstage-specific controls (currently just an enable/disable button)
     for (int i = 0; i < 4; i++)
     {
@@ -191,7 +320,7 @@ void RHD2000Editor::comboBoxChanged(ComboBox* comboBox)
 
 void RHD2000Editor::buttonEvent(Button* button)
 {
-
+	VisualizerEditor::buttonEvent(button);
     if (button == rescanButton && !acquisitionIsActive)
     {
         board->scanPorts();
@@ -290,6 +419,15 @@ void RHD2000Editor::loadCustomParameters(XmlElement* xml)
 	dacHPFcombo->setSelectedId(xml->getIntAttribute("DAC_HPF"));
 }
 
+
+Visualizer* RHD2000Editor::createNewCanvas()
+{
+	GenericProcessor* processor = (GenericProcessor*) getProcessor();
+	FPGAcanvas *canvas= new FPGAcanvas(processor);
+	ActionListener* listener = (ActionListener*) canvas;
+    getUIComponent()->registerAnimatedComponent(listener);
+	return canvas;
+}
 
 // Bandwidth Options --------------------------------------------------------------------
 

@@ -37,7 +37,7 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
     // a pointer to a uint8_t buffer (which will hold the serialized SpikeObject,
     // and a integer indicating the bufferSize.
 
-    //int reqBytes = 1 + 4 + 2 + 2 + 2 + 2 * s->nChannels * s->nSamples + 2 * s->nChannels * 2;
+    //int reqBytes = 1 + 4 + 2+2 + 2 + 2 + 2 * s->nChannels * s->nSamples + 2 * s->nChannels * 2;
 
     int idx = 0;
 
@@ -65,7 +65,11 @@ int packSpike(const SpikeObject* s, uint8_t* buffer, int bufferSize)
     memcpy(buffer+idx, &(s->electrodeID), 2);
     idx +=2;
 
-	
+
+
+	memcpy(buffer+idx, &(s->channel), 2);
+    idx +=2;
+
 
 	memcpy(buffer+idx, &(s->color[0]), 1);
     idx +=1;
@@ -162,6 +166,8 @@ bool unpackSpike(SpikeObject* s, const uint8_t* buffer, int bufferSize)
 	    memcpy(&(s->electrodeID), buffer+idx, 2);
     idx +=2;
 
+	    memcpy(&(s->channel), buffer+idx, 2);
+    idx +=2;
 
   memcpy(&(s->color[0]), buffer+idx, 1);
     idx +=1;

@@ -26,6 +26,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "GenericEditor.h"
+#include "VisualizerEditor.h"
 
 #include "ElectrodeButtons.h" // for ElectrodeButton
 
@@ -44,9 +45,33 @@ class UtilityButton;
   @see SourceNode
 
 */
+class SourceNode;
 
+class FPGAcanvas : public Visualizer, public Button::Listener
+{
+public:
+	 FPGAcanvas(GenericProcessor* n);
+    ~FPGAcanvas();
 
-class RHD2000Editor : public GenericEditor, public ComboBox::Listener
+    void paint(Graphics& g);
+
+    void refresh();
+
+    void beginAnimation();
+    void endAnimation();
+
+	void refreshState();
+    void update();
+	void setParameter(int, float) {}
+	void setParameter(int, int, int, float) {}
+
+    void resized();
+	void buttonClicked(Button* button);
+
+	GenericProcessor* processor;
+};
+
+class RHD2000Editor : public VisualizerEditor, public ComboBox::Listener
 
 {
 public:
@@ -65,7 +90,7 @@ public:
 
     void saveCustomParameters(XmlElement* xml);
     void loadCustomParameters(XmlElement* xml);
-
+	Visualizer* createNewCanvas(void);
 private:
 
     OwnedArray<HeadstageOptionsInterface> headstageOptionsInterfaces;

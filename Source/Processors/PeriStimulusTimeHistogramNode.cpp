@@ -232,7 +232,7 @@ void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool du
 
 	// write event type
 	fwrite(&eventType, 1,1, eventFile); 
-	int16 eventSize = 8+8+2+2+2+2  + s->nChannels*4; // ts, ts, sorted id, electrode ID, num channels, num data per channel + 4x gains 
+	int16 eventSize = 8+8+2+2+2+2+2  + s->nChannels*4; // ts, ts, sorted id, electrode ID, num channels, num data per channel + 4x gains 
 
 	if (dumpWave)
 		eventSize += 2*(s->nSamples*s->nChannels); // uint16 per samples 
@@ -250,13 +250,16 @@ void PeriStimulusTimeHistogramNode::dumpSpikeEventToDisk(SpikeObject *s, bool du
 	// 4. electrod ID
 	fwrite(&s->electrodeID, 2,1, eventFile);
 
+	// 5. Channel in which threshold was detected
+	fwrite(&s->channel, 2,1, eventFile);
+
 	// 6. num channels
 	fwrite(&s->nChannels, 2,1, eventFile);
 
 	// 7. gains
 	fwrite(&s->gain, 4,s->nChannels, eventFile);
 
-	// 7. num data points per channel
+	// 8. num data points per channel
 	fwrite(&s->nSamples, 2,1, eventFile);
 	if (dumpWave)
 		fwrite(&s->data, 2,s->nSamples*s->nChannels, eventFile);
@@ -405,6 +408,7 @@ void PeriStimulusTimeHistogramNode::handleNetworkMessage(StringTS s)
 void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& event, int samplePosition)
 {
     //tictoc.Tic(9);
+	static std::list<long> previousSpikesIDs;
 
 	if (eventType == NETWORK)
 	{
@@ -474,6 +478,7 @@ void PeriStimulusTimeHistogramNode::handleEvent(int eventType, MidiMessage& even
         {
             SpikeObject newSpike;
             unpackSpike(&newSpike, dataptr, bufferSize);
+
 			if (newSpike.sortedId > 0) { // drop unsorted spikes
 				trialCircularBuffer->addSpikeToSpikeBuffer(newSpike);
 			}
