@@ -339,10 +339,13 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		case 5:
 			processor->seteAutoDacAssignment(!processor->getAutoDacAssignmentStatus());
 			refreshElectrodeList();
+			break;
 		case 6:
 			processor->setThresholdSyncStatus(!processor->getThresholdSyncStatus());
+			break;
 		case 7:
 			processor->setFlipSignalState(!processor->getFlipSignalState());
+			break;
 		}
 
 	}
