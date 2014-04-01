@@ -124,6 +124,12 @@ public:
     /** Updates name if processor ID changes. */
     void updateName();
 
+    /** Updates name on title bar. */
+    void setDisplayName(const String& string);
+
+    /** Get name on title bar. */
+    String getDisplayName();
+
     /** Determines how wide the editor will be drawn. */
     int desiredWidth;
 
@@ -282,6 +288,9 @@ public:
 
     /** Returns the editors a splitter or merger is connected to */
 	virtual Array<GenericEditor*> getConnectedEditors(){ Array<GenericEditor*> a; return a;}
+
+    /** Returns an array of record statuses for all channels. Used by GraphNode */
+    Array<bool> getRecordStatusArray();
     
 protected:
 
@@ -333,6 +342,7 @@ private:
     void constructorInitialize(GenericProcessor* owner, bool useDefaultParameterEditors);
 
     String name;
+    String displayName;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GenericEditor);
 

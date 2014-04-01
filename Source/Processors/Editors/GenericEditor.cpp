@@ -66,6 +66,7 @@ void GenericEditor::constructorInitialize(GenericProcessor* owner, bool useDefau
 {
 
     name = getAudioProcessor()->getName();
+    displayName = name;
 
     nodeId = owner->getNodeId();
 
@@ -75,7 +76,7 @@ void GenericEditor::constructorInitialize(GenericProcessor* owner, bool useDefau
 
     if (!owner->isMerger() && !owner->isSplitter() && !owner->isUtility())
     {
-        std::cout << "Adding drawer button." << std::endl;
+       // std::cout << "Adding drawer button." << std::endl;
 
         drawerButton = new DrawerButton("name");
         drawerButton->addListener(this);
@@ -118,6 +119,20 @@ void GenericEditor::updateName()
     repaint();
 }
 
+void GenericEditor::setDisplayName(const String& string)
+{
+    displayName = string;
+    getGraphViewer()->updateNodeLocations();
+    repaint();
+}
+
+
+String GenericEditor::getDisplayName()
+{
+    return displayName;
+}
+
+
 void GenericEditor::addParameterEditors(bool useDefaultParameterEditors=true)
 {
     if (useDefaultParameterEditors)
@@ -126,7 +141,7 @@ void GenericEditor::addParameterEditors(bool useDefaultParameterEditors=true)
         int maxX = 15;
         int maxY = 30;
 
-        std::cout << "Adding parameter editors." << std::endl;
+       // std::cout << "Adding parameter editors." << std::endl;
 
         for (int i = 0; i < getProcessor()->getNumParameters(); i++)
         {
@@ -345,14 +360,14 @@ void GenericEditor::paint(Graphics& g)
     // draw title
     if (!isCollapsed)
     {
-        if (!getProcessor()->isMerger() && !getProcessor()->isSplitter())
-            g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
-        else
-            g.drawText(name, 6, 5, 500, 15, Justification::left, false);
+       // if (!getProcessor()->isMerger() && !getProcessor()->isSplitter())
+      //      g.drawText(name+" ("+String(nodeId)+")", 6, 5, 500, 15, Justification::left, false);
+       // else
+            g.drawText(displayName, 6, 5, 500, 15, Justification::left, false);
 
     } else {
         g.addTransform(AffineTransform::rotation(-M_PI/2.0));
-        g.drawText(name, -getHeight()+6, 5, 500, 15, Justification::left, false);
+        g.drawText(displayName, -getHeight()+6, 5, 500, 15, Justification::left, false);
         g.addTransform(AffineTransform::rotation(M_PI/2.0));
     }
 
@@ -451,11 +466,11 @@ void GenericEditor::sliderValueChanged(Slider* slider)
 void GenericEditor::update()
 {
 
-    std::cout << "Editor for ";
+    //std::cout << "Editor for ";
 
     GenericProcessor* p = (GenericProcessor*) getProcessor();
 
-    std::cout << p->getName() << " updating settings." << std::endl;
+   // std::cout << p->getName() << " updating settings." << std::endl;
 
     int numChannels;
 
@@ -467,6 +482,12 @@ void GenericEditor::update()
             numChannels = p->getNumInputs();
 
         channelSelector->setNumChannels(numChannels);
+
+        for (int i = 0; i < numChannels; i++)
+        {
+           // std::cout << p->channels[i]->getRecordState() << std::endl;
+            channelSelector->setRecordStatus(i, p->channels[i]->getRecordState());
+        }
     }
 
     if (numChannels == 0)
@@ -522,6 +543,24 @@ bool GenericEditor::getRecordStatus(int chan)
     {
         return false;
     }
+}
+
+Array<bool> GenericEditor::getRecordStatusArray()
+{
+
+    Array<bool> recordStatuses;
+    recordStatuses.resize(getProcessor()->getNumOutputs());
+
+    for (int i = 0; i < getProcessor()->getNumOutputs(); i++)
+    {
+        if (channelSelector != nullptr)
+            recordStatuses.set(i,channelSelector->getRecordStatus(i));
+        else
+            recordStatuses.set(i,false);
+    }
+
+    return recordStatuses;
+
 }
 
 bool GenericEditor::getAudioStatus(int chan)
@@ -607,6 +646,7 @@ void GenericEditor::saveEditorParameters(XmlElement* xml)
 {
 
     xml->setAttribute("isCollapsed", isCollapsed);
+    xml->setAttribute("displayName", displayName);
 
     saveCustomParameters(xml);
 
@@ -621,6 +661,8 @@ void GenericEditor::loadEditorParameters(XmlElement* xml)
     {
         switchCollapsedState();
     }
+
+    displayName = xml->getStringAttribute("displayName", name);
 
     loadCustomParameters(xml);
 

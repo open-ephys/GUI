@@ -27,6 +27,7 @@
 #include "../RecordNode.h"
 #include "../AudioNode.h"
 #include "../ProcessorGraph.h"
+#include "../../UI/GraphViewer.h"
 
 ChannelSelector::ChannelSelector(bool createButtons, Font& titleFont_) :
     eventsOnly(false), paramsToggled(true), paramsActive(true),
@@ -112,7 +113,7 @@ void ChannelSelector::setNumChannels(int numChans)
 
     int difference = numChans - parameterButtons.size();
 
-    std::cout << difference << " buttons needed." << std::endl;
+   // std::cout << difference << " buttons needed." << std::endl;
 
     if (difference > 0)
     {
@@ -302,7 +303,7 @@ Array<int> ChannelSelector::getActiveChannels()
 void ChannelSelector::setActiveChannels(Array<int> a)
 {
 
-    std::cout << "Setting active channels!" << std::endl;
+    //std::cout << "Setting active channels!" << std::endl;
 
     for (int i = 0; i < parameterButtons.size(); i++)
     {
@@ -586,13 +587,15 @@ void ChannelSelector::buttonClicked(Button* button)
             {
                 editor->getProcessorGraph()->
                 getRecordNode()->
-                setChannelStatus(ch, status);
+                    setChannelStatus(ch, status);
             }
             else     // change parameter directly
             {
                 //std::cout << "Setting record status for channel " << b->getChannel() << std::endl;
                 ch->setRecordState(status);
             }
+
+            editor->getGraphViewer()->repaint();
 
         }
         else // parameter type
