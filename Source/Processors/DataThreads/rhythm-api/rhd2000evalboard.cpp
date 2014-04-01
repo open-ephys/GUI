@@ -1186,6 +1186,11 @@ int Rhd2000EvalBoard::gecDacDataChannel(int dacChannel)
 	return dacChannelAssignment[dacChannel];
 }
 
+void Rhd2000EvalBoard::updateDacAssignment(int dacChannel, int channel)
+{
+	dacChannelAssignment[dacChannel] = channel;
+}
+
 // Assign a particular amplifier channel (0-31) to a DAC channel (0-7).
 void Rhd2000EvalBoard::selectDacDataChannel(int dacChannel, int dataChannel)
 {

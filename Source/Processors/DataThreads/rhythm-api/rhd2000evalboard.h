@@ -159,7 +159,7 @@ public:
     void selectDacDataChannel(int dacChannel, int dataChannel);
 
 	int gecDacDataChannel(int dacChannel);
-
+	void updateDacAssignment(int dacChannel, int channel);
 	void enableExternalFastSettle(bool enable);
 	void setExternalFastSettleChannel(int channel);
 

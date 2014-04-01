@@ -174,6 +174,7 @@ void RHD2000Thread::setDACchannel(int dacOutput, int channel)
 	dacChannels[dacOutput] = channel;
 	dacChannelsToUpdate[dacOutput] = true;
     dacOutputShouldChange = true;
+	evalBoard->updateDacAssignment(dacOutput, channel); // doesn't really change anything, but keep things in sync...
 }
 
 Array<int> RHD2000Thread::getDACchannels()
