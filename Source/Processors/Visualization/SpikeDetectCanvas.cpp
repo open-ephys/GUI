@@ -66,6 +66,19 @@ SpikeDetectCanvas::SpikeDetectCanvas(SpikeDetector* n) :
     addAndMakeVisible(rePCAButton);
  
 
+
+    newIDbuttons = new UtilityButton("New IDs", Font("Small Text", 13, Font::plain));
+    newIDbuttons->setRadius(3.0f);
+    newIDbuttons->addListener(this);
+    addAndMakeVisible(newIDbuttons);
+
+    deleteAllUnits = new UtilityButton("Del All", Font("Small Text", 13, Font::plain));
+    deleteAllUnits->setRadius(3.0f);
+    deleteAllUnits->addListener(this);
+    addAndMakeVisible(deleteAllUnits);
+
+
+
     nextElectrode = new UtilityButton("Next Electrode", Font("Small Text", 13, Font::plain));
     nextElectrode->setRadius(3.0f);
     nextElectrode->addListener(this);
@@ -153,6 +166,9 @@ void SpikeDetectCanvas::resized()
 	
 
 	rePCAButton->setBounds(0, 240, 120,20);
+
+	newIDbuttons->setBounds(0, 270, 120,20);
+	deleteAllUnits->setBounds(0, 300, 120,20);
 	
 }
 
@@ -359,7 +375,20 @@ void SpikeDetectCanvas::buttonClicked(Button* button)
 		SpikeDetectorEditor *ed = (SpikeDetectorEditor *)processor->getEditor();
 
 		ed->setElectrodeComboBox(-1);
+	} else if (button == newIDbuttons)
+	{
+		// generate new IDs
+		processor->getActiveElectrode()->spikeSort->generateNewIDs();
+		electrode->spikePlot->updateUnitsFromProcessor();
+		processor->updateSinks(electrode->electrodeID,false);
+	} else if (button == deleteAllUnits)
+	{
+		// delete unit
+		processor->getActiveElectrode()->spikeSort->removeAllUnits();
+		electrode->spikePlot->updateUnitsFromProcessor();
+		processor->removeAllUnits(electrode->electrodeID);
 	}
+
 
 	repaint();
 
@@ -1577,7 +1606,7 @@ void WaveformAxes::drawBoxes(Graphics &g)
 			}
 
 			g.drawRect(rectx1,recty1,rectx2-rectx1,recty2-recty1,thickness);
-
+			g.drawText(String(units[k].UnitID), rectx1,recty1-15,rectx2-rectx1,15,juce::Justification::centred,false);
 		}
 	}
 
@@ -1735,6 +1764,7 @@ void PCAProjectionAxes::drawUnit(Graphics &g, PCAUnit unit)
 		else 
 			thickness = 1;
 
+		double cx=0,cy=0;
 		for (int k=0;k<unit.poly.pts.size()-1;k++)
 		{
 			// convert projection coordinates to screen coordinates.
@@ -1742,6 +1772,8 @@ void PCAProjectionAxes::drawUnit(Graphics &g, PCAUnit unit)
 			float y1 = (unit.poly.offset.Y + unit.poly.pts[k].Y - pcaMin[1]) / (pcaMax[1]-pcaMin[1]) * h;
 			float x2 = (unit.poly.offset.X + unit.poly.pts[k+1].X - pcaMin[0]) / (pcaMax[0]-pcaMin[0]) * w;
 			float y2 = (unit.poly.offset.Y + unit.poly.pts[k+1].Y - pcaMin[1]) / (pcaMax[1]-pcaMin[1]) * h;
+			cx+=x1;
+			cy+=y1;
 			g.drawLine(x1,y1,x2,y2,thickness);
 		}
 		float x1 = (unit.poly.offset.X + unit.poly.pts[0].X - pcaMin[0]) / (pcaMax[0]-pcaMin[0]) * w;
@@ -1750,7 +1782,14 @@ void PCAProjectionAxes::drawUnit(Graphics &g, PCAUnit unit)
 		float y2 = (unit.poly.offset.Y + unit.poly.pts[unit.poly.pts.size()-1].Y - pcaMin[1]) / (pcaMax[1]-pcaMin[1]) * h;
 		g.drawLine(x1,y1,x2,y2,thickness);
 
+		cx+=x2;
+		cy+=y2;
+
+		g.drawText(String(unit.UnitID), (cx/unit.poly.pts.size() )-10,(cy/unit.poly.pts.size())-10,20,15,juce::Justification::centred,false);
 	}
+
+	
+
 
 }
 void PCAProjectionAxes::paint(Graphics& g)

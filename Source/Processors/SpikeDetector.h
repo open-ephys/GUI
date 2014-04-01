@@ -254,6 +254,8 @@ public:
 	void updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, uint8 b, bool addRemove);
 	/** sync PSTH: inform of a name change*/
 	void updateSinks(int electrodeID, String NewName);
+	/** sync PSTH: remove all units*/
+	void updateSinks(int electrodeID, bool b);
 
 	/** used to generate messages over the network and to inform PSTH sink */
 	void addNewUnit(int electrodeID, int newUnitID, uint8 r, uint8 g, uint8 b);
@@ -306,6 +308,8 @@ public:
 	std::vector<float> getElectrodeVoltageScales(int electrodeID);
 	//void getElectrodePCArange(int electrodeID, float &minX,float &maxX,float &minY,float &maxY);
 	//void setElectrodePCArange(int electrodeID, float minX,float maxX,float minY,float maxY);
+	
+	void removeAllUnits(int electrodeID);
 
 	void setElectrodeVoltageScale(int electrodeID, int index, float newvalue);
 	bool isSelectedElectrodeRecorded(int channel);

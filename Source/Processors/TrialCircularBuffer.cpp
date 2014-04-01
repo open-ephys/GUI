@@ -1841,6 +1841,19 @@ void  TrialCircularBuffer::removeUnit(int electrodeID, int unitID)
 
 }
 
+void  TrialCircularBuffer::removeAllUnits(int electrodeID)
+{
+ const ScopedLock myScopedLock (psthMutex);
+
+  for (int e =0;e<electrodesPSTH.size();e++)
+  {
+	  if (electrodesPSTH[e].electrodeID == electrodeID)
+	  {
+		  electrodesPSTH[e].unitsPSTHs.clear();
+	  }
+  }
+}
+
 
 void TrialCircularBuffer::removeElectrode(int electrodeID)
 {

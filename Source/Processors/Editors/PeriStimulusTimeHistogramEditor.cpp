@@ -686,7 +686,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 					GenericPlot *newplot;
 					if (compactView)
 					{
-						String plotName = electrodeName+" Unit:"+String(1+u);
+						String plotName = electrodeName+" Unit:"+String(processor->trialCircularBuffer->getUnitID(e,u));
 					    newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),
@@ -702,7 +702,7 @@ void PeriStimulusTimeHistogramCanvas::update()
 						}
 					} else
 					{
-						String plotName = electrodeName+" Unit:"+String(1+u);
+						String plotName = electrodeName+" Unit:"+String(processor->trialCircularBuffer->getUnitID(e,u));
 					newplot = new GenericPlot(plotName,psthDisplay,++plotID,SPIKE_PLOT,processor->trialCircularBuffer,
 						electrodeID,
 						processor->trialCircularBuffer->getUnitID(e,u),

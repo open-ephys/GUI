@@ -376,6 +376,14 @@ void SpikeDetector::removeUnit(int electrodeID, int unitID)
 	
 }
 
+
+void SpikeDetector::removeAllUnits(int electrodeID)
+{
+	String eventlog = "RemoveAllUnits "+String(electrodeID);
+	addNetworkEventToQueue(StringTS(eventlog));
+	updateSinks( electrodeID,true);
+}
+
 RHD2000Thread* SpikeDetector::getRhythmAccess()
 {
 
@@ -459,6 +467,33 @@ void SpikeDetector::updateSinks(int electrodeID, int unitID, uint8 r, uint8 g, u
 				}
 				((PeriStimulusTimeHistogramEditor *) node->getEditor())->updateCanvas();
 			}
+		}
+	}
+}
+
+void SpikeDetector::updateSinks(int electrodeID, bool rem)
+{
+	// inform sinks about a removal of all units
+	ProcessorGraph *g = getProcessorGraph();
+	Array<GenericProcessor*> p = g->getListOfProcessors();
+	for (int k=0;k<p.size();k++)
+	{
+		if (p[k]->getName() == "PSTH")
+		{
+			PeriStimulusTimeHistogramNode *node = (PeriStimulusTimeHistogramNode*)p[k];
+			if (node->trialCircularBuffer != nullptr)
+			{
+				if (rem)
+				{
+					node->trialCircularBuffer->removeAllUnits(electrodeID);
+				}
+				(((PeriStimulusTimeHistogramEditor *) node->getEditor()))->updateCanvas();
+			}
+		}
+		if (p[k]->getName() == "Spike Viewer")
+		{
+			SpikeDisplayNode* node = (SpikeDisplayNode*)p[k];
+			node->syncWithSpikeDetector();
 		}
 	}
 }

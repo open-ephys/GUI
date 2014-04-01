@@ -321,6 +321,8 @@ public:
 	void removeElectrode(int electrodeID);
 	void addNewUnit(int electrodeID, int unitID, uint8 r,uint8 g,uint8 b);
 	void removeUnit(int electrodeID, int unitID);
+	
+	void removeAllUnits(int electrodeID);
 	int getNumTrialsInChannel(int electrodeID, int channelID);
 	int getNumTrialsInUnit(int electrodeID, int unitID);
 	void getElectrodeConditionRange(int electrodeID, int channelID, double &xmin, double &xmax)	;

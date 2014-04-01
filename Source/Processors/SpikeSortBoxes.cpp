@@ -1035,6 +1035,25 @@ void  SpikeSortBoxes::EndCriticalSection()
 }
 
 
+ void SpikeSortBoxes::generateNewIDs()
+ {
+	const ScopedLock myScopedLock (mut);
+	for (int k=0;k<boxUnits.size();k++)
+	  {
+		  boxUnits[k].UnitID = generateUnitID();
+	}
+	for (int k=0;k<pcaUnits.size();k++)
+	{
+		pcaUnits[k].UnitID = generateUnitID();
+	}
+ }
+
+void SpikeSortBoxes::removeAllUnits()
+{
+	const ScopedLock myScopedLock (mut);
+	boxUnits.clear();
+	pcaUnits.clear();
+}
 
 bool SpikeSortBoxes::removeUnit(int unitID)
 {

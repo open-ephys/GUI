@@ -248,6 +248,8 @@ public:
 	bool isPCAfinished();
 
 	bool removeUnit(int unitID);
+	
+	void removeAllUnits();
 	bool addBoxToUnit(int channel, int unitID);
 	bool addBoxToUnit(int channel, int unitID, Box B);
 	bool removeBoxFromUnit(int unitID, int boxIndex);
@@ -261,7 +263,7 @@ public:
 	void updatePCAUnits(std::vector<PCAUnit> _units);
 	int generateUnitID();
     int generateLocalID();
-
+	void generateNewIDs();
     void setSelectedUnitAndbox(int unitID, int boxID);
 	void getSelectedUnitAndbox(int &unitID, int &boxid);
 	void saveCustomParametersToXml(XmlElement *electrodeNode);
