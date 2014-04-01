@@ -1286,7 +1286,7 @@ void Rhd2000EvalBoard::setDacHighpassFilter(double cutoff)
 void Rhd2000EvalBoard::setDacThresholdVoltage(int dacChannel, float voltage_threshold)
 {
      int threshLevel = (voltage_threshold / 0.195) + 32768;
-    setDacThreshold(0, abs(threshLevel), voltage_threshold >= 0);
+    setDacThreshold(dacChannel, abs(threshLevel), voltage_threshold >= 0);
 
 }
 
