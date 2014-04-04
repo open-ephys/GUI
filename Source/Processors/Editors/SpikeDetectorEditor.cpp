@@ -362,6 +362,7 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 		depthprobeMenu.addItem(5,"16 ch, 125um");
 		depthprobeMenu.addItem(6,"24 ch, 125um");
 		depthprobeMenu.addItem(7,"32 ch, 50um");
+		depthprobeMenu.addItem(8,"32 ch, 25um");
 		probeMenu.addSubMenu("Depth probe", depthprobeMenu,true);
 
 		const int result = probeMenu.show();
@@ -421,6 +422,13 @@ void SpikeDetectorEditor::buttonEvent(Button* button)
 				nElectrodes = 32;
 				interelectrodeDistance = 0.050;
 				firstElectrodeOffset= -0.5;
+                break;
+            case 8:
+				ProbeType = "Depth Probe";
+                nChansPerElectrode = 1;
+				nElectrodes = 32;
+				interelectrodeDistance = 0.025;
+				firstElectrodeOffset= -0.075;
                 break;
         }
 

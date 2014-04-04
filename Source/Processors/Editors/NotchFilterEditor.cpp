@@ -91,11 +91,11 @@ NotchFilterEditor::~NotchFilterEditor()
 
 void NotchFilterEditor::setDefaults(double center, double band)
 {
-    bandwidthString = String(roundFloatToInt(center));
-    centerString = String(roundFloatToInt(band));
+    bandwidthString = String(roundFloatToInt(band));
+    centerString = String(roundFloatToInt(center));
 
-    centerValue->setText(bandwidthString, dontSendNotification);
-    bandwidthValue->setText(centerString, dontSendNotification);
+    centerValue->setText(centerString, dontSendNotification);
+    bandwidthValue->setText(bandwidthString, dontSendNotification);
 }
 
 

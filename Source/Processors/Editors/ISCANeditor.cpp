@@ -257,7 +257,7 @@ void ISCANeditor::buttonCallback(Button* button)
 		} else if (result < 4000)
 		{
 			processor->setCalibrationMode(result-3000);
-	
+			setCalibrationMode(result-3000);
 		}
 
 	}
