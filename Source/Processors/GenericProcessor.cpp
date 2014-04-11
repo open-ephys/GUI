@@ -27,7 +27,7 @@
 GenericProcessor::GenericProcessor(const String& name_) : AccessClass(),
     sourceNode(0), destNode(0), isEnabled(true), wasConnected(false),
     nextAvailableChannel(0), saveOrder(-1), loadOrder(-1), currentChannel(-1),
-     parametersAsXml(nullptr),  name(name_), paramsWereLoaded(false), editor(0), sendSampleCount(true)
+     parametersAsXml(nullptr),  name(name_), paramsWereLoaded(false), editor(nullptr), sendSampleCount(true)
 {
 	  settings.numInputs = settings.numOutputs = settings.sampleRate = 0;
 
@@ -342,33 +342,28 @@ void GenericProcessor::update()
     }
     else
     {
+		// This is a source node!
+		// Use names derived from the Data Thread 
         settings.numOutputs = getDefaultNumOutputs();
         settings.sampleRate = getDefaultSampleRate();
 		
 		int numChan = getNumOutputs();
 		int numADC_Chan = getDefaultADCoutputs();
+		StringArray names; 
+		Array<channelType> types;
+		Array<int> stream, orig;
+		getChannelNamesAndType(names,types,stream,orig);
         for (int i = 0; i < numChan; i++)
         {
             Channel* ch = new Channel(this, i );
+              ch->setName(names[i]);
+			  ch->setType(types[i]);
 
-			// if (i < oldNumChannels)
-			// 	ch->setName(oldNames[i]);
-			//else if (i >= numChan-numADC_Chan) 
-			//	ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
-
-            if (i >= numChan-numADC_Chan) 
-              ch->setName("ADC"+String(1+i-(numChan-numADC_Chan)));
-
-            if (i >= numChan-numADC_Chan)
-              ch->isADCchannel = true;
-            
+			  ch->originalStream = stream[i];
+			  ch->originalChannel = orig[i];
 
             ch->sampleRate = getDefaultSampleRate();
-
-          //  if (ch->isADCchannel)
-                ch->bitVolts = getDefaultBitVolts();
-          //  else
-          //      ch->bitVolts = getDefaultAdcBitVolts(); // should implement this
+            ch->bitVolts = getDefaultBitVolts();
 
              if (i < recordStatus.size())
             {

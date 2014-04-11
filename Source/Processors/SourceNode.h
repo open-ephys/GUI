@@ -54,7 +54,12 @@ public:
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
 
     void setParameter(int parameterIndex, float newValue);
+	
 
+	int modifyChannelName(channelType t, int str, int ch, String newName);
+	void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber);
+	void setDefaultNamingScheme(int scheme);
+	void getEventChannelNames(StringArray &names);
     float getSampleRate();
     float getDefaultSampleRate();
     int getDefaultNumOutputs();

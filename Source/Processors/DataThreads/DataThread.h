@@ -27,6 +27,7 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include <stdio.h>
 #include "DataBuffer.h"
+#include "../GenericProcessor.h"
 
 class SourceNode;
 
@@ -92,6 +93,20 @@ public:
     {
         return 0;
     }
+	virtual int modifyChannelName(channelType t, int stream, int ch, String newName)
+	{
+		return -1;
+	}
+	virtual void setDefaultNamingScheme(int scheme)
+	{
+	}
+
+	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber)
+	{
+	};
+	virtual void getEventChannelNames(StringArray &names)
+	{
+	}
 
     /** Returns the number of ADC channels of the data source.*/
     virtual int getNumADCchannels()

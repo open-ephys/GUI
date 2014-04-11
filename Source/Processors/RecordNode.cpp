@@ -50,7 +50,7 @@ RecordNode::RecordNode()
     settings.numOutputs = 0;
 
     eventChannel = new Channel(this, 0);
-    eventChannel->isEventChannel = true;
+    eventChannel->setType(EVENT_CHANNEL); 
 
     recordMarker = new char[10];
     for (int i = 0; i < 9; i++)
@@ -209,7 +209,7 @@ void RecordNode::updateFileName(Channel* ch)
     String filename = rootFolder.getFullPathName();
     filename += rootFolder.separatorString;
 
-    if (!ch->isEventChannel)
+	if (ch->getType() != EVENT_CHANNEL)
     {
         filename += ch->nodeId;
         filename += "_";
@@ -597,7 +597,7 @@ String RecordNode::generateHeader(Channel* ch)
     header += String(HEADER_SIZE);
     header += ";\n";
 
-    if (ch->isEventChannel)
+    if  (ch->getType() == EVENT_CHANNEL)
     {
         header += "header.description = 'each record contains one 64-bit timestamp, one 16-bit sample position, one uint8 event type, one uint8 processor ID, one uint8 event ID, one uint8 event channel, and one uint16 recordingNumber'; \n";
 
@@ -616,7 +616,7 @@ String RecordNode::generateHeader(Channel* ch)
     header += ch->name;
     header += "';\n";
 
-    if (ch->isEventChannel)
+   if  (ch->getType() == EVENT_CHANNEL)
     {
 
         header += "header.channelType = 'Event';\n";

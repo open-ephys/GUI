@@ -112,17 +112,24 @@ void SourceNode::updateSettings()
 {
     if (inputBuffer == 0 && dataThread != 0)
     {
-
+        dataThread->updateChannelNames();
         inputBuffer = dataThread->getBufferAddress();
-        //dataThread->updateChannelNames();
         std::cout << "Input buffer address is " << inputBuffer << std::endl;
+		// update channel names
+			/*
+	for (int k=0;k<Names.size();k++)
+	{
+		sn->channels[k]->setName(Names[k]);
+	}
+	*/
+
     }
 
     for (int i = 0; i < dataThread->getNumEventChannels(); i++)
     {
         Channel* ch = new Channel(this, i);
         ch->eventType = TTL;
-        ch->isEventChannel = true;
+		ch->setType(EVENT_CHANNEL);
         eventChannels.add(ch);
     }
 
@@ -176,6 +183,50 @@ int SourceNode::getDefaultADCoutputs()
         return dataThread->getNumADCchannels();
     else
         return 0;
+
+}
+int SourceNode::modifyChannelName(channelType t, int str, int ch, String newName)
+{
+    if (dataThread != 0) {
+        int channel_index = dataThread->modifyChannelName(t, str, ch, newName);
+		if (channel_index >= 0 && channel_index < channels.size())
+		{
+			channels[channel_index]->setName(newName);
+		}
+		return channel_index;
+	}
+	return -1;
+}
+
+void SourceNode::getChannelNamesAndType(StringArray &names, Array<channelType> &types, Array<int> &stream, Array<int> &originalChannelNumber)
+{
+    if (dataThread != 0)
+        dataThread->getChannelNamesAndType(names, types,stream,originalChannelNumber);
+}
+
+void SourceNode::setDefaultNamingScheme(int scheme)
+{
+    if (dataThread != 0) {
+		dataThread->setDefaultNamingScheme(scheme);
+
+		StringArray names;
+		Array<channelType> types;
+		Array<int> stream;
+		Array<int> originalChannelNumber;
+		getChannelNamesAndType(names, types, stream, originalChannelNumber);
+		for (int k=0;k<names.size();k++)
+		{
+			modifyChannelName(types[k],stream[k],originalChannelNumber[k], names[k]);
+		}
+	}
+
+}
+
+void SourceNode::getEventChannelNames(StringArray &names)
+{
+    if (dataThread != 0)
+        dataThread->getEventChannelNames(names);
+
 }
 
 int SourceNode::getDefaultNumOutputs()

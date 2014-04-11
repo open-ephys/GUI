@@ -117,7 +117,7 @@ StringArray ISCANnode::getAnalogDeviceNames(Array<int> &channelNumbers)
 	StringArray names;
 	for (int k=0;k<channels.size();k++)
 	{
-		if (channels[k]->isADCchannel) {
+		if (channels[k]->getType() == ADC_CHANNEL) {
 			names.add(channels[k]->getName());
 			channelNumbers.add(k);
 		}

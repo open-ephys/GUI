@@ -97,12 +97,19 @@ public:
     void enableAdcs(bool);
 
     bool isAcquisitionActive();
-
+	
+	virtual int modifyChannelName(channelType t, int str, int k, String newName);
+	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber);
+	virtual void getEventChannelNames(StringArray &Names);
     void updateChannelNames();
 	Array<int> getDACchannels();
 	void setDACchannel(int dacOutput, int channel);
 	void setDACthreshold(int dacOutput, float threshold);
+	void setDefaultNamingScheme(int scheme);
+
 private:
+	void setDefaultChannelNamesAndType();
+	bool getOldNameWasModified(channelType t, int str, int k, String &oldName, int &index);
 
     ScopedPointer<Rhd2000EvalBoard> evalBoard;
     Rhd2000Registers chipRegisters;
@@ -167,6 +174,15 @@ private:
 	float *dacThresholds;
 	bool *dacChannelsToUpdate;
 	Array<int> chipId;
+
+	// used for data stream names...
+	int numberingScheme ;
+	StringArray Names, oldNames;
+	Array<channelType> type, oldType;
+	Array<int> stream, oldStream;
+	Array<bool> modifiedName, oldModifiedName;
+	Array<int> originalChannelNumber, oldChannelNumber;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Thread);
 };

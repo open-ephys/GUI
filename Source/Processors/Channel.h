@@ -47,6 +47,9 @@ class GenericProcessor;
 
 */
 
+enum channelType {DATA_CHANNEL = 0, AUX_CHANNEL = 1, ADC_CHANNEL = 2, EVENT_CHANNEL = 3};
+
+
 class Channel
 
 {
@@ -63,6 +66,12 @@ public:
 
     /** Sets the name of a given channel. */
     void setName(String);
+
+   /** Sets the type of a given channel. */
+    void setType(channelType t);
+
+   /** Sets the type of a given channel. */
+    channelType getType();
 
     /** Restores the default settings for a given channel. */
     void reset();
@@ -91,13 +100,14 @@ public:
     // crucial information:
     float sampleRate;
     float bitVolts;
+	channelType type;
     
     // boolean values:
-    bool isEventChannel;
-    bool isADCchannel;
     bool isMonitored;
     bool isEnabled;
 
+	int originalStream;
+	int originalChannel;
     // file info (for disk writing):
     String filename;
     FILE* file;

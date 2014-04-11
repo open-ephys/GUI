@@ -211,7 +211,7 @@ void LfpDisplayCanvas::update()
 
         String chName = processor->channels[i]->getName();
         lfpDisplay->channelInfo[i]->setName(chName);
-		if (processor->channels[i]->isADCchannel)
+		if (processor->channels[i]->getType() == ADC_CHANNEL || processor->channels[i]->getType() == AUX_CHANNEL)
 	    {
 		    lfpDisplay->channelInfo[i]->setCanBeInverted(false);
 		}

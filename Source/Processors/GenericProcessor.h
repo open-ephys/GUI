@@ -29,6 +29,7 @@
 #include "Editors/GenericEditor.h"
 #include "Parameter.h"
 #include "../AccessClass.h"
+#include "Channel.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -39,6 +40,7 @@ class UIComponent;
 class GenericEditor;
 class Parameter;
 class Channel;
+enum channelType;
 
 /**
 
@@ -56,6 +58,7 @@ class Channel;
   @see ProcessorGraph, GenericEditor, SourceNode, FilterNode, LfpDisplayNode
 
 */
+
 
 class GenericProcessor : public AudioProcessor,
     public AccessClass
@@ -128,12 +131,24 @@ public:
     {
         return GenericProcessor::unusedNameString;
     }
-
     /** Returns the name of the output channel with a given index.*/
     virtual const String getOutputChannelName(int channelIndex) const
     {
         return GenericProcessor::unusedNameString;
     }
+
+	/** returns the names and types of all data, aux and adc channels */
+	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber)
+	{
+
+	}
+	virtual int modifyChannelName(channelType t, int stream, int ch, String newName)
+	{
+		return -1;
+	}
+	virtual void getEventChannelNames(StringArray &Names)
+	{
+	}
 
     /** Returns the name of the parameter with a given index.*/
     const String getParameterName(int parameterIndex);

@@ -47,6 +47,79 @@ class UtilityButton;
 */
 class SourceNode;
 
+class FPGAchannelComponent;
+class RHD2000Editor;
+class FPGAcanvas;
+
+class FPGAchannelList : public Component,
+	public AccessClass, Button::Listener, ComboBox::Listener
+{
+public:
+    
+	FPGAchannelList(GenericProcessor* proc, Viewport *p, FPGAcanvas*c);
+    ~FPGAchannelList();
+	void setNewName(int stream, int channelIndex, channelType t, String newName);
+	void disableAll();
+	void enableAll();
+    void paint(Graphics& g);
+	void buttonClicked(Button *btn);
+	void update();
+	void updateButtons();
+	int getNumChannels();
+	void comboBoxChanged(ComboBox *b);
+
+private:
+	GenericProcessor* proc;
+	Viewport *viewport;
+	FPGAcanvas *canvas;
+	ScopedPointer<UtilityButton> impedanceButton;
+	ScopedPointer<ComboBox> numberingScheme;
+	ScopedPointer<Label> numberingSchemeLabel;
+	OwnedArray<Label> staticLabels;
+	OwnedArray<FPGAchannelComponent> channelComponents;
+   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FPGAchannelList);
+};
+
+
+class FPGAchannelComponent : public Component, public AccessClass, Button::Listener, public ComboBox::Listener, public Label::Listener
+{
+public:
+    FPGAchannelComponent(FPGAchannelList* cl,int stream, int ch, channelType t,  int gainIndex_, String name_);
+    ~FPGAchannelComponent() {}
+	Colour getDefaultColor(int ID);
+
+	void disableEdit();
+	void enableEdit();
+
+
+    void setEnabledState(bool);
+    bool getEnabledState()
+    {
+        return isEnabled;
+    }
+	void buttonClicked(Button *btn);
+	void setUserDefinedData(int d);
+	int getUserDefinedData();
+	void comboBoxChanged(ComboBox* comboBox);
+	void labelTextChanged(Label* lbl);
+
+	void resized();
+private:
+	FPGAchannelList* channelList;
+	ScopedPointer<Label> staticLabel, editName, impedance;
+	ScopedPointer<ComboBox> gainComboBox;
+	int channel;
+    String name;
+	int stream;
+	channelType type;
+	int gainIndex;
+	int userDefinedData;
+	Font font;
+    bool isEnabled;
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FPGAchannelComponent);
+};
+
+
 class FPGAcanvas : public Visualizer, public Button::Listener
 {
 public:
@@ -62,13 +135,14 @@ public:
 
 	void refreshState();
     void update();
-	void setParameter(int, float) {}
-	void setParameter(int, int, int, float) {}
+	void setParameter(int, float) ;
+	void setParameter(int, int, int, float) ;
 
     void resized();
 	void buttonClicked(Button* button);
-
+	Viewport* channelsViewport;
 	GenericProcessor* processor;
+	ScopedPointer<FPGAchannelList> channelList;
 };
 
 class RHD2000Editor : public VisualizerEditor, public ComboBox::Listener
@@ -81,7 +155,7 @@ public:
     void buttonEvent(Button* button);
 
     void scanPorts();
-	   void comboBoxChanged(ComboBox* comboBox);
+	void comboBoxChanged(ComboBox* comboBox);
  
     void startAcquisition();
     void stopAcquisition();
