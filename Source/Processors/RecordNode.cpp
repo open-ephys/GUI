@@ -466,6 +466,29 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
         }
 
         allFilesOpened = true;
+		
+		/* verify we don't write two channels to the same file! */
+		StringArray tmp;
+		bool error = false;
+		for (int k=0;k<channelPointers.size();k++)
+		{
+			if (tmp.contains(channelPointers[k]->filename,true))
+			{
+				error = true;
+			}
+			else 
+			{
+					tmp.add(channelPointers[k]->filename);
+			}
+		}
+		if (error)
+		{
+	       const MessageManagerLock mmLock;
+			getControlPanel()->recordButton->setToggleState(false,true);
+			std::cout << "WARNING. CANNOT RECORD SINCE TWO CHANNELS ARE WRITING ON THE SAME FILENAME! " << std::endl;
+
+		}
+
 
     }
     else if (parameterIndex == 0)
