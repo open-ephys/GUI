@@ -24,6 +24,8 @@
 #ifndef __GENERICPROCESSOR_H_1F469DAF__
 #define __GENERICPROCESSOR_H_1F469DAF__
 
+enum channelType {DATA_CHANNEL = 0, AUX_CHANNEL = 1, ADC_CHANNEL = 2, EVENT_CHANNEL = 3};
+
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 #include "Editors/GenericEditor.h"
@@ -40,7 +42,6 @@ class UIComponent;
 class GenericEditor;
 class Parameter;
 class Channel;
-enum channelType;
 
 /**
 
@@ -136,7 +137,7 @@ public:
     {
         return GenericProcessor::unusedNameString;
     }
-
+    
 	/** returns the names and types of all data, aux and adc channels */
 	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber)
 	{

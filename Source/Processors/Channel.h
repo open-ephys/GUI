@@ -47,8 +47,6 @@ class GenericProcessor;
 
 */
 
-enum channelType {DATA_CHANNEL = 0, AUX_CHANNEL = 1, ADC_CHANNEL = 2, EVENT_CHANNEL = 3};
-
 
 class Channel
 
@@ -97,6 +95,8 @@ public:
     /** Pointer to the channel's parent processor. */
     GenericProcessor* processor;
 
+
+
     // crucial information:
     float sampleRate;
     float bitVolts;
@@ -113,6 +113,8 @@ public:
     FILE* file;
 
     String name;
+
+
 
 private:
 
