@@ -485,8 +485,6 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
 		{
 	       const MessageManagerLock mmLock;
 			getControlPanel()->recordButton->setToggleState(false,true);
-			std::cout << "WARNING. CANNOT RECORD SINCE TWO CHANNELS ARE WRITING ON THE SAME FILENAME! " << std::endl;
-
 		}
 
 

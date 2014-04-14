@@ -103,7 +103,7 @@ public:
 	virtual void getEventChannelNames(StringArray &Names);
     void updateChannelNames();
 	Array<int> getDACchannels();
-	void setDACchannel(int dacOutput, int channel);
+	void setDACchannel(int dacOutput, int stream, int channel);
 	void setDACthreshold(int dacOutput, float threshold);
 	void setDefaultNamingScheme(int scheme);
 
@@ -170,7 +170,7 @@ private:
     double cableLengthPortA, cableLengthPortB, cableLengthPortC, cableLengthPortD;
 
     int audioOutputL, audioOutputR;
-	int *dacChannels;
+	int *dacChannels, *dacStream;
 	float *dacThresholds;
 	bool *dacChannelsToUpdate;
 	Array<int> chipId;

@@ -117,12 +117,14 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
 
         // probably better to do this with a thread, but a timer works for now:
        // startTimer(10); // initialize the board in the background
+	   dacStream = new int[8];
 	   dacChannels = new int[8];
 	   dacThresholds = new float[8];
 	   dacChannelsToUpdate = new bool[8];
 	   for (int k = 0; k < 8; k++)
        {
 		    dacChannelsToUpdate[k] = true;
+			dacStream[k] = 0;
             setDACthreshold(k, 65534);
        }
 
@@ -154,6 +156,7 @@ RHD2000Thread::~RHD2000Thread()
 
     deleteAndZero(dataBlock);
 
+	delete dacStream;
 	delete dacChannels;
 	delete dacThresholds;
 	delete dacChannelsToUpdate;
@@ -169,9 +172,10 @@ void RHD2000Thread::setDACthreshold(int dacOutput, float threshold)
 //	evalBoard->setDacThresholdVoltage(dacOutput,threshold);
 }
 
-void RHD2000Thread::setDACchannel(int dacOutput, int channel)
+void RHD2000Thread::setDACchannel(int dacOutput, int stream, int channel)
 {
 	dacChannels[dacOutput] = channel;
+	dacStream[dacOutput] = stream;
 	dacChannelsToUpdate[dacOutput] = true;
     dacOutputShouldChange = true;
 	evalBoard->updateDacAssignment(dacOutput, channel); // doesn't really change anything, but keep things in sync...
@@ -1370,6 +1374,7 @@ bool RHD2000Thread::updateBuffer()
 				if (dacChannels[k] >= 0)
 				{
 					evalBoard->enableDac(k, true);
+					evalBoard->selectDacDataStream(k, dacStream[k]);
 					evalBoard->selectDacDataChannel(k, dacChannels[k]);
 					evalBoard->setDacThresholdVoltage(k, (int) dacThresholds[k]);
 				}

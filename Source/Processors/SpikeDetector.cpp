@@ -439,7 +439,7 @@ void SpikeDetector::assignDACtoChannel(int dacOutput, int channel)
 	RHD2000Thread* th = getRhythmAccess();
 	if (th != nullptr)
 	{
-		th->setDACchannel(dacOutput, channel);
+		th->setDACchannel(dacOutput, channels[channel]->originalStream, channels[channel]->originalChannel);
 	}
 }
 
