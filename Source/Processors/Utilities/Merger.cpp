@@ -245,7 +245,7 @@ void Merger::updateSettings()
         {
             Channel* ch = new Channel(this, i);
             ch->sampleRate = getDefaultSampleRate();
-            ch->bitVolts = getDefaultBitVolts();
+			ch->setGain(getDefaultBitVolts());
 
             channels.add(ch);
         }

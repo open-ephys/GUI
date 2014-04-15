@@ -98,8 +98,9 @@ public:
 
     bool isAcquisitionActive();
 	
+	virtual int modifyChannelGain(channelType t, int str, int ch, float gain);
 	virtual int modifyChannelName(channelType t, int str, int k, String newName);
-	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber);
+	virtual void getChannelsInfo(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains);
 	virtual void getEventChannelNames(StringArray &Names);
     void updateChannelNames();
 	Array<int> getDACchannels();
@@ -109,7 +110,7 @@ public:
 
 private:
 	void setDefaultChannelNamesAndType();
-	bool getOldNameWasModified(channelType t, int str, int k, String &oldName, int &index);
+	bool channelModified(channelType t, int str, int k, String &oldName, float &oldGain, int &index);
 
     ScopedPointer<Rhd2000EvalBoard> evalBoard;
     Rhd2000Registers chipRegisters;
@@ -179,6 +180,7 @@ private:
 	int numberingScheme ;
 	StringArray Names, oldNames;
 	Array<channelType> type, oldType;
+	Array<float> gains, oldGains;
 	Array<int> stream, oldStream;
 	Array<bool> modifiedName, oldModifiedName;
 	Array<int> originalChannelNumber, oldChannelNumber;

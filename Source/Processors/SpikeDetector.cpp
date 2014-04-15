@@ -901,8 +901,8 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
 
     int chan = *(electrodes[electrodeNumber]->channels+currentChannel);
 
-    s->gain[currentChannel] = (1.0f / channels[chan]->bitVolts)*1000;
-    s->threshold[currentChannel] = (int) electrodes[electrodeNumber]->thresholds[currentChannel]; // / channels[chan]->bitVolts * 1000;
+	s->gain[currentChannel] = (1.0f / channels[chan]->getChannelGain())*1000;
+    s->threshold[currentChannel] = (int) electrodes[electrodeNumber]->thresholds[currentChannel]; 
 
     // cycle through buffer
 
@@ -915,7 +915,7 @@ void SpikeDetector::addWaveformToSpikeObject(SpikeObject* s,
             // warning -- be careful of bitvolts conversion
 			// do not flip signal (!).
 			float value = getNextSample(electrodes[electrodeNumber]->channels[currentChannel]);
-            s->data[currentIndex] = uint16(MIN(65535,MAX(0,value / channels[chan]->bitVolts + 32768)));
+			s->data[currentIndex] = uint16(MIN(65535,MAX(0,value / channels[chan]->getChannelGain() + 32768)));
  			// recovered data
 			//float value2 = (s->data[currentIndex]-32768) /float(s->gain[currentChannel])*1000.0f;
 

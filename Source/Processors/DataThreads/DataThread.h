@@ -97,11 +97,15 @@ public:
 	{
 		return -1;
 	}
+	virtual int modifyChannelGain(channelType t, int stream, int ch, float gain)
+	{
+		return -1;
+	}
 	virtual void setDefaultNamingScheme(int scheme)
 	{
 	}
 
-	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber)
+	virtual void getChannelsInfo(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains)
 	{
 	};
 	virtual void getEventChannelNames(StringArray &names)

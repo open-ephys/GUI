@@ -528,7 +528,7 @@ String PeriStimulusTimeHistogramNode::generateHeader()
     header += "header.bitVolts = ";
 	if (recordNode->channels.size() > 0)
 	{
-		header += String(recordNode->channels[0]->bitVolts);
+		header += String(recordNode->channels[0]->getChannelGain());
 	}
 	else
 	{

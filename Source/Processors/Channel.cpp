@@ -50,6 +50,22 @@ Channel::Channel(const Channel& ch)
     setRecordState(false);
 }
 
+float Channel::getChannelGain()
+{
+	return bitVolts;
+}
+
+String Channel::getChannelName()
+{
+	return name;
+}
+
+void Channel::setGain(float gain)
+{
+    bitVolts = gain;
+}
+
+
 void Channel::setProcessor(GenericProcessor* p)
 {
     processor = p;

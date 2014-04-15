@@ -296,17 +296,7 @@ void GenericProcessor::clearSettings()
 void GenericProcessor::update()
 {
 
-    //std::cout << getName() << " updating settings." << std::endl;
-	// SO patched here to keep original channel names
-
-	int oldNumChannels = channels.size();
-	StringArray oldNames;
-	for (int k = 0; k < oldNumChannels; k++)
-	{
-		oldNames.add(channels[k]->getName());
-	}
-
-    clearSettings();
+   clearSettings();
 
     if (sourceNode != 0)
     {
@@ -320,7 +310,7 @@ void GenericProcessor::update()
             Channel* sourceChan = sourceNode->channels[i];
             Channel* ch = new Channel(*sourceChan);
             ch->setProcessor(this);
-            ch->bitVolts = ch->bitVolts*getDefaultBitVolts();
+			ch->setGain(sourceChan->getChannelGain());// ???    ch->bitVolts*getDefaultBitVolts();
 
             if (i < recordStatus.size())
             {
@@ -335,7 +325,7 @@ void GenericProcessor::update()
             Channel* sourceChan = sourceNode->eventChannels[i];
             Channel* ch = new Channel(*sourceChan);
             ch->sampleRate = getDefaultSampleRate();
-            ch->bitVolts = getDefaultBitVolts();
+			ch->setGain(sourceChan->getChannelGain());
             eventChannels.add(ch);
         }
 
@@ -352,7 +342,8 @@ void GenericProcessor::update()
 		StringArray names; 
 		Array<channelType> types;
 		Array<int> stream, orig;
-		getChannelNamesAndType(names,types,stream,orig);
+		Array<float> gains;
+		getChannelsInfo(names,types,stream,orig,gains);
         for (int i = 0; i < numChan; i++)
         {
             Channel* ch = new Channel(this, i );
@@ -363,7 +354,7 @@ void GenericProcessor::update()
 			  ch->originalChannel = orig[i];
 
             ch->sampleRate = getDefaultSampleRate();
-            ch->bitVolts = getDefaultBitVolts();
+			ch->setGain(gains[i]);
 
              if (i < recordStatus.size())
             {

@@ -293,7 +293,7 @@ void AudioNode::process(AudioSampleBuffer& buffer,
 
                     } // copying buffer
 
-                    gain = volume/(float(0x7fff) * channelPointers[i-2]->bitVolts);
+                    gain = volume/(float(0x7fff) * channelPointers[i-2]->getChannelGain());
                     // Data are floats in units of microvolts, so dividing by bitVolts and 0x7fff (max value for 16b signed)
                     // rescales to between -1 and +1. Audio output starts So, maximum gain applied to maximum data would be 10.
 

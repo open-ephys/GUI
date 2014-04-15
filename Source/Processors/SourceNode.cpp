@@ -185,23 +185,54 @@ int SourceNode::getDefaultADCoutputs()
         return 0;
 
 }
-int SourceNode::modifyChannelName(channelType t, int str, int ch, String newName)
+int SourceNode::modifyChannelName(channelType t, int str, int ch, String newName, bool updateSignalChain)
 {
     if (dataThread != 0) {
         int channel_index = dataThread->modifyChannelName(t, str, ch, newName);
 		if (channel_index >= 0 && channel_index < channels.size())
 		{
-			channels[channel_index]->setName(newName);
+			if (channels[channel_index]->getChannelName() != newName)
+			{
+				channels[channel_index]->setName(newName);
+				// propagate this information...
+				
+				if (updateSignalChain)
+					getEditorViewport()->makeEditorVisible(getEditor(), false, true);
+					
+			}
 		}
 		return channel_index;
 	}
 	return -1;
 }
 
-void SourceNode::getChannelNamesAndType(StringArray &names, Array<channelType> &types, Array<int> &stream, Array<int> &originalChannelNumber)
+int SourceNode::modifyChannelGain(int stream, int channel,channelType type, float gain, bool updateSignalChain)
+{
+    if (dataThread != 0) {
+        int channel_index = dataThread->modifyChannelGain(type, stream, channel, gain);
+		if (channel_index >= 0 && channel_index < channels.size())
+		{
+			// we now need to update the signal chain to propagate this change.....
+			if (channels[channel_index]->getChannelGain() != gain) 
+			{
+				channels[channel_index]->setGain(gain);
+				
+				if (updateSignalChain)
+					getEditorViewport()->makeEditorVisible(getEditor(), false, true);
+				
+				return channel_index;
+			}
+		}
+	}
+	return -1;
+}
+
+
+
+void SourceNode::getChannelsInfo(StringArray &names, Array<channelType> &types, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains)
 {
     if (dataThread != 0)
-        dataThread->getChannelNamesAndType(names, types,stream,originalChannelNumber);
+        dataThread->getChannelsInfo(names, types,stream,originalChannelNumber,gains);
 }
 
 void SourceNode::setDefaultNamingScheme(int scheme)
@@ -213,10 +244,11 @@ void SourceNode::setDefaultNamingScheme(int scheme)
 		Array<channelType> types;
 		Array<int> stream;
 		Array<int> originalChannelNumber;
-		getChannelNamesAndType(names, types, stream, originalChannelNumber);
+		Array<float> gains;
+		getChannelsInfo(names, types, stream, originalChannelNumber, gains);
 		for (int k=0;k<names.size();k++)
 		{
-			modifyChannelName(types[k],stream[k],originalChannelNumber[k], names[k]);
+			modifyChannelName(types[k],stream[k],originalChannelNumber[k], names[k],false);
 		}
 	}
 

@@ -83,6 +83,15 @@ public:
     /** Sets whether or not the channel will record. */
     bool getRecordState() {return isRecording;}
 
+	/** Sets a new channel gain by modifying bitVolts */
+	void setGain(float gain);
+
+	/** returns channel's name */
+	String getChannelName();
+
+	/** returns current gain */
+	float getChannelGain();
+
     /** The channel number.*/
     int num;
 
@@ -99,8 +108,7 @@ public:
 
     // crucial information:
     float sampleRate;
-    float bitVolts;
-	channelType type;
+ 	channelType type;
     
     // boolean values:
     bool isMonitored;
@@ -117,6 +125,7 @@ public:
 
 
 private:
+	   float bitVolts;
 
     bool isRecording; 
 

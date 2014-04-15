@@ -53,11 +53,27 @@ FPGAchannelList::FPGAchannelList(GenericProcessor* proc_, Viewport *p, FPGAcanva
 	impedanceButton->addListener(this);
 	addAndMakeVisible(impedanceButton);
 
+	
+	gains.clear();
+	gains.add( 0.01);
+	gains.add( 0.1);
+	gains.add( 1);
+	gains.add( 2);
+	gains.add( 5);
+	gains.add( 10);
+	gains.add( 20);
+	gains.add( 50);
+	gains.add( 100);
+	gains.add( 500);
+	gains.add(  1000);
+
+
 	update();
 }
 
 FPGAchannelList::~FPGAchannelList()
 {
+	
 }
 
 void FPGAchannelList::paint(Graphics& g)
@@ -77,7 +93,8 @@ void FPGAchannelList::update()
 	Array<channelType> types;
 	Array<int> stream;
 	Array<int> orig_number;
-	proc->getChannelNamesAndType(names,types,stream,orig_number);
+	Array<float> oldgains;
+	proc->getChannelsInfo(names,types,stream,orig_number,oldgains);
 	int numChannels = names.size();
 
 	// find out which streams are active.
@@ -134,9 +151,16 @@ void FPGAchannelList::update()
 	// add buttons for all DATA,AUX,channels
 	for (int k=0;k<numChannels;k++)
 		{
-			int channelGainIndex = 3;
-			
-			FPGAchannelComponent* comp = new FPGAchannelComponent(this, stream[k],orig_number[k],types[k],channelGainIndex, names[k]);
+			int channelGainIndex = 1;
+			float ch_gain = oldgains[k]/proc->getDefaultBitVolts();
+			for (int j=0;j<gains.size();j++) {
+				if (fabs(gains[j]-ch_gain) < 1e-3) {
+					channelGainIndex = j;
+					break;
+				}
+			}
+
+			FPGAchannelComponent* comp = new FPGAchannelComponent(this, stream[k],orig_number[k],types[k],channelGainIndex+1, names[k],gains);
 			comp->setBounds(10+streamColumn[stream[k]],70+numChannelsPerStream[stream[k]]*22,columnWidth,22);
 			numChannelsPerStream[stream[k]]++;
 
@@ -150,7 +174,7 @@ void FPGAchannelList::update()
 	// add buttons for TTL channels
 	for (int k=0;k<ttlNames.size();k++)
 	{
-		FPGAchannelComponent* comp = new FPGAchannelComponent(this,-1,k, EVENT_CHANNEL,-1, ttlNames[k]);
+		FPGAchannelComponent* comp = new FPGAchannelComponent(this,-1,k, EVENT_CHANNEL,-1, ttlNames[k],gains);
 			comp->setBounds( 10+numActiveStreams*columnWidth,70+k*22,columnWidth,22);
 			comp->setUserDefinedData(k);
 			addAndMakeVisible(comp);
@@ -185,9 +209,15 @@ void FPGAchannelList::enableAll()
 
 }
 
+void FPGAchannelList::setNewGain(int stream, int channel,channelType type, float gain)
+{
+	SourceNode* p = (SourceNode*)proc;
+	p->modifyChannelGain(stream,channel,type,gain,true);
+}
+
 void FPGAchannelList::setNewName(int stream, int channelIndex, channelType t, String newName)
 {
-	proc->modifyChannelName(t,stream,channelIndex,newName);
+	proc->modifyChannelName(t,stream,channelIndex,newName,true);
 }
 
 void FPGAchannelList::updateButtons()
@@ -219,7 +249,7 @@ void FPGAchannelList::comboBoxChanged(ComboBox *b)
 
 
 /****************************************************/
-FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int ch, channelType t, int gainIndex_, String N) : channelList(cl),name(N), channel(ch),gainIndex(gainIndex_), stream(stream_), type(t)
+FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int ch, channelType t, int gainIndex_, String N, Array<float> gains_) : channelList(cl),name(N), channel(ch),gainIndex(gainIndex_), stream(stream_), type(t), gains(gains_)
 {
 	Font f = Font("Small Text", 13, Font::plain);
 
@@ -234,22 +264,20 @@ FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int
 	editName->setColour(Label::backgroundColourId,juce::Colours::lightgrey);
 	editName->addListener(this);
 	addAndMakeVisible(editName);
-
 	if (gainIndex > 0)
 	{
+		
 		gainComboBox = new ComboBox("Gains");
-		gainComboBox->addItem("x0.01",1);
-		gainComboBox->addItem("x0.1",2);
-		gainComboBox->addItem("x1",3);
-		gainComboBox->addItem("x2",4);
-		gainComboBox->addItem("x5",5);
-		gainComboBox->addItem("x10",6);
-		gainComboBox->addItem("x20",7);
-		gainComboBox->addItem("x50",8);
-		gainComboBox->addItem("x100",9);
-		gainComboBox->addItem("x500",10);
-		gainComboBox->addItem("x1000",11);
-		gainComboBox->setSelectedId(gainIndex,false);
+		for (int k=0;k<gains.size();k++)
+		{
+			if (gains[k] < 1) {
+				gainComboBox->addItem("x"+String(gains[k],2),k+1);
+			} else
+			{
+				gainComboBox->addItem("x"+String((int)gains[k]),k+1);
+			}
+		}
+		gainComboBox->setSelectedId(gainIndex,true);
 		gainComboBox->addListener(this);
 		addAndMakeVisible(gainComboBox);
 	} else
@@ -268,9 +296,20 @@ FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int
 		impedance = nullptr;
 	}
 }
+FPGAchannelComponent::~FPGAchannelComponent()
+{
+	
+}
 
 void FPGAchannelComponent::comboBoxChanged(ComboBox* comboBox)
 {
+	if (comboBox == gainComboBox)
+	{
+		int newGainIndex = gainComboBox->getSelectedId();
+		float mult = gains[newGainIndex-1];
+		float bitvolts = channelList->proc->getDefaultBitVolts();
+		channelList->setNewGain(stream,channel,type, mult*bitvolts);
+	}
 }
 void FPGAchannelComponent::labelTextChanged(Label* lbl)
 {
@@ -361,6 +400,7 @@ void FPGAcanvas::refreshState()
 {
 	resized();
 }
+
 
 void FPGAcanvas::beginAnimation()
 {
@@ -609,6 +649,7 @@ void RHD2000Editor::startAcquisition()
     rescanButton->setEnabledState(false);
     adcButton->setEnabledState(false);
     acquisitionIsActive = true;
+	canvas->channelList->setEnabled(false);
 }
 
 void RHD2000Editor::stopAcquisition()
@@ -620,6 +661,8 @@ void RHD2000Editor::stopAcquisition()
     adcButton->setEnabledState(true);
 
     acquisitionIsActive = false;
+	canvas->channelList->setEnabled(true);
+	//	canvas->channelList->setEnabled(true);
 }
 
 void RHD2000Editor::saveCustomParameters(XmlElement* xml)
@@ -657,7 +700,7 @@ void RHD2000Editor::loadCustomParameters(XmlElement* xml)
 Visualizer* RHD2000Editor::createNewCanvas()
 {
 	GenericProcessor* processor = (GenericProcessor*) getProcessor();
-	FPGAcanvas *canvas= new FPGAcanvas(processor);
+	canvas= new FPGAcanvas(processor);
 	ActionListener* listener = (ActionListener*) canvas;
     getUIComponent()->registerAnimatedComponent(listener);
 	return canvas;

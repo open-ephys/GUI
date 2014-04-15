@@ -658,7 +658,7 @@ String RecordNode::generateHeader(Channel* ch)
     header += getAudioComponent()->getBufferSize();
     header += ";\n";
     header += "header.bitVolts = ";
-    header += String(ch->bitVolts);
+	header += String(ch->getChannelGain());
     header += ";\n";
 
     header = header.paddedRight(' ', HEADER_SIZE);
@@ -726,7 +726,7 @@ void RecordNode::writeContinuousBuffer(float* data, int nSamples, int channel)
         return;
 
     // scale the data back into the range of int16
-    float scaleFactor =  float(0x7fff) * channelPointers[channel]->bitVolts;
+	float scaleFactor =  float(0x7fff) * channelPointers[channel]->getChannelGain();
     for (int n = 0; n < nSamples; n++)
     {
         *(continuousDataFloatBuffer+n) = *(data+n) / scaleFactor;

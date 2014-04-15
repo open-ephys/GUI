@@ -618,12 +618,13 @@ void RHD2000Thread::getEventChannelNames(StringArray &Names)
 	}
 }
 
-void RHD2000Thread::getChannelNamesAndType(StringArray &Names_, Array<channelType> &type_, Array<int> &stream_, Array<int> &originalChannelNumber_)
+void RHD2000Thread::getChannelsInfo(StringArray &Names_, Array<channelType> &type_, Array<int> &stream_, Array<int> &originalChannelNumber_,Array<float> &gains_)
 {
 	Names_ = Names;
 	type_ = type;
 	stream_ = stream;
 	originalChannelNumber_ = originalChannelNumber;
+	gains_ = gains;
 }
 
 void RHD2000Thread::updateChannelNames()
@@ -633,13 +634,14 @@ void RHD2000Thread::updateChannelNames()
 
 /* go over the old names and tests whether this particular channel name was changed.
 if so, return the old name */
-bool RHD2000Thread::getOldNameWasModified(channelType t, int str, int ch, String &oldName, int &index)
+bool RHD2000Thread::channelModified(channelType t, int str, int ch, String &oldName, float &oldGain, int &index)
 {
 	for (int k=0;k<oldNames.size();k++)
 	{
 		if (oldType[k] == t && oldStream[k] == str && oldChannelNumber[k] == ch) 
 		{
 			oldName = oldNames[k];
+			oldGain = oldGains[k];
 			index = k;
 			return true;
 		}
@@ -651,8 +653,9 @@ bool RHD2000Thread::getOldNameWasModified(channelType t, int str, int ch, String
 int RHD2000Thread::modifyChannelName(channelType t, int str, int ch, String newName)
 {
 	String dummy;
+	float dummyFloat;
 	int index;
-	if (getOldNameWasModified(t, str, ch, dummy,index))
+	if (channelModified(t, str, ch, dummy, dummyFloat, index))
 	{
 		oldNames.set(index, newName);
 	} else 
@@ -661,6 +664,7 @@ int RHD2000Thread::modifyChannelName(channelType t, int str, int ch, String newN
 		oldType.add(t);
 		oldStream.add(str);
 		oldChannelNumber.add(ch);
+		oldGains.add(dummyFloat);
 	}
 
 	for (int k=0;k<Names.size();k++)
@@ -674,26 +678,59 @@ int RHD2000Thread::modifyChannelName(channelType t, int str, int ch, String newN
 	return -1;
 }
 
+int RHD2000Thread::modifyChannelGain(channelType t, int str, int ch, float gain)
+{
+	String dummy;
+	float dummyFloat;
+	int index;
+	if (channelModified(t, str, ch, dummy, dummyFloat, index))
+	{
+		oldGains.set(index, gain);
+	} else 
+	{
+		oldNames.add(dummy);
+		oldType.add(t);
+		oldStream.add(str);
+		oldChannelNumber.add(ch);
+		oldGains.add(gain);
+	}
+
+	for (int k=0;k<Names.size();k++)
+	{
+		if (type[k] == t && stream[k] == str && originalChannelNumber[k] == ch) 
+		{
+			gains.set(k,gain);
+			return k;
+		}
+	}
+	return -1;
+}
+
 void RHD2000Thread::setDefaultNamingScheme(int scheme)
 {
 	oldNames.clear();
 	oldType.clear();
 	oldStream.clear();
+	oldGains.clear();
 	oldChannelNumber.clear();
 	numberingScheme = scheme;
 	setDefaultChannelNamesAndType();
 }
 
+/* This will give default names & gains to channels, unless they were manually modified by the user
+ In that case, the query channelModified, will return the values that need to be put */
 void RHD2000Thread::setDefaultChannelNamesAndType()
 {
 	Names.clear();
 	type.clear();
 	stream.clear();
+	gains.clear();
 	originalChannelNumber.clear();
    int aux_counter=1;
    int data_counter = 1;
    String oldName;
    int dummy;
+   float oldGain;
    StringArray stream_prefix;
    stream_prefix.add("A1");stream_prefix.add("A2");
    stream_prefix.add("B1");stream_prefix.add("B2");
@@ -705,8 +742,9 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
         {
 			for  (int k=0;k<numChannelsPerDataStream[i];k++)
 			{
-				if (getOldNameWasModified(DATA_CHANNEL,i,k, oldName,dummy)) {
+				if (channelModified(DATA_CHANNEL,i,k, oldName,oldGain,dummy)) {
 					Names.add(oldName);
+					gains.add(oldGain);
 					data_counter++;
 				} else
 				{
@@ -714,7 +752,10 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
 						Names.add("CH"+String(data_counter++));
 					else 
 						Names.add("CH_"+stream_prefix[i]+"_"+String(1+k));
+
+					gains.add(getBitVolts());
 				}
+				
 				type.add(DATA_CHANNEL);
 				stream.add(i);
 				originalChannelNumber.add(k);
@@ -722,8 +763,10 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
 			}
 			for  (int k=0;k<3;k++)
 			{
-				if (getOldNameWasModified(AUX_CHANNEL,i,numChannelsPerDataStream[i]+k, oldName, dummy)) {
+				if (channelModified(AUX_CHANNEL,i,numChannelsPerDataStream[i]+k, oldName,oldGain, dummy)) {
 					Names.add(oldName);
+					gains.add(oldGain);
+
 					aux_counter++;
 				} else 
 				{
@@ -731,6 +774,9 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
 						Names.add("AUX"+String(aux_counter++));
 					else
 						Names.add("AUX_"+stream_prefix[i]+"_"+String(1+k));
+
+					gains.add(getBitVolts());
+
 				}
 				type.add(AUX_CHANNEL);
 				stream.add(i);
@@ -744,11 +790,13 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
     {
         for (int k=0;k<8;k++)
 		{
-			if (getOldNameWasModified(ADC_CHANNEL,MAX_NUM_DATA_STREAMS,k, oldName,dummy)) {
+			if (channelModified(ADC_CHANNEL,MAX_NUM_DATA_STREAMS,k, oldName,oldGain,dummy)) {
 				Names.add(oldName);
+				gains.add(oldGain);
 			} else
 			{
 				Names.add("ADC"+String(k+1));
+				gains.add(getBitVolts());
 			}
 				type.add(ADC_CHANNEL);
 				stream.add(MAX_NUM_DATA_STREAMS);

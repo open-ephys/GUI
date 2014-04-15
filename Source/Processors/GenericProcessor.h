@@ -139,11 +139,17 @@ public:
     }
     
 	/** returns the names and types of all data, aux and adc channels */
-	virtual void getChannelNamesAndType(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber)
+	virtual void getChannelsInfo(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains)
 	{
 
 	}
-	virtual int modifyChannelName(channelType t, int stream, int ch, String newName)
+
+	virtual int modifyChannelName(channelType t, int stream, int ch, String newName, bool updateSignalChain)
+	{
+		return -1;
+	}
+
+	virtual int modifyChannelGain(channelType t, int stream, int ch, float newGain, bool updateSignalChain)
 	{
 		return -1;
 	}

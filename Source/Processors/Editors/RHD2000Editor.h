@@ -59,6 +59,7 @@ public:
 	FPGAchannelList(GenericProcessor* proc, Viewport *p, FPGAcanvas*c);
     ~FPGAchannelList();
 	void setNewName(int stream, int channelIndex, channelType t, String newName);
+	void setNewGain(int stream, int channel,channelType t, float gain);
 	void disableAll();
 	void enableAll();
     void paint(Graphics& g);
@@ -67,9 +68,9 @@ public:
 	void updateButtons();
 	int getNumChannels();
 	void comboBoxChanged(ComboBox *b);
-
-private:
 	GenericProcessor* proc;
+private:
+	Array<float> gains;
 	Viewport *viewport;
 	FPGAcanvas *canvas;
 	ScopedPointer<UtilityButton> impedanceButton;
@@ -84,8 +85,8 @@ private:
 class FPGAchannelComponent : public Component, public AccessClass, Button::Listener, public ComboBox::Listener, public Label::Listener
 {
 public:
-    FPGAchannelComponent(FPGAchannelList* cl,int stream, int ch, channelType t,  int gainIndex_, String name_);
-    ~FPGAchannelComponent() {}
+    FPGAchannelComponent(FPGAchannelList* cl,int stream, int ch, channelType t,  int gainIndex_, String name_, Array<float> gains_);
+    ~FPGAchannelComponent();
 	Colour getDefaultColor(int ID);
 
 	void disableEdit();
@@ -105,6 +106,7 @@ public:
 
 	void resized();
 private:
+	Array<float> gains;
 	FPGAchannelList* channelList;
 	ScopedPointer<Label> staticLabel, editName, impedance;
 	ScopedPointer<ComboBox> gainComboBox;
@@ -183,7 +185,7 @@ private:
     ScopedPointer<Label> audioLabel,ttlSettleLabel,dacHPFlabel ;
 
     RHD2000Thread* board;
-
+	FPGAcanvas *canvas;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Editor);
 
 };
