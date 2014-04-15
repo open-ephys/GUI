@@ -1449,6 +1449,7 @@ bool RHD2000Thread::updateBuffer()
 
 
 /***********************************/
+/* Below is code for impedance measurements */
 #define CHIP_ID_RHD2164_B  1000
 
 
@@ -1638,7 +1639,7 @@ void RHD2000Thread::empiricalResistanceCorrection(double &impedanceMagnitude, do
     impedancePhase = RADIANS_TO_DEGREES * atan2(impedanceX, impedanceR);
 }
 
-void RHD2000Thread::runImpedanceTest()
+void RHD2000Thread::runImpedanceTest(Array<int> &streams, Array<int> &channels, Array<float> &magnitudes, Array<float> &phases)
 {
     int commandSequenceLength, stream, channel, capRange;
     double cSeries;
@@ -1648,7 +1649,14 @@ void RHD2000Thread::runImpedanceTest()
 	int numdataStreams = evalBoard->getNumEnabledDataStreams();
     
     bool rhd2164ChipPresent = false;
+	Array<int> enabledStreams;
     for (stream = 0; stream < MAX_NUM_DATA_STREAMS; ++stream) {
+		
+		if (evalBoard->isStreamEnabled(stream))
+		{
+			enabledStreams.add(stream);
+		}
+
         if (chipId[stream] == CHIP_ID_RHD2164_B) {
             rhd2164ChipPresent = true;
         }
@@ -1720,42 +1728,49 @@ void RHD2000Thread::runImpedanceTest()
         }
     }
 
+
+
+    double distance, minDistance, current, Cseries;
+    double impedanceMagnitude, impedancePhase;
+
+    const double bestAmplitude = 250.0;  // we favor voltage readings that are closest to 250 uV: not too large,
+                                         // and not too small.
+    const double dacVoltageAmplitude = 128 * (1.225 / 256);  // this assumes the DAC amplitude was set to 128
+    const double parasiticCapacitance = 14.0e-12;  // 14 pF: an estimate of on-chip parasitic capacitance,
+                                                   // including 10 pF of amplifier input capacitance.
+    double relativeFreq = actualImpedanceFreq / boardSampleRate;
+
+    int bestAmplitudeIndex;
+
     // We execute three complete electrode impedance measurements: one each with
     // Cseries set to 0.1 pF, 1 pF, and 10 pF.  Then we select the best measurement
     // for each channel so that we achieve a wide impedance measurement range.
-    for (capRange = 0; capRange < 3; ++ capRange) {
+    for (capRange = 0; capRange < 3; ++ capRange) 
+	{
+		
+
         switch (capRange) {
         case 0:
             chipRegisters.setZcheckScale(Rhd2000Registers::ZcheckCs100fF);
             cSeries = 0.1e-12;
+			cout << "setting capacitance to 0.1pF"  << endl;
             break;
         case 1:
             chipRegisters.setZcheckScale(Rhd2000Registers::ZcheckCs1pF);
             cSeries = 1.0e-12;
+			cout << "setting capacitance to 1pF"  << endl;
             break;
         case 2:
             chipRegisters.setZcheckScale(Rhd2000Registers::ZcheckCs10pF);
             cSeries = 10.0e-12;
+			cout << "setting capacitance to 10pF"  << endl;
             break;
-        }
+		}
 
         // Check all 32 channels across all active data streams.
-        for (channel = 0; channel < 32; ++channel) {
-
-            //progress.setValue(32 * capRange + channel + 2);
-			/*
-            if (progress.wasCanceled()) {
-                evalBoard->setContinuousRunMode(false);
-                evalBoard->setMaxTimeStep(0);
-                evalBoard->flush();
-                for (int i = 0; i < 8; ++i) ledArray[i] = 0;
-                ttlOut[15] = 0;
-                evalBoard->setLedDisplay(ledArray);
-                evalBoard->setTtlOut(ttlOut);
-                statusBar()->clearMessage();
-                wavePlot->setFocus();
-                return;
-            } */
+        for (channel = 0; channel < 32; ++channel) 
+		{
+			cout << "running impedance on channel " << channel << endl;
 
             chipRegisters.setZcheckChannel(channel);
             commandSequenceLength =
@@ -1805,17 +1820,11 @@ void RHD2000Thread::runImpedanceTest()
         }
     }
 
-    double distance, minDistance, current, Cseries;
-    double impedanceMagnitude, impedancePhase;
+	streams.clear();
+	channels.clear();
+	magnitudes.clear();
+	phases.clear();
 
-    const double bestAmplitude = 250.0;  // we favor voltage readings that are closest to 250 uV: not too large,
-                                         // and not too small.
-    const double dacVoltageAmplitude = 128 * (1.225 / 256);  // this assumes the DAC amplitude was set to 128
-    const double parasiticCapacitance = 14.0e-12;  // 14 pF: an estimate of on-chip parasitic capacitance,
-                                                   // including 10 pF of amplifier input capacitance.
-    double relativeFreq = actualImpedanceFreq / boardSampleRate;
-
-    int bestAmplitudeIndex;
     for (stream = 0; stream < evalBoard->getNumEnabledDataStreams(); ++stream) {
         for (channel = 0; channel < 32; ++channel) {
             if (1) {
@@ -1860,8 +1869,15 @@ void RHD2000Thread::runImpedanceTest()
                 empiricalResistanceCorrection(impedanceMagnitude, impedancePhase,
                                               boardSampleRate);
 
-                cout << "stream" << stream << " channel " << channel << " magnitude: " <<  impedanceMagnitude;
-				cout << "stream" << stream << " channel " << channel << " phase: " <<  impedancePhase;
+				streams.add(enabledStreams[stream]);
+				channels.add(channel);
+				magnitudes.add(impedanceMagnitude);
+				phases.add(impedancePhase);
+
+				if (impedanceMagnitude > 1000000)
+					cout << "stream " << stream << " channel " << 1+channel << " magnitude: " <<  String(impedanceMagnitude/1e6,2) << " mOhm , phase : " <<impedancePhase << endl;
+				else  
+					cout << "stream " << stream << " channel " << 1+channel << " magnitude: " <<  String(impedanceMagnitude/1e3,2) << " kOhm , phase : " <<impedancePhase << endl;
                 
             }
         }

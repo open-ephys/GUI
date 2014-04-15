@@ -136,6 +136,7 @@ public:
 
     void setDataSource(int stream, BoardDataSource dataSource);
     void enableDataStream(int stream, bool enabled);
+	bool isStreamEnabled(int streamIndex);
     int getNumEnabledDataStreams() const;
 
     void clearTtlOut();

@@ -74,7 +74,7 @@ public:
     double setLowerBandwidth(double lower);
     
     int setNoiseSlicerLevel(int level);
-	void runImpedanceTest();
+	void runImpedanceTest(Array<int> &stream, Array<int> &channel, Array<float> &magnitude, Array<float> &phase);
 	void setFastTTLSettle(bool state, int channel);
 	void setTTLoutputMode(bool state);
 	void setDAChpf(float cutoff, bool enabled);

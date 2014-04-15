@@ -82,6 +82,11 @@ void FPGAchannelList::paint(Graphics& g)
 
 void FPGAchannelList::buttonClicked(Button *btn)
 {
+	if (btn == impedanceButton)
+	{
+		RHD2000Editor *p = (RHD2000Editor*)proc->getEditor();
+		p->measureImpedance();
+	}
 }
 
 void FPGAchannelList::update()
@@ -90,9 +95,6 @@ void FPGAchannelList::update()
 	channelComponents.clear();
 	staticLabels.clear();
 	StringArray names;
-	Array<channelType> types;
-	Array<int> stream;
-	Array<int> orig_number;
 	Array<float> oldgains;
 	proc->getChannelsInfo(names,types,stream,orig_number,oldgains);
 	int numChannels = names.size();
@@ -109,7 +111,7 @@ void FPGAchannelList::update()
 		streamActive[k] = false;
 		streamColumn[k] = 0;
 	}
-	int columnWidth =280;
+	int columnWidth =330;
 
 	for (int k=0;k<numChannels;k++)
 	{
@@ -247,6 +249,22 @@ void FPGAchannelList::comboBoxChanged(ComboBox *b)
 	}
 }
 
+void FPGAchannelList::updateImpedance(Array<int> streams, Array<int> channels, Array<float> magnitude, Array<float> phase)
+{
+		for (int k=0;k<streams.size();k++)
+		{
+			for (int j=k;j<stream.size();j++)
+			{
+			if (stream[j] == streams[k] && types[j] == DATA_CHANNEL && orig_number[j] == channels[k]) {
+				channelComponents[j]->setImpedanceValues(magnitude[k],phase[k]);
+				break;
+			}
+
+		}
+	}
+
+}
+
 
 /****************************************************/
 FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int ch, channelType t, int gainIndex_, String N, Array<float> gains_) : channelList(cl),name(N), channel(ch),gainIndex(gainIndex_), stream(stream_), type(t), gains(gains_)
@@ -288,7 +306,7 @@ FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int
 	if (type == DATA_CHANNEL)
 	{
 		impedance = new Label("Impedance","? Ohm");
-		impedance->setFont(f);
+		impedance->setFont(Font("Default", 13, Font::plain));
 		impedance->setEditable(false);
 		addAndMakeVisible(impedance);
 	} else
@@ -299,6 +317,22 @@ FPGAchannelComponent::FPGAchannelComponent(FPGAchannelList* cl, int stream_, int
 FPGAchannelComponent::~FPGAchannelComponent()
 {
 	
+}
+
+void FPGAchannelComponent::setImpedanceValues(float mag, float phase)
+{
+	if (impedance != nullptr)
+	{
+		if (mag > 10000)
+			impedance->setText(String(mag/1e6,2)+" mOhm, "+String((int)phase) + " deg",juce::NotificationType::dontSendNotification);
+		else if (mag > 1000)
+			impedance->setText(String(mag/1e3,0)+" kOhm, "+String((int)phase) + " deg" ,juce::NotificationType::dontSendNotification);
+		else 
+			impedance->setText(String(mag,0)+" Ohm, "+String((int)phase) + " deg" ,juce::NotificationType::dontSendNotification);
+	} else 
+	{
+
+	}
 }
 
 void FPGAchannelComponent::comboBoxChanged(ComboBox* comboBox)
@@ -350,7 +384,7 @@ void FPGAchannelComponent::resized()
 	}
 	if (impedance != nullptr)
 	{
-		impedance->setBounds(180,0,70,20);
+		impedance->setBounds(180,0,130,20);
 	}
 
 }
@@ -430,6 +464,11 @@ void FPGAcanvas::resized()
 
 void FPGAcanvas::buttonClicked(Button* button)
 {
+}
+
+void FPGAcanvas::updateImpedance(Array<int> streams, Array<int> channels, Array<float> magnitude, Array<float> phase)
+{
+	channelList->updateImpedance(streams, channels,  magnitude, phase);
 }
 
 /***********************************************************************/
@@ -566,6 +605,16 @@ RHD2000Editor::~RHD2000Editor()
 void RHD2000Editor::scanPorts()
 {
     rescanButton->triggerClick();
+}
+
+void RHD2000Editor::measureImpedance()
+{
+	Array<int> stream, channel;
+	Array<float> magnitude, phase;
+	board->runImpedanceTest(stream,channel,magnitude,phase);
+
+	// update components...
+	canvas->updateImpedance(stream,channel,magnitude,phase);
 }
 
 void RHD2000Editor::comboBoxChanged(ComboBox* comboBox)

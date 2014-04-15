@@ -68,9 +68,15 @@ public:
 	void updateButtons();
 	int getNumChannels();
 	void comboBoxChanged(ComboBox *b);
+	void updateImpedance(Array<int> streams, Array<int> channels, Array<float> magnitude, Array<float> phase);
 	GenericProcessor* proc;
+	
 private:
 	Array<float> gains;
+	Array<channelType> types;
+	Array<int> stream;
+	Array<int> orig_number;
+
 	Viewport *viewport;
 	FPGAcanvas *canvas;
 	ScopedPointer<UtilityButton> impedanceButton;
@@ -88,7 +94,7 @@ public:
     FPGAchannelComponent(FPGAchannelList* cl,int stream, int ch, channelType t,  int gainIndex_, String name_, Array<float> gains_);
     ~FPGAchannelComponent();
 	Colour getDefaultColor(int ID);
-
+	void setImpedanceValues(float mag, float phase);
 	void disableEdit();
 	void enableEdit();
 
@@ -139,6 +145,7 @@ public:
     void update();
 	void setParameter(int, float) ;
 	void setParameter(int, int, int, float) ;
+	void updateImpedance(Array<int> streams, Array<int> channels, Array<float> magnitude, Array<float> phase);
 
     void resized();
 	void buttonClicked(Button* button);
@@ -167,6 +174,7 @@ public:
     void saveCustomParameters(XmlElement* xml);
     void loadCustomParameters(XmlElement* xml);
 	Visualizer* createNewCanvas(void);
+	void measureImpedance();
 private:
 
     OwnedArray<HeadstageOptionsInterface> headstageOptionsInterfaces;

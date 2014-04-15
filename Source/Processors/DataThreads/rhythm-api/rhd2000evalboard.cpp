@@ -925,6 +925,14 @@ void Rhd2000EvalBoard::setDataSource(int stream, BoardDataSource dataSource)
     dev->UpdateWireIns();
 }
 
+bool Rhd2000EvalBoard::isStreamEnabled(int streamIndex)
+{
+  if (streamIndex < 0 || streamIndex > (MAX_NUM_DATA_STREAMS - 1))
+	return false;
+
+  return dataStreamEnabled[streamIndex];
+}
+
 // Enable or disable one of the eight available USB data streams (0-7).
 void Rhd2000EvalBoard::enableDataStream(int stream, bool enabled)
 {
