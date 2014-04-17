@@ -1166,7 +1166,6 @@ void SpikeSortBoxes::updateBoxUnits(std::vector<BoxUnit> _units)
 bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 {
 	const ScopedLock myScopedLock (mut);
-  //StartCriticalSection();
   if (PCAfirst) {
 
 	  for (int k=0;k<pcaUnits.size();k++)
@@ -1177,8 +1176,6 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[0] = pcaUnits[k].ColorRGB[0];
 			  so->color[1] = pcaUnits[k].ColorRGB[1];
 			  so->color[2] = pcaUnits[k].ColorRGB[2];
-			  //pcaUnits[k].updateWaveform(so);
-			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1191,7 +1188,6 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = boxUnits[k].ColorRGB[1];
 			  so->color[2] = boxUnits[k].ColorRGB[2];
 			  boxUnits[k].updateWaveform(so);
-			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1206,7 +1202,6 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[1] = boxUnits[k].ColorRGB[1];
 			  so->color[2] = boxUnits[k].ColorRGB[2];
 			  boxUnits[k].updateWaveform(so);
-			  //EndCriticalSection();
 			  return true;
 		  }
 	  }
@@ -1218,68 +1213,15 @@ bool SpikeSortBoxes::sortSpike(SpikeObject *so, bool PCAfirst)
 			  so->color[0] = pcaUnits[k].ColorRGB[0];
 			  so->color[1] = pcaUnits[k].ColorRGB[1];
 			  so->color[2] = pcaUnits[k].ColorRGB[2];
-			  //pcaUnits[k].updateWaveform(so);
-			 // EndCriticalSection();
+			  pcaUnits[k].updateWaveform(so);
 			  return true;
 		  }
 	  }
 
   }
 
-  // EndCriticalSection();
-	  return false;
-	
+  return false;	
 }
-
-
-/*
-        public int isInsideUnit(PointD P, int channel, out int unitID, out int boxID, out Box box)
-        {
-            box = new Box();
-            int unitcounter = 0;
-            int boxcounter = 0;
-            foreach (BoxUnit unit in lstChannelUnits[channel])
-            {
-                boxcounter = 0;
-                foreach (Box b in unit.getBoxes())
-                {
-                    unitID = unit.GetUnitID();
-                    boxID = boxcounter;
-                    box = b;
-
-                    if (P.X >= b.x && P.X <= b.x + b.w / 4.0 && P.Y <= b.y && P.Y >= b.y - b.h / 4.0)
-                    {
-                        return 2; // top left ?
-                    }
-
-                    if (P.X >= b.x + b.w - b.w / 4.0 && P.X <= b.x + b.w && P.Y <= b.y && P.Y >= b.y - b.h / 4.0)
-                    {
-                        return 3; // top right
-                    }
-
-                    if (P.X >= b.x && P.X <= b.x + b.w / 4.0 && P.Y <= b.y - 3.0 / 4.0 * b.h && P.Y >= b.y - b.h)
-                    {
-                        return 4; // bottom left 
-                    }
-
-                    if (P.X >= b.x + b.w - b.w / 4.0 && P.X <= b.x + b.w && P.Y <= b.y - 3.0 / 4.0 * b.h && P.Y >= b.y - b.h)
-                    {
-                        return 5; // bottom right
-                    }
-
-                    if (P.X >= b.x && P.X <= b.x + b.w && P.Y <= b.y && P.Y >= b.y - b.h)
-                    {
-                        return 1;
-                    }
-                    boxcounter++;
-                }
-                unitcounter++;
-            }
-            unitID = -1;
-            boxID = -1;
-            return 0;
-        }
-		*/
 
 
 bool  SpikeSortBoxes::removeBoxFromUnit(int unitID, int boxIndex)
@@ -1732,6 +1674,12 @@ bool PCAUnit::isWaveFormInsidePolygon(SpikeObject *so)
 
 void PCAUnit::resizeWaveform(int newlength)
 {
+}
+
+
+void PCAUnit::updateWaveform(SpikeObject *so)
+{
+	WaveformStat.update(so);
 }
 
 /***************************/

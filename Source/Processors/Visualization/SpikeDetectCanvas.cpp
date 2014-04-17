@@ -558,21 +558,14 @@ SpikeHistogramPlot::SpikeHistogramPlot(SpikeDetector *prc,SpikeDetectCanvas* sdc
 
 void SpikeHistogramPlot::setSelectedUnitAndbox(int unitID, int boxID)
 {
-	mut.enter();
+    const ScopedLock myScopedLock (mut);
 	processor->getActiveElectrode()->spikeSort->setSelectedUnitAndbox(unitID, boxID);
-	/*if (nWaveAx > 0) 
-	{
-		 wAxes[0]->selectedUnit = unitID;
-		 wAxes[0]->selectedBox = boxID ;
-	}*/
-	mut.exit();
 }
 
 void SpikeHistogramPlot::getSelectedUnitAndbox(int &unitID, int &boxID)
 {
-	mut.enter();
+    const ScopedLock myScopedLock (mut);
 	processor->getActiveElectrode()->spikeSort->getSelectedUnitAndbox(unitID, boxID);
-	mut.exit();
 }
 
 
@@ -607,14 +600,13 @@ void SpikeHistogramPlot::setFlipSignal(bool state)
 
 void SpikeHistogramPlot::setPolygonDrawingMode(bool on)
 {
-	mut.enter();
+    const ScopedLock myScopedLock (mut);
 	pAxes[0]->setPolygonDrawingMode(on);
-	mut.exit();
 }
 
 void SpikeHistogramPlot::updateUnitsFromProcessor()
 {
-	mut.enter();
+    const ScopedLock myScopedLock (mut);
 	boxUnits = processor->getActiveElectrode()->spikeSort->getBoxUnits();
 	pcaUnits = processor->getActiveElectrode()->spikeSort->getPCAUnits();
 
@@ -623,21 +615,25 @@ void SpikeHistogramPlot::updateUnitsFromProcessor()
 		wAxes[0]->updateUnits(boxUnits);
 	}
 	pAxes[0]->updateUnits(pcaUnits);
-	mut.exit();
+
+	
+	int selectedUnitID, selectedBoxID;
+	processor->getActiveElectrode()->spikeSort->getSelectedUnitAndbox(selectedUnitID, selectedBoxID);
+
+	
+	
 
 }
 
 void SpikeHistogramPlot::setPCARange(float p1min, float p2min, float p1max, float p2max)
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
 	pAxes[0]->setPCARange(p1min, p2min, p1max, p2max);
-	mut.exit();
-
 }
 
 void SpikeHistogramPlot::processSpikeObject(const SpikeObject& s)
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
 	if (nWaveAx > 0) 
 	{
         for (int i = 0; i < nWaveAx; i++)
@@ -646,9 +642,9 @@ void SpikeHistogramPlot::processSpikeObject(const SpikeObject& s)
 		}
 
 		pAxes[0]->updateSpikeData(s);
-		
+	
+	
 	}
-mut.exit();
 }
 
 void SpikeHistogramPlot::select()
@@ -663,7 +659,7 @@ void SpikeHistogramPlot::deselect()
 
 void SpikeHistogramPlot::initAxes(std::vector<float> scales)
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
     initLimits();
 
     for (int i = 0; i < nWaveAx; i++)
@@ -684,12 +680,11 @@ void SpikeHistogramPlot::initAxes(std::vector<float> scales)
     addAndMakeVisible(pAx);
 
     setLimitsOnAxes(); // initialize the ranges
-	mut.exit();
 }
 
 void SpikeHistogramPlot::resized()
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
 
     float width = (float)getWidth()-10;
     float height = (float) getHeight()-25;
@@ -730,11 +725,8 @@ void SpikeHistogramPlot::resized()
                                    20 + (i/nWaveCols) * axesHeight + axesHeight - 18,
                                    35, 15);
     }
+    pAxes[0]->setBounds(5 +  axesWidth, 20 + 0, width/2, height);
 
-   // for (int i = 0; i < nProjAx; i++)
-        pAxes[0]->setBounds(5 +  axesWidth, 20 + 0, width/2, height);
-
-	mut.exit();
 
 }
 
@@ -811,13 +803,9 @@ void SpikeHistogramPlot::buttonClicked(Button* button)
 
 void SpikeHistogramPlot::setLimitsOnAxes()
 {
-    //std::cout<<"SpikePlot::setLimitsOnAxes()"<<std::endl;
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
     for (int i = 0; i < nWaveAx; i++)
         wAxes[i]->setRange(ranges[i]);
-
-    
-	mut.exit();
 }
 
 void SpikeHistogramPlot::initLimits()
@@ -855,45 +843,35 @@ void SpikeHistogramPlot::getBestDimensions(int* w, int* h)
 
 void SpikeHistogramPlot::clear()
 {
-	mut.enter();
-    std::cout << "SpikePlot::clear()" << std::endl;
+	const ScopedLock myScopedLock (mut);
+	std::cout << "SpikePlot::clear()" << std::endl;
 
     for (int i = 0; i < nWaveAx; i++)
         wAxes[i]->clear();
     for (int i = 0; i < nProjAx; i++)
         pAxes[i]->clear();
 
-	mut.exit();
+	
 }
 
 
 void SpikeHistogramPlot::setDisplayThresholdForChannel(int i, float f)
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
 	if (i < wAxes.size())
 		wAxes[i]->setDetectorThreshold(f);
-	mut.exit();
+	
 	return;
 }
 
 
 float SpikeHistogramPlot::getDisplayThresholdForChannel(int i)
 {
-	mut.enter();
+	const ScopedLock myScopedLock (mut);
     float f= wAxes[i]->getDisplayThreshold();
-	mut.exit();
+	
 	return f;
 }
-
-/*
-void SpikeHistogramPlot::setDetectorThresholdForChannel(int i, float t)
-{
-   // std::cout << "Setting threshold to " << t << std::endl;
-	mut.enter();
-    wAxes[i]->setDetectorThreshold(t);
-	mut.exit();
-}
-*/
 
 /********************************/
 

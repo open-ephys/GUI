@@ -189,9 +189,6 @@ SpikeDetectorEditor::~SpikeDetectorEditor()
         removeChildComponent(electrodeButtons[i]);
     }
 
-   // deleteAllChildren();
-	 
-
 }
 
 void SpikeDetectorEditor::sliderEvent(Slider* slider)

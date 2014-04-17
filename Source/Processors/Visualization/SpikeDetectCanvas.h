@@ -161,6 +161,13 @@ private:
 
 
 
+class UnitWaveformAxes : public Component
+{
+public:
+	UnitWaveformAxes();
+
+}
+
 class GenericDrawAxes : public Component
 {
 public:

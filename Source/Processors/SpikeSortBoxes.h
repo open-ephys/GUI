@@ -212,12 +212,13 @@ public:
 	bool isWaveFormInsidePolygon(SpikeObject *so);
 	bool isPointInsidePolygon(PointD p);
 	void resizeWaveform(int newlength);
+	void updateWaveform(SpikeObject *so);
 public:
 	int UnitID;
 	int localID; // used internally, for colors and position.
 	cPolygon poly;
 	uint8_t ColorRGB[3];
-	//RunningStats WaveformStat;
+	RunningStats WaveformStat;
 	bool Active;
 	juce::int64 Activated_TS_S;
 	Time timer;
