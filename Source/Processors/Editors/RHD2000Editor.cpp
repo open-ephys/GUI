@@ -479,6 +479,7 @@ RHD2000Editor::RHD2000Editor(GenericProcessor* parentNode,
                             )
 							: VisualizerEditor(parentNode, useDefaultParameterEditors), board(board_)
 {
+	canvas = nullptr;
     desiredWidth = 330;
 	tabText = "FPGA";
     // add headstage-specific controls (currently just an enable/disable button)
@@ -698,7 +699,8 @@ void RHD2000Editor::startAcquisition()
     rescanButton->setEnabledState(false);
     adcButton->setEnabledState(false);
     acquisitionIsActive = true;
-	canvas->channelList->setEnabled(false);
+	if (canvas !=nullptr)
+		canvas->channelList->setEnabled(false);
 }
 
 void RHD2000Editor::stopAcquisition()
@@ -710,7 +712,8 @@ void RHD2000Editor::stopAcquisition()
     adcButton->setEnabledState(true);
 
     acquisitionIsActive = false;
-	canvas->channelList->setEnabled(true);
+	if (canvas != nullptr)
+		canvas->channelList->setEnabled(true);
 	//	canvas->channelList->setEnabled(true);
 }
 

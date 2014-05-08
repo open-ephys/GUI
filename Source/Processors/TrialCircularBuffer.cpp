@@ -3154,6 +3154,9 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 	// now, check if a trial finished, and enough time has elapsed so we also
 	// have post trial information
 	tictoc.Tic(3);
+	Time t;
+	long startTime = t.getHighResolutionTicks();
+	double MaxPSTHprocessingTime = 50/1000; // 50 ms
 	if (electrodesPSTH.size() > 0 && aliveTrials.size() > 0)
 	{
 		//printf("Entering alive loop\n");
@@ -3185,6 +3188,13 @@ void TrialCircularBuffer::process(AudioSampleBuffer& buffer,int nSamples,int64 h
 				tictoc.Toc(4);
 				//printf("Exitting updatePSTHwithTrial\n");
 			}
+
+			long endTime = t.getHighResolutionTicks();
+			
+		//	if  ((endTime-startTime) > MaxPSTHprocessingTime*t.getHighResolutionTicksPerSecond())
+				//break;
+			
+
 		}
 		//printf("Exitting alive loop\n");
 	}

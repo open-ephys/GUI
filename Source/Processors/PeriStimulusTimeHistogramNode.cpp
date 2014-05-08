@@ -383,7 +383,10 @@ void PeriStimulusTimeHistogramNode::modifyTimeRange(double preSec_, double postS
 			TrialCircularBufferParams params = trialCircularBuffer->getParams();
 			params.preSec = preSec_;
 			params.postSec = postSec_;
+			delete trialCircularBuffer;
+			trialCircularBuffer = new TrialCircularBuffer(params);
 			trialCircularBuffer->syncInternalDataStructuresWithSpikeSorter(electrodes);
+
 		}
 	}
 }
