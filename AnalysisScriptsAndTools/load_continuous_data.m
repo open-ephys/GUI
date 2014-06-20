@@ -1,8 +1,11 @@
 function [data, timestamps, info] = load_continuous_data(filename)
-if ~exist('filename','var')
-    filename = 'E:\Data\Doris\Electrophys\Intan\140113_154158_Debug\100_CH1.continuous';
+if ~exist(filename,'file')
+    fprintf('File does not exit!\n');
+    data = [];
+    timestamps = [];
+    info = [];
+    return
 end
-disp(['Loading ' filename '...']);
 fid = fopen(filename,'rb+');
 filesize = getfilesize(fid);
 
@@ -35,9 +38,11 @@ if version >= 0.2
 end
 
 current_sample = 0;
-
+fprintf('Reading %s\n',filename);
 while ftell(fid) + RECORD_SIZE < filesize % at least one record remains
-    
+    if mod(index,10000) == 0
+        fprintf('Passed record %d\n',index);
+    end;
     go_back_to_start_of_loop = 0;
     
     index = index + 1;
@@ -155,7 +160,7 @@ else % v0.0; NOTE: the timestamps for the last record will not be interpolated
     end
     
 end
-
+fprintf('Done\n');
 return
 
 

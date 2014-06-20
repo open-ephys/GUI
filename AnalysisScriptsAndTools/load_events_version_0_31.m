@@ -1,4 +1,5 @@
 function [strctDataFromEvents] = load_events_version_0_31(filename, verbose)
+
 %
 % [data, timestamps, info] = load_open_ephys_data(filename)
 %
@@ -75,6 +76,9 @@ index = 0;
 
 hdr = fread(fid, NUM_HEADER_BYTES, 'char*1');
 eval(char(hdr'));
+if ~isfield(header,'ticksPerSec')
+    header.ticksPerSec = 2727753.00;
+end
 info.header = header;
 
 if (isfield(info.header, 'version'))
@@ -85,6 +89,8 @@ end
 
 fseek(fid,NUM_HEADER_BYTES,-1);
 
+tmp=dir(filename);
+fileSize = tmp.bytes;
 
 %% Event types definition
 SESSION = 10;
@@ -113,7 +119,7 @@ eyeCounter = 1;
 while (1)
     index=index+1;
     if (mod(index,10000) == 0)
-        fprintf('Passed event %d\n',index);
+        fprintf('Passed event %d (%.2f%%)\n',index,sum(eventSize)/fileSize*100);
     end
     eventTy= fread(fid, 1, 'uint8=>uint8');
     if isempty(eventTy)
@@ -143,15 +149,21 @@ while (1)
             
             softwareTS = fread(fid,1,'int64=>int64');
             hardwareTS = fread(fid,1,'int64=>int64');
+            
             sortedID = fread(fid,1,'int16=>int16');
+            % hack to fix early files
+            if (sortedID<  0 || sortedID > 20000)
+                sortedID = 0;
+            end
             electrodeID = fread(fid,1,'int16=>int16');
+            channelCrossingThreshold = fread(fid,1,'int16=>int16'); %unused at the moment.
             
             numChannels = fread(fid,1,'int16=>int16');
             
             gains = fread(fid,numChannels,'float=>float');
             
             numPts = fread(fid,1,'int16=>int16');
-            if (eventSize(index) > 8+8+2+2+2+2)
+            if (eventSize(index) > 8+8+2+2+2+2+2)
                 Waveform = fread(fid,numPts*numChannels,'uint16=>double');
             end
             if (spikeCounter == 1)
@@ -207,67 +219,79 @@ TimestampHardware = TimestampHardware(1:timestampCounter-1);
 % clock
 % robust fit has trouble with very large values.
 % so we remove the offset and then regress
-[SyncCoeff]=robustfit(TimstampSoftware(:)-TimstampSoftware(1),TimestampHardware(:)-TimestampHardware(1));
-strctSoftwareHardwareSync.coeff = SyncCoeff;
-strctSoftwareHardwareSync.sourceT0 = TimstampSoftware(1);
-strctSoftwareHardwareSync.targetT0 = TimestampHardware(1);
+
+[strctSoftwareHardwareSync,JitterStd,Jitter] = fnTimeZoneFit(TimstampSoftware,TimestampHardware); % Most accurate sync, std is ~ 2.8 ms
+fprintf('Open Ephys Software-Hardware Synchronization: mean: %.4f +- %.4f ms\n', nanmean(Jitter/header.sampleRate*1e3), JitterStd/header.sampleRate*1e3);
 
 if (verbose)
     figure(1);
     clf;
-    subplot(2,1,1);
-    plot(TimstampSoftware-TimstampSoftware(1),TimestampHardware-TimestampHardware(1),'.');
-    JitterMS = 1e3/ header.sampleRate*(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1)) -  (TimestampHardware-TimestampHardware(1))) ;
-    hold on;
-    plot(TimstampSoftware-TimstampSoftware(1),(((TimstampSoftware-TimstampSoftware(1))* SyncCoeff(2) + SyncCoeff(1))),'r');
-    title(sprintf('hardware-software synchronization. Avg jitter %.3f (ms)',mean(JitterMS)));
-    xlabel('Software timestamp');
-    ylabel('Hardware timestamp');
-    subplot(2,1,2);
-    plot(JitterMS);
+    plot(Jitter/header.sampleRate*1e3);
+    title(sprintf('Software=>Hardware synchronization. Jitter standard deviation: %.3f (ms)',JitterStd/header.sampleRate*1e3));
     xlabel('Timestamp index');
     ylabel('Jitter (ms)');
 end
+
+%% Correct all TTL software timestamps with the calculated linear regression model (?)
+% probably a better way to infer software timestamps of TTLs since error is
+% reduced
+hardwareTTL_TS = TTLs(:,4);
+%softwareTTL_TS = TTLs(:,3);
+reconstructedTTLs_TS_Software = fnTimeZoneInvTransform(strctSoftwareHardwareSync, hardwareTTL_TS);
+TTLs(:,3)= reconstructedTTLs_TS_Software; 
+%% Correct all Spike software timestamps with the calculated linear regression model (?)
+
+% Verify we don't have any double spikes?
+[~,aiUniqueSpikeInd]=unique(Spikes(:,2:4),'rows');
+Spikes=Spikes(aiUniqueSpikeInd,:);
+% Now sort by hardware TS
+[~,aiSortInd]=sort(Spikes(:,2));
+Spikes=Spikes(aiSortInd,:);
+
+hardwareSpikes_TS = Spikes(:,2);
+reconstructedSpikes_TS_Software =  fnTimeZoneInvTransform(strctSoftwareHardwareSync,hardwareSpikes_TS);
+Spikes(:,1) = reconstructedSpikes_TS_Software;
 
 %% Software-Software Synchronization 
 % Synchronize software timestamps between two computers.
 % The remote computer sends messages of the form [keyword TS]
 % in this case, the keyword is "KofikoSync".
-syncKeyword = 'KofikoSync';
-localComputerTS = [];
-remoteComputerTS = [];
-for k=1:length(acNetworkEvents)
-    if strncmpi(acNetworkEvents{k},syncKeyword,length(syncKeyword))
-        localComputerTS = [localComputerTS,networkEventsTS(k)];
-        remoteComputerTS = [remoteComputerTS, str2double(acNetworkEvents{k}(length(syncKeyword)+1:end))];
-    end
-end
-if ~isempty(localComputerTS)
-    % Use robust linear regression to find optimal coefficients to match
-    % local and remote timestamps
-    [RemoteComputerSyncCoeff]=robustfit(localComputerTS(:)-localComputerTS(1),remoteComputerTS(:)-remoteComputerTS(1));
-    
-    strctLocalRemoteSync.coeff = SyncCoeff;
-    strctLocalRemoteSync.sourceT0 = localComputerTS(1);
-    strctLocalRemoteSync.targetT0 = remoteComputerTS(1);
-    
-    if (verbose)
-        JitterMS = 1e3*(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1)) -  (remoteComputerTS-remoteComputerTS(1))) ;
-        figure(2);
-        clf;
-        subplot(2,1,1);
-        plot(localComputerTS-localComputerTS(1),remoteComputerTS-remoteComputerTS(1),'b.');
-        hold on;
-        plot(localComputerTS-localComputerTS(1),(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1))),'r');
-        title(sprintf('local-remote computer synchronization. Avg jitter %.3f (ms), median (%.3f)',mean(JitterMS),median(JitterMS)));
-        subplot(2,1,2);
-        plot(JitterMS);
-        xlabel('Timestamp index');
-        ylabel('Jitter (ms)');
-    end
-else
-    strctLocalRemoteSync = [];
-end
+% syncKeyword = 'KofikoSync';
+% localComputerTS = [];
+% remoteComputerTS = [];
+% for k=1:length(acNetworkEvents)
+%     if strncmpi(acNetworkEvents{k},syncKeyword,length(syncKeyword))
+%         localComputerTS = [localComputerTS,networkEventsTS(k)];
+%         remoteComputerTS = [remoteComputerTS, str2double(acNetworkEvents{k}(length(syncKeyword)+1:end))];
+%     end
+% end
+% if ~isempty(localComputerTS)
+%     % Use robust linear regression to find optimal coefficients to match
+%     % local and remote timestamps
+%     [RemoteComputerSyncCoeff]=robustfit(localComputerTS(:)-localComputerTS(1),remoteComputerTS(:)-remoteComputerTS(1));
+%     strctLocalRemoteSync.coeff = SyncCoeff;
+%     strctLocalRemoteSync.sourceT0 = localComputerTS(1);
+%     strctLocalRemoteSync.targetT0 = remoteComputerTS(1);
+%     strctLocalRemoteSync.localComputerTS = localComputerTS;
+%     strctLocalRemoteSync.remoteComputerTS = remoteComputerTS;
+%     
+%     if (verbose)
+%         JitterMS = 1e3*(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1)) -  (remoteComputerTS-remoteComputerTS(1))) ;
+%         figure(2);
+%         clf;
+%         subplot(2,1,1);
+%         plot(localComputerTS-localComputerTS(1),remoteComputerTS-remoteComputerTS(1),'b.');
+%         hold on;
+%         plot(localComputerTS-localComputerTS(1),(((localComputerTS-localComputerTS(1))* RemoteComputerSyncCoeff(2) + RemoteComputerSyncCoeff(1))),'r');
+%         title(sprintf('local-remote computer synchronization. Avg jitter %.3f (ms), median (%.3f)',mean(JitterMS),median(JitterMS)));
+%         subplot(2,1,2);
+%         plot(JitterMS);
+%         xlabel('Timestamp index');
+%         ylabel('Jitter (ms)');
+%     end
+% else
+%     strctLocalRemoteSync = [];
+% end
 
 %% Spikes
 if ~isempty(Spikes)
@@ -287,7 +311,7 @@ if ~isempty(Spikes)
             title(sprintf('Electrode %d, Unit %d',sortedUnits(k,1),sortedUnits(k,2)));
             xlabel('Time (ms)');
             ylabel('Amplitude (uV)');
-            set(gca,'ylim',[-120 100]);
+            set(gca,'ylim',[-200 150]);
         end
     end
 else
@@ -341,7 +365,7 @@ for k=1:length(acNetworkEvents)
     end
   if strncmpi(acNetworkEvents{k},TRIAL_OUTCOME,length(TRIAL_OUTCOME))    
        trialOutcome = str2num(acNetworkEvents{k}(length(TRIAL_OUTCOME)+1:end));
-         if ~isempty(trialType)
+         if ~isempty(trialOutcome)
                     trialTable(trialCounter, 5) = trialOutcome;
          end
   end
@@ -397,7 +421,7 @@ end
 % ylabel('Average firing rate (Hz)');
 % xlabel('Time (ms)');
 % legend('Faces','Bodies','Fruits','Object','Hands','Scrambled Images','Location','NorthEastOutside');
-
+fprintf('%d trials were found\n',trialCounter);
 %% TTL
 TTLhardwareOnsets = cell(1,8);
 for ttlChannel=1:8
@@ -469,8 +493,10 @@ strctDataFromEvents.acNetworkEvents = acNetworkEvents;
 strctDataFromEvents.networkEventsTS = networkEventsTS;
 strctDataFromEvents.trialTable = trialTable;
 strctDataFromEvents.strctSync.strctSoftwareHardwareSync = strctSoftwareHardwareSync;
-strctDataFromEvents.strctSync.strctLocalRemoteSync = strctLocalRemoteSync;
+%strctDataFromEvents.strctSync.strctLocalRemoteSync = strctLocalRemoteSync;
 strctDataFromEvents.headerInfo = info.header;
+strctDataFromEvents.advancerTable = advancerTable;
+strctDataFromEvents.EyePos = EyePos;
 return
 
 
