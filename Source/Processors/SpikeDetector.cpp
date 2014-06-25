@@ -1028,7 +1028,6 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
 
             sampleIndex++;
 
-
             // cycle through channels
             for (int chan = 0; chan < electrode->numChannels; chan++)
             {
@@ -1052,6 +1051,9 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                         //std::cout << "Spike detected on electrode " << i << std::endl;
                         // find the peak
                         int peakIndex = sampleIndex;
+
+                        //if (sampleIndex == 0 && i == 0)
+                        //    std::cout << getCurrentSample(currentChannel) << std::endl;
 
 						if (bSpikeDetectedPositive) 
 						{
@@ -1093,6 +1095,8 @@ void SpikeDetector::process(AudioSampleBuffer& buffer,
                                                      peakIndex,
                                                      i,
                                                      channel);
+
+                            //std::cout << "adding waveform" << std::endl;
                         }
 
 						/*

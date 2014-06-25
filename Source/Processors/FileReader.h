@@ -60,6 +60,8 @@ public:
 
     void updateSettings();
 
+    void getChannelsInfo(StringArray &names, Array<channelType> &types, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains);
+
     bool isReady();
 
     bool isSource()

@@ -126,6 +126,24 @@ void FileReader::updateSettings()
 
 }
 
+void FileReader::getChannelsInfo(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber,Array<float> &gains)
+{
+
+    Names.clear();
+    type.clear();
+    stream.clear();
+    originalChannelNumber.clear();
+    gains.clear();
+
+    for (int n = 0; n < getDefaultNumOutputs(); n++)
+    {
+        Names.add("CH" + String(n));
+        type.add(DATA_CHANNEL);
+        stream.add(0);
+        originalChannelNumber.add(n);
+        gains.add(getDefaultBitVolts());
+    }
+}
 
 
 void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSamples)

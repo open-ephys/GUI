@@ -358,6 +358,8 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 
         const uint8_t* dataptr = event.getRawData();
         int bufferSize = event.getRawDataSize();
+
+        //std::cout << "Received spike." << std::endl;
             
         if (bufferSize > 0 && electrodes.size() > 0)
         {
@@ -368,13 +370,18 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 
             if (isValid)
             {
+
+               //std::cout << "Spike is valid." << std::endl;
+
                 int electrodeNum = newSpike.source;
+
 				if (electrodeNum < electrodes.size() )
 				{
 					dispElectrode& e = electrodes.getReference(electrodeNum);
-					// std::cout << electrodeNum << std::endl;
-
+					
 					bool aboveThreshold = false;
+
+                   // std::cout << "Checking threshold." << std::endl;
 
 					// update threshold / check threshold
 					for (int i = 0; i < e.numChannels; i++)
@@ -387,20 +394,28 @@ void SpikeDisplayNode::handleEvent(int eventType, MidiMessage& event, int sample
 					if (aboveThreshold)
 					{
 
+                        //std::cout << "Above threshold." << std::endl;
+
 						// add to buffer
 						if (e.currentSpikeIndex < displayBufferSize)
 						{
-							//  std::cout << "Adding spike " << e.currentSpikeIndex + 1 << std::endl;
+							//std::cout << "Adding spike " << e.currentSpikeIndex + 1 << std::endl;
 							e.mostRecentSpikes.set(e.currentSpikeIndex, newSpike);
 							e.currentSpikeIndex++;
-						}
+						} else {
+
+                           // std::cout << "Not adding spike." << std::endl;
+                        }
 
 						// save spike
 						if (isRecording)
 						{
 							writeSpike(newSpike, electrodeNum);
 						}
-					}
+					} else {
+                        //std::cout << "Not above threshold." << std::endl;
+                    }
+
 				}
 
             }
@@ -418,7 +433,11 @@ bool SpikeDisplayNode::checkThreshold(int chan, float thresh, SpikeObject& s)
     for (int i = 0; i < s.nSamples-1; i++)
     {
 
-        if (float(s.data[sampIdx]-32768)/float(*s.gain)*1000.0f > thresh)
+        float value = float(s.data[sampIdx]-32768)/float(*s.gain)*1000.0f;
+
+       // std::cout << value << " > " << thresh << "? gain:" << float(*s.gain) << std::endl;
+
+        if (value > thresh)
         {
             return true;
         }

@@ -367,6 +367,8 @@ void SpikeDisplay::invertSpikes(bool shouldInvert)
 void SpikeDisplay::plotSpike(const SpikeObject& spike, int electrodeNum)
 {
     spikePlots[electrodeNum]->processSpikeObject(spike);
+
+    //std::cout << "received spike." << std::endl;
 }
 
 void SpikeDisplay::registerThresholdCoordinator(SpikeThresholdCoordinator *stc)
