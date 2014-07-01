@@ -1434,10 +1434,10 @@ bool RHD2000Thread::updateBuffer()
 		}
 
         evalBoard->setTtlMode(ttlMode);
-        evalBoard->enableExternalFastSettle(fastTTLSettleEnabled);
-        evalBoard->setExternalFastSettleChannel(fastSettleTTLChannel);
-	    evalBoard->setDacHighpassFilter(desiredDAChpf);
-		evalBoard->enableDacHighpassFilter(desiredDAChpfState);
+        evalBoard->setFastSettleByTTL(fastTTLSettleEnabled);
+	evalBoard->setFastSettleByTTLchannel(fastSettleTTLChannel);
+        evalBoard->setDacHighpassFilter(desiredDAChpf);
+	evalBoard->enableDacHighpassFilter(desiredDAChpfState);
 
         dacOutputShouldChange = false;
     }
