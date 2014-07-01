@@ -1154,7 +1154,25 @@ void Rhd2000EvalBoard::selectDacDataStream(int dacChannel, int stream)
     dev->UpdateWireIns();
 }
 
+void Rhd2000EvalBoard::setFastSettleByTTL(bool state)
 
+{
+    dev->SetWireInValue(WireInResetRun, (state ? 0x10 : 0x00), 0x10);
+    dev->UpdateWireIns();
+}
+
+void Rhd2000EvalBoard::setFastSettleByTTLchannel(int channel)
+{
+  if (channel < 0 || channel > 7)
+    {
+        cerr << "Error in Rhd2000EvalBoard::setFastSettleByTTLchannel: channel out of range." << endl;
+        return;
+    }
+// the WireInTTLSettleChannel is also used by DAC, so keep the values of 10 used bits
+ // and shift the channel value 10 bits to the left
+	dev->SetWireInValue(WireInTTLSettleChannel, channel << 10, 0x3c00);
+    dev->UpdateWireIns();
+}
 
 
 
