@@ -163,6 +163,8 @@ public:
 	void updateDacAssignment(int dacChannel, int channel);
 	void enableExternalFastSettle(bool enable);
 	void setExternalFastSettleChannel(int channel);
+	void setFastSettleByTTL(bool state);
+	void setFastSettleByTTLchannel(int channel);
 
     void flush();
     bool readDataBlock(Rhd2000DataBlock* dataBlock);
