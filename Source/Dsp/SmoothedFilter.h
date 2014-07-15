@@ -74,7 +74,8 @@ public:
         assert(m_remainingSamples >= 0);
 
         // first handle any transition samples
-        int remainingSamples = std::min(m_remainingSamples, numSamples);
+
+		int remainingSamples = m_remainingSamples < numSamples ? m_remainingSamples : numSamples;
 
         if (remainingSamples > 0)
         {

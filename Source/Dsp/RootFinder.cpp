@@ -151,7 +151,9 @@ void RootFinderBase::laguerre(int degree,
         double abm = std::abs(gm);
         if (abp < abm)
             gp = gm;
-        dx = std::max(abp, abm) > 0.0 ? double(m) / gp : std::polar(1 + abx, double(iter));
+
+		double localmax = abp > abm ? abp : abm;
+		dx = localmax > 0.0 ? double(m) / gp : std::polar(1 + abx, double(iter));
         x1 = x - dx;
         if (x == x1)
             return;

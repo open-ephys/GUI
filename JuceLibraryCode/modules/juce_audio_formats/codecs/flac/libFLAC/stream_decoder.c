@@ -3339,28 +3339,51 @@ FLAC__StreamDecoderReadStatus file_read_callback_dec(const FLAC__StreamDecoder *
 FLAC__StreamDecoderSeekStatus file_seek_callback_dec(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data)
 {
 	(void)client_data;
-
+#if WIN32
 	if(decoder->private_->file == stdin)
 		return FLAC__STREAM_DECODER_SEEK_STATUS_UNSUPPORTED;
-	else if(fseeko(decoder->private_->file, (off_t)absolute_byte_offset, SEEK_SET) < 0)
+	else if(_fseeki64(decoder->private_->file, (off_t)absolute_byte_offset, SEEK_SET) < 0)
 		return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 	else
 		return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
+#else
+
+	if (decoder->private_->file == stdin)
+		return FLAC__STREAM_DECODER_SEEK_STATUS_UNSUPPORTED;
+	else if (fseeko(decoder->private_->file, (off_t)absolute_byte_offset, SEEK_SET) < 0)
+		return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
+	else
+		return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
+
+#endif
 }
+
 
 FLAC__StreamDecoderTellStatus file_tell_callback_dec(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
 {
 	off_t pos;
 	(void)client_data;
-
+#if WIN32
 	if(decoder->private_->file == stdin)
 		return FLAC__STREAM_DECODER_TELL_STATUS_UNSUPPORTED;
-	else if((pos = ftello(decoder->private_->file)) < 0)
+	else if ((pos = _ftelli64(decoder->private_->file)) < 0)
 		return FLAC__STREAM_DECODER_TELL_STATUS_ERROR;
 	else {
 		*absolute_byte_offset = (FLAC__uint64)pos;
 		return FLAC__STREAM_DECODER_TELL_STATUS_OK;
 	}
+
+#else
+	if (decoder->private_->file == stdin)
+		return FLAC__STREAM_DECODER_TELL_STATUS_UNSUPPORTED;
+	else if ((pos = ftello(decoder->private_->file)) < 0)
+		return FLAC__STREAM_DECODER_TELL_STATUS_ERROR;
+	else {
+		*absolute_byte_offset = (FLAC__uint64)pos;
+		return FLAC__STREAM_DECODER_TELL_STATUS_OK;
+	}
+
+#endif
 }
 
 FLAC__StreamDecoderLengthStatus file_length_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *stream_length, void *client_data)
