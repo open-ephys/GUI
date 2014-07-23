@@ -34,6 +34,8 @@ FileReader::FileReader()
 
     enabledState(false);
 
+    counter = 0;
+
 }
 
 FileReader::~FileReader()
@@ -145,7 +147,35 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
 
     // FIXME: needs to account for the fact that the ratio might not be an exact
     //        integer value
+
+    // code for testing events:
+    // if (counter > 100)
+    // {
+    //     addEvent(events,    // MidiBuffer
+    //          TTL, // eventType
+    //          0,         // sampleNum
+    //          1,    // eventID
+    //          0      // eventChannel
+    //         );
+    //     counter = 0;
+    // } else {
+    //     counter++;
+
+    // }
+    
+
+
     int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
+
+
+    // if (counter == 0)
+    // {
+    //     samplesNeeded = samplesNeeded - 2;
+    //     counter = 1;
+    // } else {
+    //     samplesNeeded = samplesNeeded + 2;
+    //     counter = 0;
+    // }
 
     if (ftell(input) >= lengthOfInputFile - samplesNeeded)
     {
@@ -176,7 +206,7 @@ void FileReader::process(AudioSampleBuffer& buffer, MidiBuffer& events, int& nSa
 
 #endif
 
-        *buffer.getSampleData(chan++, samp) = -sample * getDefaultBitVolts();
+        *buffer.getWritePointer(chan++, samp) = -sample * getDefaultBitVolts();
 
     }
 

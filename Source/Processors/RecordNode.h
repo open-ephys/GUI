@@ -59,6 +59,7 @@ public:
     */
     void process(AudioSampleBuffer& buffer, MidiBuffer& eventBuffer, int& nSamples);
 
+
     /** Overrides implementation in GenericProcessor; used to change recording parameters
         on the fly.
 
@@ -121,6 +122,7 @@ public:
     bool newDirectoryNeeded;
 
     bool isRecording;
+    bool allFilesOpened;
 
     /** Generate a Matlab-compatible datestring */
     String generateDateString();
@@ -159,8 +161,11 @@ private:
     */
     int64 timestamp;
 
-    /** Integer to keep track of the number samples written in each buffer */
-    int sampleCount;
+    /** Integer to keep track of the number samples written in each block */
+    int blockIndex;
+
+    /** Integer to keep track of number of recording sessions in the same file */
+    uint16 recordingNumber;
 
     /** Used to generate timestamps if none are given.
     */
@@ -200,7 +205,7 @@ private:
 
     /** Method for writing continuous buffers to disk.
     */
-    void writeContinuousBuffer(float* data, int nSamples, int channel);
+    void writeContinuousBuffer(const float* data, int nSamples, int channel);
 
     /** Method for writing event buffers to disk.
     */
