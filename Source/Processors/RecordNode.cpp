@@ -512,7 +512,7 @@ String RecordNode::generateHeader(Channel* ch)
 
     String header = "header.format = 'Open Ephys Data Format'; \n";
 
-    header += "header.version = 0.2;";
+    header += "header.version = 0.2;\n";
     header += "header.header_bytes = ";
     header += String(HEADER_SIZE);
     header += ";\n";
