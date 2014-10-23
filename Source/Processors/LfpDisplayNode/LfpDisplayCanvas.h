@@ -26,6 +26,7 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "LfpDisplayNode.h"
 #include "../Visualization/Visualizer.h"
+#define CHANNEL_TYPES 3
 
 class LfpDisplayNode;
 
@@ -34,6 +35,7 @@ class LfpDisplay;
 class LfpChannelDisplay;
 class LfpChannelDisplayInfo;
 class EventDisplayInterface;
+class LfpViewport;
 
 /**
 
@@ -62,8 +64,8 @@ public:
     void setParameter(int, float);
     void setParameter(int, int, int, float) {}
 
-	void setRangeSelection(float range); // set range selection combo box to correct value if it has been changed by scolling etc.
-	void setSpreadSelection(int spread); // set spread selection combo box to correct value if it has been changed by scolling etc.
+	void setRangeSelection(float range, bool canvasMustUpdate = false); // set range selection combo box to correct value if it has been changed by scolling etc.
+	void setSpreadSelection(int spread, bool canvasMustUpdate = false); // set spread selection combo box to correct value if it has been changed by scolling etc.
 
     void paint(Graphics& g);
 
@@ -97,6 +99,9 @@ public:
     bool keyPressed(const KeyPress& key, Component* orig);
 
 	channelType getChannelType(int n);
+	channelType getSelectedType();
+	String getTypeName(channelType type);
+	int getRangeStep(channelType type);
 
 	void setSelectedType(channelType type);
 
@@ -136,7 +141,7 @@ private:
 
     ScopedPointer<LfpTimescale> timescale;
     ScopedPointer<LfpDisplay> lfpDisplay;
-    ScopedPointer<Viewport> viewport;
+    ScopedPointer<LfpViewport> viewport;
 
     ScopedPointer<ComboBox> timebaseSelection;
     ScopedPointer<ComboBox> rangeSelection;
@@ -146,13 +151,24 @@ private:
     ScopedPointer<UtilityButton> drawMethodButton;
     ScopedPointer<UtilityButton> pauseButton;
 
-    StringArray voltageRanges[3];
+    StringArray voltageRanges[CHANNEL_TYPES];
     StringArray timebases;
     StringArray spreads; // option for vertical spacing between channels
     StringArray colorGroupings; // option for coloring every N channels the same
 
-	channelType selectedVoltageType;
-	int selectedVoltageRange[3];
+	channelType selectedChannelType;
+	int selectedVoltageRange[CHANNEL_TYPES];
+	String selectedVoltageRangeValues[CHANNEL_TYPES];
+	float rangeGain[CHANNEL_TYPES];
+	StringArray rangeUnits;
+	StringArray typeNames;
+	int rangeSteps[CHANNEL_TYPES];
+
+	int selectedSpread;
+	String selectedSpreadValue;
+
+	int selectedTimebase;
+	String selectedTimebaseValue;
 
     OwnedArray<EventDisplayInterface> eventDisplayInterfaces;
 
@@ -212,8 +228,10 @@ public:
 
 
     void setRange(float range, channelType type);
-	//TODO: update for multiple ranges 
+	
+	//Withouth parameters returns selected type
     int getRange();
+	int getRange(channelType type);
 
     void setChannelHeight(int r, bool resetSingle = true);
     int getChannelHeight();
@@ -255,7 +273,7 @@ private:
     LfpDisplayCanvas* canvas;
     Viewport* viewport;
 
-    float range;
+    float range[3];
 
 
 };
@@ -326,6 +344,7 @@ protected:
     bool drawMethod;
 
 	channelType type;
+	String typeStr;
 
 };
 
@@ -373,6 +392,16 @@ private:
 
     ScopedPointer<UtilityButton> chButton;
 
+};
+
+class LfpViewport : public Viewport
+{
+public:
+	LfpViewport(LfpDisplayCanvas* canvas);
+	void visibleAreaChanged(const Rectangle<int>& newVisibleArea);
+
+private:
+	LfpDisplayCanvas* canvas;
 };
 
 
