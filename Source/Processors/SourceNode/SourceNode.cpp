@@ -25,11 +25,11 @@
 #include "../DataThreads/DataBuffer.h"
 //#include "DataThreads/IntanThread.h"
 #include "../DataThreads/FPGAThread.h"
-#include "../DataThreads/FileReaderThread.h"
+//#include "../DataThreads/FileReaderThread.h"
 #include "../DataThreads/RHD2000Thread.h"
 #include "../DataThreads/EcubeThread.h" // Added by Michael Borisov
 #include "../SourceNode/SourceNodeEditor.h"
-#include "../FileReader/FileReaderEditor.h"
+//#include "../FileReader/FileReaderEditor.h"
 #include "../DataThreads/RHD2000Editor.h"
 #include "../DataThreads/EcubeEditor.h" // Added by Michael Borisov
 #include "../Channel/Channel.h"
@@ -51,10 +51,10 @@ SourceNode::SourceNode(const String& name_)
     {
         dataThread = new FPGAThread(this);
     }
-    else if (getName().equalsIgnoreCase("File Reader"))
-    {
-        dataThread = new FileReaderThread(this);
-    }
+    //else if (getName().equalsIgnoreCase("File Reader"))
+   // {
+    //    dataThread = new FileReaderThread(this);
+   // }
     else if (getName().equalsIgnoreCase("Rhythm FPGA"))
     {
         dataThread = new RHD2000Thread(this);
@@ -92,7 +92,7 @@ SourceNode::SourceNode(const String& name_)
     startTimer(sourceCheckInterval);
 
     timestamp = 0;
-    eventCodeBuffer = new int16[10000]; //10000 samples per buffer max?
+    eventCodeBuffer = new uint64[10000]; //10000 samples per buffer max?
 
 
 }
@@ -180,7 +180,7 @@ void SourceNode::setDefaultNamingScheme(int scheme)
         Array<int> originalChannelNumber;
         Array<float> gains;
         getChannelsInfo(names, types, stream, originalChannelNumber, gains);
-        for (int k=0;k<names.size();k++)
+        for (int k = 0; k < names.size(); k++)
         {
             modifyChannelName(types[k],stream[k],originalChannelNumber[k], names[k],false);
         }
@@ -203,6 +203,7 @@ void SourceNode::updateSettings()
         inputBuffer = dataThread->getBufferAddress();
         std::cout << "Input buffer address is " << inputBuffer << std::endl;
     }
+
 	dataThread->updateChannelNames();
 
     for (int i = 0; i < dataThread->getNumEventChannels(); i++)
@@ -212,6 +213,11 @@ void SourceNode::updateSettings()
         ch->getType() == EVENT_CHANNEL;
         eventChannels.add(ch);
     }
+
+   //for (int i = 0; i < channels.size(); i++)
+   // {
+        std::cout << "Channel: " << channels[channels.size()-1]->bitVolts << std::endl;
+    //}
 
 
 }
@@ -265,13 +271,14 @@ int SourceNode::getDefaultNumOutputs()
         return 0;
 }
 
-float SourceNode::getDefaultBitVolts()
+float SourceNode::getBitVolts(int chan)
 {
-    if (dataThread != 0)
-        return dataThread->getBitVolts();
-    else
-        return 1.0f;
+	if (dataThread != 0)
+		return dataThread->getBitVolts(chan);
+	else
+		return 1.0f;
 }
+
 
 void SourceNode::enabledState(bool t)
 {
@@ -498,13 +505,12 @@ void SourceNode::process(AudioSampleBuffer& buffer,
 void SourceNode::saveCustomParametersToXml(XmlElement* parentElement)
 {
 
-    if (getName().equalsIgnoreCase("File Reader"))
-    {
-        XmlElement* childNode = parentElement->createNewChildElement("FILENAME");
-        FileReaderThread* thread = (FileReaderThread*) dataThread.get();
-        childNode->setAttribute("path", thread->getFile());
-
-    }
+  //  if (getName().equalsIgnoreCase("File Reader"))
+  //  {
+  //      XmlElement* childNode = parentElement->createNewChildElement("FILENAME");
+  //      FileReaderThread* thread = (FileReaderThread*) dataThread.get();
+  //      childNode->setAttribute("path", thread->getFile());
+  //  }
 
 }
 
@@ -517,13 +523,12 @@ void SourceNode::loadCustomParametersFromXml()
 
         forEachXmlChildElement(*parametersAsXml, xmlNode)
         {
-            if (xmlNode->hasTagName("FILENAME"))
-            {
-                String filepath = xmlNode->getStringAttribute("path");
-                FileReaderEditor* fre = (FileReaderEditor*) getEditor();
-                fre->setFile(filepath);
-
-            }
+//            if (xmlNode->hasTagName("FILENAME"))
+//            {
+//                String filepath = xmlNode->getStringAttribute("path");
+//                FileReaderEditor* fre = (FileReaderEditor*) getEditor();
+//                fre->setFile(filepath);
+//            }
         }
     }
 

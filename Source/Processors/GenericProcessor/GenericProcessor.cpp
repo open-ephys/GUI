@@ -296,7 +296,7 @@ void GenericProcessor::clearSettings()
 void GenericProcessor::update()
 {
 
-    //std::cout << getName() << " updating settings." << std::endl;
+    std::cout << getName() << " updating settings." << std::endl;
     // SO patched here to keep original channel names
 
     int oldNumChannels = channels.size();
@@ -320,7 +320,7 @@ void GenericProcessor::update()
             Channel* sourceChan = sourceNode->channels[i];
             Channel* ch = new Channel(*sourceChan);
             ch->setProcessor(this);
-            ch->bitVolts = ch->bitVolts*getDefaultBitVolts();
+            ch->bitVolts = ch->bitVolts*getBitVolts(i);
 			ch->num = i;
 
             if (i < recordStatus.size())

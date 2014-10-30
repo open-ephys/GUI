@@ -76,11 +76,14 @@ public:
     /** Returns the number of continuous channels the data source can provide.*/
     virtual int getNumChannels();
 
+    /** Returns the number of event channels of the data source.*/
+    virtual int getNumEventChannels();
+
     /** Returns the sample rate of the data source.*/
     virtual float getSampleRate();
 
-    /** Returns the volts per bit of the data source.*/
-    virtual float getBitVolts();
+    /** Returns the volts per bit of a given data channel.*/
+    virtual float getBitVolts(int chan);
 
     virtual void getChannelsInfo(StringArray &Names, Array<channelType> &type, Array<int> &stream, Array<int> &originalChannelNumber, Array<float> &gains);
     void setDefaultNamingScheme(int scheme);

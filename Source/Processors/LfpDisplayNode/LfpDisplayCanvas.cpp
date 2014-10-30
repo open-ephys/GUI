@@ -80,6 +80,7 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     voltageRanges[DATA_CHANNEL].add("1000");
     voltageRanges[DATA_CHANNEL].add("2000");
     voltageRanges[DATA_CHANNEL].add("5000");
+	voltageRanges[DATA_CHANNEL].add("10000");
 	selectedVoltageRange[DATA_CHANNEL] = 8;
 	rangeGain[DATA_CHANNEL] = 1; //uV
 	rangeSteps[DATA_CHANNEL] = 10;
@@ -111,10 +112,11 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     voltageRanges[ADC_CHANNEL].add("0.5");
     voltageRanges[ADC_CHANNEL].add("1.0");
     voltageRanges[ADC_CHANNEL].add("2.0");
-    voltageRanges[ADC_CHANNEL].add("5.0");
-	selectedVoltageRange[ADC_CHANNEL] = 4;
-	rangeGain[ADC_CHANNEL] = 1000000; //V
-	rangeSteps[ADC_CHANNEL] = 100000; //in uV
+	voltageRanges[ADC_CHANNEL].add("5.0");
+	voltageRanges[ADC_CHANNEL].add("10.0");
+	selectedVoltageRange[ADC_CHANNEL] = 8;
+	rangeGain[ADC_CHANNEL] = 1; //V
+	rangeSteps[ADC_CHANNEL] = 0.1; //in V
 	rangeUnits.add("V");
 	typeNames.add("ADC");
 
@@ -131,8 +133,8 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     timebases.add("5.0");
     timebases.add("10.0");
     timebases.add("20.0");
-	selectedTimebase=2;
-	selectedTimebaseValue=timebases[selectedTimebase-1];
+	selectedTimebase = 4;
+	selectedTimebaseValue = timebases[selectedTimebase-1];
 
     spreads.add("10");
     spreads.add("20");
@@ -145,7 +147,7 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     spreads.add("90");
     spreads.add("100");
 	selectedSpread = 5;
-	selectedSpreadValue=spreads[selectedSpread-1];
+	selectedSpreadValue = spreads[selectedSpread-1];
 
     colorGroupings.add("1");
     colorGroupings.add("2");
@@ -202,7 +204,7 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     drawMethodButton->setToggleState(false, sendNotification);
     addAndMakeVisible(drawMethodButton);
 
-    //button for pausing the diaplsy - works by skipping buffer updates. This way scrolling etc still works
+    //button for pausing the display - works by skipping buffer updates. This way scrolling etc still works
     pauseButton = new UtilityButton("Pause", Font("Small Text", 13, Font::plain));
     pauseButton->setRadius(5.0f);
     pauseButton->setEnabledState(true);
@@ -327,6 +329,15 @@ void LfpDisplayCanvas::update()
 
         resized();
     }
+	else
+	{
+		for (int i = 0; i < processor->getNumInputs(); i++)
+        {
+			lfpDisplay->channels[i]->updateType();
+			lfpDisplay->channelInfo[i]->updateType();
+		}
+		
+	}
 
 }
 
@@ -1328,18 +1339,21 @@ void LfpDisplay::mouseWheelMove(const MouseEvent&  e, const MouseWheelDetails&  
     {
         int h = getChannelHeight();
         int hdiff=0;
-        if (wheel.deltaY>0)
+        
+        std::cout << wheel.deltaY << std::endl;
+        
+        if (wheel.deltaY > 0)
         {
-            hdiff=2;
+            hdiff = 2;
         }
         else
         {
-            if (h>5)
-                hdiff=-2;
+            if (h > 5)
+                hdiff = -2;
         }
 
-        if (abs(h)>100) // accelerate scrolling for large ranges
-            hdiff=hdiff*3;
+        if (abs(h) > 100) // accelerate scrolling for large ranges
+            hdiff *= 3;
 
         setChannelHeight(h+hdiff);
         int oldX=viewport->getViewPositionX();
@@ -1358,15 +1372,18 @@ void LfpDisplay::mouseWheelMove(const MouseEvent&  e, const MouseWheelDetails&  
     {
         if (e.mods.isShiftDown())  // SHIFT + scroll wheel -> change channel range
         {
-            int h= getRange();
+            int h = getRange();
 			int step = canvas->getRangeStep(canvas->getSelectedType());
-            if (wheel.deltaY>0)
+            
+            std::cout << wheel.deltaY << std::endl;
+            
+            if (wheel.deltaY > 0)
             {
 				setRange(h+step,canvas->getSelectedType());
             }
             else
             {
-                if (h>step+1)
+                if (h > step+1)
 					setRange(h-step,canvas->getSelectedType());
             }
 
@@ -1398,7 +1415,7 @@ void LfpDisplay::toggleSingleChannel(int chan)
         setChannelHeight(newHeight, false);
         setSize(getWidth(), numChans*getChannelHeight());
         viewport->setScrollBarsShown(false,false);
-        //viewport->setViewPosition(Point<int>(0,chan*newHeight));
+        viewport->setViewPosition(Point<int>(0,chan*newHeight));
         for (int n = 0; n < numChans; n++)
         {
             if (n != chan) channelInfo[n]->setEnabledState(false);
@@ -1530,6 +1547,12 @@ LfpChannelDisplay::~LfpChannelDisplay()
 
 }
 
+void LfpChannelDisplay::updateType()
+{
+	type = canvas->getChannelType(chan);
+	typeStr = canvas->getTypeName(type);
+}
+
 void LfpChannelDisplay::setEnabledState(bool state)
 {
 
@@ -1588,6 +1611,8 @@ void LfpChannelDisplay::paint(Graphics& g)
 
             int leftEdge = 150;
 
+			float r = range;
+
             g.setColour(Colours::lightgrey);
             g.setFont(channelFont);
             g.setFont(20);
@@ -1595,14 +1620,15 @@ void LfpChannelDisplay::paint(Graphics& g)
             if (getType() == ADC_CHANNEL)
             {
             	unitString = " V";
+				//r = range / 1000.0f;
             } else {
             	unitString = " uV";
             }
             g.drawText(String(0) + unitString, 20, center, leftEdge, 25, Justification::left, false);
-            g.drawText(String(range/2) + unitString, 20, center-channelHeight/2, leftEdge, 25, Justification::left, false);
-            g.drawText(String(-range/2) + unitString, 20, center+channelHeight/2-25, leftEdge, 25, Justification::left, false);
-            g.drawText(String(range/4) + unitString, 20, center-channelHeight/4, leftEdge, 25, Justification::left, false);
-            g.drawText(String(-range/4) + unitString, 20, center+channelHeight/4, leftEdge, 25, Justification::left, false);
+            g.drawText(String(r/2) + unitString, 20, center-channelHeight/2, leftEdge, 25, Justification::left, false);
+            g.drawText(String(-r/2) + unitString, 20, center+channelHeight/2-25, leftEdge, 25, Justification::left, false);
+            g.drawText(String(r/4) + unitString, 20, center-channelHeight/4, leftEdge, 25, Justification::left, false);
+            g.drawText(String(-r/4) + unitString, 20, center+channelHeight/4, leftEdge, 25, Justification::left, false);
 
         }
 
@@ -1835,6 +1861,13 @@ LfpChannelDisplayInfo::LfpChannelDisplayInfo(LfpDisplayCanvas* canvas_, LfpDispl
 
     addAndMakeVisible(enableButton);
 
+}
+
+void LfpChannelDisplayInfo::updateType()
+{
+	type = canvas->getChannelType(chan);
+	typeStr = canvas->getTypeName(type);
+	repaint();
 }
 
 void LfpChannelDisplayInfo::buttonClicked(Button* button)
