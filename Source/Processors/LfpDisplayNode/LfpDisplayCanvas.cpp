@@ -162,7 +162,14 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
 	rangeSelection->setEditableText(true);
     rangeSelection->addListener(this);
     addAndMakeVisible(rangeSelection);
-
+	
+	// jz nov 10
+	ADCrangeSelection = new ComboBox("ADC Voltage range");
+    ADCrangeSelection->addItemList(voltageRanges[ADC_CHANNEL], 1);
+	ADCrangeSelection->setSelectedId(selectedVoltageRange[ADC_CHANNEL], sendNotification);
+	ADCrangeSelection->setEditableText(true);
+    ADCrangeSelection->addListener(this);
+    addAndMakeVisible(ADCrangeSelection);
 
     timebaseSelection = new ComboBox("Timebase");
     timebaseSelection->addItemList(timebases, 1);
@@ -218,6 +225,9 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     lfpDisplay->setNumChannels(nChans);
 	lfpDisplay->setRange(voltageRanges[DATA_CHANNEL][selectedVoltageRange[DATA_CHANNEL]-1].getFloatValue()*rangeGain[DATA_CHANNEL]
 		,DATA_CHANNEL);
+		
+	// jz nov 10
+	lfpDisplay->setRange(voltageRanges[ADC_CHANNEL][selectedVoltageRange[ADC_CHANNEL]-1].getFloatValue()*rangeGain[ADC_CHANNEL],ADC_CHANNEL);
 
     // add event display-specific controls (currently just an enable/disable button)
     for (int i = 0; i < 8; i++)
@@ -267,6 +277,8 @@ void LfpDisplayCanvas::resized()
     drawMethodButton->setBounds(750,getHeight()-25,100,22);
     pauseButton->setBounds(880,getHeight()-50,50,44);
 
+	ADCrangeSelection->setBounds(960,getHeight()-30,100,25);
+	
     for (int i = 0; i < 8; i++)
     {
         eventDisplayInterfaces[i]->setBounds(500+(floor(i/2)*20), getHeight()-40+(i%2)*20, 40, 20); // arrange event channel buttons in two rows
@@ -403,7 +415,7 @@ void LfpDisplayCanvas::comboBoxChanged(ComboBox* cb)
 		}
     }
     else if (cb == rangeSelection)
-    {
+    {	std::cout << "rangeSelection changed" << std::endl;
 		if (cb->getSelectedId())
 		{
 		lfpDisplay->setRange(voltageRanges[selectedChannelType][cb->getSelectedId()-1].getFloatValue()*rangeGain[selectedChannelType]
@@ -445,6 +457,51 @@ void LfpDisplayCanvas::comboBoxChanged(ComboBox* cb)
 		selectedVoltageRangeValues[selectedChannelType] = cb->getText();
         //std::cout << "Setting range to " << voltageRanges[cb->getSelectedId()-1].getFloatValue() << std::endl;
     }
+    
+    else if (cb == ADCrangeSelection) // jz nov 10
+    {	std::cout << "ADCrangeSelection changed" << std::endl;
+		if (cb->getSelectedId())
+		{
+		lfpDisplay->setRange(voltageRanges[ADC_CHANNEL][cb->getSelectedId()-1].getFloatValue()*rangeGain[ADC_CHANNEL]
+			,ADC_CHANNEL);
+		}
+		else
+		{
+		    float vRange = cb->getText().getFloatValue();
+		    if (vRange)
+		    {
+		        if (vRange < voltageRanges[ADC_CHANNEL][0].getFloatValue())
+		        {
+					cb->setSelectedId(1,dontSendNotification);
+					vRange = voltageRanges[ADC_CHANNEL][0].getFloatValue();
+		        }
+		        else if (vRange > voltageRanges[ADC_CHANNEL][voltageRanges[ADC_CHANNEL].size()-1].getFloatValue())
+		        {
+					cb->setSelectedId(voltageRanges[ADC_CHANNEL].size(),dontSendNotification);
+					vRange = voltageRanges[ADC_CHANNEL][voltageRanges[ADC_CHANNEL].size()-1].getFloatValue();
+		        }
+		        else
+		        {
+		            if (rangeGain[ADC_CHANNEL] > 1)
+		                cb->setText(String(vRange,1),dontSendNotification);
+		            else
+		                cb->setText(String(vRange),dontSendNotification);
+		        }
+				lfpDisplay->setRange(vRange*rangeGain[ADC_CHANNEL],ADC_CHANNEL);
+		    }
+		    else
+			{
+				if (selectedVoltageRange[ADC_CHANNEL])
+					cb->setText(selectedVoltageRangeValues[ADC_CHANNEL],dontSendNotification);
+				else
+					cb->setSelectedId(selectedVoltageRange[ADC_CHANNEL],dontSendNotification);
+			}
+		}
+		selectedVoltageRange[ADC_CHANNEL] = cb->getSelectedId();
+		selectedVoltageRangeValues[ADC_CHANNEL] = cb->getText();
+        //std::cout << "Setting range to " << voltageRanges[cb->getSelectedId()-1].getFloatValue() << std::endl;
+    }
+    
     else if (cb == spreadSelection)
     {
 		if (cb->getSelectedId())
@@ -790,6 +847,7 @@ void LfpDisplayCanvas::paint(Graphics& g)
     g.setColour(Colour(100,100,100));
 
 	g.drawText("Voltage range ("+ rangeUnits[selectedChannelType] +")",5,getHeight()-55,300,20,Justification::left, false);
+	g.drawText("ADC range ("+ rangeUnits[ADC_CHANNEL] +")",960,getHeight()-55,300,20,Justification::left, false);
     g.drawText("Timebase (s)",175,getHeight()-55,300,20,Justification::left, false);
     g.drawText("Spread (px)",345,getHeight()-55,300,20,Justification::left, false);
     g.drawText("Color grouping",620,getHeight()-55,300,20,Justification::left, false);
