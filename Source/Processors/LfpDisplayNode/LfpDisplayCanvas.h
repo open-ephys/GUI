@@ -145,6 +145,7 @@ private:
 
     ScopedPointer<ComboBox> timebaseSelection;
     ScopedPointer<ComboBox> rangeSelection;
+    ScopedPointer<ComboBox> ADCrangeSelection; // jz nov 10
     ScopedPointer<ComboBox> spreadSelection;
     ScopedPointer<ComboBox> colorGroupingSelection;
     ScopedPointer<UtilityButton> invertInputButton;
