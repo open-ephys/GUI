@@ -316,7 +316,7 @@ void RHD2000Thread::initializeBoard()
 
     bitfilename = executableDirectory;
     bitfilename += File::separatorString;
-    bitfilename += "rhd2000.bit";
+    bitfilename += "rhd2000_with_fast_ttl_settle.bit";
 
     if (!uploadBitfile(bitfilename))
     {
@@ -1024,6 +1024,8 @@ void RHD2000Thread::setFastTTLSettle(bool state, int channel)
 {
     fastTTLSettleEnabled = state;
     fastSettleTTLChannel = channel;
+    evalBoard->setExternalFastSettleChannel(channel);
+    evalBoard->enableExternalFastSettle(state);
     dacOutputShouldChange = true;
 }
 
