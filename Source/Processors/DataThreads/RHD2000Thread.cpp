@@ -34,7 +34,13 @@
 #define okLIB_NAME "./libokFrontPanel.so"
 #define okLIB_EXTENSION "*.so"
 #endif
+
+#define CHIP_ID_RHD2132  1
+#define CHIP_ID_RHD2216  2
+#define CHIP_ID_RHD2164  4
 #define CHIP_ID_RHD2164_B  1000
+#define REGISTER_59_MISO_A  53
+#define REGISTER_59_MISO_B  58
 
 // Allocates memory for a 3-D array of doubles.
 void allocateDoubleArray3D(std::vector<std::vector<std::vector<double> > >& array3D,
@@ -132,7 +138,7 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
         }
 
         evalBoard->getDacInformation(dacChannels,dacThresholds);
-        setDefaultChannelNamesAndType();
+		sn->setDefaultNamingScheme(numberingScheme);
     }
 }
 
@@ -394,6 +400,7 @@ void RHD2000Thread::scanPorts()
     // Scan SPI ports
 
     int delay, stream, id;
+	int register59Value;
     //int numChannelsOnPort[4] = {0, 0, 0, 0};
     Rhd2000EvalBoard::BoardDataSource initStreamPorts[8] =
     {
@@ -503,9 +510,10 @@ void RHD2000Thread::scanPorts()
         {
             // std::cout << "Stream number " << stream << ", delay = " << delay << std::endl;
 
-            id = deviceId(dataBlock, stream);
+			id = deviceId(dataBlock, stream, register59Value);
 
-            if (id > 0) // 1 = RHD2132, 2 = RHD2216
+            if (id == CHIP_ID_RHD2132 || id == CHIP_ID_RHD2216 ||
+                (id == CHIP_ID_RHD2164 && register59Value == REGISTER_59_MISO_A))
             {
                 //  std::cout << "Device ID found: " << id << std::endl;
 
@@ -532,13 +540,27 @@ void RHD2000Thread::scanPorts()
     // }
     //std::cout << std::endl;
 
-    // Now, disable data streams where we did not find chips present.
+#if DEBUG_EMULATE_HEADSTAGES > 0
+	for (int nd = 0; nd < MAX_NUM_DATA_STREAMS; ++nd)
+	{
+		if ((nd < DEBUG_EMULATE_HEADSTAGES) &&(chipId[0] > 0))
+		{
+			evalBoard->setDataSource(nd,initStreamPorts[0]);
+			enableHeadstage(nd,true);
+		}
+		else
+		{
+			enableHeadstage(stream,false);
+		}
+	}
+#else
+	// Now, disable data streams where we did not find chips present.
     for (stream = 0; stream < MAX_NUM_DATA_STREAMS; ++stream)
     {
         if (chipId[stream] > 0)
         {
             //std::cout << "Enabling headstage on stream " << stream << std::endl;
-            if (chipId[stream] == 4) //RHD2164
+            if (chipId[stream] == CHIP_ID_RHD2164) //RHD2164
             {
                 //We just add it like a second headstage, allowing only one RHD2164 per channel
                 //This would need to change
@@ -556,6 +578,8 @@ void RHD2000Thread::scanPorts()
             enableHeadstage(stream, false);
         }
     }
+#endif
+
 
     std::cout << "Number of enabled data streams: " << evalBoard->getNumEnabledDataStreams() << std::endl;
 
@@ -600,7 +624,7 @@ void RHD2000Thread::scanPorts()
     updateRegisters();
 }
 
-int RHD2000Thread::deviceId(Rhd2000DataBlock* dataBlock, int stream)
+int RHD2000Thread::deviceId(Rhd2000DataBlock* dataBlock, int stream, int &register59Value)
 {
     bool intanChipPresent;
 
@@ -623,10 +647,12 @@ int RHD2000Thread::deviceId(Rhd2000DataBlock* dataBlock, int stream)
     // chip ID number stored in ROM regstier 63.
     if (!intanChipPresent)
     {
+		register59Value = -1;
         return -1;
     }
     else
     {
+		register59Value = dataBlock->auxiliaryData[stream][2][23]; // Register 59
         return dataBlock->auxiliaryData[stream][2][19]; // chip ID (Register 63)
     }
 }
@@ -758,7 +784,7 @@ int RHD2000Thread::modifyChannelGain(channelType t, int str, int ch, float gain)
 		if (t == ADC_CHANNEL)
 			oldNames.add(Names[getNumChannels()-getNumADCchannels()+ch]);
 		else
-			oldNames.add(Names[ch]);
+			oldNames.add(getChannelName(t,str,ch));
         oldType.add(t);
         oldStream.add(str);
         oldChannelNumber.add(ch);
@@ -834,13 +860,17 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
 
                     gains.add(getBitVolts(channelNumber));
                 }
-
                 
                 stream.add(i);
                 originalChannelNumber.add(k);
 
             }
-            for (int k = 0; k < 3; k++)
+        }
+    }
+	//Aux channels
+	for (int i = 0; i < MAX_NUM_DATA_STREAMS; i++)
+    {
+		for (int k = 0; k < 3; k++)
             {
 
                 type.add(AUX_CHANNEL);
@@ -859,17 +889,15 @@ void RHD2000Thread::setDefaultChannelNamesAndType()
                     else
                         Names.add("AUX_"+stream_prefix[i]+"_"+String(1+k));
 
-                    gains.add(getBitVolts(0));
+                    gains.add(0.0000374);
 
                 }
 
                 stream.add(i);
                 originalChannelNumber.add(numChannelsPerDataStream[i]+k);
-
             }
-        }
-    }
-
+	}
+	//ADC channels
     if (acquireAdcChannels)
     {
         for (int k = 0; k < 8; k++)
