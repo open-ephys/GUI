@@ -33,19 +33,15 @@
 #include "../FilterNode/FilterNode.h"
 #include "../RecordNode/RecordNode.h"
 #include "../ResamplingNode/ResamplingNode.h"
-#include "../ReferenceNode/ReferenceNode.h"
 #include "../ChannelMappingNode/ChannelMappingNode.h"
-#include "../AudioResamplingNode/AudioResamplingNode.h"
 #include "../SignalGenerator/SignalGenerator.h"
 #include "../SourceNode/SourceNode.h"
 #include "../EventDetector/EventDetector.h"
 #include "../SpikeDetector/SpikeDetector.h"
 #include "../SpikeSorter/SpikeSorter.h"
 #include "../PhaseDetector/PhaseDetector.h"
-#include "../WiFiOutput/WiFiOutput.h"
 #include "../FileReader/FileReader.h"
 #include "../ArduinoOutput/ArduinoOutput.h"
-#include "../FPGAOutput/FPGAOutput.h"
 #include "../PulsePalOutput/PulsePalOutput.h"
 #include "../SerialInput/SerialInput.h"
 #include "../MessageCenter/MessageCenter.h"
@@ -56,6 +52,20 @@
 #include "../../UI/EditorViewport.h"
 #include "../NetworkEvents/NetworkEvents.h"
 #include "../PSTH/PeriStimulusTimeHistogramNode.h"
+#include "../CAR/CAR.h"
+
+
+#ifdef ZEROMQ 
+    
+#ifdef WIN32
+    #pragma comment( lib, "../../Resources/windows-libs/ZeroMQ/lib_x64/libzmq-v120-mt-4_0_4.lib" )
+    #include "../../Resources/windows-libs/ZeroMQ/include/zmq.h"
+    #include "../../Resources/windows-libs/ZeroMQ/include/zmq_utils.h"
+#else
+    #include <zmq.h>
+#endif
+
+#endif
 
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
@@ -78,7 +88,7 @@ ProcessorGraph::~ProcessorGraph()
 void* ProcessorGraph::createZmqContext()
 {
 #ifdef ZEROMQ 
-	zmqcontext =  zmq_ctx_new ();
+	zmqcontext =  zmq_ctx_new (); //<-- this is only available in version 3+
 	return zmqcontext;
 #endif
 	return nullptr;
@@ -94,14 +104,9 @@ void ProcessorGraph::createDefaultNodes()
     RecordNode* recn = new RecordNode();
     recn->setNodeId(RECORD_NODE_ID);
 
-
     // add audio node -- takes all inputs and selects those to be used for audio monitoring
     AudioNode* an = new AudioNode();
     an->setNodeId(AUDIO_NODE_ID);
-
-    // add audio resampling node -- resamples continuous signals to 44.1kHz
-    AudioResamplingNode* arn = new AudioResamplingNode();
-    arn->setNodeId(RESAMPLING_NODE_ID);
 
     // add message center
     MessageCenter* msgCenter = new MessageCenter();
@@ -110,7 +115,6 @@ void ProcessorGraph::createDefaultNodes()
     addNode(on, OUTPUT_NODE_ID);
     addNode(recn, RECORD_NODE_ID);
     addNode(an, AUDIO_NODE_ID);
-    addNode(arn, RESAMPLING_NODE_ID);
     addNode(msgCenter, MESSAGE_CENTER_ID);
 
 }
@@ -155,6 +159,12 @@ void* ProcessorGraph::createNewProcessor(String& description, int id)//,
         {
             // by default, all source nodes record automatically
             processor->setAllChannelsToRecord();
+
+            getMessageCenter()->addSourceProcessor(processor);
+            if (getMessageCenter()->getSourceNodeId() == 0)
+            {
+                getMessageCenter()->setSourceNodeId(processor->getNodeId());
+            }
         }
 
         return processor->createEditor();
@@ -199,7 +209,6 @@ void ProcessorGraph::refreshColors()
         if (nodeId != OUTPUT_NODE_ID &&
             nodeId != AUDIO_NODE_ID &&
             nodeId != RECORD_NODE_ID &&
-            nodeId != RESAMPLING_NODE_ID &&
             nodeId != MESSAGE_CENTER_ID)
         {
             GenericProcessor* p =(GenericProcessor*) node->getProcessor();
@@ -223,7 +232,6 @@ void ProcessorGraph::restoreParameters()
         if (nodeId != OUTPUT_NODE_ID &&
             nodeId != AUDIO_NODE_ID &&
             nodeId != RECORD_NODE_ID &&
-            nodeId != RESAMPLING_NODE_ID &&
             nodeId != MESSAGE_CENTER_ID)
         {
             GenericProcessor* p =(GenericProcessor*) node->getProcessor();
@@ -247,7 +255,6 @@ Array<GenericProcessor*> ProcessorGraph::getListOfProcessors()
         if (nodeId != OUTPUT_NODE_ID &&
             nodeId != AUDIO_NODE_ID &&
             nodeId != RECORD_NODE_ID &&
-            nodeId != RESAMPLING_NODE_ID &&
             nodeId != MESSAGE_CENTER_ID)
         {
             GenericProcessor* p =(GenericProcessor*) node->getProcessor();
@@ -267,8 +274,7 @@ void ProcessorGraph::clearConnections()
         Node* node = getNode(i);
         int nodeId = node->nodeId;
 
-        if (nodeId != OUTPUT_NODE_ID &&
-            nodeId != RESAMPLING_NODE_ID)
+        if (nodeId != OUTPUT_NODE_ID)
         {
 
             if (nodeId != RECORD_NODE_ID && nodeId != AUDIO_NODE_ID)
@@ -287,15 +293,9 @@ void ProcessorGraph::clearConnections()
     {
 
         addConnection(AUDIO_NODE_ID, n,
-                      RESAMPLING_NODE_ID, n);
-
-        addConnection(RESAMPLING_NODE_ID, n,
                       OUTPUT_NODE_ID, n);
 
     }
-
-    addConnection(AUDIO_NODE_ID, midiChannelIndex,
-                  RESAMPLING_NODE_ID, midiChannelIndex);
 
     addConnection(MESSAGE_CENTER_ID, midiChannelIndex,
                   RECORD_NODE_ID, midiChannelIndex);
@@ -465,7 +465,8 @@ void ProcessorGraph::connectProcessorToAudioAndRecordNodes(GenericProcessor* sou
     if (source == nullptr)
         return;
 
-	getRecordNode()->registerProcessor(source);
+    getRecordNode()->registerProcessor(source);
+
     for (int chan = 0; chan < source->getNumOutputs(); chan++)
     {
 
@@ -604,7 +605,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             std::cout << "Creating a new channel mapping node." << std::endl;
             processor = new ChannelMappingNode();
         }
-
+        else if (subProcessorType.equalsIgnoreCase("Common Avg Ref"))
+        {
+            std::cout << "Creating a new common average reference node." << std::endl;
+            processor = new CAR();
+        }
         sendActionMessage("New filter node created.");
 
     }
@@ -655,20 +660,10 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             processor = new SpikeDisplayNode();
         }
 
-        else if (subProcessorType.equalsIgnoreCase("WiFi Output"))
-        {
-            std::cout << "Creating a WiFi node." << std::endl;
-            processor = new WiFiOutput();
-        }
         else if (subProcessorType.equalsIgnoreCase("Arduino Output"))
         {
             std::cout << "Creating an Arduino node." << std::endl;
             processor = new ArduinoOutput();
-        }
-        else if (subProcessorType.equalsIgnoreCase("FPGA Output"))
-        {
-            std::cout << "Creating an FPGA output node." << std::endl;
-            processor = new FPGAOutput();
         }
         else if (subProcessorType.equalsIgnoreCase("Pulse Pal"))
         {
@@ -709,8 +704,31 @@ void ProcessorGraph::removeProcessor(GenericProcessor* processor)
 
     std::cout << "Removing processor with ID " << processor->getNodeId() << std::endl;
 
-    disconnectNode(processor->getNodeId());
-    removeNode(processor->getNodeId());
+    int nodeId = processor->getNodeId();
+
+    if (processor->isSource())
+    {
+        getMessageCenter()->removeSourceProcessor(processor);
+    }
+
+    disconnectNode(nodeId);
+    removeNode(nodeId);
+
+    if (getMessageCenter()->getSourceNodeId() == nodeId)
+    {
+        int newId = 0;
+
+        //Look for the next source node. If none is found, set the sourceid to 0
+        for (int i = 0; i < getNumNodes() && newId == 0; i++)
+        {
+            GenericProcessor* p = static_cast<GenericProcessor*>(getNode(i)->getProcessor());
+            if (p->isSource())
+            {
+                newId = p->nodeId;
+            }
+        }
+        getMessageCenter()->setSourceNodeId(newId);
+    }
 
 }
 
@@ -822,7 +840,7 @@ void ProcessorGraph::setRecordState(bool isRecording)
         {
             GenericProcessor* p = (GenericProcessor*) node->getProcessor();
 
-			p->setRecording(isRecording);
+            p->setRecording(isRecording);
         }
     }
 

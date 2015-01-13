@@ -2,7 +2,7 @@
     ------------------------------------------------------------------
 
     This file is part of the Open Ephys GUI
-    Copyright (C) 2013 Open Ephys
+    Copyright (C) 2015 Open Ephys
 
     ------------------------------------------------------------------
 
@@ -26,9 +26,15 @@
 //#define ZEROMQ
 
 #ifdef ZEROMQ 
-	#pragma comment( lib, "../../Resources/windows-libs/ZeroMQ/lib_x64/libzmq-v120-mt-4_0_4.lib" )
+	
+#ifdef WIN32
+	//#pragma comment( lib, "../../Resources/windows-libs/ZeroMQ/lib_x64/libzmq-v120-mt-4_0_4.lib" )
 	#include "../../Resources/windows-libs/ZeroMQ/include/zmq.h"
 	#include "../../Resources/windows-libs/ZeroMQ/include/zmq_utils.h"
+#else
+    #include <zmq.h>
+#endif
+
 #endif
 
 #include "../../JuceLibraryCode/JuceHeader.h"
@@ -74,7 +80,7 @@ public:
 	int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
 	void initSimulation();
 	void simulateDesignAndTrials(juce::MidiBuffer& events);
-    void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
+    void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
     void setParameter(int parameterIndex, float newValue);
 	String handleSpecialMessages(StringTS msg);
 	std::vector<String> splitString(String S, char sep);

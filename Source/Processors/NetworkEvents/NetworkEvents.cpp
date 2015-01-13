@@ -2,7 +2,7 @@
 ------------------------------------------------------------------
 
 This file is part of the Open Ephys GUI
-Copyright (C) 2013 Open Ephys
+Copyright (C) 2015 Open Ephys
 
 ------------------------------------------------------------------
 
@@ -77,11 +77,11 @@ StringTS::StringTS(MidiMessage &event)
 {
 	const uint8* dataptr = event.getRawData();
 	int bufferSize = event.getRawDataSize();
-	len = bufferSize-4-8; // -4 for initial event prefix, -8 for timestamp at the end
+	len = bufferSize-6-8; // -6 for initial event prefix, -8 for timestamp at the end
 
-	memcpy(&timestamp, dataptr + 4+len, 8); // remember to skip first four bytes
+	memcpy(&timestamp, dataptr + 6+ len, 8); // remember to skip first six bytes
 	str = new uint8[len];
-	memcpy(str,dataptr+4,len);
+	memcpy(str,dataptr + 6, len);
 }
 
 StringTS& StringTS::operator=(const StringTS &rhs)
@@ -269,7 +269,7 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 			 (uint8) NETWORK,
 			 0,
 			 0,
-			 (uint8) GENERIC_EVENT,
+			 0,
 			 (uint8) s.len+8,
 			 msg_with_ts);
 
@@ -380,8 +380,7 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 }
 
 void NetworkEvents::process(AudioSampleBuffer& buffer,
-							MidiBuffer& events,
-							int& nSamples)
+							MidiBuffer& events)
 {
 
 	//std::cout << "NETWORK NODE" << std::endl;
@@ -395,12 +394,12 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 	 while (!networkMessagesQueue.empty()) {
 			 StringTS msg = networkMessagesQueue.front();
 			 postTimestamppedStringToMidiBuffer(msg, events);
+			 sendActionMessage("Network event received: " + msg.getString());
 //			 getUIComponent()->getLogWindow()->addLineToLog(msg);
 		     networkMessagesQueue.pop();
 	 }
 	 lock.exit();
-	 nSamples = -10; // make sure this is not processed;
-	//printf("Exitting NetworkEvents::process\n");	
+
 }
 
 
@@ -418,6 +417,7 @@ void NetworkEvents::run() {
   
   if (rc != 0) {
 	  // failed to open socket?
+  	  std::cout << "Failed to open socket." << std::endl;
 	  return;
   }
 
@@ -439,6 +439,8 @@ void NetworkEvents::run() {
 			lock.enter();
 			networkMessagesQueue.push(Msg);
 		    lock.exit();
+
+		    std::cout << "Received message!" << std::endl;
 			// handle special messages
 			String response = handleSpecialMessages(Msg);
 	
@@ -446,6 +448,8 @@ void NetworkEvents::run() {
 		} else 
 		{
 			String zeroMessageError = "Recieved Zero Message?!?!?";
+			std::cout << "Received Zero Message!" << std::endl;
+
 			zmq_send (responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
 		}
     }
