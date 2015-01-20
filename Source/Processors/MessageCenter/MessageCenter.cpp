@@ -23,17 +23,21 @@
 
 #include "MessageCenter.h"
 #include "MessageCenterEditor.h"
+#include "../ProcessorGraph/ProcessorGraph.h"
 
 //---------------------------------------------------------------------
 
 MessageCenter::MessageCenter() :
-    GenericProcessor("Message Center"), newEventAvailable(false), isRecording(false), sourceNodeId(0)
+	GenericProcessor("Message Center"), newEventAvailable(false), isRecording(false), sourceNodeId(0), msTime(0), timestampSource(nullptr)
 {
 
     setPlayConfigDetails(0, // number of inputs
                          0, // number of outputs
                          44100.0, // sampleRate
                          128);    // blockSize
+
+    Channel* ch = new Channel(this, 0, EVENT_CHANNEL);
+    eventChannels.add(ch);
 
 }
 
@@ -65,6 +69,36 @@ void MessageCenter::setParameter(int parameterIndex, float newValue)
 
 }
 
+bool MessageCenter::enable()
+{
+	messageCenterEditor->startAcquisition();
+	msTime = Time::currentTimeMillis();
+	if (sourceNodeId)
+	{
+		AudioProcessorGraph::Node* node = getProcessorGraph()->getNodeForId(sourceNodeId);
+		if (node)
+		{
+			timestampSource = static_cast<GenericProcessor*>(node->getProcessor());
+		}
+		else
+		{
+			std::cout << "Message Center: BAD node id " << sourceNodeId << std::endl;
+			timestampSource = nullptr;
+			sourceNodeId = 0;
+		}
+	}
+	else
+		timestampSource = nullptr;
+
+	return true;
+}
+
+bool MessageCenter::disable()
+{
+	messageCenterEditor->stopAcquisition();
+	return true;
+}
+
 void MessageCenter::setSourceNodeId(int id)
 {
     sourceNodeId = id;
@@ -75,9 +109,17 @@ int MessageCenter::getSourceNodeId()
     return sourceNodeId;
 }
 
+int64 MessageCenter::getTimestamp()
+{
+	if (sourceNodeId > 0)
+		return timestampSource->getTimestamp(0);
+	else
+		return (Time::currentTimeMillis() - msTime);
+}
+
 void MessageCenter::process(AudioSampleBuffer& buffer, MidiBuffer& eventBuffer)
 {
-
+	setTimestamp(eventBuffer,getTimestamp());
     if (newEventAvailable)
     {
         int numBytes = 0;
@@ -87,10 +129,6 @@ void MessageCenter::process(AudioSampleBuffer& buffer, MidiBuffer& eventBuffer)
         CharPointer_UTF8 data = eventString.toUTF8();
         int realId = getNodeId();
 
-        //Fake node ID to the specified source for the event timestamps
-        if (sourceNodeId > 0)
-            setNodeId(sourceNodeId);
-
         addEvent(eventBuffer,
                  MESSAGE,
                  0,
@@ -99,9 +137,7 @@ void MessageCenter::process(AudioSampleBuffer& buffer, MidiBuffer& eventBuffer)
                  data.length()+1, //It doesn't hurt to send the end-string null and can help avoid issues
                  (uint8*) data.getAddress());
 
-        setNodeId(realId);
-
-        newEventAvailable = false;
+		newEventAvailable = false;
     }
 
 

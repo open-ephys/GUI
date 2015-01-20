@@ -25,7 +25,7 @@
 #define __GENERICPROCESSOR_H_1F469DAF__
 
 enum ChannelType {HEADSTAGE_CHANNEL = 0, AUX_CHANNEL = 1, ADC_CHANNEL = 2, EVENT_CHANNEL = 3,
-                  SINGLE_ELECTRODE = 4, STEREOTRODE = 5, TETRODE = 6
+                  SINGLE_ELECTRODE = 4, STEREOTRODE = 5, TETRODE = 6, MESSAGE_CHANNEL = 7
                  };
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
@@ -383,6 +383,12 @@ public:
 
     /** Sets one of two possible source nodes for a splitter.*/
     virtual void setSplitterDestNode(GenericProcessor* dn) { }
+
+	/** Returns trus if a processor generates its own timestamps, false otherwise.*/
+	virtual bool generatesTimestamps()
+	{
+		return false;
+	}
 
     /** Returns true if a processor is a source, false otherwise.*/
     virtual bool isSource()

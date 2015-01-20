@@ -604,6 +604,9 @@ void GenericProcessor::setTimestamp(MidiBuffer& events, int64 timestamp)
              8,         // numBytes
              data   // data
             );
+
+	//since the processor generating the timestamp won't get the event, add it to the map
+	timestamps[nodeId] = timestamp;
 }
 
 int GenericProcessor::processEventBuffer(MidiBuffer& events)
@@ -658,7 +661,7 @@ int GenericProcessor::processEventBuffer(MidiBuffer& events)
             else if (*dataptr == TIMESTAMP)
             {
                 int64 ts;
-                memcpy(&ts, dataptr+4, 8);
+                memcpy(&ts, dataptr+6, 8);
 
                 uint8 sourceNodeId;
                 memcpy(&sourceNodeId, dataptr + 1, 1);
@@ -734,7 +737,7 @@ void GenericProcessor::addEvent(MidiBuffer& eventBuffer,
     data[2] = eventId; // event ID (1 = on, 0 = off, usually)
     data[3] = eventChannel; // event channel
     data[4] = 1; // saving flag
-    data[5] = (uint8) channels[0]->sourceNodeId;  // source node ID (for nSamples)
+    data[5] = (uint8) eventChannels[eventChannel]->sourceNodeId;  // source node ID (for nSamples)
     memcpy(data + 6, eventData, numBytes);
 
     //std::cout << "Node id: " << data[1] << std::endl;

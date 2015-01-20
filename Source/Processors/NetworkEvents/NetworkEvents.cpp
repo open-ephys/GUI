@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "NetworkEvents.h"
 #include "../Editors/NetworkEventsEditor.h"
 #include "../../AccessClass.h"
+#include "../MessageCenter/MessageCenterEditor.h"
+
 const int MAX_MESSAGE_LENGTH = 64000;
 
 
@@ -159,7 +161,7 @@ NetworkEvents::NetworkEvents(void *zmq_context)
 void NetworkEvents::setNewListeningPort(int port)
 {
 	// first, close existing thread.
-	disable();
+	closesocket();
 	// allow some time for thread to quit
 #ifdef WIN32
 	Sleep(300);
@@ -175,11 +177,14 @@ void NetworkEvents::setNewListeningPort(int port)
 NetworkEvents::~NetworkEvents()
 {
 	shutdown = true;
-	disable();
+	closesocket();
 }
 
-bool NetworkEvents::disable()
+bool NetworkEvents::closesocket()
 {
+
+std::cout << "Disabling network node" << std::endl;
+
 #ifdef ZEROMQ 
 	if (threadRunning)
 	{
@@ -191,6 +196,16 @@ bool NetworkEvents::disable()
 	}
 #endif
 	return true;
+}
+
+int NetworkEvents::getNumEventChannels()
+{
+	return 1;
+}
+
+void NetworkEvents::updateSettings()
+{
+	eventChannels[0]->type = MESSAGE_CHANNEL; // so it's ignored by LFP Viewer
 }
 
 AudioProcessorEditor* NetworkEvents::createEditor(
@@ -265,6 +280,7 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
 	uint8* msg_with_ts = new uint8[s.len+8]; // for the two timestamps
 	memcpy(msg_with_ts, s.str, s.len);	
 	memcpy(msg_with_ts+s.len, &s.timestamp, 8);
+	
 	addEvent(events, 
 			 (uint8) NETWORK,
 			 0,
@@ -385,7 +401,7 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 
 	//std::cout << "NETWORK NODE" << std::endl;
 	//printf("Entering NetworkEvents::process\n");
-
+	setTimestamp(events,getMessageCenter()->getTimestamp());
 	checkForEvents(events);
 	//simulateDesignAndTrials(events);
 
@@ -440,7 +456,7 @@ void NetworkEvents::run() {
 			networkMessagesQueue.push(Msg);
 		    lock.exit();
 
-		    std::cout << "Received message!" << std::endl;
+		    //std::cout << "Received message!" << std::endl;
 			// handle special messages
 			String response = handleSpecialMessages(Msg);
 	
@@ -448,7 +464,7 @@ void NetworkEvents::run() {
 		} else 
 		{
 			String zeroMessageError = "Recieved Zero Message?!?!?";
-			std::cout << "Received Zero Message!" << std::endl;
+			//std::cout << "Received Zero Message!" << std::endl;
 
 			zmq_send (responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
 		}
