@@ -952,15 +952,16 @@ float RHD2000Thread::getSampleRate()
 
 float RHD2000Thread::getBitVolts(int chan)
 {
-    if (type[chan] == ADC_CHANNEL)
-	   return 0.00015258789;
-    else
+    //if (type[chan] == ADC_CHANNEL)
+	  // return 0.00015258789;
+    //else
         return 0.195f;
 }
 
 float RHD2000Thread::getADCBitVolts(int chan)
 {
-    return 0.00015258789;
+    //return 0.00015258789;
+    return 0.195f;
 
 }
 
@@ -1120,7 +1121,7 @@ void RHD2000Thread::enableAdcs(bool t)
     acquireAdcChannels = t;
 
     dataBuffer->resize(getNumChannels(), 10000);
-    //updateChannelNames();
+    //updateChannelNames(); //remove if does not work
 }
 
 
@@ -1541,10 +1542,12 @@ bool RHD2000Thread::updateBuffer()
                 {
 
                     channel++;
-                    // ADC waveform units = volts
+                     //ADC waveform units = volts
                     thisSample[channel] =
                         //0.000050354 * float(dataBlock->boardAdcData[adcChan][samp]);
-                        0.00015258789 * float(dataBlock->boardAdcData[adcChan][samp]) - 5 - 0.4096; // account for +/-5V input range and DC offset
+                       // 0.00015258789 * float(dataBlock->boardAdcData[adcChan][samp]) - 5 - 0.4096; // account for +/-5V input range and DC offset
+                   // 0.050354 * float(dataBlock->boardAdcData[adcChan][samp]) - 5 - 0.4096;
+                    0.015258789 * float(dataBlock->boardAdcData[adcChan][samp]) - 5 - 0.4096;
                 }
             }
             // std::cout << channel << std::endl;
