@@ -264,6 +264,7 @@ public:
 private:
     void toggleSingleChannel(int chan);
     int singleChan;
+	Array<bool> savedChannelState;
 
     int numChans;
 
@@ -309,6 +310,9 @@ public:
     void setCanBeInverted(bool);
 
     void setDrawMethod(bool);
+
+    PopupMenu getOptions();
+    void changeParameter(const int id);
 
     void setEnabledState(bool);
     bool getEnabledState()
