@@ -333,6 +333,7 @@ void GenericProcessor::update()
             Channel* ch = new Channel(*sourceChan);
             ch->setProcessor(this);
             ch->nodeIndex = i;
+			ch->mappedIndex = i;
 
             if (i < recordStatus.size())
             {
@@ -368,6 +369,7 @@ void GenericProcessor::update()
             ch->bitVolts = getBitVolts(ch);
             ch->sourceNodeId = nodeId;
             ch->nodeIndex = nidx;
+			ch->mappedIndex = nidx;
 
             if (i < recordStatus.size())
             {
@@ -391,6 +393,7 @@ void GenericProcessor::update()
             ch->bitVolts = getBitVolts(ch);
             ch->sourceNodeId = nodeId;
             ch->nodeIndex = nidx;
+			ch->mappedIndex = nidx;
 
             if (j < recordStatus.size())
             {
@@ -414,6 +417,7 @@ void GenericProcessor::update()
             ch->bitVolts = getBitVolts(ch);
             ch->sourceNodeId = nodeId;
             ch->nodeIndex = nidx;
+			ch->mappedIndex = nidx;
 
             if (k < recordStatus.size())
             {
