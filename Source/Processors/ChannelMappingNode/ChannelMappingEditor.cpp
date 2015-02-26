@@ -118,7 +118,7 @@ void ChannelMappingEditor::updateSettings()
             createElectrodeButtons(getProcessor()->getNumInputs(),false);
             previousChannelCount = getProcessor()->getNumInputs();
         }
-        else if (!reorderActive)
+        if (!reorderActive)
         {
             checkUnusedChannels();
         }
@@ -155,7 +155,7 @@ void ChannelMappingEditor::createElectrodeButtons(int numNeeded, bool clearPrevi
     }
     else
     {
-        startButton = previousChannelCount;
+        startButton = electrodeButtons.size();
         if (startButton > numNeeded) return;
         //row = startButton/16;
         //column = startButton % 16;
@@ -1026,6 +1026,9 @@ String ChannelMappingEditor::loadPrbFile(File filename)
 
     std::cout << "We found this many: " << map->size() << std::endl;
 
+	if (map->size() > previousChannelCount)
+		createElectrodeButtons(map->size(), false);
+
     for (int i = 0; i < map->size(); i++)
     {
         int ch = map->getUnchecked(i); 
@@ -1046,6 +1049,7 @@ String ChannelMappingEditor::loadPrbFile(File filename)
 		getProcessor()->setParameter(1, rf);
 		getProcessor()->setParameter(3, en ? 1 : 0);
     }
+	checkUnusedChannels();
 
     var refChans = json[Identifier("refs")];
     var channels = refChans[Identifier("channels")];
