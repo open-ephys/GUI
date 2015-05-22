@@ -27,14 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../AccessClass.h"
 #include "../MessageCenter/MessageCenterEditor.h"
 
-const int MAX_MESSAGE_LENGTH = 64000;
-
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
 
 StringTS::StringTS()
 {
@@ -146,62 +138,59 @@ StringTS::~StringTS()
 }
 
 /*********************************************/
-void* NetworkEvents::zmqcontext = nullptr;
+
+
+std::shared_ptr<void> NetworkEvents::getZMQContext() {
+    // Note: C++11 guarantees that initialization of static local variables occurs exactly once, even
+    // if multiple threads attempt to initialize the same static local variable concurrently.
+#ifdef ZEROMQ
+    static const std::shared_ptr<void> ctx(zmq_ctx_new(), zmq_ctx_destroy);
+#else
+    static const std::shared_ptr<void> ctx;
+#endif
+    return ctx;
+}
+
 
 NetworkEvents::NetworkEvents()
-    : GenericProcessor("Network Events"), Thread("NetworkThread"), threshold(200.0), bufferZone(5.0f), state(false)
+    : GenericProcessor("Network Events"), Thread("NetworkThread"), zmqcontext(getZMQContext()), threshold(200.0), bufferZone(5.0f), state(false)
 
 {
-    createZmqContext();
     firstTime = true;
-    responder = nullptr;
-    urlport = 5556;
-    threadRunning = false;
-    opensocket();
+    setNewListeningPort(5556);
 
     sendSampleCount = false; // disable updating the continuous buffer sample counts,
     // since this processor only sends events
-    shutdown = false;
 }
 
 void NetworkEvents::setNewListeningPort(int port)
 {
     // first, close existing thread.
     closesocket();
-    // allow some time for thread to quit
-#ifdef WIN32
-    Sleep(300);
-#else
-    usleep(300 * 1000);
-#endif
-
 
     urlport = port;
-    opensocket();
+    startThread();
+    
+    // Wait for thread startup to complete
+    if (wait(5000)) {
+        std::cout << "Network node started" << std::endl;
+    } else {
+        std::cout << "Network node failed to start" << std::endl;
+    }
 }
 
 NetworkEvents::~NetworkEvents()
 {
-    shutdown = true;
     closesocket();
 }
 
 bool NetworkEvents::closesocket()
 {
-
-    std::cout << "Disabling network node" << std::endl;
-
-#ifdef ZEROMQ
-    if (threadRunning)
-    {
-        zmq_close(responder);
-        zmq_ctx_destroy(zmqcontext); // this will cause the thread to exit
-        zmqcontext = nullptr;
-
-        if (!shutdown)
-            createZmqContext();// and this will take care that processor graph doesn't attempt to delete the context again
+    if (isThreadRunning()) {
+        std::cout << "Disabling network node" << std::endl;
+        stopThread(5000);  // 5-second timeout
+        std::cout << "Network node stopped" << std::endl;
     }
-#endif
     return true;
 }
 
@@ -344,41 +333,50 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
 }
 
 
-void NetworkEvents::opensocket()
-{
-    startThread();
-}
-
 void NetworkEvents::run()
 {
 
 #ifdef ZEROMQ
-    responder = zmq_socket(zmqcontext, ZMQ_REP);
+    const std::unique_ptr<void, int(*)(void*)> responder(zmq_socket(zmqcontext.get(), ZMQ_REP), zmq_close);
+    if (!responder) {
+        std::cout << "Failed to create socket: " << zmq_strerror(zmq_errno()) << std::endl;
+        return;
+    }
+    
+    // Set receive timeout to one second
+    const int recvTimeout = 1000;
+    if (0 != zmq_setsockopt(responder.get(), ZMQ_RCVTIMEO, &recvTimeout, sizeof(recvTimeout))) {
+        std::cout << "Failed to set socket receive timeout: " << zmq_strerror(zmq_errno()) << std::endl;
+        return;
+    }
+    
     String url= String("tcp://*:")+String(urlport);
-    int rc = zmq_bind(responder, url.toRawUTF8());
-
-    if (rc != 0)
+    if (0 != zmq_bind(responder.get(), url.toRawUTF8()))
     {
         // failed to open socket?
         std::cout << "Failed to open socket: " << zmq_strerror(zmq_errno()) << std::endl;
         return;
     }
 
-    threadRunning = true;
-    unsigned char* buffer = new unsigned char[MAX_MESSAGE_LENGTH];
-    int result=-1;
+    constexpr int MAX_MESSAGE_LENGTH = 64000;
+    std::vector<unsigned char> buffer(MAX_MESSAGE_LENGTH);
+    notify();  // Signal thread waiting in setNewListeningPort
 
-    while (threadRunning)
+    while (!threadShouldExit())
     {
 
-        result = zmq_recv(responder, buffer, MAX_MESSAGE_LENGTH-1, 0);  // blocking
+        int result = zmq_recv(responder.get(), buffer.data(), MAX_MESSAGE_LENGTH-1, 0);  // blocking with timeout
 
         juce::int64 timestamp_software = timer.getHighResolutionTicks();
 
-        if (result < 0) // will only happen when responder dies.
-            break;
+        if (result < 0) {
+            if (zmq_errno() != EAGAIN) {
+                std::cout << "Socket receive failed: " << zmq_strerror(zmq_errno()) << std::endl;
+            }
+            continue;
+        }
 
-        StringTS Msg(buffer, result, timestamp_software);
+        StringTS Msg(buffer.data(), result, timestamp_software);
         if (result > 0)
         {
             lock.enter();
@@ -389,23 +387,18 @@ void NetworkEvents::run()
             // handle special messages
             String response = handleSpecialMessages(Msg);
 
-            zmq_send(responder, response.getCharPointer(), response.length(), 0);
+            zmq_send(responder.get(), response.getCharPointer(), response.length(), 0);
         }
         else
         {
             String zeroMessageError = "Recieved Zero Message?!?!?";
             //std::cout << "Received Zero Message!" << std::endl;
 
-            zmq_send(responder, zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
+            zmq_send(responder.get(), zeroMessageError.getCharPointer(), zeroMessageError.length(), 0);
         }
     }
-
-
-    zmq_close(responder);
-    delete buffer;
-    threadRunning = false;
-    return;
 #endif
+    
 }
 
 
@@ -468,12 +461,4 @@ void NetworkEvents::loadCustomParametersFromXml()
             }
         }
     }
-}
-
-void NetworkEvents::createZmqContext()
-{
-#ifdef ZEROMQ
-    if (zmqcontext == nullptr)
-        zmqcontext = zmq_ctx_new(); //<-- this is only available in version 3+
-#endif
 }

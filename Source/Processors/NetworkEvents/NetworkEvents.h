@@ -74,6 +74,8 @@ public:
 class NetworkEvents : public GenericProcessor,  public Thread
 {
 public:
+    static std::shared_ptr<void> getZMQContext();
+    
     NetworkEvents();
     ~NetworkEvents();
     AudioProcessorEditor* createEditor();
@@ -87,7 +89,6 @@ public:
 
     bool closesocket();
     void run();
-    void opensocket();
 
     void updateSettings();
 
@@ -107,19 +108,15 @@ public:
 
     int urlport;
     String socketStatus;
-    bool threadRunning ;
 private:
     void handleEvent(int eventType, MidiMessage& event, int samplePos);
-    void createZmqContext();
 
     StringTS createStringTS(String S, int64 t);
 
-    static void* zmqcontext;
-    void* responder;
+    const std::shared_ptr<void> zmqcontext;
     float threshold;
     float bufferZone;
     bool state;
-    bool shutdown;
     Time timer;
     std::queue<StringTS> networkMessagesQueue;
 
