@@ -240,45 +240,6 @@ void NetworkEvents::setParameter(int parameterIndex, float newValue)
 
 }
 
-void NetworkEvents::initSimulation()
-{
-    Time t;
-
-    int64 secondsToTicks = t.getHighResolutionTicksPerSecond();
-    simulationStartTime=3*secondsToTicks + t.getHighResolutionTicks(); // start 10 seconds after
-
-    simulation.push(StringTS("ClearDesign",simulationStartTime));
-    simulation.push(StringTS("NewDesign Test",simulationStartTime+0.5*secondsToTicks));
-    simulation.push(StringTS("AddCondition Name GoRight TrialTypes 1 2 3",simulationStartTime+0.6*secondsToTicks));
-    simulation.push(StringTS("AddCondition Name GoLeft TrialTypes 4 5 6",simulationStartTime+0.6*secondsToTicks));
-
-
-
-}
-
-void NetworkEvents::simulateDesignAndTrials(juce::MidiBuffer& events)
-{
-    Time t;
-    while (simulation.size() > 0)
-    {
-        int64 currenttime = t.getHighResolutionTicks();
-        StringTS S = simulation.front();
-        if (currenttime > S.timestamp)
-        {
-
-            // handle special messages
-            handleSpecialMessages(S);
-
-            postTimestamppedStringToMidiBuffer(S,events);
-            //getUIComponent()->getLogWindow()->addLineToLog(S.getString());
-            simulation.pop();
-        }
-        else
-            break;
-    }
-
-}
-
 
 void NetworkEvents::handleEvent(int eventType, juce::MidiMessage& event, int samplePosition)
 {
@@ -301,55 +262,6 @@ void NetworkEvents::postTimestamppedStringToMidiBuffer(StringTS s, MidiBuffer& e
              msg_with_ts);
 
     delete msg_with_ts;
-}
-
-void NetworkEvents::simulateStopRecord()
-{
-    Time t;
-    simulation.push(StringTS("StopRecord",t.getHighResolutionTicks()));
-
-}
-
-void NetworkEvents::simulateStartRecord()
-{
-    Time t;
-    simulation.push(StringTS("StartRecord",t.getHighResolutionTicks()));
-
-}
-
-void NetworkEvents::simulateSingleTrial()
-{
-
-    std::cout << "Simulating trial." << std::endl;
-
-    int numTrials = 1;
-    float ITI = 0.7;
-    float TrialLength = 0.4;
-    Time t;
-
-    if (firstTime)
-    {
-        firstTime = false;
-        initSimulation();
-    }
-
-    int64 secondsToTicks = t.getHighResolutionTicksPerSecond();
-    simulationStartTime=3*secondsToTicks + t.getHighResolutionTicks(); // start 10 seconds after
-
-    // trial every 5 seconds
-    for (int k=0; k<numTrials; k++)
-    {
-        simulation.push(StringTS("TrialStart",simulationStartTime+ITI*k*secondsToTicks));
-        if (k%2 == 0)
-            simulation.push(StringTS("TrialType 2",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
-        else
-            simulation.push(StringTS("TrialType 4",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
-
-        simulation.push(StringTS("TrialAlign",simulationStartTime+(ITI*k+0.1)*secondsToTicks)); // 100 ms after trial start
-        simulation.push(StringTS("TrialOutcome 1",simulationStartTime+(ITI*k+0.3)*secondsToTicks)); // 300 ms after trial start
-        simulation.push(StringTS("TrialEnd",simulationStartTime+(ITI*k+TrialLength)*secondsToTicks)); // 400 ms after trial start
-
-    }
 }
 
 
@@ -416,7 +328,6 @@ void NetworkEvents::process(AudioSampleBuffer& buffer,
     //printf("Entering NetworkEvents::process\n");
     setTimestamp(events,CoreServices::getGlobalTimestamp());
     checkForEvents(events);
-    //simulateDesignAndTrials(events);
 
     //std::cout << *buffer.getSampleData(0, 0) << std::endl;
     lock.enter();

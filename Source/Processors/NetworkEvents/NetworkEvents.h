@@ -78,18 +78,13 @@ public:
     ~NetworkEvents();
     AudioProcessorEditor* createEditor();
     int64 getExtrapolatedHardwareTimestamp(int64 softwareTS);
-    void initSimulation();
-    void simulateDesignAndTrials(juce::MidiBuffer& events);
     void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
     void setParameter(int parameterIndex, float newValue);
     String handleSpecialMessages(StringTS msg);
     std::vector<String> splitString(String S, char sep);
 
-    void simulateSingleTrial();
     bool isSource();
 
-    void simulateStartRecord();
-    void simulateStopRecord();
     bool closesocket();
     void run();
     void opensocket();
