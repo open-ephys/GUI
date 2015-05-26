@@ -25,12 +25,14 @@
 #include "MergerEditor.h"
 
 #include "../../UI/EditorViewport.h"
-
+#include "../../AccessClass.h"
 #include "../Channel/Channel.h"
 
 Merger::Merger()
     : GenericProcessor("Merger"),
-      sourceNodeA(0), sourceNodeB(0), activePath(0)//, tabA(-1), tabB(-1)
+      mergeEventsA(true), mergeContinuousA(true),
+      mergeEventsB(true), mergeContinuousB(true),
+      sourceNodeA(0), sourceNodeB(0), activePath(0)
 {
     sendSampleCount = false;
 }
@@ -93,6 +95,32 @@ void Merger::switchIO(int sourceNum)
 
 }
 
+bool Merger::sendContinuousForSource(GenericProcessor* sourceNode)
+{
+    if (sourceNode == sourceNodeA)
+    {
+        return mergeContinuousA;
+    } else if (sourceNode == sourceNodeB)
+    {
+        return mergeContinuousB;
+    }
+
+    return false;
+}
+
+bool Merger::sendEventsForSource(GenericProcessor* sourceNode)
+{
+    if (sourceNode == sourceNodeA)
+    {
+        return mergeEventsA;
+    } else if (sourceNode == sourceNodeB)
+    {
+        return mergeEventsB;
+    }
+
+    return false;
+}
+
 bool Merger::stillHasSource()
 {
     if (sourceNodeA == 0 || sourceNodeB == 0)
@@ -127,31 +155,33 @@ void Merger::switchIO()
 void Merger::addSettingsFromSourceNode(GenericProcessor* sn)
 {
 
-    settings.numInputs += sn->getNumOutputs();
-    //settings.inputChannelNames.addArray(sn->settings.inputChannelNames);
-    //settings.eventChannelIds.addArray(sn->settings.eventChannelIds);
-    //settings.eventChannelNames.addArray(sn->settings.eventChannelNames);
-    //settings.bitVolts.addArray(sn->settings.bitVolts);
-
-    for (int i = 0; i < sn->channels.size(); i++)
+    if (sendContinuousForSource(sn))
     {
-        Channel* sourceChan = sn->channels[i];
-        Channel* ch = new Channel(*sourceChan);
-        channels.add(ch);
+        settings.numInputs += sn->getNumOutputs();
+
+        for (int i = 0; i < sn->channels.size(); i++)
+        {
+            Channel* sourceChan = sn->channels[i];
+            Channel* ch = new Channel(*sourceChan);
+            channels.add(ch);
+        
+        }
     }
 
-    for (int i = 0; i < sn->eventChannels.size(); i++)
+    if (sendEventsForSource(sn))
     {
-        Channel* sourceChan = sn->eventChannels[i];
-        Channel* ch = new Channel(*sourceChan);
-        eventChannels.add(ch);
+        for (int i = 0; i < sn->eventChannels.size(); i++)
+        {
+            Channel* sourceChan = sn->eventChannels[i];
+            Channel* ch = new Channel(*sourceChan);
+            eventChannels.add(ch);
+        }
     }
 
     settings.originalSource = sn->settings.originalSource;
     settings.sampleRate = sn->settings.sampleRate;
 
     settings.numOutputs = settings.numInputs;
-    //settings.outputChannelNames = settings.inputChannelNames;
 
 }
 
@@ -208,6 +238,11 @@ void Merger::saveCustomParametersToXml(XmlElement* parentElement)
         mainNode->setAttribute("NodeB",	sourceNodeB->getNodeId());
     else
         mainNode->setAttribute("NodeB",	-1);
+
+    mainNode->setAttribute("MergeEventsA", mergeEventsA);
+    mainNode->setAttribute("MergeContinuousA", mergeContinuousA);
+    mainNode->setAttribute("MergeEventsB", mergeEventsB);
+    mainNode->setAttribute("MergeContinuousB", mergeContinuousB);
 }
 
 
@@ -224,7 +259,7 @@ void Merger::loadCustomParametersFromXml()
                     int NodeAid = mainNode->getIntAttribute("NodeA");
                     int NodeBid = mainNode->getIntAttribute("NodeB");
 
-                    ProcessorGraph* gr = getProcessorGraph();
+					ProcessorGraph* gr = AccessClass::getProcessorGraph();
                     Array<GenericProcessor*> p = gr->getListOfProcessors();
 
                     for (int k = 0; k < p.size(); k++)
@@ -242,6 +277,11 @@ void Merger::loadCustomParametersFromXml()
                             setMergerSourceNode(p[k]);
                         }
                     }
+
+                    mergeEventsA = mainNode->getBoolAttribute("MergeEventsA");
+                    mergeEventsB = mainNode->getBoolAttribute("MergeEventsB");
+                    mergeContinuousA = mainNode->getBoolAttribute("MergeContinuousA");
+                    mergeContinuousB = mainNode->getBoolAttribute("MergeContinuousB");
 
                     updateSettings();
                 }

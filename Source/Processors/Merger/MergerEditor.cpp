@@ -25,6 +25,7 @@
 #include "Merger.h"
 #include "../ProcessorGraph/ProcessorGraph.h"
 #include "../../UI/EditorViewport.h"
+#include "../../AccessClass.h"
 
 // PipelineSelectorButton::PipelineSelectorButton()
 // 	: DrawableButton ("Selector", DrawableButton::ImageFitted)
@@ -115,13 +116,13 @@ void MergerEditor::buttonEvent(Button* button)
 
     }
 
-    getEditorViewport()->makeEditorVisible(this, false);
+    AccessClass::getEditorViewport()->makeEditorVisible(this, false);
 }
 
 void MergerEditor::mouseDown(const MouseEvent& e)
 {
 
-
+    Merger* merger = (Merger*) getProcessor();
 
     if (e.mods.isRightButtonDown())
     {
@@ -129,9 +130,11 @@ void MergerEditor::mouseDown(const MouseEvent& e)
         PopupMenu m;
         m.addItem(1, "Choose input 2:",false);
 
-        Array<GenericProcessor*> availableProcessors = getProcessorGraph()->getListOfProcessors();
+		Array<GenericProcessor*> availableProcessors = AccessClass::getProcessorGraph()->getListOfProcessors();
 
-        for (int i = 0; i < availableProcessors.size(); i++)
+        int i;
+
+        for (i = 0; i < availableProcessors.size(); i++)
         {
             if (!availableProcessors[i]->isSink() &&
                 !availableProcessors[i]->isMerger() &&
@@ -148,9 +151,29 @@ void MergerEditor::mouseDown(const MouseEvent& e)
             }
         }
 
+        //m.addItem(++i, "Merging:", false);
+
+        int eventMerge = ++i;
+        int continuousMerge = ++i;
+
+        bool* eventPtr;
+        bool* continuousPtr;
+
+        if (pipelineSelectorA->getToggleState())
+        {
+            eventPtr = &merger->mergeEventsA;
+            continuousPtr = &merger->mergeContinuousA;   
+        } else {
+            eventPtr = &merger->mergeEventsB;
+            continuousPtr = &merger->mergeContinuousB;  
+        }
+        
+        m.addItem(eventMerge, "Events", !acquisitionIsActive, *eventPtr);
+        m.addItem(continuousMerge, "Continuous", !acquisitionIsActive, *continuousPtr);
+
         const int result = m.show();
 
-        if (result > 1)
+        if (result > 1 && result < eventMerge)
         {
             std::cout << "Selected " << availableProcessors[result-2]->getName() << std::endl;
 
@@ -160,9 +183,15 @@ void MergerEditor::mouseDown(const MouseEvent& e)
             processor->setMergerSourceNode(availableProcessors[result-2]);
             availableProcessors[result-2]->setDestNode(getProcessor());
 
-            getGraphViewer()->updateNodeLocations();
+			AccessClass::getGraphViewer()->updateNodeLocations();
 
-            getEditorViewport()->makeEditorVisible(this, false, true);
+			AccessClass::getEditorViewport()->makeEditorVisible(this, false, true);
+        } else if (result == eventMerge)
+        {
+            *eventPtr = !(*eventPtr);
+        } else if (result == continuousMerge)
+        {
+            *continuousPtr = !(*continuousPtr);
         }
     }
 

@@ -26,8 +26,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../GenericProcessor/GenericProcessor.h"
-#include "../../AccessClass.h"
-
+#include "../../CoreServices.h"
 #include "../Channel/Channel.h"
 
 #include <stdio.h>
@@ -56,7 +55,6 @@ class Channel;
 
 class GenericEditor : public AudioProcessorEditor,
     public Timer,
-    public AccessClass,
     public Button::Listener,
     public Slider::Listener
 
@@ -108,11 +106,11 @@ public:
     /** Used to enable or disable an editor's processor.*/
     void setEnabledState(bool);
 
-	/** Called at the start of a recording **/
-	void startRecording();
+    /** Called at the start of a recording **/
+    void startRecording();
 
-	/** Called at the end of a recording **/
-	void stopRecording();
+    /** Called at the end of a recording **/
+    void stopRecording();
 
     /** Called just prior to the start of acquisition, to allow the editor to prepare.*/
     virtual void startAcquisition();
@@ -121,10 +119,7 @@ public:
     virtual void stopAcquisition();
 
     /** Returns the name of the editor.*/
-    String getName()
-    {
-        return name;
-    }
+    String getName();
 
     /** Updates name if processor ID changes. */
     void updateName();
@@ -142,28 +137,19 @@ public:
     int nodeId;
 
     /** Sets the number of the editor's associated tab in the DataViewport. */
-    virtual void tabNumber(int t)
-    {
-        tNum = t;
-    }
+    virtual void tabNumber(int t);
 
     /** Returns the number of the editor's associated tab in the DataViewport. */
-    int tabNumber()
-    {
-        return tNum;
-    }
+    int tabNumber();
 
     /** Required for MergerEditor only.*/
-    virtual void switchSource(int) { }
+    virtual void switchSource(int);
 
     /** Required for MergerEditor only.*/
-    virtual void switchSource() { }
+    virtual void switchSource();
 
     /** Returns the processor associated with an editor.*/
-    GenericProcessor* getProcessor() const
-    {
-        return (GenericProcessor*) getAudioProcessor();
-    }
+    GenericProcessor* getProcessor() const;
 
     /** Causes the editor to fade in when it first appears in the EditorViewport. */
     void fadeIn();
@@ -175,17 +161,14 @@ public:
     float accumulator;
 
     /** Required for SplitterEditor only.*/
-    virtual void switchDest() { }
+    virtual void switchDest();
 
 
     /** Required for SplitterEditor and MergerEditor only.*/
-    virtual void switchIO(int) { }
+    virtual void switchIO(int);
 
     /** Required for SplitterEditor and MergerEditor only.*/
-    virtual int getPathForEditor(GenericEditor* editor)
-    {
-        return -1;
-    }
+    virtual int getPathForEditor(GenericEditor* editor);
 
     /** Used by GraphViewer */
     bool isSplitter();
@@ -208,10 +191,10 @@ public:
 
     /** Called by sliderValueChanged(). Deals with clicks on custom sliders. Subclasses
         of GenericEditor should modify this method only.*/
-    virtual void sliderEvent(Slider* slider) {}
+    virtual void sliderEvent(Slider* slider);
 
     /** Required for opening displays in a VisualizerEditor. Hopefully will be deprecated soon.*/
-    virtual void editorWasClicked() {}
+    virtual void editorWasClicked();
 
     /** Checks to see if a button click occurred on the ChannelSelector drawer button.*/
     bool checkDrawerButton(Button* button);
@@ -232,23 +215,19 @@ public:
     virtual void update();
 
     /** Allows other UI elements to use background color of editor. */
-    Colour getBackgroundColor() {
-        return backgroundColor;
-    }
+    Colour getBackgroundColor();
 
     /** Allows other elements to use background gradient of editor. */
-    ColourGradient getBackgroundGradient() {
-        return backgroundGradient;
-    }
+    ColourGradient getBackgroundGradient();
 
     /** Called by the update() method to allow the editor to update its custom settings.*/
-    virtual void updateSettings() {}
+    virtual void updateSettings();
 
     /** Allows an editor to update the settings of its visualizer (such as channel count and sample rate).*/
-    virtual void updateVisualizer() {}
+    virtual void updateVisualizer();
 
     /** Used by SpikeDetectorEditor. */
-    virtual void channelChanged(int chan) {}
+    virtual void channelChanged(int chan);
 
     /** Returns all selected channels from the ChannelSelector. */
     Array<int> getActiveChannels();
@@ -281,10 +260,10 @@ public:
     void loadEditorParameters(XmlElement* xml);
 
     /** Writes editor state to xml */
-    virtual void saveCustomParameters(XmlElement* xml) { }
+    virtual void saveCustomParameters(XmlElement* xml);
 
     /** Writes editor state to xml */
-    virtual void loadCustomParameters(XmlElement* xml) { }
+    virtual void loadCustomParameters(XmlElement* xml);
 
     /** Syncs parametereditor colors with parameter values */
     void updateParameterButtons(int parameterIndex = -1);
@@ -296,7 +275,7 @@ public:
     void switchCollapsedState();
 
     /**  Notifies the editor that the collapsed state changed, for non-standard function. */
-    virtual void collapsedStateChanged() {}
+    virtual void collapsedStateChanged();
 
     /** Returns the editor of this processor's source */
     GenericEditor* getSourceEditor();
@@ -305,11 +284,7 @@ public:
     GenericEditor* getDestEditor();
 
     /** Returns the editors a splitter or merger is connected to */
-    virtual Array<GenericEditor*> getConnectedEditors()
-    {
-        Array<GenericEditor*> a;
-        return a;
-    }
+    virtual Array<GenericEditor*> getConnectedEditors();
 
     /** Returns an array of record statuses for all channels. Used by GraphNode */
     Array<bool> getRecordStatusArray();
@@ -493,30 +468,30 @@ private:
 class ColorButton : public Button
 {
 public:
-	ColorButton(String label_, Font font_);
-	~ColorButton() {}
+    ColorButton(String label_, Font font_);
+    ~ColorButton() {}
 
-	void setEnabledState(bool);
-	bool getEnabledState()
-	{
-		return isEnabled;
-	}
-	void setColors(Colour foreground, Colour background);
-	void setLabel(String label);
-	String getLabel();
-	void setVerticalOrientation(bool state);
-	void setUserDefinedData(int d);
-	int getUserDefinedData();
-	void setShowEnabled(bool state);
+    void setEnabledState(bool);
+    bool getEnabledState()
+    {
+        return isEnabled;
+    }
+    void setColors(Colour foreground, Colour background);
+    void setLabel(String label);
+    String getLabel();
+    void setVerticalOrientation(bool state);
+    void setUserDefinedData(int d);
+    int getUserDefinedData();
+    void setShowEnabled(bool state);
 private:
-	int userDefinedData;
-	void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);
-	bool vert;
-	String label;
-	Font font;
-	Colour fontColor, backgroundColor;
-	bool showEnabledStatus;
-	bool isEnabled;
+    int userDefinedData;
+    void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown);
+    bool vert;
+    String label;
+    Font font;
+    Colour fontColor, backgroundColor;
+    bool showEnabledStatus;
+    bool isEnabled;
 };
 
 

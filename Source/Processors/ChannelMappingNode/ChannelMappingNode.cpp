@@ -64,7 +64,6 @@ AudioProcessorEditor* ChannelMappingNode::createEditor()
 
 void ChannelMappingNode::updateSettings()
 {
-    int j;
     if (getNumInputs() > 0)
         channelBuffer.setSize(getNumInputs(), 10000);
 
@@ -94,7 +93,6 @@ void ChannelMappingNode::updateSettings()
 			channels[i]->setRecordState(recordStates[i]);
 		}
 	}
-
 }
 
 
@@ -107,7 +105,7 @@ void ChannelMappingNode::setParameter(int parameterIndex, float newValue)
     }
     else if (parameterIndex == 2)
     {
-        referenceChannels.set((int) newValue, channelArray[currentChannel]);
+		referenceChannels.set((int)newValue, currentChannel);
     }
     else if (parameterIndex == 3)
     {
@@ -156,7 +154,7 @@ void ChannelMappingNode::process(AudioSampleBuffer& buffer,
                 buffer.addFrom(j, // destChannel
                                0, // destStartSample
                                channelBuffer, // source
-                               referenceChannels[referenceArray[realChan]], // sourceChannel
+							   channels[referenceChannels[referenceArray[realChan]]]->index-1, // sourceChannel
                                0, // sourceStartSample
                                getNumSamples(j), // numSamples
                                -1.0f // gain to apply to source (negative for reference)

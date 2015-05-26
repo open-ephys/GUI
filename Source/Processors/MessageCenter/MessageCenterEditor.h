@@ -40,7 +40,6 @@ class MessageLabel;
 class MessageCenterEditor : public AudioProcessorEditor,
     public Button::Listener,
     public Label::Listener,
-    public AccessClass,
     public Timer,
     public ActionListener
 
@@ -58,8 +57,8 @@ public:
     void enable();
     void disable();
 
-	void startAcquisition();
-	void stopAcquisition();
+    void startAcquisition();
+    void stopAcquisition();
 
     void messageReceived(bool state);
 
@@ -73,14 +72,14 @@ public:
 
     void mouseDown(const MouseEvent& event);
 
-	int64 getTimestamp();
+    int64 getTimestamp(bool softwareTimestamp = false);
 
 private:
 
     void buttonClicked(Button* button);
     void labelTextChanged(Label* slider);
     void timerCallback();
-	bool acquisitionIsActive;
+    bool acquisitionIsActive;
 
     bool isEnabled;
 

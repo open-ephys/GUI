@@ -41,8 +41,6 @@
 #define strParameter(i,v) if ((parameter.id == i) && (parameter.type == EngineParameter::STR)) \
         v = parameter.strParam.value
 
-#define isWritableEvent(ev) (ev == GenericProcessor::TTL) || (ev == GenericProcessor::MESSAGE) || (ev == GenericProcessor::BINARY_MSG)
-
 struct SpikeRecordInfo
 {
     String name;
@@ -56,11 +54,11 @@ class EngineParameter;
 class RecordNode;
 class RecordEngineManager;
 
-class RecordEngine : public AccessClass
+class RecordEngine
 {
 public:
     RecordEngine();
-    ~RecordEngine();
+    virtual ~RecordEngine();
     virtual String getEngineID() =0;
 
     /** All the public methods (except registerManager) are called by RecordNode:

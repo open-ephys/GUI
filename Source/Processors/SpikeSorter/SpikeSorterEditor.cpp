@@ -45,7 +45,7 @@ SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode, bool useDefau
 
     desiredWidth = 300;
 
-    SpikeSorter* processor = (SpikeSorter*) getProcessor();
+    //SpikeSorter* processor = (SpikeSorter*) getProcessor();
 
     advancerList = new ComboBox("Advancers");
     advancerList->addListener(this);
@@ -352,7 +352,7 @@ void SpikeSorterEditor::buttonEvent(Button* button)
         // std::cout << "Plus button pressed!" << std::endl;
         if (acquisitionIsActive)
         {
-            sendActionMessage("Stop acquisition before adding electrodes.");
+            CoreServices::sendStatusMessage("Stop acquisition before adding electrodes.");
             return;
         }
 
@@ -439,7 +439,8 @@ void SpikeSorterEditor::buttonEvent(Button* button)
         processor->addProbes(ProbeType,numProbes, nElectrodes,nChansPerElectrode, firstElectrodeOffset,interelectrodeDistance);
         refreshElectrodeList();
 
-        getEditorViewport()->makeEditorVisible(this, true, true);
+        CoreServices::updateSignalChain(this);
+        CoreServices::highlightEditor(this);
 
         return;
 
@@ -448,7 +449,7 @@ void SpikeSorterEditor::buttonEvent(Button* button)
     {
         if (acquisitionIsActive)
         {
-            sendActionMessage("Stop acquisition before deleting electrodes.");
+            CoreServices::sendStatusMessage("Stop acquisition before deleting electrodes.");
             return;
         }
         removeElectrode(electrodeList->getSelectedItemIndex());
@@ -634,11 +635,11 @@ void SpikeSorterEditor::labelTextChanged(Label* label)
     if (label == depthOffsetEdit)
     {
         // update electrode depth offset.
-        Value v = depthOffsetEdit->getTextValue();
-        double offset = v.getValue();
+        //Value v = depthOffsetEdit->getTextValue();
+        //double offset = v.getValue();
 
-        int electrodeIndex = electrodeList->getSelectedId()-1;
-        SpikeSorter* processor = (SpikeSorter*) getProcessor();
+        //int electrodeIndex = electrodeList->getSelectedId()-1;
+        //SpikeSorter* processor = (SpikeSorter*) getProcessor();
         //if (electrodeIndex >= 0)
         //	processor->setElectrodeAdvancerOffset(electrodeIndex, offset);
 
@@ -657,7 +658,7 @@ void SpikeSorterEditor::setElectrodeComboBox(int direction)
         C = N;
     if (C > N)
         C = 1;
-	electrodeList->setSelectedId(C, sendNotification);
+    electrodeList->setSelectedId(C, sendNotification);
 }
 
 void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)

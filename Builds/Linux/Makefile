@@ -51,6 +51,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
+  $(OBJDIR)/CoreServices_8f7d6f26.o \
   $(OBJDIR)/AccessClass_de9602d5.o \
   $(OBJDIR)/PracticalSocket_2574ecc8.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
@@ -96,7 +97,6 @@ OBJECTS := \
   $(OBJDIR)/ImageIcon_c89b23a6.o \
   $(OBJDIR)/VisualizerEditor_3672b003.o \
   $(OBJDIR)/NetworkEventsEditor_fd22826.o \
-  $(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o \
   $(OBJDIR)/EventDetector_d0f4d00c.o \
   $(OBJDIR)/EventNode_857d5604.o \
   $(OBJDIR)/EventNodeEditor_2652ddd1.o \
@@ -130,6 +130,7 @@ OBJECTS := \
   $(OBJDIR)/RecordEngine_97ef83aa.o \
   $(OBJDIR)/RecordNode_cc21a82a.o \
   $(OBJDIR)/NetworkEvents_5344c99a.o \
+  $(OBJDIR)/PeriStimulusTimeHistogramEditor_6be5bf55.o \
   $(OBJDIR)/PeriStimulusTimeHistogramNode_9631ca2a.o \
   $(OBJDIR)/tictoc_cdca1ed.o \
   $(OBJDIR)/TrialCircularBuffer_4a4cef0c.o \
@@ -155,6 +156,7 @@ OBJECTS := \
   $(OBJDIR)/SpikeSorterEditor_3cee6cfb.o \
   $(OBJDIR)/Splitter_889c68aa.o \
   $(OBJDIR)/SplitterEditor_93a6dbf7.o \
+  $(OBJDIR)/Visualizer_2e631df8.o \
   $(OBJDIR)/DataWindow_83ce6754.o \
   $(OBJDIR)/SpikeObject_24e8c655.o \
   $(OBJDIR)/MatlabLikePlot_fb09c37f.o \
@@ -204,6 +206,11 @@ clean:
 strip:
 	@echo Stripping open-ephys
 	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
+$(OBJDIR)/CoreServices_8f7d6f26.o: ../../Source/CoreServices.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling CoreServices.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AccessClass_de9602d5.o: ../../Source/AccessClass.cpp
 	-@mkdir -p $(OBJDIR)
@@ -430,11 +437,6 @@ $(OBJDIR)/NetworkEventsEditor_fd22826.o: ../../Source/Processors/Editors/Network
 	@echo "Compiling NetworkEventsEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/PeriStimulusTimeHistogramEditor_f7323eb0.o: ../../Source/Processors/Editors/PeriStimulusTimeHistogramEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling PeriStimulusTimeHistogramEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/EventDetector_d0f4d00c.o: ../../Source/Processors/EventDetector/EventDetector.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling EventDetector.cpp"
@@ -600,6 +602,11 @@ $(OBJDIR)/NetworkEvents_5344c99a.o: ../../Source/Processors/NetworkEvents/Networ
 	@echo "Compiling NetworkEvents.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/PeriStimulusTimeHistogramEditor_6be5bf55.o: ../../Source/Processors/PSTH/PeriStimulusTimeHistogramEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PeriStimulusTimeHistogramEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/PeriStimulusTimeHistogramNode_9631ca2a.o: ../../Source/Processors/PSTH/PeriStimulusTimeHistogramNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling PeriStimulusTimeHistogramNode.cpp"
@@ -723,6 +730,11 @@ $(OBJDIR)/Splitter_889c68aa.o: ../../Source/Processors/Splitter/Splitter.cpp
 $(OBJDIR)/SplitterEditor_93a6dbf7.o: ../../Source/Processors/Splitter/SplitterEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SplitterEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/Visualizer_2e631df8.o: ../../Source/Processors/Visualization/Visualizer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling Visualizer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/DataWindow_83ce6754.o: ../../Source/Processors/Visualization/DataWindow.cpp

@@ -442,6 +442,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\CoreServices.cpp">
+      <Filter>open-ephys\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\AccessClass.cpp">
       <Filter>open-ephys\Source</Filter>
     </ClCompile>
@@ -577,9 +580,6 @@
     <ClCompile Include="..\..\Source\Processors\Editors\NetworkEventsEditor.cpp">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.cpp">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\EventDetector\EventDetector.cpp">
       <Filter>open-ephys\Source\Processors\EventDetector</Filter>
     </ClCompile>
@@ -679,6 +679,9 @@
     <ClCompile Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.cpp">
       <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\PSTH\PeriStimulusTimeHistogramEditor.cpp">
+      <Filter>open-ephys\Source\Processors\PSTH</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\PSTH\PeriStimulusTimeHistogramNode.cpp">
       <Filter>open-ephys\Source\Processors\PSTH</Filter>
     </ClCompile>
@@ -753,6 +756,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Splitter\SplitterEditor.cpp">
       <Filter>open-ephys\Source\Processors\Splitter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Visualization\Visualizer.cpp">
+      <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Visualization\DataWindow.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
@@ -2034,6 +2040,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\CoreServices.h">
+      <Filter>open-ephys\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\AccessClass.h">
       <Filter>open-ephys\Source</Filter>
     </ClInclude>
@@ -2187,9 +2196,6 @@
     <ClInclude Include="..\..\Source\Processors\Editors\NetworkEventsEditor.h">
       <Filter>open-ephys\Source\Processors\Editors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\Editors\PeriStimulusTimeHistogramEditor.h">
-      <Filter>open-ephys\Source\Processors\Editors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\EventDetector\EventDetector.h">
       <Filter>open-ephys\Source\Processors\EventDetector</Filter>
     </ClInclude>
@@ -2288,6 +2294,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.h">
       <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\PSTH\PeriStimulusTimeHistogramEditor.h">
+      <Filter>open-ephys\Source\Processors\PSTH</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\PSTH\PeriStimulusTimeHistogramNode.h">
       <Filter>open-ephys\Source\Processors\PSTH</Filter>
