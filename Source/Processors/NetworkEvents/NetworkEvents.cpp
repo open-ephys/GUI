@@ -355,6 +355,39 @@ void NetworkEvents::simulateSingleTrial()
 
 String NetworkEvents::handleSpecialMessages(StringTS msg)
 {
+	std::vector<String> input = msg.splitString(' ');
+
+	if (input[0] == "ProcessorCommunication")
+	{
+		ProcessorGraph *g = AccessClass::getProcessorGraph();
+		Array<GenericProcessor*> p = g->getListOfProcessors();
+		for (int k=0; k<p.size(); k++)
+		{
+			String name = p[k]->getName().removeCharacters(" ");
+			if (name.toLowerCase() == input[1].toLowerCase())
+			{
+				String Query="";
+				for (int i=2;i<input.size();i++)
+				{
+					if (i == input.size()-1)
+						Query+=input[i];
+					else
+						Query+=input[i] + " ";
+				}
+
+				std::cout << "Network processor communication " << name << std::endl;
+				return p[k]->interProcessorCommunication(Query);
+			}
+		}
+
+  		return String("OK");      
+	} else
+	{
+		std::cout << "Network message: " << msg.getString() << std::endl;
+		CoreServices::sendStatusMessage(String("Network message: ") + msg.getString());
+		return String("NotHandled");
+	}
+
     /*
     std::vector<String> input = msg.splitString(' ');
     if (input[0] == "StartRecord")
@@ -405,7 +438,7 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
     }
 
     */
-    return String("NotHandled");
+    // return String("NotHandled");
 }
 
 void NetworkEvents::process(AudioSampleBuffer& buffer,

@@ -1044,3 +1044,45 @@ void ControlPanel::setRecentlyUsedFilenames(const StringArray& filenames)
 {
     filenameComponent->setRecentlyUsedFilenames(filenames);
 }
+
+
+bool ControlPanel::getRecordState()
+{
+	return recordButton->getToggleState();
+}
+
+
+void ControlPanel::setRecordingDirectory(String path)
+{
+	File newFile(path);
+	filenameComponent->setCurrentFile(newFile, true, sendNotificationSync);
+
+    graph->getRecordNode()->newDirectoryNeeded = true;
+    masterClock->resetRecordTime();
+}
+
+
+bool ControlPanel::getAcquisitionState()
+{
+	return playButton->getToggleState();
+}
+
+
+void ControlPanel::setAcquisitionState(bool isRunning)
+{
+	playButton->setToggleState(isRunning, sendNotification);
+}
+
+
+void ControlPanel::setPrependText(String text)
+{
+	prependText->setText(text, sendNotificationSync);
+}
+
+
+void ControlPanel::setAppendText(String text)
+{
+	appendText->setText(text, sendNotificationSync);
+}
+
+
