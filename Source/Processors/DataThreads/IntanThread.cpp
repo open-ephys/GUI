@@ -53,12 +53,22 @@ int IntanThread::getNumEventChannels()
     return 6;
 }
 
+int IntanThread::getNumAuxOutputs()
+{
+    return 0;
+}
+
+int IntanThread::getNumAdcOutputs()
+{
+    return 0;
+}
+
 float IntanThread::getSampleRate()
 {
     return 25000.0;
 }
 
-float IntanThread::getBitVolts()
+float IntanThread::getBitVolts(Channel* chan)
 {
     return 0.1907;
 }

@@ -33,7 +33,7 @@ class SourceNode;
 
 /**
 
-  Interface to the Intan Demo Board.
+  Interface to the Intan Demo Board (RHA2000 analog chips)
 
   @see SourceNode, DataThread
 
@@ -49,7 +49,9 @@ public:
     bool foundInputSource();
     int getNumChannels();
     float getSampleRate();
-    float getBitVolts();
+    int getNumAuxOutputs();
+    int getNumAdcOutputs();
+    float getBitVolts(Channel* chan);
     int getNumEventChannels();
 
 private:

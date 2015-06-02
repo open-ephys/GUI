@@ -42,7 +42,7 @@ SourceNode::SourceNode(const String& name_)
 
     if (getName().equalsIgnoreCase("RHA2000-EVAL"))
     {
-        // dataThread = new IntanThread(this); // this thread has not been updated recently
+         dataThread = new IntanThread(this);
     }
     // else if (getName().equalsIgnoreCase("Custom FPGA"))
     // {

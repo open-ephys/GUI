@@ -280,6 +280,7 @@
     <ClCompile Include="..\..\Source\Processors\Channel\Channel.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\DataThreads\IntanThread.cpp"/>
     <ClCompile Include="..\..\Source\Processors\DataThreads\EcubeEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\DataThreads\RHD2000Editor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\DataThreads\EcubeThread.cpp"/>
@@ -1527,6 +1528,7 @@
     <ClInclude Include="..\..\Source\Processors\Channel\Channel.h"/>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\IntanThread.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\EcubeEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\RHD2000Editor.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\EcubeThread.h"/>
