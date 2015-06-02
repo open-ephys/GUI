@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 ArduinoOutput::ArduinoOutput()
-    : GenericProcessor("Arduino Output"), state(true), deviceSelected(false), outputChannel(13), inputChannel(-1)
+    : GenericProcessor("Arduino Output"), outputChannel(13), inputChannel(-1), state(true), deviceSelected(false)
 {
 
 }
@@ -79,16 +79,16 @@ void ArduinoOutput::setDevice(String devName)
 
             std::cout << "Arduino is initialized." << std::endl;
             arduino.sendDigitalPinMode(outputChannel, ARD_OUTPUT);
-            sendActionMessage("Arduino initialized at" + devName);
+            CoreServices::sendStatusMessage("Arduino initialized at" + devName);
             deviceSelected = true;
         }
         else
         {
             std::cout << "Arduino is NOT initialized." << std::endl;
-            sendActionMessage("Arduino could not be initialized at" + devName);
+			CoreServices::sendStatusMessage("Arduino could not be initialized at" + devName);
         }
     } else {
-        sendActionMessage("Cannot change device while acquisition is active.");
+		CoreServices::sendStatusMessage("Cannot change device while acquisition is active.");
     }
 
 
@@ -101,7 +101,7 @@ void ArduinoOutput::handleEvent(int eventType, MidiMessage& event, int sampleNum
     {
         const uint8* dataptr = event.getRawData();
 
-        int eventNodeId = *(dataptr+1);
+        //int eventNodeId = *(dataptr+1);
         int eventId = *(dataptr+2);
         int eventChannel = *(dataptr+3);
 

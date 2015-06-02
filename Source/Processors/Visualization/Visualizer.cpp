@@ -1,9 +1,8 @@
-
 /*
     ------------------------------------------------------------------
 
     This file is part of the Open Ephys GUI
-    Copyright (C) 2013 Open Ephys
+    Copyright (C) 2014 Open Ephys
 
     ------------------------------------------------------------------
 
@@ -22,27 +21,30 @@
 
 */
 
-#ifndef __TICTOC_H
-#define __TICTOC_H
+#include "Visualizer.h"
 
-#include "../../JuceLibraryCode/JuceHeader.h"
-class TicToc
+Visualizer::Visualizer()
 {
-public:
-    TicToc();
-    void Tic(int x);
-    void Toc(int x);
-    void clear();
-    void print();
-    int N;
-    std::vector<double> tics;
-    std::vector<double> averageTime;
-    std::vector<double> totalTime;
-    std::vector<int> numSamples;
-    std::vector<double> tocs;
-    std::vector<int> sort_indexes(std::vector<double> v) ;
-};
+	refreshRate = 10;    // 10 Hz default refresh rate
+}
 
+Visualizer::~Visualizer() {}
 
+void Visualizer::startCallbacks()
+{
+	startTimer(20);
+}
 
-#endif  // __TICTOC_H
+void Visualizer::stopCallbacks()
+{
+	stopTimer();
+}
+
+void Visualizer::timerCallback()
+{
+	refresh();
+}
+
+void Visualizer::saveVisualizerParameters(XmlElement* xml) { }
+
+void Visualizer::loadVisualizerParameters(XmlElement* xml) { }

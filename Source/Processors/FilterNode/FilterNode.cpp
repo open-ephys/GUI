@@ -126,7 +126,7 @@ AudioProcessorEditor* FilterNode::createEditor()
 
 void FilterNode::updateSettings()
 {
-    int id = nodeId;
+    //int id = nodeId;
     int numInputs = getNumInputs();
     int numfilt = filters.size();
     if (numInputs < 1024 && numInputs != numfilt)
@@ -205,7 +205,8 @@ bool FilterNode::getBypassStatusForChannel(int chan)
 
 void FilterNode::setFilterParameters(double lowCut, double highCut, int chan)
 {
-
+	if (channels.size()-1 < chan)
+		return;
     Dsp::Params params;
     params[0] = channels[chan]->sampleRate; // sample rate
     params[1] = 2; // order

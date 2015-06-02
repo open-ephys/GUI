@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ChannelMappingEditor.h"
 #include "ChannelMappingNode.h"
-#include "../../UI/EditorViewport.h"
 #include "../Editors/ChannelSelector.h"
 #include <stdio.h>
 
@@ -34,7 +33,7 @@ ChannelMappingEditor::ChannelMappingEditor(GenericProcessor* parentNode, bool us
 
 {
     desiredWidth = 350;
-
+	
     scrollDistance = 0;
 
     selectAllButton = new ElectrodeEditorButton("Select All",Font("Small Text",14,Font::plain));
@@ -272,19 +271,19 @@ void ChannelMappingEditor::buttonEvent(Button* button)
     {
 		if (acquisitionIsActive)
 		{
-			sendActionMessage("Cannot change channel order while acquiring");
+			CoreServices::sendStatusMessage("Cannot change channel order while acquiring");
 			return;
 		}
         createElectrodeButtons(getProcessor()->getNumInputs());
         previousChannelCount = getProcessor()->getNumInputs();
         setConfigured(false);
-        getEditorViewport()->makeEditorVisible(this, false, true);
+		CoreServices::updateSignalChain(this);
     }
     else if (button == modifyButton)
     {
 		if (acquisitionIsActive)
 		{
-			sendActionMessage("Cannot change channel order while acquiring");
+			CoreServices::sendStatusMessage("Cannot change channel order while acquiring");
 			button->setToggleState(false,dontSendNotification);
 			return;
 		}
@@ -302,7 +301,15 @@ void ChannelMappingEditor::buttonEvent(Button* button)
 
             if (referenceChannels[selectedReference] >= 0)
             {
-                a.add(referenceChannels[selectedReference]);
+				if (referenceChannels[selectedReference] < channelSelector->getNumChannels())
+					a.add(referenceChannels[selectedReference]);
+				else
+				{
+					a.add(channelSelector->getNumChannels() - 1);
+					getProcessor()->setCurrentChannel(channelSelector->getNumChannels() - 1);
+					getProcessor()->setParameter(2, selectedReference);
+					referenceChannels.set(selectedReference, channelSelector->getNumChannels() - 1);
+				}
             }
             channelSelector->setActiveChannels(a);
 
@@ -552,10 +559,10 @@ void ChannelMappingEditor::buttonEvent(Button* button)
             {
                 File fileToSave = fc.getResult();
                 std::cout << fileToSave.getFileName() << std::endl;
-                sendActionMessage(writePrbFile(fileToSave));
+                CoreServices::sendStatusMessage(writePrbFile(fileToSave));
             }
         } else {
-            sendActionMessage("Stop acquisition before saving the channel map.");
+			CoreServices::sendStatusMessage("Stop acquisition before saving the channel map.");
         }
 
         
@@ -577,10 +584,10 @@ void ChannelMappingEditor::buttonEvent(Button* button)
                     modifyButton->setToggleState(false,sendNotificationSync);
                 File fileToOpen = fc.getResult();
                 std::cout << fileToOpen.getFileName() << std::endl;
-                sendActionMessage(loadPrbFile(fileToOpen));
+				CoreServices::sendStatusMessage(loadPrbFile(fileToOpen));
             }
         } else {
-            sendActionMessage("Stop acquisition before saving the channel map.");
+			CoreServices::sendStatusMessage("Stop acquisition before saving the channel map.");
         }
     }
 }
@@ -848,7 +855,7 @@ void ChannelMappingEditor::mouseUp(const MouseEvent& e)
             setChannelPosition(i,electrodeButtons[i]->getChannelNum());
         }
         setConfigured(true);
-		getEditorViewport()->makeEditorVisible(this, false, true);
+		CoreServices::updateSignalChain(this);
     }
 }
 
@@ -865,7 +872,6 @@ void ChannelMappingEditor::mouseDoubleClick(const MouseEvent& e)
     {
         setConfigured(true);
         ElectrodeButton* button = (ElectrodeButton*)e.originalComponent;
-
         if (button->getToggleState())
         {
             button->setToggleState(false, dontSendNotification);
@@ -880,7 +886,7 @@ void ChannelMappingEditor::mouseDoubleClick(const MouseEvent& e)
             getProcessor()->setCurrentChannel(button->getChannelNum()-1);
             getProcessor()->setParameter(3,1);
         }
-        getEditorViewport()->makeEditorVisible(this, false, true);
+		CoreServices::updateSignalChain(this);
     }
 }
 
@@ -1078,7 +1084,7 @@ String ChannelMappingEditor::loadPrbFile(File filename)
     }
 
 	setConfigured(true);
-	getEditorViewport()->makeEditorVisible(this, false, true);
+	CoreServices::updateSignalChain(this);
 
 	var recChans = json[Identifier("recording")];
 	var recording = recChans[Identifier("channels")];

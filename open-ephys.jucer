@@ -12,7 +12,8 @@
               includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               extraLinkerFlags="-lhdf5 -lhdf5_cpp" objCExtraSuffix="fea2mT">
+               extraLinkerFlags="-lhdf5 -lhdf5_cpp -lzmq" objCExtraSuffix="fea2mT"
+               extraDefs="ZEROMQ">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"
@@ -273,6 +274,9 @@
       </GROUP>
     </GROUP>
     <GROUP id="ZMfWAFj" name="Source">
+      <FILE id="QyaTEa" name="CoreServices.cpp" compile="1" resource="0"
+            file="Source/CoreServices.cpp"/>
+      <FILE id="BH11mU" name="CoreServices.h" compile="0" resource="0" file="Source/CoreServices.h"/>
       <FILE id="AXFRUPT" name="AccessClass.cpp" compile="1" resource="0"
             file="Source/AccessClass.cpp"/>
       <FILE id="2ViPrE" name="AccessClass.h" compile="0" resource="0" file="Source/AccessClass.h"/>
@@ -677,6 +681,7 @@
                 file="Source/Processors/Splitter/SplitterEditor.h"/>
         </GROUP>
         <GROUP id="W4eqkOy" name="Visualization">
+          <FILE id="Akiup9" name="Visualizer.cpp" compile="1" resource="0" file="Source/Processors/Visualization/Visualizer.cpp"/>
           <FILE id="ETLsfY" name="DataWindow.cpp" compile="1" resource="0" file="Source/Processors/Visualization/DataWindow.cpp"/>
           <FILE id="qDfeYR" name="DataWindow.h" compile="0" resource="0" file="Source/Processors/Visualization/DataWindow.h"/>
           <FILE id="tuQVXY" name="SpikeObject.cpp" compile="1" resource="0" file="Source/Processors/Visualization/SpikeObject.cpp"/>
@@ -736,7 +741,7 @@
       <FILE id="z41Hy7g" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS/>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>

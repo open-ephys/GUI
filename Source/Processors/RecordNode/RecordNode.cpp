@@ -25,6 +25,7 @@
 #include "../ProcessorGraph/ProcessorGraph.h"
 #include "../../UI/EditorViewport.h"
 #include "../../UI/ControlPanel.h"
+#include "../../AccessClass.h"
 #include "RecordEngine.h"
 
 #define EVERY_ENGINE for(int eng = 0; eng < engineArray.size(); eng++) engineArray[eng]
@@ -55,7 +56,7 @@ RecordNode::RecordNode()
 
     experimentNumber = 0;
     hasRecorded = false;
-	settingsNeeded = false;
+    settingsNeeded = false;
 
     // 128 inputs, 0 outputs
     setPlayConfigDetails(getNumInputs(),getNumOutputs(),44100.0,128);
@@ -156,7 +157,7 @@ void RecordNode::getChannelNamesAndRecordingStatus(StringArray& names, Array<boo
 void RecordNode::addInputChannel(GenericProcessor* sourceNode, int chan)
 {
 
-    if (chan != getProcessorGraph()->midiChannelIndex)
+    if (chan != AccessClass::getProcessorGraph()->midiChannelIndex)
     {
 
         int channelIndex = getNextChannel(false);
@@ -217,7 +218,7 @@ String RecordNode::generateDirectoryName()
     t.add(calendar.getMinutes());
     t.add(calendar.getSeconds());
 
-    String filename = getControlPanel()->getTextToPrepend();
+    String filename = AccessClass::getControlPanel()->getTextToPrepend();
 
     String datestring = "";
 
@@ -234,10 +235,10 @@ String RecordNode::generateDirectoryName()
             datestring += "-";
     }
 
-    getControlPanel()->setDateText(datestring);
+    AccessClass::getControlPanel()->setDateText(datestring);
 
     filename += datestring;
-    filename += getControlPanel()->getTextToAppend();
+    filename += AccessClass::getControlPanel()->getTextToAppend();
 
     return filename;
 
@@ -298,7 +299,7 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
             createNewDirectory();
             recordingNumber = 0;
             experimentNumber = 1;
-			settingsNeeded = true;
+            settingsNeeded = true;
             EVERY_ENGINE->directoryChanged();
         }
         else
@@ -310,12 +311,12 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
         {
             rootFolder.createDirectory();
         }
-		if (settingsNeeded)
-		{
-			String settingsFileName = rootFolder.getFullPathName() + File::separator + "settings" + ((experimentNumber > 1) ? "_" + String(experimentNumber) : String::empty) + ".xml";
-			getEditorViewport()->saveState(File(settingsFileName));
-			settingsNeeded = false;
-		}
+        if (settingsNeeded)
+        {
+            String settingsFileName = rootFolder.getFullPathName() + File::separator + "settings" + ((experimentNumber > 1) ? "_" + String(experimentNumber) : String::empty) + ".xml";
+            AccessClass::getEditorViewport()->saveState(File(settingsFileName));
+            settingsNeeded = false;
+        }
 
         EVERY_ENGINE->openFiles(rootFolder, experimentNumber, recordingNumber);
 
@@ -352,7 +353,7 @@ void RecordNode::setParameter(int parameterIndex, float newValue)
             {
                 //Toggling channels while recording isn't allowed. Code shouldn't reach here.
                 //In case it does, display an error and exit.
-                sendActionMessage("Toggling record channels while recording is not allowed");
+                CoreServices::sendStatusMessage("Toggling record channels while recording is not allowed");
                 std::cout << "ERROR: Wrong code section reached\n Toggling record channels while recording is not allowed." << std::endl;
                 return;
             }
@@ -384,7 +385,7 @@ bool RecordNode::enable()
     {
         hasRecorded = false;
         experimentNumber++;
-		settingsNeeded = true;
+        settingsNeeded = true;
     }
 
     //When starting a recording, if a new directory is needed it gets rewritten. Else is incremented by one.

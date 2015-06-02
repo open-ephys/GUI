@@ -451,6 +451,7 @@ void RHD2000Thread::scanPorts()
         Rhd2000EvalBoard::PortD2
     };
 
+    /*
     Rhd2000EvalBoard::BoardDataSource initStreamDdrPorts[8] =
     {
         Rhd2000EvalBoard::PortA1Ddr,
@@ -462,6 +463,7 @@ void RHD2000Thread::scanPorts()
         Rhd2000EvalBoard::PortD1Ddr,
         Rhd2000EvalBoard::PortD2Ddr
     };
+     */
 
     chipId.insertMultiple(0,-1,8);
     Array<int> tmpChipId(chipId);
@@ -776,8 +778,8 @@ void RHD2000Thread::setDefaultChannelNames()
     int aux_counter = 1;
     int channelNumber = 1;
     String oldName;
-    int dummy;
-    float oldGain;
+    //int dummy;
+    //float oldGain;
     StringArray stream_prefix;
     stream_prefix.add("A1");
     stream_prefix.add("A2");
@@ -1724,7 +1726,7 @@ void RHD2000Thread::runImpedanceTest(ImpedanceData* data)
 
 
 RHDHeadstage::RHDHeadstage(Rhd2000EvalBoard::BoardDataSource stream) :
-    numStreams(0), channelsPerStream(32), dataStream(stream), halfChannels(false)
+    dataStream(stream), numStreams(0), channelsPerStream(32), halfChannels(false)
 {
 	streamIndex = -1;
 }
@@ -1800,7 +1802,7 @@ void RHDImpedanceMeasure::stopThreadSafely()
 {
 	if (isThreadRunning())
 	{
-		sendActionMessage("Impedance measure in progress. Stopping it.");
+		CoreServices::sendStatusMessage("Impedance measure in progress. Stopping it.");
 		if (!stopThread(3000)) //wait three seconds max for it to exit gracefully
 		{
 			std::cerr << "ERROR: Impedance measurement thread did not exit. Force killed it. This might led to crashes." << std::endl;
@@ -1812,7 +1814,7 @@ void RHDImpedanceMeasure::waitSafely()
 {
 	if (!waitForThreadToExit(120000)) //two minutes should be enough for completing a scan
 	{
-		sendActionMessage("Impedance measurement took too much. Aborting.");
+		CoreServices::sendStatusMessage("Impedance measurement took too much. Aborting.");
 		if (!stopThread(3000)) //wait three seconds max for it to exit gracefully
 		{
 			std::cerr << "ERROR: Impedance measurement thread did not exit. Force killed it. This might led to crashes." << std::endl;
@@ -1822,7 +1824,6 @@ void RHDImpedanceMeasure::waitSafely()
 
 void RHDImpedanceMeasure::prepareData(ImpedanceData* d)
 {
-	addActionListener(board->sn->getMessageCenter());
 	data = d;
 }
 
@@ -1880,8 +1881,9 @@ int RHDImpedanceMeasure::loadAmplifierData(queue<Rhd2000DataBlock>& dataQueue,
 	int numBlocks, int numDataStreams)
 {
 
-	int block, t, channel, stream, i, j;
+	int block, t, channel, stream;
 	int indexAmp = 0;
+    /*
 	int indexAux = 0;
 	int indexSupply = 0;
 	int indexAdc = 0;
@@ -1895,6 +1897,7 @@ int RHDImpedanceMeasure::loadAmplifierData(queue<Rhd2000DataBlock>& dataQueue,
 
 	bool triggerFound = false;
 	const double AnalogTriggerThreshold = 1.65;
+     */
 
 
 	for (block = 0; block < numBlocks; ++block)
@@ -2045,7 +2048,7 @@ void RHDImpedanceMeasure::runImpedanceMeasurement()
 	int commandSequenceLength, stream, channel, capRange;
 	double cSeries;
 	vector<int> commandList;
-	int triggerIndex;                       // dummy reference variable; not used
+	//int triggerIndex;                       // dummy reference variable; not used
 	queue<Rhd2000DataBlock> bufferQueue;    // dummy reference variable; not used
 	int numdataStreams = board->evalBoard->getNumEnabledDataStreams();
 

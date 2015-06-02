@@ -442,6 +442,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\CoreServices.cpp">
+      <Filter>open-ephys\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\AccessClass.cpp">
       <Filter>open-ephys\Source</Filter>
     </ClCompile>
@@ -753,6 +756,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Splitter\SplitterEditor.cpp">
       <Filter>open-ephys\Source\Processors\Splitter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\Visualization\Visualizer.cpp">
+      <Filter>open-ephys\Source\Processors\Visualization</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Visualization\DataWindow.cpp">
       <Filter>open-ephys\Source\Processors\Visualization</Filter>
@@ -2034,6 +2040,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\CoreServices.h">
+      <Filter>open-ephys\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\AccessClass.h">
       <Filter>open-ephys\Source</Filter>
     </ClInclude>

@@ -51,6 +51,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
+  $(OBJDIR)/CoreServices_8f7d6f26.o \
   $(OBJDIR)/AccessClass_de9602d5.o \
   $(OBJDIR)/PracticalSocket_2574ecc8.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
@@ -155,6 +156,7 @@ OBJECTS := \
   $(OBJDIR)/SpikeSorterEditor_3cee6cfb.o \
   $(OBJDIR)/Splitter_889c68aa.o \
   $(OBJDIR)/SplitterEditor_93a6dbf7.o \
+  $(OBJDIR)/Visualizer_2e631df8.o \
   $(OBJDIR)/DataWindow_83ce6754.o \
   $(OBJDIR)/SpikeObject_24e8c655.o \
   $(OBJDIR)/MatlabLikePlot_fb09c37f.o \
@@ -204,6 +206,11 @@ clean:
 strip:
 	@echo Stripping open-ephys
 	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
+$(OBJDIR)/CoreServices_8f7d6f26.o: ../../Source/CoreServices.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling CoreServices.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AccessClass_de9602d5.o: ../../Source/AccessClass.cpp
 	-@mkdir -p $(OBJDIR)
@@ -723,6 +730,11 @@ $(OBJDIR)/Splitter_889c68aa.o: ../../Source/Processors/Splitter/Splitter.cpp
 $(OBJDIR)/SplitterEditor_93a6dbf7.o: ../../Source/Processors/Splitter/SplitterEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling SplitterEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/Visualizer_2e631df8.o: ../../Source/Processors/Visualization/Visualizer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling Visualizer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/DataWindow_83ce6754.o: ../../Source/Processors/Visualization/DataWindow.cpp

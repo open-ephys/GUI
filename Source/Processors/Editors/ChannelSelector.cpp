@@ -24,6 +24,7 @@
 #include "ChannelSelector.h"
 #include <math.h>
 
+#include "../../AccessClass.h"
 #include "../RecordNode/RecordNode.h"
 #include "../AudioNode/AudioNode.h"
 #include "../ProcessorGraph/ProcessorGraph.h"
@@ -143,6 +144,11 @@ void ChannelSelector::setNumChannels(int numChans)
 
     refreshButtonBoundaries();
 
+}
+
+int ChannelSelector::getNumChannels()
+{
+	return parameterButtons.size();
 }
 
 void ChannelSelector::shiftChannelsVertical(float amount)
@@ -377,6 +383,17 @@ void ChannelSelector::activateRecButtons()
 
 }
 
+void ChannelSelector::refreshParameterColors()
+{
+	GenericEditor* p = dynamic_cast<GenericEditor*>(getParentComponent());
+	p->updateParameterButtons(-1);
+}
+
+void ChannelSelector::paramButtonsToggledByDefault(bool t)
+{
+	paramsToggled = t;
+}
+
 void ChannelSelector::startAcquisition()
 {
     acquisitionIsActive = true;
@@ -600,7 +617,7 @@ void ChannelSelector::buttonClicked(Button* button)
 
             if (acquisitionIsActive) // use setParameter to change parameter safely
             {
-                editor->getProcessorGraph()->
+                AccessClass::getProcessorGraph()->
                 getAudioNode()->setChannelStatus(ch, status);
             }
             else     // change parameter directly
@@ -621,7 +638,7 @@ void ChannelSelector::buttonClicked(Button* button)
 
             if (acquisitionIsActive) // use setParameter to change parameter safely
             {
-                editor->getProcessorGraph()->
+                AccessClass::getProcessorGraph()->
                 getRecordNode()->
                 setChannelStatus(ch, status);
             }
@@ -631,7 +648,7 @@ void ChannelSelector::buttonClicked(Button* button)
                 ch->setRecordState(status);
             }
 
-            editor->getGraphViewer()->repaint();
+            AccessClass::getGraphViewer()->repaint();
 
         }
         else // parameter type
@@ -685,6 +702,29 @@ EditorButton::EditorButton(const String& name, Font& f) : Button(name)
                                      false);
 
 
+}
+
+EditorButton::~EditorButton() {}
+
+bool EditorButton::getState()
+{
+	return isEnabled;
+}
+
+void EditorButton::setState(bool state)
+{
+	isEnabled = state;
+
+	if (!state)
+	{
+		removeListener((Button::Listener*) getParentComponent());
+	}
+	else
+	{
+		addListener((Button::Listener*) getParentComponent());
+	}
+
+	repaint();
 }
 
 void EditorButton::resized()
@@ -820,7 +860,7 @@ ChannelSelectorButton::ChannelSelectorButton(int num_, int type_, Font& f) : But
 {
     isActive = true;
     num = num_;
-	displayNum = num_;
+    displayNum = num_;
     type = type_;
 
     setClickingTogglesState(true);
@@ -829,6 +869,28 @@ ChannelSelectorButton::ChannelSelectorButton(int num_, int type_, Font& f) : But
     buttonFont.setHeight(10);
 }
 
+ChannelSelectorButton::~ChannelSelectorButton() {}
+
+int ChannelSelectorButton::getType()
+{
+	return type;
+}
+
+int ChannelSelectorButton::getChannel()
+{
+	return num;
+}
+
+void ChannelSelectorButton::setChannel(int n)
+{
+	num = n;
+	displayNum = n;
+}
+void ChannelSelectorButton::setChannel(int n, int d)
+{
+	num = n;
+	displayNum = d;
+}
 
 void ChannelSelectorButton::paintButton(Graphics& g, bool isMouseOver, bool isButtonDown)
 {
@@ -856,7 +918,7 @@ void ChannelSelectorButton::paintButton(Graphics& g, bool isMouseOver, bool isBu
 
     // g.drawRect(0,0,getWidth(),getHeight(),1.0);
 
-	g.drawText(String(displayNum),0,0,getWidth(),getHeight(),Justification::centred,true);
+    g.drawText(String(displayNum),0,0,getWidth(),getHeight(),Justification::centred,true);
 }
 
 void ChannelSelectorButton::setActive(bool t)

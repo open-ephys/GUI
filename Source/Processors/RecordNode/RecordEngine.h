@@ -54,11 +54,11 @@ class EngineParameter;
 class RecordNode;
 class RecordEngineManager;
 
-class RecordEngine : public AccessClass
+class RecordEngine
 {
 public:
     RecordEngine();
-    ~RecordEngine();
+    virtual ~RecordEngine();
     virtual String getEngineID() =0;
 
     /** All the public methods (except registerManager) are called by RecordNode:

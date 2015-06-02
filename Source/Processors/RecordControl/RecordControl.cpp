@@ -28,7 +28,7 @@
 
 RecordControl::RecordControl()
     : GenericProcessor("Record Control"),
-     triggerChannel(0), recordNode(0)
+      triggerChannel(0)
 {
 
 }
@@ -50,6 +50,14 @@ void RecordControl::setParameter(int parameterIndex, float newValue)
     {
         updateTriggerChannel((int) newValue);
     }
+    else if (parameterIndex == 1)
+    {
+        triggerType = (Types)((int)newValue - 1);
+    }
+    else if (parameterIndex == 2)
+    {
+        triggerEdge = (Edges)((int)newValue - 1);
+    }
 }
 
 void RecordControl::updateTriggerChannel(int newChannel)
@@ -59,10 +67,6 @@ void RecordControl::updateTriggerChannel(int newChannel)
 
 bool RecordControl::enable()
 {
-    if (recordNode == 0)
-        recordNode = getProcessorGraph()->getRecordNode();
-
-    //recordNode->appendTrialNumber(createNewFilesOnTrigger);
 
     return true;
 }
@@ -85,18 +89,26 @@ void RecordControl::handleEvent(int eventType, MidiMessage& event, int)
 
     if (eventType == TTL && eventChannel == triggerChannel)
     {
+        int edge = triggerEdge == RISING ? 1 : 0;
 
         //std::cout << "Trigger!" << std::endl;
 
         const MessageManagerLock mmLock;
 
-        if (eventId == 1)
+        if (triggerType == SET)
         {
-            getControlPanel()->setRecordState(true);
+            if (eventId == edge)
+            {
+                CoreServices::setRecordingStatus(true);
+            }
+            else
+            {
+                CoreServices::setRecordingStatus(false);
+            }
         }
-        else
+        else if (triggerType == TOGGLE && eventId == edge)
         {
-            getControlPanel()->setRecordState(false);
+            CoreServices::setRecordingStatus(!CoreServices::getRecordingStatus());
         }
 
 
