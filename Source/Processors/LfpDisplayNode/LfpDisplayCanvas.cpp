@@ -176,6 +176,19 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     selectedSpread = 5;
     selectedSpreadValue = spreads[selectedSpread-1];
 
+    spacings.add("10");
+    spacings.add("20");
+    spacings.add("30");
+    spacings.add("40");
+    spacings.add("50");
+    spacings.add("60");
+    spacings.add("70");
+    spacings.add("80");
+    spacings.add("90");
+    spacings.add("100");
+    selectedSpacing = 5;
+    selectedSpacingValue = spacings[selectedSpacing-1];
+
     colorGroupings.add("1");
     colorGroupings.add("2");
     colorGroupings.add("4");
@@ -205,6 +218,13 @@ LfpDisplayCanvas::LfpDisplayCanvas(LfpDisplayNode* processor_) :
     spreadSelection->addListener(this);
     spreadSelection->setEditableText(true);
     addAndMakeVisible(spreadSelection);
+
+    spacingSelection = new ComboBox("Spacing");
+    spacingSelection->addItemList(spacings, 1);
+    spacingSelection->setSelectedId(selectedSpacing,sendNotification);
+    spacingSelection->addListener(this);
+    spacingSelection->setEditableText(true);
+    addAndMakeVisible(spacingSelection);
 
     colorGroupingSelection = new ComboBox("Color Grouping");
     colorGroupingSelection->addItemList(colorGroupings, 1);
@@ -290,7 +310,8 @@ void LfpDisplayCanvas::resized()
 
     rangeSelection->setBounds(5,getHeight()-30,100,25);
     timebaseSelection->setBounds(175,getHeight()-30,100,25);
-    spreadSelection->setBounds(345,getHeight()-30,100,25);
+    spreadSelection->setBounds(300,getHeight()-30,75,25);
+    spacingSelection->setBounds(400,getHeight()-30,75,25);
     colorGroupingSelection->setBounds(620,getHeight()-30,100,25);
 
     invertInputButton->setBounds(750,getHeight()-50,100,22);
@@ -562,6 +583,47 @@ void LfpDisplayCanvas::comboBoxChanged(ComboBox* cb)
         selectedSpreadValue = cb->getText();
         //std::cout << "Setting spread to " << spreads[cb->getSelectedId()-1].getFloatValue() << std::endl;
     }
+    else if (cb == spacingSelection)
+    {
+        if (cb->getSelectedId())
+        {
+            lfpDisplay->setChannelSpacing(spacings[cb->getSelectedId()-1].getIntValue());
+            resized();
+        }
+        else
+        {
+            int spacing = cb->getText().getIntValue();
+            if (spacing)
+            {
+                if (spacing < spacings[0].getFloatValue())
+                {
+                    cb->setSelectedId(1,dontSendNotification);
+                    spacing = spacings[0].getFloatValue();
+                }
+                else if (spacing > spacings[spacings.size()-1].getFloatValue())
+                {
+                    cb->setSelectedId(spacings.size(),dontSendNotification);
+                    spacing = spacings[spacings.size()-1].getFloatValue();
+                }
+                else
+                {
+                    cb->setText(String(spacing),dontSendNotification);
+                }
+                lfpDisplay->setChannelSpacing(spacing);
+                resized();
+            }
+            else
+            {
+                if (selectedSpacing == 0)
+                    cb->setText(selectedSpacingValue,dontSendNotification);
+                else
+                    cb->setSelectedId(selectedSpacing,dontSendNotification);
+            }
+        }
+        selectedSpacing = cb->getSelectedId();
+        selectedSpacingValue = cb->getText();
+        //std::cout << "Setting spread to " << spreads[cb->getSelectedId()-1].getFloatValue() << std::endl;
+    }
     else if (cb == colorGroupingSelection)
     {
         // set color grouping hre
@@ -603,7 +665,7 @@ void LfpDisplayCanvas:: setRangeSelection(float range, bool canvasMustUpdate)
 
 }
 
-void LfpDisplayCanvas:: setSpreadSelection(int spread, bool canvasMustUpdate)
+void LfpDisplayCanvas::setSpreadSelection(int spread, bool canvasMustUpdate)
 {
     if (canvasMustUpdate)
     {
@@ -614,6 +676,23 @@ void LfpDisplayCanvas:: setSpreadSelection(int spread, bool canvasMustUpdate)
         spreadSelection->setText(String(spread),dontSendNotification);
         selectedSpread=spreadSelection->getSelectedId();
         selectedSpreadValue=spreadSelection->getText();
+
+        repaint();
+        refresh();
+    }
+}
+
+void LfpDisplayCanvas::setSpacingSelection(int spacing, bool canvasMustUpdate)
+{
+    if (canvasMustUpdate)
+    {
+        spacingSelection->setText(String(spacing),sendNotification);
+    }
+    else
+    {
+        spacingSelection->setText(String(spacing),dontSendNotification);
+        selectedSpacing = spacingSelection->getSelectedId();
+        selectedSpacingValue=spacingSelection->getText();
 
         repaint();
         refresh();
@@ -880,7 +959,8 @@ void LfpDisplayCanvas::paint(Graphics& g)
 
     g.drawText("Voltage range ("+ rangeUnits[selectedChannelType] +")",5,getHeight()-55,300,20,Justification::left, false);
     g.drawText("Timebase (s)",175,getHeight()-55,300,20,Justification::left, false);
-    g.drawText("Spread (px)",345,getHeight()-55,300,20,Justification::left, false);
+    g.drawText("Height (px)",300,getHeight()-55,300,20,Justification::left, false);
+    g.drawText("Spacing (px)",400,getHeight()-55,300,20,Justification::left, false);
     g.drawText("Color grouping",620,getHeight()-55,300,20,Justification::left, false);
 
     //g.drawText(typeNames[selectedChannelType],110,getHeight()-30,50,20,Justification::centredLeft,false);
@@ -1135,7 +1215,7 @@ void LfpTimescale::setTimebase(float t)
 // ---------------------------------------------------------------
 
 LfpDisplay::LfpDisplay(LfpDisplayCanvas* c, Viewport* v) :
-    singleChan(-1), canvas(c), viewport(v)
+    singleChan(-1), canvas(c), viewport(v), channelSpacing(50)
 {
     totalHeight = 0;
     colorGrouping=1;
@@ -1239,7 +1319,7 @@ void LfpDisplay::setNumChannels(int numChannels)
 
 		savedChannelState.add(true);
 
-        totalHeight += lfpChan->getChannelHeight();
+        totalHeight += channelSpacing; //lfpChan->getChannelHeight();
 
     }
 
@@ -1292,7 +1372,7 @@ void LfpDisplay::resized()
                         canvas->leftmargin,
                         disp->getChannelHeight());
 
-        totalHeight += disp->getChannelHeight();
+        totalHeight += channelSpacing; //disp->getChannelHeight();
 
     }
 
@@ -1393,6 +1473,15 @@ void LfpDisplay::setChannelHeight(int r, bool resetSingle)
 			channelInfo[n]->setEnabledState(savedChannelState[n]);
         }
     }
+
+    resized();
+
+}
+
+void LfpDisplay::setChannelSpacing(int r)
+{
+
+    channelSpacing = r;
 
     resized();
 
