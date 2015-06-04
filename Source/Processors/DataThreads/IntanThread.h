@@ -25,7 +25,7 @@
 #define __INTANTHREAD_H_D9135C03__
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
-#include <ftdi.h>
+#include "../Serial/ftdi.h"
 #include <stdio.h>
 #include "DataThread.h"
 
@@ -53,6 +53,7 @@ public:
     int getNumAdcOutputs();
     float getBitVolts(Channel* chan);
     int getNumEventChannels();
+    int getNumHeadstageOutputs();
 
 private:
 
@@ -74,6 +75,8 @@ private:
     float thisSample[17]; // 17 continuous channels and one event channel
 
     int ch;
+
+    Time timer;
 
     bool updateBuffer();
 

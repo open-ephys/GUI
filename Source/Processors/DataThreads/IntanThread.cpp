@@ -68,6 +68,11 @@ float IntanThread::getSampleRate()
     return 25000.0;
 }
 
+int IntanThread::getNumHeadstageOutputs()
+{
+    return 16;
+}
+
 float IntanThread::getBitVolts(Channel* chan)
 {
     return 0.1907;

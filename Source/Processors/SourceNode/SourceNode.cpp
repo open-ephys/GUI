@@ -28,6 +28,7 @@
 #include "../SourceNode/SourceNodeEditor.h"
 #include "../DataThreads/RHD2000Editor.h"
 #include "../DataThreads/EcubeEditor.h" // Added by Michael Borisov
+#include "../DataThreads/IntanThread.h"
 #include "../Channel/Channel.h"
 #include <stdio.h>
 #include "../../AccessClass.h"
