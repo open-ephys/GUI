@@ -103,7 +103,8 @@ void EventBroadcaster::handleEvent(int eventType, MidiMessage& event, int sample
     switch (type) {
         case TTL:
         case MESSAGE:
-        case BINARY_MSG: {
+        case BINARY_MSG:
+        case TTL_WORD: {
             uint8_t nodeID = buffer[1];
             timestamp = timestamps.at(nodeID) + samplePosition;
             break;

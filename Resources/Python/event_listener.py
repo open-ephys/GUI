@@ -15,6 +15,7 @@ TTL = 3
 SPIKE = 4
 MESSAGE = 5
 BINARY_MSG = 6
+TTL_WORD = 7
 
 
 def unpacker(format, *fields):
@@ -22,6 +23,10 @@ def unpacker(format, *fields):
 
     def unpack(data):
         values = s.unpack(data[:s.size])
+        if (len(values) == 1) and (not fields):
+            assert len(data) == s.size
+            return values[0], ''
+        assert len(values) <= len(fields)
         return (OrderedDict(izip(fields, chain(values, repeat(None)))),
                 data[s.size:])
 
@@ -53,12 +58,15 @@ unpack_spike = unpacker('<2q2x5H3B2fH',
                         )
 
 
+unpack_ttl_word = unpacker('<Q')
+
+
 def run(hostname='localhost', port=5557):
     with zmq.Context() as ctx:
         with ctx.socket(zmq.SUB) as sock:
             sock.connect('tcp://%s:%d' % (hostname, port))
 
-            for etype in (TTL, SPIKE, MESSAGE):
+            for etype in (TTL, SPIKE, MESSAGE, TTL_WORD):
                 sock.setsockopt(zmq.SUBSCRIBE, chr(etype).encode('utf-8'))
 
             while True:
@@ -87,6 +95,11 @@ def run(hostname='localhost', port=5557):
                         elif etype == MESSAGE:
                             msg, body = body.decode('utf-8'), ''
                             print('%g: Message: %s' % (timestamp_seconds, msg))
+
+                        elif etype == TTL_WORD:
+                            word, body = unpack_ttl_word(body)
+                            print('%g: TTL Word: %d (%s)' %
+                                  (timestamp_seconds, word, bin(word)))
 
 
                     # Check that all data was consumed
