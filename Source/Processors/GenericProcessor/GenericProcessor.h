@@ -373,7 +373,8 @@ public:
         TTL = 3,
         SPIKE = 4,
         MESSAGE = 5,
-        BINARY_MSG = 6
+        BINARY_MSG = 6,
+        TTL_WORD = 7
     };
 
     /** Variable used to orchestrate saving the ProcessorGraph. */

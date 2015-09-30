@@ -398,6 +398,8 @@ void SourceNode::process(AudioSampleBuffer& buffer,
     // fill event buffer
     for (int i = 0; i < nSamples; i++)
     {
+        bool eventChannelStateChanged = false;
+        
         for (int c = 0; c < numEventChannels; c++)
         {
             int state = eventCodeBuffer[i] & (1 << c);
@@ -439,7 +441,20 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                 }
 
                 eventChannelState[c] = state;
+                eventChannelStateChanged = true;
             }
+        }
+        
+        if (eventChannelStateChanged) {
+            uint64 word = eventCodeBuffer[i];
+            addEvent(events,    // MidiBuffer
+                     TTL_WORD,  // eventType
+                     i,         // sampleNum
+                     0,         // eventID
+                     0,         // eventChannel
+                     sizeof(word), // numBytes
+                     reinterpret_cast<uint8 *>(&word)  // data
+                     );
         }
     }
 
