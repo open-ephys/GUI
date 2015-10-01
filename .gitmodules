@@ -1,0 +1,3 @@
+[submodule "Libraries/oscpack"]
+	path = Libraries/oscpack
+	url = git@github.com:CINPLA/oscpack.git
