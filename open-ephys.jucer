@@ -40,15 +40,15 @@
         <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" extraLinkerFlags="-pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp -lzmq"
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" extraLinkerFlags="-pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp -lzmq -L/home/mikkel/apps/OE/open-ephys-GUI/Libraries/oscpack -loscpack"
                 extraCompilerFlags="-export-dynamic -g -pg -std=c++0x" extraDefs="ZEROMQ">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
-                       libraryPath="/usr/X11R6/lib/&#10;/usr/local/include&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial"
-                       headerPath="/usr/include/hdf5/serial"/>
+                       libraryPath="/usr/X11R6/lib/&#10;/usr/local/include&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial&#10;/home/mikkel/apps/OE/open-ephys-GUI/Libraries/oscpack"
+                       headerPath="/usr/include/hdf5/serial&#10;/home/mikkel/apps/OE/open-ephys-GUI/Libraries/oscpack"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="open-ephys-release"
-                       libraryPath="/usr/X11R6/lib/&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial"
-                       headerPath="/usr/include/hdf5/serial"/>
+                       libraryPath="/usr/X11R6/lib/&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial&#10;/home/mikkel/apps/OE/open-ephys-GUI/Libraries/oscpack"
+                       headerPath="/usr/include/hdf5/serial&#10;/home/mikkel/apps/OE/open-ephys-GUI/Libraries/oscpack"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="JuceLibraryCode/modules"/>
@@ -295,6 +295,14 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <GROUP id="{3FCFBFDA-848D-6B59-5F37-E3D1F43D54DF}" name="OSCNode">
+          <FILE id="imRe2j" name="ReceiveOSC.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.cpp"/>
+          <FILE id="SeWdUl" name="ReceiveOSC.h" compile="0" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.h"/>
+          <FILE id="g5oo8R" name="OSCEditor.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/OSCEditor.cpp"/>
+          <FILE id="TdovvU" name="OSCEditor.h" compile="0" resource="0" file="Source/Processors/OSCNode/OSCEditor.h"/>
+          <FILE id="JnQOi1" name="OSCNode.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/OSCNode.cpp"/>
+          <FILE id="kXueJ2" name="OSCNode.h" compile="0" resource="0" file="Source/Processors/OSCNode/OSCNode.h"/>
+        </GROUP>
         <GROUP id="{6E059BEC-4A8F-BCDA-1F91-9B22C6CBF2E4}" name="Rectifier">
           <FILE id="oMFsRh" name="Rectifier.cpp" compile="1" resource="0" file="Source/Processors/Rectifier/Rectifier.cpp"/>
           <FILE id="NdIO5Q" name="Rectifier.h" compile="0" resource="0" file="Source/Processors/Rectifier/Rectifier.h"/>
