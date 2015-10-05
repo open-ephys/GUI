@@ -59,35 +59,9 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
 {
     desiredWidth = 180;
 
-    pipelineSelectorA = new ImageButton("Pipeline A");
-
-    Image normalImageA = ImageCache::getFromMemory(BinaryData::PipelineB01_png, BinaryData::PipelineB01_pngSize);
-    Image downImageA = ImageCache::getFromMemory(BinaryData::PipelineA01_png, BinaryData::PipelineA01_pngSize);
-    Image normalImageB = ImageCache::getFromMemory(BinaryData::PipelineA02_png, BinaryData::PipelineA02_pngSize);
-    Image downImageB = ImageCache::getFromMemory(BinaryData::PipelineB02_png, BinaryData::PipelineB02_pngSize);
-
-    pipelineSelectorA->setImages(true, true, true,
-                                 normalImageA, 1.0f, Colours::white.withAlpha(0.0f),
-                                 normalImageA, 1.0f, Colours::black.withAlpha(0.0f),
-                                 downImageA, 1.0f, Colours::white.withAlpha(0.0f));
-
-
-    pipelineSelectorA->addListener(this);
-    pipelineSelectorA->setBounds(-10,25,95,50);
-    pipelineSelectorA->setToggleState(true, dontSendNotification);
-    addAndMakeVisible(pipelineSelectorA);
-
-    pipelineSelectorB = new ImageButton("Pipeline B");
-
-    pipelineSelectorB->setImages(true, true, true,
-                                 normalImageB, 1.0f, Colours::white.withAlpha(0.0f),
-                                 normalImageB, 1.0f, Colours::black.withAlpha(0.0f),
-                                 downImageB, 1.0f, Colours::white.withAlpha(0.0f));
-
-    pipelineSelectorB->addListener(this);
-    pipelineSelectorB->setBounds(-10,75,95,50);
-    pipelineSelectorB->setToggleState(false, dontSendNotification);
-    addAndMakeVisible(pipelineSelectorB);
+    positionLabel = new Label("PositionLabel", "(X, Y)");
+    positionLabel->setBounds(30,25,140,20);
+    addAndMakeVisible(positionLabel);
 
 }
 
@@ -188,6 +162,13 @@ Array<GenericEditor*> OSCEditor::getConnectedEditors()
 
     return editors;
 
+}
+
+void OSCEditor::setPositionLabel(float x, float y)
+{
+	String text = "(" + String(x) + ", " + String(y) + ")";
+
+	positionLabel->setText(text, juce::sendNotificationSync);
 }
 
 void OSCEditor::switchDest()

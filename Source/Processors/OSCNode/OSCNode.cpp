@@ -27,8 +27,12 @@
 #include "../../UI/EditorViewport.h"
 
 OSCNode::OSCNode()
-    : GenericProcessor("OSCNode"),
-      destNodeA(0), destNodeB(0), activePath(0)
+    : GenericProcessor("OSCNode")
+    ,  destNodeA(0), destNodeB(0), activePath(0)
+	, timestamp(0)
+	, previousEventTime(0)
+	, eventId(1)
+	, osc(this)
 {
     sendSampleCount = false;
 }
@@ -45,6 +49,54 @@ AudioProcessorEditor* OSCNode::createEditor()
 
     //std::cout << "Creating editor." << std::endl;
     return editor;
+}
+
+int OSCNode::getNumEventChannels()
+{
+    return 1;
+}
+
+void OSCNode::updateSettings()
+{
+    eventChannels[0]->type = EVENT_CHANNEL;
+}
+
+void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events) 
+{    
+	setTimestamp(events,CoreServices::getGlobalTimestamp());
+    checkForEvents(events);
+
+	int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
+
+    //std::cout << *buffer.getSampleData(0, 0) << std::endl;
+    lock.enter();
+	if(eventId == 0) {
+		eventId = 1;
+	} else {
+		eventId = 0;
+	}
+	if(m_positionIsUpdated) {
+		DBG("Fire!");
+		DBG(String(eventId));
+		addEvent(events, // MidiBuffer
+						 TTL,    // eventType
+						 1,      // sampleNum
+						 eventId,	     // eventID
+						 0		 // eventChannel
+						);
+		previousEventTime = timestamp;
+		m_positionIsUpdated = false;
+	}
+    timestamp += samplesNeeded;
+    setNumSamples(events, samplesNeeded);
+	lock.exit();
+}
+
+void OSCNode::receivePosition(float x, float y) 
+{
+	m_positionIsUpdated = true;
+	m_x = x;
+	m_y = y;
 }
 
 bool OSCNode::isReady()

@@ -53,9 +53,6 @@ public:
 
     AudioProcessorEditor* createEditor();
 
-    /** Nothing happens here, because OSCNodes are not part of the ProcessorGraph. */
-    void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages) {}
-
     bool isSource()
     {
         DBG("Is source!");
@@ -69,16 +66,31 @@ public:
     void setOSCNodeDestNode(GenericProcessor* dn);
 
     void setPathToProcessor(GenericProcessor* processor);
+
+	void receivePosition(float x, float y);
 //    void process(AudioSampleBuffer& buffer, MidiBuffer& events);
 
     int getPath();
 
+	void process(AudioSampleBuffer&, MidiBuffer&);
+    int getNumEventChannels();
+	void updateSettings();
+
 private:
+
+    int64 timestamp;
+	int64 previousEventTime;
+	juce::uint8 eventId;
 
     GenericProcessor* destNodeA;
     GenericProcessor* destNodeB;
     int activePath;
     ReceiveOSC osc;
+    CriticalSection lock;
+
+	float m_x;
+	float m_y;
+	bool m_positionIsUpdated;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCNode);
 

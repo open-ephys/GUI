@@ -21,6 +21,7 @@
 #include "osc/OscPacketListener.h"
 // OSC shared includes
 #include "ip/UdpSocket.h"
+class OSCNode;
 
 #define PORT 7000
 class ReceiveOSC: public osc::OscPacketListener,
@@ -28,7 +29,7 @@ class ReceiveOSC: public osc::OscPacketListener,
 {
 public:
     // Constructor
-    ReceiveOSC();//, MainContentComponent* const owner); //from mlrVSTAudioProcessor * const owner);
+    ReceiveOSC(OSCNode* node);//, MainContentComponent* const owner); //from mlrVSTAudioProcessor * const owner);
     ~ReceiveOSC()
     {
         // stop the OSC Listener thread running
@@ -54,6 +55,7 @@ public:
 private:
     int incomingPort;
     UdpListeningReceiveSocket s;
+	OSCNode* processor;
 
 protected:
     //this is our main processing function

@@ -11,12 +11,14 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "ReceiveOSC.h"
 #include "OSCEditor.h"
+#include "OSCNode.h"
 
-ReceiveOSC::ReceiveOSC():
-    Thread("OscListener Thread"),
-    incomingPort(PORT),
-    s(IpEndpointName("localhost",
+ReceiveOSC::ReceiveOSC(OSCNode *node)
+	: Thread("OscListener Thread")
+    , incomingPort(PORT)
+    , s(IpEndpointName("localhost",
                      incomingPort), this)
+	, processor(node)
 {
 
     DBG("Now called the Constructor");
@@ -28,21 +30,21 @@ void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
 {
     DBG("Process message!");
     DBG(m.AddressPattern());
-//    DBG(m.ArgumentStream());
     (void) remoteEndpoint; // suppress unused parameter warning
     try{
         // example of parsing single messages. osc::OsckPacketListener
         // handles the bundle traversal.
-        if( std::strcmp( m.AddressPattern(), "/a_float" ) == 0 ) {
+        if( std::strcmp( m.AddressPattern(), "/bonsai" ) == 0 ) {
             // example #1 -- argument stream interface
             osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
             osc::int32 intMessage;
             float floatMessage;
+            float floatMessage2;
             // const char *a4;
-            args >> floatMessage >> osc::EndMessage;
+			args >> floatMessage >> floatMessage2 >> osc::EndMessage;
             // args >>  intMessage >> floatMessage >> a4 >> osc::EndMessage;
-            DBG("received '/test1' message with arguments: " << intMessage << " " << floatMessage);
-
+            DBG("received message with arguments: " << floatMessage << " " << floatMessage2);
+			processor->receivePosition(floatMessage, floatMessage2);
             //                        customOSCCall.setFloatTextField(floatMessage);
 
             // MainContentComponent::setIntTextField(intMessage);

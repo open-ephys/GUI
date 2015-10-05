@@ -46,6 +46,7 @@ public:
 
     void switchDest(int);
     void switchDest();
+	void setPositionLabel(float x, float y);
 
     void switchIO(int i);
 
@@ -54,6 +55,7 @@ public:
 
 
 private:
+    ScopedPointer<Label> positionLabel;
 
     ImageButton* pipelineSelectorA;
     ImageButton* pipelineSelectorB;
