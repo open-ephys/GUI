@@ -34,7 +34,7 @@ void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
     try{
         // example of parsing single messages. osc::OsckPacketListener
         // handles the bundle traversal.
-        if( std::strcmp( m.AddressPattern(), "/bonsai" ) == 0 ) {
+        if( std::strcmp( m.AddressPattern(), "/debug" ) == 0 ) {
             // example #1 -- argument stream interface
             osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
             osc::int32 intMessage;

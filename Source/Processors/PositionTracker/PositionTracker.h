@@ -1,0 +1,45 @@
+/*
+  ==============================================================================
+
+    PositionTracker.h
+    Created: 5 Oct 2015 11:34:58am
+    Author:  mikkel
+
+  ==============================================================================
+*/
+
+#ifndef POSITIONTRACKER_H_INCLUDED
+#define POSITIONTRACKER_H_INCLUDED
+
+#include "../../../JuceLibraryCode/JuceHeader.h"
+#include "../GenericProcessor/GenericProcessor.h"
+
+//==============================================================================
+/*
+*/
+class PositionTracker : public GenericProcessor
+{
+public:
+    PositionTracker();
+    ~PositionTracker();
+
+    AudioProcessorEditor* createEditor();
+
+    virtual void process(AudioSampleBuffer& buffer, MidiBuffer& events);
+    virtual void handleEvent(int eventType, MidiMessage &event, int samplePosition);
+
+    float x() const;
+    float y() const;
+
+    void clearPositionUpdated();
+    bool positionIsUpdated() const;
+private:
+    float m_x;
+    float m_y;
+    bool m_positionIsUpdated;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionTracker)
+};
+
+
+#endif  // POSITIONTRACKER_H_INCLUDED

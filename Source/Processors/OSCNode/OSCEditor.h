@@ -28,37 +28,14 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../Editors/GenericEditor.h"
 
-/**
-
-  User interface for the OSCNode utility.
-
-  @see OSCNode
-
-*/
-
 class OSCEditor : public GenericEditor
 {
 public:
     OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~OSCEditor();
 
-    void buttonEvent(Button* button);
-
-    void switchDest(int);
-    void switchDest();
-	void setPositionLabel(float x, float y);
-
-    void switchIO(int i);
-
-    int getPathForEditor(GenericEditor* editor);
-    Array<GenericEditor*> getConnectedEditors();
-
-
 private:
     ScopedPointer<Label> positionLabel;
-
-    ImageButton* pipelineSelectorA;
-    ImageButton* pipelineSelectorB;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCEditor);
 

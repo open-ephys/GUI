@@ -295,6 +295,20 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <GROUP id="{DA378349-D12C-5AA8-E5AD-CAEDA41011C5}" name="PositionTracker">
+          <FILE id="LyyBWE" name="PositionTrackerCanvas.cpp" compile="1" resource="0"
+                file="Source/Processors/PositionTracker/PositionTrackerCanvas.cpp"/>
+          <FILE id="C23S9q" name="PositionTrackerCanvas.h" compile="0" resource="0"
+                file="Source/Processors/PositionTracker/PositionTrackerCanvas.h"/>
+          <FILE id="PR2CQ1" name="PositionTrackerEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/PositionTracker/PositionTrackerEditor.cpp"/>
+          <FILE id="THS6Jt" name="PositionTrackerEditor.h" compile="0" resource="0"
+                file="Source/Processors/PositionTracker/PositionTrackerEditor.h"/>
+          <FILE id="WT88IF" name="PositionTracker.cpp" compile="1" resource="0"
+                file="Source/Processors/PositionTracker/PositionTracker.cpp"/>
+          <FILE id="BgpFVx" name="PositionTracker.h" compile="0" resource="0"
+                file="Source/Processors/PositionTracker/PositionTracker.h"/>
+        </GROUP>
         <GROUP id="{3FCFBFDA-848D-6B59-5F37-E3D1F43D54DF}" name="OSCNode">
           <FILE id="imRe2j" name="ReceiveOSC.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.cpp"/>
           <FILE id="SeWdUl" name="ReceiveOSC.h" compile="0" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.h"/>

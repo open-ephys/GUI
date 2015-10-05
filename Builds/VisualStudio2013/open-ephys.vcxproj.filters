@@ -32,6 +32,9 @@
     <Filter Include="open-ephys\Source\Processors">
       <UniqueIdentifier>{3DDEC88C-BAA5-2DDA-A59F-0FB74070AB82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="open-ephys\Source\Processors\PositionTracker">
+      <UniqueIdentifier>{C183B92D-2FF4-0469-4D0D-0AB606F9A236}</UniqueIdentifier>
+    </Filter>
     <Filter Include="open-ephys\Source\Processors\OSCNode">
       <UniqueIdentifier>{54AB8449-EDC6-626B-E7B9-6797FCCD99C2}</UniqueIdentifier>
     </Filter>
@@ -456,6 +459,15 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\PositionTracker\PositionTrackerCanvas.cpp">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\PositionTracker\PositionTrackerEditor.cpp">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\PositionTracker\PositionTracker.cpp">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\OSCNode\ReceiveOSC.cpp">
       <Filter>open-ephys\Source\Processors\OSCNode</Filter>
@@ -2063,6 +2075,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\PositionTracker\PositionTrackerCanvas.h">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\PositionTracker\PositionTrackerEditor.h">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\PositionTracker\PositionTracker.h">
+      <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\OSCNode\ReceiveOSC.h">
       <Filter>open-ephys\Source\Processors\OSCNode</Filter>

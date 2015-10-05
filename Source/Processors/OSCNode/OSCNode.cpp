@@ -28,11 +28,13 @@
 
 OSCNode::OSCNode()
     : GenericProcessor("OSCNode")
-    ,  destNodeA(0), destNodeB(0), activePath(0)
-	, timestamp(0)
-	, previousEventTime(0)
-	, eventId(1)
-	, osc(this)
+    , timestamp(0)
+    , previousEventTime(0)
+    , eventId(1)
+    , osc(this)
+    , m_x(0.0)
+    , m_y(0.0)
+    , m_positionIsUpdated(true)
 {
     sendSampleCount = false;
 }
@@ -45,10 +47,12 @@ OSCNode::~OSCNode()
 AudioProcessorEditor* OSCNode::createEditor()
 {
     editor = new OSCEditor(this, true);
-    //tEditor(editor);
-
-    //std::cout << "Creating editor." << std::endl;
     return editor;
+}
+
+bool OSCNode::isSource()
+{
+    return true;
 }
 
 int OSCNode::getNumEventChannels()
@@ -63,159 +67,47 @@ void OSCNode::updateSettings()
 
 void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events) 
 {    
-	setTimestamp(events,CoreServices::getGlobalTimestamp());
+    setTimestamp(events,CoreServices::getGlobalTimestamp());
     checkForEvents(events);
 
-	int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
+    int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
 
     //std::cout << *buffer.getSampleData(0, 0) << std::endl;
     lock.enter();
-	if(eventId == 0) {
-		eventId = 1;
-	} else {
-		eventId = 0;
-	}
-	if(m_positionIsUpdated) {
-		DBG("Fire!");
-		DBG(String(eventId));
-		addEvent(events, // MidiBuffer
-						 TTL,    // eventType
-						 1,      // sampleNum
-						 eventId,	     // eventID
-						 0		 // eventChannel
-						);
-		previousEventTime = timestamp;
-		m_positionIsUpdated = false;
-	}
+
+    int argumentCount = 2;
+    float* message = new float[argumentCount];
+    message[0] = m_x;
+    message[1] = m_y;
+
+    if(m_positionIsUpdated) {
+        addEvent(events, // MidiBuffer
+                 MESSAGE,    // eventType
+                 0,      // sampleNum
+                 eventId,	     // eventID
+                 0,		 // eventChannel
+                 sizeof(float)*argumentCount,
+                 (uint8*)message
+                 );
+        previousEventTime = timestamp;
+        m_positionIsUpdated = false;
+    }
     timestamp += samplesNeeded;
     setNumSamples(events, samplesNeeded);
-	lock.exit();
+    lock.exit();
+    delete message;
 }
 
 void OSCNode::receivePosition(float x, float y) 
 {
-	m_positionIsUpdated = true;
-	m_x = x;
-	m_y = y;
+    m_positionIsUpdated = true;
+    m_x = x;
+    m_y = y;
 }
 
 bool OSCNode::isReady()
 {
-    DBG("Is ready!");
     osc.startThread();
     return true;
 }
 
-void OSCNode::setPathToProcessor(GenericProcessor* p)
-{
-
-    if (destNodeA == p)
-    {
-        switchIO(0);
-
-    }
-    else if (destNodeB == p)
-    {
-        switchIO(1);
-    }
-
-
-}
-
-void OSCNode::setOSCNodeDestNode(GenericProcessor* dn)
-{
-    destNode = dn;
-
-    if (activePath == 0)
-    {
-        std::cout << "Setting destination node A." << std::endl;
-        destNodeA = dn;
-    }
-    else
-    {
-        destNodeB = dn;
-        std::cout << "Setting destination node B." << std::endl;
-
-    }
-}
-
-void OSCNode::switchIO(int destNum)
-{
-
-    //std::cout << "Switching to dest number " << destNum << std::endl;
-
-    activePath = destNum;
-
-    if (destNum == 0)
-    {
-        destNode = destNodeA;
-        // std::cout << "Dest node: " << getDestNode() << std::endl;
-    }
-    else
-    {
-        destNode = destNodeB;
-        // std::cout << "Dest node: " << getDestNode() << std::endl;
-    }
-
-    // getEditorViewport()->makeEditorVisible(getEditor(), false);
-
-}
-
-void OSCNode::switchIO()
-{
-
-    //std::cout << "OSCNode switching source." << std::endl;
-
-    if (activePath == 0)
-    {
-        activePath = 1;
-        destNode = destNodeB;
-    }
-    else
-    {
-        activePath = 0;
-        destNode = destNodeA;
-    }
-
-}
-
-int OSCNode::getPath()
-{
-    return activePath;
-}
-
-//void OSCNode::process(AudioSampleBuffer&, MidiBuffer& events)
-//{
-//    int bytesAvailable = 0;
-
-//    if (bytesAvailable == OF_SERIAL_ERROR)
-//    {
-//        // ToDo: Properly warn about problem here!
-//        AlertWindow::showMessageBoxAsync(AlertWindow::WarningIcon, "SerialInput device access error!", "Could not access serial device.");
-//        return;
-//    }
-
-//    if (bytesAvailable > 0)
-//    {
-
-//        unsigned char buffer[10000];
-//        int bytesRead = serial.readBytes(buffer, bytesAvailable);
-
-//        if (bytesRead > 0)
-//        {
-//            addEvent(events,    // MidiBuffer
-//                     BINARY_MSG,    // eventType
-//                     0,         // sampleNum
-//                     nodeId,    // eventID
-//                     0,         // eventChannel
-//                     bytesRead, // numBytes
-//                     buffer);   // data
-//        }
-//        else if (bytesRead < 0)
-//        {
-//            // ToDo: Properly warn about problem here!
-//            AlertWindow::showMessageBoxAsync(AlertWindow::WarningIcon, "SerialInput device read error!", "Could not read serial input, even though data should be available.");
-//            return;
-//        }
-//    }
-//}

@@ -55,6 +55,9 @@ OBJECTS := \
   $(OBJDIR)/AccessClass_de9602d5.o \
   $(OBJDIR)/PracticalSocket_2574ecc8.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/PositionTrackerCanvas_65702c22.o \
+  $(OBJDIR)/PositionTrackerEditor_b173c5b7.o \
+  $(OBJDIR)/PositionTracker_95cba26a.o \
   $(OBJDIR)/ReceiveOSC_56b88099.o \
   $(OBJDIR)/OSCEditor_c5c65639.o \
   $(OBJDIR)/OSCNode_f452ca0e.o \
@@ -228,6 +231,21 @@ $(OBJDIR)/PracticalSocket_2574ecc8.o: ../../Source/Network/PracticalSocket.cpp
 $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PositionTrackerCanvas_65702c22.o: ../../Source/Processors/PositionTracker/PositionTrackerCanvas.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PositionTrackerCanvas.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PositionTrackerEditor_b173c5b7.o: ../../Source/Processors/PositionTracker/PositionTrackerEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PositionTrackerEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PositionTracker_95cba26a.o: ../../Source/Processors/PositionTracker/PositionTracker.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling PositionTracker.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ReceiveOSC_56b88099.o: ../../Source/Processors/OSCNode/ReceiveOSC.cpp
