@@ -29,29 +29,42 @@ PositionTrackerCanvas::PositionTrackerCanvas(PositionTracker *positionTracker)
 
 PositionTrackerCanvas::~PositionTrackerCanvas()
 {
+    TopLevelWindow::getTopLevelWindow(0)->removeKeyListener(this);
 }
 
 void PositionTrackerCanvas::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);   // clear the background
+    g.setColour(Colour(0,18,43)); //background color
+    g.fillRect(0, 0, getWidth(), getHeight());
 
-    g.setColour (Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+    g.setGradientFill(ColourGradient(Colour(50,50,50),0,0,
+                                     Colour(25,25,25),0,30,
+                                     false));
 
-    g.setColour (Colours::lightblue);
-    g.setFont (14.0f);
-    g.drawText ("PositionTrackerCanvas", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
+    g.fillRect(0, 0, getWidth(), 30);
 
+    g.setColour(Colours::black);
+
+    float x_prev = m_x;
+    float y_prev = m_y;
     for(auto position : m_positions) {
         float x = position.x - 5.0;
         float y = position.y - 5.0;
-        g.drawRect(x, y, 10.0, 10.0, 1.0);
+        g.drawLine(x_prev, y_prev, x, y, 1.0f);
+
+        g.setFont(Font("Default", 16, Font::plain));
+
+        g.setColour(Colour(100,100,100));
+        x_prev = x;
+        y_prev = y;
+
     }
 }
 
 void PositionTrackerCanvas::resized()
 {
+//    refresh();
+
 }
 
 
