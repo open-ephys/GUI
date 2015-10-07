@@ -14,13 +14,13 @@
 #include "../../JuceLibraryCode/JuceHeader.h"
 
 // OSC send includes
-#include "osc/OscOutboundPacketStream.h"
-#include "ip/IpEndpointName.h"
+#include <oscpack/osc/OscOutboundPacketStream.h>
+#include <oscpack/ip/IpEndpointName.h>
 // OSC receive includes
-#include "osc/OscReceivedElements.h"
-#include "osc/OscPacketListener.h"
+#include <oscpack/osc/OscReceivedElements.h>
+#include <oscpack/osc/OscPacketListener.h>
 // OSC shared includes
-#include "ip/UdpSocket.h"
+#include <oscpack/ip/UdpSocket.h>
 class OSCNode;
 
 #define PORT 7000
