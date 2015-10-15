@@ -63,13 +63,14 @@ void PositionTrackerCanvas::paint (Graphics& g)
 
 void PositionTrackerCanvas::resized()
 {
-//    refresh();
+    refresh();
 
 }
 
 
 bool PositionTrackerCanvas::keyPressed(const KeyPress &key, Component *originatingComponent)
 {
+	return false;
 }
 
 void PositionTrackerCanvas::buttonClicked(Button *)

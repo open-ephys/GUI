@@ -44,7 +44,11 @@ void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
 			args >> floatMessage >> floatMessage2 >> osc::EndMessage;
             // args >>  intMessage >> floatMessage >> a4 >> osc::EndMessage;
             DBG("received message with arguments: " << floatMessage << " " << floatMessage2);
-			processor->receivePosition(floatMessage, floatMessage2);
+
+			// Check that numbers are valid numbers and not nans or infs and stuff
+			if(floatMessage == floatMessage && floatMessage2 == floatMessage2) {
+				processor->receivePosition(floatMessage, floatMessage2);
+			}
             //                        customOSCCall.setFloatTextField(floatMessage);
 
             // MainContentComponent::setIntTextField(intMessage);
