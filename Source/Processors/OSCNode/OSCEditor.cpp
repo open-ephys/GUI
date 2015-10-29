@@ -32,13 +32,59 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
 {
     desiredWidth = 180;
 
-    positionLabel = new Label("PositionLabel", "(X, Y)");
-    positionLabel->setBounds(30,25,140,20);
-    addAndMakeVisible(positionLabel);
+    adrLabel = new Label("Address", "Address:");
+    adrLabel->setBounds(10,80,140,25);
+    addAndMakeVisible(adrLabel);
 
+    String defaultAddress = "/red";
+    labelAdr = new Label("Address", defaultAddress);
+    labelAdr->setBounds(80,85,80,18);
+    labelAdr->setFont(Font("Default", 15, Font::plain));
+    labelAdr->setColour(Label::textColourId, Colours::white);
+    labelAdr->setColour(Label::backgroundColourId, Colours::grey);
+    labelAdr->setEditable(true);
+    labelAdr->addListener(this);
+    addAndMakeVisible(labelAdr);
+    OSCNode *p= (OSCNode *)getProcessor();
+    p->setAddress(defaultAddress);
+
+    urlLabel = new Label("Port", "Port:");
+    urlLabel->setBounds(10,40,140,25);
+    addAndMakeVisible(urlLabel);
+
+    String defaultPort = "5005";
+    labelPort = new Label("Port", defaultPort);
+    labelPort->setBounds(80,45,80,18);
+    labelPort->setFont(Font("Default", 15, Font::plain));
+    labelPort->setColour(Label::textColourId, Colours::white);
+    labelPort->setColour(Label::backgroundColourId, Colours::grey);
+    labelPort->setEditable(true);
+    labelPort->addListener(this);
+    addAndMakeVisible(labelPort);
 }
 
 OSCEditor::~OSCEditor()
 {
-    deleteAllChildren();
+    // TODO should we delete all children, check JUCE docs
+    // PS: Causes segfault if we do right now
+//    deleteAllChildren();
 }
+
+void OSCEditor::labelTextChanged(Label *label)
+{
+    if (label == labelAdr)
+    {
+       Value val = label->getTextValue();
+
+        OSCNode *p= (OSCNode *)getProcessor();
+        p->setAddress(val.getValue());
+    }
+    if (label == labelPort)
+    {
+       Value val = label->getTextValue();
+
+        OSCNode *p= (OSCNode *)getProcessor();
+        p->setPort(val.getValue());
+    }
+}
+

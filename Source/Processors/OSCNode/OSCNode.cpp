@@ -65,6 +65,26 @@ void OSCNode::updateSettings()
     eventChannels[0]->type = EVENT_CHANNEL;
 }
 
+void OSCNode::setAddress(String address)
+{
+    m_address = address;
+}
+
+String OSCNode::address()
+{
+    return m_address;
+}
+
+void OSCNode::setPort(int port)
+{
+    m_port = port;
+}
+
+int OSCNode::port()
+{
+    return m_port;
+}
+
 void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events) 
 {    
     setTimestamp(events,CoreServices::getGlobalTimestamp());

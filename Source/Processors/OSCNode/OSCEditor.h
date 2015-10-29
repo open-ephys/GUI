@@ -28,7 +28,7 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../Editors/GenericEditor.h"
 
-class OSCEditor : public GenericEditor
+class OSCEditor : public GenericEditor,public Label::Listener
 {
 public:
     OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
@@ -36,9 +36,16 @@ public:
 
 private:
     ScopedPointer<Label> positionLabel;
-
+    ScopedPointer<Label> labelPort;
+    ScopedPointer<Label> urlLabel;
+    ScopedPointer<Label> labelAdr;
+    ScopedPointer<Label> adrLabel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCEditor);
 
+
+    // Listener interface
+public:
+    virtual void labelTextChanged(Label *labelThatHasChanged) override;
 };
 
 

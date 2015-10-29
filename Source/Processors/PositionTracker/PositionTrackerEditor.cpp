@@ -17,6 +17,7 @@
 PositionTrackerEditor::PositionTrackerEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
     : VisualizerEditor(parentNode, useDefaultParameterEditors)
 {
+    tabText = "Tracking";
     desiredWidth = 180;
 }
 

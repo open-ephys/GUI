@@ -47,6 +47,10 @@ public:
     void process(AudioSampleBuffer&, MidiBuffer&);
     int getNumEventChannels();
     void updateSettings();
+    void setAddress(String address);
+    String address();
+    void setPort(int port);
+    int port();
 
 private:
 
@@ -60,6 +64,8 @@ private:
     float m_x;
     float m_y;
     bool m_positionIsUpdated;
+    String m_address;
+    int m_port;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCNode);
 

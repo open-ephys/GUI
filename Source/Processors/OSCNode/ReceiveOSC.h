@@ -23,7 +23,7 @@
 #include <oscpack/ip/UdpSocket.h>
 class OSCNode;
 
-#define PORT 7000
+#define PORT 5005
 class ReceiveOSC: public osc::OscPacketListener,
         public Thread
 {
@@ -44,7 +44,6 @@ public:
     // s.AsynchronousBreak() as is done in the destructor
     void run()
     {
-        DBG("calling run");
         s.Run();
     }
 
@@ -55,7 +54,9 @@ public:
 private:
     int incomingPort;
     UdpListeningReceiveSocket s;
-	OSCNode* processor;
+    OSCNode* processor;
+    String m_address;
+    String m_port;
 
 protected:
     //this is our main processing function

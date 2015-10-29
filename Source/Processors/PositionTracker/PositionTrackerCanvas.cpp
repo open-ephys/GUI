@@ -48,8 +48,8 @@ void PositionTrackerCanvas::paint (Graphics& g)
     float x_prev = m_x;
     float y_prev = m_y;
     for(auto position : m_positions) {
-        float x = position.x - 5.0;
-        float y = position.y - 5.0;
+        float x = getWidth()*position.x;
+        float y = getHeight()*position.y;
         g.drawLine(x_prev, y_prev, x, y, 1.0f);
 
         g.setFont(Font("Default", 16, Font::plain));

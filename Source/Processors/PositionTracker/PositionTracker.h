@@ -33,6 +33,9 @@ public:
 
     void clearPositionUpdated();
     bool positionIsUpdated() const;
+
+    bool isSink(); //get the color correct
+
 private:
     float m_x;
     float m_y;
@@ -40,6 +43,11 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionTracker)
 };
+
+inline bool PositionTracker::isSink()
+{
+    return true;
+}
 
 
 #endif  // POSITIONTRACKER_H_INCLUDED
