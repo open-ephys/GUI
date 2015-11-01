@@ -32,6 +32,8 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
 {
     desiredWidth = 180;
 
+    OSCNode *processor = (OSCNode *)getProcessor();
+
     adrLabel = new Label("Address", "Address:");
     adrLabel->setBounds(10,80,140,25);
     addAndMakeVisible(adrLabel);
@@ -45,15 +47,14 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
     labelAdr->setEditable(true);
     labelAdr->addListener(this);
     addAndMakeVisible(labelAdr);
-    OSCNode *p= (OSCNode *)getProcessor();
-    p->setAddress(defaultAddress);
+    processor->setAddress(defaultAddress);
 
     urlLabel = new Label("Port", "Port:");
     urlLabel->setBounds(10,40,140,25);
     addAndMakeVisible(urlLabel);
 
-    String defaultPort = "5005";
-    labelPort = new Label("Port", defaultPort);
+    int defaultPort = 5005;
+    labelPort = new Label("Port", String(defaultPort));
     labelPort->setBounds(80,45,80,18);
     labelPort->setFont(Font("Default", 15, Font::plain));
     labelPort->setColour(Label::textColourId, Colours::white);
@@ -61,6 +62,7 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
     labelPort->setEditable(true);
     labelPort->addListener(this);
     addAndMakeVisible(labelPort);
+    processor->setPort(defaultPort);
 }
 
 OSCEditor::~OSCEditor()

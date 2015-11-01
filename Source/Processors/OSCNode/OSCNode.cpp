@@ -28,20 +28,15 @@
 
 OSCNode::OSCNode()
     : GenericProcessor("OSCNode")
-    , timestamp(0)
-    , previousEventTime(0)
-    , eventId(1)
-    , osc(this)
-    , m_x(0.0)
-    , m_y(0.0)
-    , m_positionIsUpdated(true)
 {
     sendSampleCount = false;
+    ReceiveOSC::getInstance(m_port)->addProcessor(this);
 }
 
 OSCNode::~OSCNode()
 {
-
+    ReceiveOSC::getInstance(m_port)->removeProcessor(this);
+    ReceiveOSC::getInstance(0, true);
 }
 
 AudioProcessorEditor* OSCNode::createEditor()
@@ -77,7 +72,9 @@ String OSCNode::address()
 
 void OSCNode::setPort(int port)
 {
+    ReceiveOSC::getInstance(m_port)->removeProcessor(this);
     m_port = port;
+    ReceiveOSC::getInstance(port)->addProcessor(this);
 }
 
 int OSCNode::port()
@@ -127,7 +124,6 @@ void OSCNode::receivePosition(float x, float y)
 
 bool OSCNode::isReady()
 {
-    osc.startThread();
     return true;
 }
 

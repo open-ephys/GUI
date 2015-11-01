@@ -13,44 +13,32 @@
 #include "OSCEditor.h"
 #include "OSCNode.h"
 
-ReceiveOSC::ReceiveOSC(OSCNode *node)
-    : Thread("OscListener Thread")
-    , incomingPort(PORT)
-    , s(IpEndpointName("localhost",
-                     incomingPort), this)
-    , processor(node)
-{
-
-    DBG("Now called the Constructor");
-}
-
-
 void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
                                 const IpEndpointName& remoteEndpoint)
 {
-    m_address = processor->address();
-//    DBG("Process message!");
-//    DBG(m.AddressPattern());
     (void) remoteEndpoint; // suppress unused parameter warning
+    DBG("Received message!");
+    DBG(m.AddressPattern());
     try{
         // example of parsing single messages. osc::OsckPacketListener
         // handles the bundle traversal.
-        if( std::strcmp( m.AddressPattern(), m_address.toStdString().c_str() ) == 0 ) {
-            // example #1 -- argument stream interface
-            osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
-            osc::int32 intMessage;
-            float floatMessage;
-            float floatMessage2;
-            args >> floatMessage >> floatMessage2 >> osc::EndMessage;
-//            DBG("received message with arguments: " << floatMessage << " " << floatMessage2);
+        for(OSCNode* processor : processors) {
+            String address = processor->address();
+            if( std::strcmp( m.AddressPattern(), address.toStdString().c_str() ) == 0 ) {
+                // example #1 -- argument stream interface
+                osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
+                float floatMessage;
+                float floatMessage2;
+                args >> floatMessage >> floatMessage2 >> osc::EndMessage;
+                DBG("received message with arguments: " << floatMessage << " " << floatMessage2);
 
-            // Check that numbers are valid numbers and not nans or infs and stuff
-            if(floatMessage == floatMessage && floatMessage2 == floatMessage2) {
-                processor->receivePosition(floatMessage, floatMessage2);
+                // Check that numbers are valid numbers and not nans or infs and stuff
+                if(floatMessage == floatMessage && floatMessage2 == floatMessage2) {
+                    processor->receivePosition(floatMessage, floatMessage2);
+                }
             }
-
         }
-    }catch( osc::Exception& e ){
+    } catch( osc::Exception& e ){
         // any parsing errors such as unexpected argument types, or
         // missing arguments get thrown as exceptions.
         DBG("error while parsing message: " << m.AddressPattern() << ": " << e.what() << "\n");
@@ -67,4 +55,30 @@ float ReceiveOSC::getFloatOSC()
 {
     float test = 2.19;
     return test;
+}
+
+void ReceiveOSC::addProcessor(OSCNode *processor)
+{
+    processors.push_back(processor);
+}
+
+void ReceiveOSC::removeProcessor(OSCNode *processor)
+{
+    processors.erase(std::remove(processors.begin(), processors.end(), processor), processors.end());
+}
+
+ReceiveOSC::ReceiveOSC(int port)
+    : Thread("OscListener Thread")
+    , incomingPort(port)
+    , s(IpEndpointName("localhost",
+                       incomingPort), this)
+{}
+
+ReceiveOSC::~ReceiveOSC()
+{
+    // stop the OSC Listener thread running
+    s.AsynchronousBreak();
+
+    // allow the thread 2 seconds to stop cleanly - should be plenty of time.
+    stopThread(2000);
 }

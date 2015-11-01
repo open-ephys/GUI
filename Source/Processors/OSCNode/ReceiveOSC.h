@@ -21,22 +21,44 @@
 #include <oscpack/osc/OscPacketListener.h>
 // OSC shared includes
 #include <oscpack/ip/UdpSocket.h>
+#include <unordered_map>
+#include <memory>
 class OSCNode;
 
-#define PORT 5005
+//#define PORT 5005
 class ReceiveOSC: public osc::OscPacketListener,
         public Thread
 {
 public:
-    // Constructor
-    ReceiveOSC(OSCNode* node);//, MainContentComponent* const owner); //from mlrVSTAudioProcessor * const owner);
-    ~ReceiveOSC()
-    {
-        // stop the OSC Listener thread running
-        s.AsynchronousBreak();
+    ReceiveOSC(int port);
+    ReceiveOSC(ReceiveOSC const&) = delete;
+    void operator=(ReceiveOSC const&) = delete;
+    ~ReceiveOSC();
 
-        // allow the thread 2 seconds to stop cleanly - should be plenty of time.
-        stopThread(2000);
+    static std::shared_ptr<ReceiveOSC> getInstance(int port, bool justDelete = false) {
+        // TODO Handle case where port cannot be assigned
+        static std::unordered_map<int, std::shared_ptr<ReceiveOSC>> instances;
+
+        std::vector<int> toDelete;
+        for(auto r : instances) {
+            if(r.first != port && r.second->processors.size() < 1) {
+                toDelete.push_back(r.first);
+            }
+        }
+        for(auto port : toDelete) {
+            instances.erase(port);
+        }
+        if(justDelete) {
+            // the function was invoked only to delete stale instances
+            return nullptr;
+        }
+        if(instances.count(port) < 1) {
+            instances[port] = std::make_shared<ReceiveOSC>(port);
+        }
+        if(!instances[port]->isThreadRunning()) {
+            instances[port]->startThread();
+        }
+        return instances[port];
     }
 
     // Start the oscpack OSC Listener Thread
@@ -44,19 +66,23 @@ public:
     // s.AsynchronousBreak() as is done in the destructor
     void run()
     {
+        DBG("Running thread");
         s.Run();
     }
 
     // getters
     int getIntOSC();
     float getFloatOSC();
-
+    void addProcessor(OSCNode *processor);
+    void removeProcessor(OSCNode *processor);
 private:
+
+
+
     int incomingPort;
     UdpListeningReceiveSocket s;
-    OSCNode* processor;
+    std::vector<OSCNode*> processors;
     String m_address;
-    String m_port;
 
 protected:
     //this is our main processing function
