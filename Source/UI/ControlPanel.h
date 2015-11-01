@@ -340,6 +340,24 @@ public:
     /** Sets the list of recently used directories for saving data. */
     void setRecentlyUsedFilenames(const StringArray& filenames);
 
+	/* Get recording state */
+	bool getRecordState();
+
+	/* Set new recording directory path */ 
+	void setRecordingDirectory(String);
+
+	/* Set prepend string */
+	void setPrependText(String);
+
+	/* Set append string */
+	void setAppendText(String);
+
+	/* Get current aquisition state */
+	bool getAcquisitionState();
+
+	/* Used to manually turn on/off data acquisition */
+	void setAcquisitionState(bool isRunning);
+
     /** Adds the RecordNode as a listener of the FilenameComponent
     (so it knows when the data directory has changed).*/
     void updateChildComponents();

@@ -115,3 +115,98 @@ void RecordControl::handleEvent(int eventType, MidiMessage& event, int)
     }
 
 }
+
+
+String RecordControl::interProcessorCommunication(String msg)
+{
+	String status;
+	StringArray inputs;
+
+	inputs.addTokens(msg, " ");
+
+	const MessageManagerLock mmLock;
+	if (String("StartAcquisition").compareIgnoreCase(inputs[0]) == 0)
+	{
+		if (AccessClass::getControlPanel()->getAcquisitionState())
+		{
+			/* Start data acquisition */
+			AccessClass::getControlPanel()->setAcquisitionState(true);
+		}
+		return String("OK");
+
+	} else 	if (String("StopAcquisition").compareIgnoreCase(inputs[0]) == 0)
+	{
+		if (AccessClass::getControlPanel()->getAcquisitionState())
+		{
+			/* Stop data acquisition */
+			AccessClass::getControlPanel()->setAcquisitionState(false);
+		}
+		return String("OK");
+
+	} else if (String("StartRecord").compareIgnoreCase(inputs[0]) == 0)
+	{
+		for (int i=1; i<inputs.size(); i++)
+		{
+			StringArray nameValuePair;
+			nameValuePair.addTokens(inputs[i], "=", "");
+
+			if (nameValuePair[0].compareIgnoreCase("CreateNewDateDirectory") == 0)
+			{
+				if (nameValuePair[1].compareIgnoreCase("1") == 0)
+				{
+					/* This will handle all UI stuff */
+					AccessClass::getControlPanel()->labelTextChanged(NULL);
+				}
+			}
+			else if (nameValuePair[0].compareIgnoreCase("RecordingDirectory") == 0)
+			{
+				/* This will send all notification events */
+				AccessClass::getControlPanel()->setRecordingDirectory(nameValuePair[1]);
+			}
+			else if (nameValuePair[0].compareIgnoreCase("PrependText") == 0)
+			{
+				AccessClass::getControlPanel()->setPrependText(nameValuePair[1]);
+			}
+			else if (nameValuePair[0].compareIgnoreCase("AppendText") == 0)
+			{
+				AccessClass::getControlPanel()->setAppendText(nameValuePair[1]);
+			}
+		}
+
+		AccessClass::getControlPanel()->setRecordState(true);
+
+		return String("OK");
+
+	} else if (String("StopRecord").compareIgnoreCase(inputs[0]) == 0)
+	{
+		bool stopAcquisition = false;
+		for (int i=1; i<inputs.size(); i++)
+		{
+			StringArray nameValuePair;
+			nameValuePair.addTokens(inputs[i], "=", "");
+
+			if (nameValuePair[0].compareIgnoreCase("StopAcquisition") == 0)
+			{
+				if (nameValuePair[1].compareIgnoreCase("1") == 0)
+				{
+					stopAcquisition = true;
+				}
+			}
+		}
+
+		/* This might be redundant if stopAcquisition is true */
+		AccessClass::getControlPanel()->setRecordState(false);
+
+		if (stopAcquisition)
+		{
+			AccessClass::getControlPanel()->setAcquisitionState(false);
+		}
+
+		return String("OK");
+
+	} else
+	{
+		return String("NotHandled");
+	}
+}
+
