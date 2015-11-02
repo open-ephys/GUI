@@ -53,7 +53,7 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
     urlLabel->setBounds(10,40,140,25);
     addAndMakeVisible(urlLabel);
 
-    int defaultPort = 5005;
+    int defaultPort = 27020;
     labelPort = new Label("Port", String(defaultPort));
     labelPort->setBounds(80,45,80,18);
     labelPort->setFont(Font("Default", 15, Font::plain));

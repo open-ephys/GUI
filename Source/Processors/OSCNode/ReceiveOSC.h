@@ -31,8 +31,6 @@ class ReceiveOSC: public osc::OscPacketListener,
 {
 public:
     ReceiveOSC(int port);
-    ReceiveOSC(ReceiveOSC const&) = delete;
-    void operator=(ReceiveOSC const&) = delete;
     ~ReceiveOSC();
 
     static std::shared_ptr<ReceiveOSC> getInstance(int port, bool justDelete = false) {
@@ -76,8 +74,8 @@ public:
     void addProcessor(OSCNode *processor);
     void removeProcessor(OSCNode *processor);
 private:
-
-
+    ReceiveOSC(ReceiveOSC const&);
+    void operator=(ReceiveOSC const&);
 
     int incomingPort;
     UdpListeningReceiveSocket s;

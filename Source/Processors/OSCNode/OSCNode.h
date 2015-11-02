@@ -54,17 +54,17 @@ public:
 
 private:
 
-    int64 timestamp = 0;
-    int64 previousEventTime = 0;
+    int64 timestamp;
+    int64 previousEventTime;
     juce::uint8 eventId;
 
     CriticalSection lock;
 
-    float m_x = 0;
-    float m_y = 0;
-    bool m_positionIsUpdated = false;
+    float m_x;
+    float m_y;
+    bool m_positionIsUpdated;
     String m_address;
-    int m_port = 5005;
+    int m_port;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCNode);
 

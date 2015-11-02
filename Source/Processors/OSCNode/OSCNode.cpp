@@ -28,9 +28,20 @@
 
 OSCNode::OSCNode()
     : GenericProcessor("OSCNode")
+	, timestamp(0)
+	, previousEventTime(0)
+	, eventId(0)
+	, m_x(0.0)
+	, m_y(0.0)
+	, m_positionIsUpdated(false)
+	, m_port(27020)
 {
     sendSampleCount = false;
-    ReceiveOSC::getInstance(m_port)->addProcessor(this);
+	try {
+		ReceiveOSC::getInstance(m_port)->addProcessor(this);
+	} catch(std::runtime_error) {
+		DBG("Unable to bind port");
+	}
 }
 
 OSCNode::~OSCNode()
@@ -72,9 +83,13 @@ String OSCNode::address()
 
 void OSCNode::setPort(int port)
 {
+	try{
     ReceiveOSC::getInstance(m_port)->removeProcessor(this);
     m_port = port;
     ReceiveOSC::getInstance(port)->addProcessor(this);
+	} catch(std::runtime_error){
+		DBG("Unable to bind port");
+	}
 }
 
 int OSCNode::port()
