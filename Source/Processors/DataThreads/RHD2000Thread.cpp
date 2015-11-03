@@ -104,8 +104,9 @@ RHD2000Thread::RHD2000Thread(SourceNode* sn) : DataThread(sn),
     File executable = File::getSpecialLocation(File::currentExecutableFile);
 
 #if defined(__APPLE__)
-    const String executableDirectory =
-        executable.getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName();
+    String executableDirectory = executable.getParentDirectory().getParentDirectory().getFullPathName();
+    executableDirectory += File::separatorString;
+    executableDirectory += "Resources";
 #else
     const String executableDirectory = executable.getParentDirectory().getFullPathName();
 
@@ -351,8 +352,9 @@ void RHD2000Thread::initializeBoard()
     File executable = File::getSpecialLocation(File::currentExecutableFile);
 
 #if defined(__APPLE__)
-    const String executableDirectory =
-        executable.getParentDirectory().getParentDirectory().getParentDirectory().getParentDirectory().getFullPathName();
+    String executableDirectory = executable.getParentDirectory().getParentDirectory().getFullPathName();
+    executableDirectory += File::separatorString;
+    executableDirectory += "Resources";
 #else
     const String executableDirectory = executable.getParentDirectory().getFullPathName();
 #endif
