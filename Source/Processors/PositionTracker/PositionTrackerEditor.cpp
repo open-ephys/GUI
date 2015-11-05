@@ -32,6 +32,26 @@ Visualizer* PositionTrackerEditor::createNewCanvas()
     return new PositionTrackerCanvas(processor);
 }
 
+void PositionTrackerEditor::initializeButtons()
+{
+    int w = 18;
+    int h = 18;
+    int xPad = 5;
+    int yPad = 6;
+
+    int xInitial = 10;
+    int yInitial = 25;
+    int x = xInitial;
+    int y = yInitial;
+
+    clearBtn = new UtilityButton("Clear", titleFont);
+    clearBtn->setBounds(x, y, w*2 + xPad, h);
+    clearBtn->setClickingTogglesState(false);
+    clearBtn->addListener(this);
+    addAndMakeVisible(clearBtn);
+
+}
+
 void PositionTrackerEditor::buttonCallback(Button* button)
 {
 

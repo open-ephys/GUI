@@ -194,10 +194,17 @@ void HDF5Recording::writeData(AudioSampleBuffer& buffer)
 void HDF5Recording::writeEvent(int eventType, MidiMessage& event, int samplePosition)
 {
     const uint8* dataptr = event.getRawData();
-    if (eventType == GenericProcessor::TTL)
+    if (eventType == GenericProcessor::TTL) {
         eventFile->writeEvent(0,*(dataptr+2),*(dataptr+1),(void*)(dataptr+3),(*timestamps)[*(dataptr+1)]+samplePosition);
-    else if (eventType == GenericProcessor::MESSAGE)
+    }
+        else if (eventType == GenericProcessor::MESSAGE) {
         eventFile->writeEvent(1,*(dataptr+2),*(dataptr+1),(void*)(dataptr+6),(*timestamps)[*(dataptr+1)]+samplePosition);
+        std::cout << "Will write message " << (uint8*)(dataptr+6) << " " << (uint8*)(dataptr+6+sizeof(uint8)) << std::endl;
+    }
+    else if(eventType == GenericProcessor::BINARY_MSG) {
+        std::cout << "Will write binary message " << (float*)(dataptr+6) << std::endl;
+        eventFile->writeEvent(2,*(dataptr+2),*(dataptr+1),(void*)(dataptr+6),(*timestamps)[*(dataptr+1)]+samplePosition);
+    }
 }
 
 void HDF5Recording::addSpikeElectrode(int index, SpikeRecordInfo* elec)
@@ -214,6 +221,7 @@ void HDF5Recording::startAcquisition()
     eventFile = new KWEFile();
     eventFile->addEventType("TTL",HDF5FileBase::U8,"event_channels");
     eventFile->addEventType("Messages",HDF5FileBase::STR,"Text");
+    eventFile->addEventType("Binary_messages",HDF5FileBase::F32,"Data"); // TODO F32 correct?
     spikesFile = new KWXFile();
 }
 

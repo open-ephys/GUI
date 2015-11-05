@@ -13,6 +13,7 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../Visualization/Visualizer.h"
+#include "../Editors/GenericEditor.h"
 #include <vector>
 
 class PositionTracker;
@@ -62,8 +63,9 @@ private:
     PositionTracker* processor;
     float m_x;
     float m_y;
-
+    ScopedPointer<UtilityButton> clearButton;
     std::vector<Position> m_positions;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionTrackerCanvas)
 };

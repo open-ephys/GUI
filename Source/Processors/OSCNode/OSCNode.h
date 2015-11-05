@@ -42,7 +42,7 @@ public:
     bool isSource();
     bool isReady();
 
-    void receivePosition(float x, float y);
+    void receiveMessage(std::vector<float> message);
 
     void process(AudioSampleBuffer&, MidiBuffer&);
     int getNumEventChannels();
@@ -60,8 +60,8 @@ private:
 
     CriticalSection lock;
 
-    float m_x;
-    float m_y;
+    std::vector<float> m_message;
+
     bool m_positionIsUpdated;
     String m_address;
     int m_port;

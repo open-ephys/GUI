@@ -12,6 +12,9 @@
 #include "PositionTracker.h"
 #include "PositionTrackerEditor.h"
 
+using std::cout;
+using std::endl;
+
 //==============================================================================
 PositionTracker::PositionTracker()
     : GenericProcessor("PositionTracker")
@@ -35,12 +38,16 @@ void PositionTracker::process(AudioSampleBuffer &buffer, MidiBuffer &events)
 
 void PositionTracker::handleEvent(int eventType, MidiMessage &event, int samplePosition)
 {
-    if(eventType == MESSAGE) {
+    if(eventType == BINARY_MSG) {
         const uint8* rawData = event.getRawData();
+        if(event.getRawDataSize() != 6 + sizeof(float)*2) {
+            cout << "Position tracker got wrong event size: " << event.getRawDataSize() << endl;
+        }
         const float* message = (float*)(rawData+6);
         m_x = message[0];
         m_y = message[1];
         m_positionIsUpdated = true;
+        std::cout << "x " << m_x << " y " << m_y << std::endl;
     }
 }
 

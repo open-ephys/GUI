@@ -30,9 +30,7 @@ OSCNode::OSCNode()
     : GenericProcessor("OSCNode")
 	, timestamp(0)
 	, previousEventTime(0)
-	, eventId(0)
-	, m_x(0.0)
-	, m_y(0.0)
+    , eventId(0)
 	, m_positionIsUpdated(false)
 	, m_port(27020)
 {
@@ -102,39 +100,34 @@ void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
     setTimestamp(events,CoreServices::getGlobalTimestamp());
     checkForEvents(events);
 
-    int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
+//    int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
 
     //std::cout << *buffer.getSampleData(0, 0) << std::endl;
     lock.enter();
 
-    int argumentCount = 2;
-    float* message = new float[argumentCount];
-    message[0] = m_x;
-    message[1] = m_y;
+    int argumentCount = m_message.size();
 
     if(m_positionIsUpdated) {
         addEvent(events, // MidiBuffer
-                 MESSAGE,    // eventType
+                 BINARY_MSG,    // eventType
                  0,      // sampleNum
                  eventId,	     // eventID
                  0,		 // eventChannel
                  sizeof(float)*argumentCount,
-                 (uint8*)message
+                 (uint8*)&(m_message[0])
                  );
-        previousEventTime = timestamp;
+//        previousEventTime = timestamp;
         m_positionIsUpdated = false;
     }
-    timestamp += samplesNeeded;
-    setNumSamples(events, samplesNeeded);
+//    timestamp += samplesNeeded;
+//    setNumSamples(events, samplesNeeded);
     lock.exit();
-    delete message;
 }
 
-void OSCNode::receivePosition(float x, float y) 
+void OSCNode::receiveMessage(std::vector<float> message)
 {
     m_positionIsUpdated = true;
-    m_x = x;
-    m_y = y;
+    m_message = message;
 }
 
 bool OSCNode::isReady()

@@ -552,6 +552,7 @@ int HDF5RecordingData::writeDataBlock(int xDataSize, int yDataSize, HDF5FileBase
         nativeType = HDF5FileBase::getNativeType(type);
 
         dSet->write(data,nativeType,mSpace,fSpace);
+//        std::cout << "write " << data << std::endl;
         xPos += xDataSize;
     }
     catch (DataSetIException error)
@@ -760,7 +761,13 @@ int KWEFile::createFileStructure()
         if (!dSet) return -1;
         dSet = createDataSet(U8,0,EVENT_CHUNK_SIZE,path + "/nodeID");
         if (!dSet) return -1;
-        dSet = createDataSet(eventTypes[i],0,EVENT_CHUNK_SIZE,path + "/" + eventDataNames[i]);
+        if (eventDataNames[i] == "Data") {
+            dSet = createDataSet(eventTypes[i],0,2,EVENT_CHUNK_SIZE,path + "/" + eventDataNames[i]);
+            std::cout << "Was data, yes: " << eventDataNames[i] << std::endl;
+        } else {
+            dSet = createDataSet(eventTypes[i],0,EVENT_CHUNK_SIZE,path + "/" + eventDataNames[i]);
+            std::cout << "Was text or shit, yo: " << eventDataNames[i] << std::endl;
+        }
         if (!dSet) return -1;
     }
     if (setAttribute(U16,(void*)&ver,"/","kwik_version")) return -1;
@@ -828,7 +835,13 @@ void KWEFile::writeEvent(int type, uint8 id, uint8 processor, void* data, uint64
     CHECK_ERROR(recordings[type]->writeDataBlock(1,I32,&recordingNumber));
     CHECK_ERROR(eventID[type]->writeDataBlock(1,U8,&id));
     CHECK_ERROR(nodeID[type]->writeDataBlock(1,U8,&processor));
-    CHECK_ERROR(eventData[type]->writeDataBlock(1,eventTypes[type],data));
+    if (type != 2) {
+        CHECK_ERROR(eventData[type]->writeDataBlock(1,eventTypes[type],data));
+    }
+    else {
+        CHECK_ERROR(eventData[type]->writeDataBlock(1,2,eventTypes[type],data));
+    }
+    // TODO event data needs to be written to multiple columns instead of two?
 }
 
 /*void KWEFile::addKwdFile(String filename)

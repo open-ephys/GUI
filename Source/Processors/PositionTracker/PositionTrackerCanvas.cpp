@@ -23,6 +23,11 @@ PositionTrackerCanvas::PositionTrackerCanvas(PositionTracker *positionTracker)
     , m_x(0.0)
     , m_y(0.0)
 {
+    clearButton = new UtilityButton("Clear plot", Font("Small Text", 13, Font::plain));
+    clearButton->setRadius(3.0f);
+    clearButton->addListener(this);
+    addAndMakeVisible(clearButton);
+
     startCallbacks();
     update();
 }

@@ -13,29 +13,38 @@
 #include "OSCEditor.h"
 #include "OSCNode.h"
 
+using std::cout;
+using std::endl;
+
 void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
                                 const IpEndpointName& remoteEndpoint)
 {
     (void) remoteEndpoint; // suppress unused parameter warning
-    DBG("Received message!");
-    DBG(m.AddressPattern());
+//    DBG("Received message!");
+//    DBG(m.AddressPattern());
     try{
         // example of parsing single messages. osc::OsckPacketListener
         // handles the bundle traversal.
         for(OSCNode* processor : processors) {
             String address = processor->address();
             if( std::strcmp( m.AddressPattern(), address.toStdString().c_str() ) == 0 ) {
-                // example #1 -- argument stream interface
                 osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
-                float floatMessage;
-                float floatMessage2;
-                args >> floatMessage >> floatMessage2 >> osc::EndMessage;
-                DBG("received message with arguments: " << floatMessage << " " << floatMessage2);
+                std::vector<float> message;
+                for(int i = 0; i < m.ArgumentCount(); i++) {
+                    if(m.TypeTags()[i] != 'f') {
+                        cout << "ReceiveOSC: We only support floats right now, not" << m.TypeTags()[i] << endl;
+                        return;
+                    }
 
-                // Check that numbers are valid numbers and not nans or infs and stuff
-                if(floatMessage == floatMessage && floatMessage2 == floatMessage2) {
-                    processor->receivePosition(floatMessage, floatMessage2);
+                    float argument;
+                    args >> argument;
+                    if(argument != argument) { // is it nan?
+                        return;
+                    }
+                    message.push_back(argument);
                 }
+                args >> osc::EndMessage;
+                processor->receiveMessage(message);
             }
         }
     } catch( osc::Exception& e ){
