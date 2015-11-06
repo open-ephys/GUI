@@ -21,9 +21,11 @@ class PositionTracker;
 class Position
 {
 public:
-    Position(float xin, float yin);
+    Position(float xin, float yin, float widthin, float heightin);
     float x;
     float y;
+    float width;
+    float height;
 };
 
 //==============================================================================
@@ -40,12 +42,12 @@ public:
 
     void paint (Graphics&);
     void resized();
-
+    void clear();
     // KeyListener interface
     virtual bool keyPressed(const KeyPress &key, Component *originatingComponent);
 
     // Listener interface
-    virtual void buttonClicked(Button *);
+    virtual void buttonClicked(Button* button);
 
     // Listener interface
     virtual void comboBoxChanged(ComboBox *comboBoxThatHasChanged);
@@ -63,7 +65,11 @@ private:
     PositionTracker* processor;
     float m_x;
     float m_y;
+    float m_width;
+    float m_height;
+
     ScopedPointer<UtilityButton> clearButton;
+
     std::vector<Position> m_positions;
 
 

@@ -30,6 +30,8 @@ public:
 
     float x() const;
     float y() const;
+    float width() const;
+    float height() const;
 
     void clearPositionUpdated();
     bool positionIsUpdated() const;
@@ -39,6 +41,8 @@ public:
 private:
     float m_x;
     float m_y;
+    float m_width;
+    float m_height;
     bool m_positionIsUpdated;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionTracker)
