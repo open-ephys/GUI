@@ -95,6 +95,30 @@ int OscNode::port()
     return m_port;
 }
 
+void OscNode::saveCustomParametersToXml(XmlElement* parentElement)
+{
+    XmlElement* mainNode = parentElement->createNewChildElement("OSCNODE");
+    mainNode->setAttribute("port", m_port);
+    mainNode->setAttribute("address", m_address);
+}
+
+
+void OscNode::loadCustomParametersFromXml()
+{
+
+    if (parametersAsXml != nullptr)
+    {
+        forEachXmlChildElement(*parametersAsXml, mainNode)
+        {
+            if (mainNode->hasTagName("OSCNODE"))
+            {
+                setPort(mainNode->getIntAttribute("port"));
+                setAddress(mainNode->getStringAttribute("address"));
+            }
+        }
+    }
+}
+
 void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
 {    
     setTimestamp(events,CoreServices::getGlobalTimestamp());

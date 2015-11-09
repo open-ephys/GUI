@@ -115,7 +115,6 @@ void PositionTrackerCanvas::refresh()
 
 void PositionTrackerCanvas::beginAnimation()
 {
-    DBG('START');
     startCallbacks();
 }
 
