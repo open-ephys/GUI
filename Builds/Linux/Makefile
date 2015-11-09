@@ -55,12 +55,12 @@ OBJECTS := \
   $(OBJDIR)/AccessClass_de9602d5.o \
   $(OBJDIR)/PracticalSocket_2574ecc8.o \
   $(OBJDIR)/AudioComponent_521bd9c9.o \
+  $(OBJDIR)/OscEditor_2185e39.o \
+  $(OBJDIR)/OscNode_ad86d20e.o \
+  $(OBJDIR)/OscServer_f207910f.o \
   $(OBJDIR)/PositionTrackerCanvas_65702c22.o \
   $(OBJDIR)/PositionTrackerEditor_b173c5b7.o \
   $(OBJDIR)/PositionTracker_95cba26a.o \
-  $(OBJDIR)/ReceiveOSC_56b88099.o \
-  $(OBJDIR)/OSCEditor_c5c65639.o \
-  $(OBJDIR)/OSCNode_f452ca0e.o \
   $(OBJDIR)/Rectifier_21cc94b6.o \
   $(OBJDIR)/ArduinoOutput_d5a968de.o \
   $(OBJDIR)/ArduinoOutputEditor_e1b7e52b.o \
@@ -233,6 +233,21 @@ $(OBJDIR)/AudioComponent_521bd9c9.o: ../../Source/Audio/AudioComponent.cpp
 	@echo "Compiling AudioComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/OscEditor_2185e39.o: ../../Source/Processors/OscNode/OscEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OscEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OscNode_ad86d20e.o: ../../Source/Processors/OscNode/OscNode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OscNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OscServer_f207910f.o: ../../Source/Processors/OscNode/OscServer.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling OscServer.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/PositionTrackerCanvas_65702c22.o: ../../Source/Processors/PositionTracker/PositionTrackerCanvas.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling PositionTrackerCanvas.cpp"
@@ -246,21 +261,6 @@ $(OBJDIR)/PositionTrackerEditor_b173c5b7.o: ../../Source/Processors/PositionTrac
 $(OBJDIR)/PositionTracker_95cba26a.o: ../../Source/Processors/PositionTracker/PositionTracker.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling PositionTracker.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/ReceiveOSC_56b88099.o: ../../Source/Processors/OSCNode/ReceiveOSC.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling ReceiveOSC.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/OSCEditor_c5c65639.o: ../../Source/Processors/OSCNode/OSCEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling OSCEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/OSCNode_f452ca0e.o: ../../Source/Processors/OSCNode/OSCNode.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling OSCNode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/Rectifier_21cc94b6.o: ../../Source/Processors/Rectifier/Rectifier.cpp

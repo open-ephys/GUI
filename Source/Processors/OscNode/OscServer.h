@@ -1,15 +1,15 @@
 /*
   ==============================================================================
 
-    ReceiveOSC.h
+    OscServer.h
     Created: 1 Oct 2015 11:16:33am
     Author:  mikkel
 
   ==============================================================================
 */
 
-#ifndef RECEIVEOSC_H_INCLUDED
-#define RECEIVEOSC_H_INCLUDED
+#ifndef OSCSERVER_H_INCLUDED
+#define OSCSERVER_H_INCLUDED
 
 #include "../../JuceLibraryCode/JuceHeader.h"
 
@@ -23,19 +23,19 @@
 #include <oscpack/ip/UdpSocket.h>
 #include <unordered_map>
 #include <memory>
-class OSCNode;
+class OscNode;
 
 //#define PORT 5005
-class ReceiveOSC: public osc::OscPacketListener,
+class OscServer: public osc::OscPacketListener,
         public Thread
 {
 public:
-    ReceiveOSC(int port);
-    ~ReceiveOSC();
+    OscServer(int port);
+    ~OscServer();
 
-    static std::shared_ptr<ReceiveOSC> getInstance(int port, bool justDelete = false) {
+    static std::shared_ptr<OscServer> getInstance(int port, bool justDelete = false) {
         // TODO Handle case where port cannot be assigned
-        static std::unordered_map<int, std::shared_ptr<ReceiveOSC>> instances;
+        static std::unordered_map<int, std::shared_ptr<OscServer>> instances;
 
         std::vector<int> toDelete;
         for(auto r : instances) {
@@ -51,7 +51,7 @@ public:
             return nullptr;
         }
         if(instances.count(port) < 1) {
-            instances[port] = std::make_shared<ReceiveOSC>(port);
+            instances[port] = std::make_shared<OscServer>(port);
         }
         if(!instances[port]->isThreadRunning()) {
             instances[port]->startThread();
@@ -71,15 +71,15 @@ public:
     // getters
     int getIntOSC();
     float getFloatOSC();
-    void addProcessor(OSCNode *processor);
-    void removeProcessor(OSCNode *processor);
+    void addProcessor(OscNode *processor);
+    void removeProcessor(OscNode *processor);
 private:
-    ReceiveOSC(ReceiveOSC const&);
-    void operator=(ReceiveOSC const&);
+    OscServer(OscServer const&);
+    void operator=(OscServer const&);
 
     int incomingPort;
     UdpListeningReceiveSocket s;
-    std::vector<OSCNode*> processors;
+    std::vector<OscNode*> processors;
     String m_address;
 
 protected:
@@ -89,4 +89,4 @@ protected:
 };
 
 
-#endif  // RECEIVEOSC_H_INCLUDED
+#endif  // OSCSERVER_H_INCLUDED

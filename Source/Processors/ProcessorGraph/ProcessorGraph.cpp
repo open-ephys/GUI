@@ -54,7 +54,7 @@
 #include "../PSTH/PeriStimulusTimeHistogramNode.h"
 #include "../CAR/CAR.h"
 #include "../Rectifier/Rectifier.h"
-#include "../OSCNode/OSCNode.h"
+#include "../OscNode/OscNode.h"
 #include "../PositionTracker/PositionTracker.h"
 
     
@@ -549,7 +549,7 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         }
         else if (subProcessorType.equalsIgnoreCase("OSC Port"))
         {
-            processor = new OSCNode();
+            processor = new OscNode();
             std::cout << "Creating a new OSC port." << std::endl;
         }
         else if (subProcessorType.equalsIgnoreCase("Serial Port"))

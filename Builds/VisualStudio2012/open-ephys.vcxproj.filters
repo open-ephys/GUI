@@ -32,11 +32,11 @@
     <Filter Include="open-ephys\Source\Processors">
       <UniqueIdentifier>{3DDEC88C-BAA5-2DDA-A59F-0FB74070AB82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="open-ephys\Source\Processors\OscNode">
+      <UniqueIdentifier>{93614AF4-0D25-88A1-3EC6-6C11EEFF26A3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="open-ephys\Source\Processors\PositionTracker">
       <UniqueIdentifier>{C183B92D-2FF4-0469-4D0D-0AB606F9A236}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="open-ephys\Source\Processors\OSCNode">
-      <UniqueIdentifier>{54AB8449-EDC6-626B-E7B9-6797FCCD99C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="open-ephys\Source\Processors\Rectifier">
       <UniqueIdentifier>{1D1CBF65-097A-91AC-3A16-B6BC18264911}</UniqueIdentifier>
@@ -460,6 +460,15 @@
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\OscNode\OscEditor.cpp">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\OscNode\OscNode.cpp">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\OscNode\OscServer.cpp">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\PositionTracker\PositionTrackerCanvas.cpp">
       <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
     </ClCompile>
@@ -468,15 +477,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\PositionTracker\PositionTracker.cpp">
       <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\OSCNode\ReceiveOSC.cpp">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\OSCNode\OSCEditor.cpp">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Processors\OSCNode\OSCNode.cpp">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\Rectifier\Rectifier.cpp">
       <Filter>open-ephys\Source\Processors\Rectifier</Filter>
@@ -2076,6 +2076,15 @@
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\OscNode\OscEditor.h">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\OscNode\OscNode.h">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\OscNode\OscServer.h">
+      <Filter>open-ephys\Source\Processors\OscNode</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Processors\PositionTracker\PositionTrackerCanvas.h">
       <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
     </ClInclude>
@@ -2084,15 +2093,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\PositionTracker\PositionTracker.h">
       <Filter>open-ephys\Source\Processors\PositionTracker</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\OSCNode\ReceiveOSC.h">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\OSCNode\OSCEditor.h">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Processors\OSCNode\OSCNode.h">
-      <Filter>open-ephys\Source\Processors\OSCNode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\Rectifier\Rectifier.h">
       <Filter>open-ephys\Source\Processors\Rectifier</Filter>

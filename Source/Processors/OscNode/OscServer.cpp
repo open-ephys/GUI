@@ -9,14 +9,14 @@
 */
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
-#include "ReceiveOSC.h"
-#include "OSCEditor.h"
-#include "OSCNode.h"
+#include "OscServer.h"
+#include "OscEditor.h"
+#include "OscNode.h"
 
 using std::cout;
 using std::endl;
 
-void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
+void OscServer::ProcessMessage(const osc::ReceivedMessage& m,
                                 const IpEndpointName& remoteEndpoint)
 {
     (void) remoteEndpoint; // suppress unused parameter warning
@@ -25,14 +25,14 @@ void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
     try{
         // example of parsing single messages. osc::OsckPacketListener
         // handles the bundle traversal.
-        for(OSCNode* processor : processors) {
+        for(OscNode* processor : processors) {
             String address = processor->address();
             if( std::strcmp( m.AddressPattern(), address.toStdString().c_str() ) == 0 ) {
                 osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
                 std::vector<float> message;
                 for(int i = 0; i < m.ArgumentCount(); i++) {
                     if(m.TypeTags()[i] != 'f') {
-                        cout << "ReceiveOSC: We only support floats right now, not" << m.TypeTags()[i] << endl;
+                        cout << "OscServer: We only support floats right now, not" << m.TypeTags()[i] << endl;
                         return;
                     }
 
@@ -54,36 +54,36 @@ void ReceiveOSC::ProcessMessage(const osc::ReceivedMessage& m,
     }
 }
 
-int ReceiveOSC::getIntOSC()
+int OscServer::getIntOSC()
 {
     int test = 1;
     return test;
 }
 
-float ReceiveOSC::getFloatOSC()
+float OscServer::getFloatOSC()
 {
     float test = 2.19;
     return test;
 }
 
-void ReceiveOSC::addProcessor(OSCNode *processor)
+void OscServer::addProcessor(OscNode *processor)
 {
     processors.push_back(processor);
 }
 
-void ReceiveOSC::removeProcessor(OSCNode *processor)
+void OscServer::removeProcessor(OscNode *processor)
 {
     processors.erase(std::remove(processors.begin(), processors.end(), processor), processors.end());
 }
 
-ReceiveOSC::ReceiveOSC(int port)
+OscServer::OscServer(int port)
     : Thread("OscListener Thread")
     , incomingPort(port)
     , s(IpEndpointName("localhost",
                        incomingPort), this)
 {}
 
-ReceiveOSC::~ReceiveOSC()
+OscServer::~OscServer()
 {
     // stop the OSC Listener thread running
     s.AsynchronousBreak();

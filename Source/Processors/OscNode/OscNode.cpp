@@ -21,13 +21,13 @@
 
 */
 
-#include "OSCNode.h"
-#include "OSCEditor.h"
+#include "OscNode.h"
+#include "OscEditor.h"
 
 #include "../../UI/EditorViewport.h"
 
-OSCNode::OSCNode()
-    : GenericProcessor("OSCNode")
+OscNode::OscNode()
+    : GenericProcessor("OSC Port")
 	, timestamp(0)
 	, previousEventTime(0)
     , eventId(0)
@@ -36,66 +36,66 @@ OSCNode::OSCNode()
 {
     sendSampleCount = false;
 	try {
-		ReceiveOSC::getInstance(m_port)->addProcessor(this);
+        OscServer::getInstance(m_port)->addProcessor(this);
 	} catch(std::runtime_error) {
 		DBG("Unable to bind port");
 	}
 }
 
-OSCNode::~OSCNode()
+OscNode::~OscNode()
 {
-    ReceiveOSC::getInstance(m_port)->removeProcessor(this);
-    ReceiveOSC::getInstance(0, true);
+    OscServer::getInstance(m_port)->removeProcessor(this);
+    OscServer::getInstance(0, true);
 }
 
-AudioProcessorEditor* OSCNode::createEditor()
+AudioProcessorEditor* OscNode::createEditor()
 {
-    editor = new OSCEditor(this, true);
+    editor = new OscEditor(this, true);
     return editor;
 }
 
-bool OSCNode::isSource()
+bool OscNode::isSource()
 {
     return true;
 }
 
-int OSCNode::getNumEventChannels()
+int OscNode::getNumEventChannels()
 {
     return 1;
 }
 
-void OSCNode::updateSettings()
+void OscNode::updateSettings()
 {
     eventChannels[0]->type = EVENT_CHANNEL;
 }
 
-void OSCNode::setAddress(String address)
+void OscNode::setAddress(String address)
 {
     m_address = address;
 }
 
-String OSCNode::address()
+String OscNode::address()
 {
     return m_address;
 }
 
-void OSCNode::setPort(int port)
+void OscNode::setPort(int port)
 {
 	try{
-    ReceiveOSC::getInstance(m_port)->removeProcessor(this);
+    OscServer::getInstance(m_port)->removeProcessor(this);
     m_port = port;
-    ReceiveOSC::getInstance(port)->addProcessor(this);
+    OscServer::getInstance(port)->addProcessor(this);
 	} catch(std::runtime_error){
 		DBG("Unable to bind port");
 	}
 }
 
-int OSCNode::port()
+int OscNode::port()
 {
     return m_port;
 }
 
-void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events) 
+void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
 {    
     setTimestamp(events,CoreServices::getGlobalTimestamp());
     checkForEvents(events);
@@ -117,6 +117,7 @@ void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
                  (uint8*)&(m_message[0])
                  );
 //        previousEventTime = timestamp;
+        std::cout << m_message[0] << std::endl;
         m_positionIsUpdated = false;
     }
 //    timestamp += samplesNeeded;
@@ -124,13 +125,13 @@ void OSCNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
     lock.exit();
 }
 
-void OSCNode::receiveMessage(std::vector<float> message)
+void OscNode::receiveMessage(std::vector<float> message)
 {
     m_positionIsUpdated = true;
     m_message = message;
 }
 
-bool OSCNode::isReady()
+bool OscNode::isReady()
 {
     return true;
 }

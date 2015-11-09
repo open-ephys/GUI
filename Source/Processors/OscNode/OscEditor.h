@@ -28,11 +28,11 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../Editors/GenericEditor.h"
 
-class OSCEditor : public GenericEditor,public Label::Listener
+class OscEditor : public GenericEditor,public Label::Listener
 {
 public:
-    OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
-    virtual ~OSCEditor();
+    OscEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
+    virtual ~OscEditor();
 
 private:
     ScopedPointer<Label> positionLabel;
@@ -40,7 +40,7 @@ private:
     ScopedPointer<Label> urlLabel;
     ScopedPointer<Label> labelAdr;
     ScopedPointer<Label> adrLabel;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCEditor);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscEditor);
 
 
     // Listener interface

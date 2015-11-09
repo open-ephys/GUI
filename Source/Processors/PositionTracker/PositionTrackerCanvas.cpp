@@ -88,7 +88,7 @@ void PositionTrackerCanvas::buttonClicked(Button* button)
 {
     if (button == clearButton)
     {
-        PositionTrackerCanvas::clear();
+        clear();
     }
 }
 
@@ -115,6 +115,7 @@ void PositionTrackerCanvas::refresh()
 
 void PositionTrackerCanvas::beginAnimation()
 {
+    DBG('START');
     startCallbacks();
 }
 

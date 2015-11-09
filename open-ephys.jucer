@@ -295,6 +295,14 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <GROUP id="{01C8D4B9-6D75-255D-B464-C93D4683C411}" name="OscNode">
+          <FILE id="sR1w6E" name="OscEditor.cpp" compile="1" resource="0" file="Source/Processors/OscNode/OscEditor.cpp"/>
+          <FILE id="bSE1P0" name="OscEditor.h" compile="0" resource="0" file="Source/Processors/OscNode/OscEditor.h"/>
+          <FILE id="o5uDPl" name="OscNode.cpp" compile="1" resource="0" file="Source/Processors/OscNode/OscNode.cpp"/>
+          <FILE id="OB8zNQ" name="OscNode.h" compile="0" resource="0" file="Source/Processors/OscNode/OscNode.h"/>
+          <FILE id="vfNTd1" name="OscServer.cpp" compile="1" resource="0" file="Source/Processors/OscNode/OscServer.cpp"/>
+          <FILE id="TRFzeM" name="OscServer.h" compile="0" resource="0" file="Source/Processors/OscNode/OscServer.h"/>
+        </GROUP>
         <GROUP id="{DA378349-D12C-5AA8-E5AD-CAEDA41011C5}" name="PositionTracker">
           <FILE id="LyyBWE" name="PositionTrackerCanvas.cpp" compile="1" resource="0"
                 file="Source/Processors/PositionTracker/PositionTrackerCanvas.cpp"/>
@@ -308,14 +316,6 @@
                 file="Source/Processors/PositionTracker/PositionTracker.cpp"/>
           <FILE id="BgpFVx" name="PositionTracker.h" compile="0" resource="0"
                 file="Source/Processors/PositionTracker/PositionTracker.h"/>
-        </GROUP>
-        <GROUP id="{3FCFBFDA-848D-6B59-5F37-E3D1F43D54DF}" name="OSCNode">
-          <FILE id="imRe2j" name="ReceiveOSC.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.cpp"/>
-          <FILE id="SeWdUl" name="ReceiveOSC.h" compile="0" resource="0" file="Source/Processors/OSCNode/ReceiveOSC.h"/>
-          <FILE id="g5oo8R" name="OSCEditor.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/OSCEditor.cpp"/>
-          <FILE id="TdovvU" name="OSCEditor.h" compile="0" resource="0" file="Source/Processors/OSCNode/OSCEditor.h"/>
-          <FILE id="JnQOi1" name="OSCNode.cpp" compile="1" resource="0" file="Source/Processors/OSCNode/OSCNode.cpp"/>
-          <FILE id="kXueJ2" name="OSCNode.h" compile="0" resource="0" file="Source/Processors/OSCNode/OSCNode.h"/>
         </GROUP>
         <GROUP id="{6E059BEC-4A8F-BCDA-1F91-9B22C6CBF2E4}" name="Rectifier">
           <FILE id="oMFsRh" name="Rectifier.cpp" compile="1" resource="0" file="Source/Processors/Rectifier/Rectifier.cpp"/>

@@ -26,16 +26,16 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../GenericProcessor/GenericProcessor.h"
-#include "ReceiveOSC.h"
+#include "OscServer.h"
 
 #include <stdio.h>
 
-class OSCNode : public GenericProcessor
+class OscNode : public GenericProcessor
 {
 public:
 
-    OSCNode();
-    ~OSCNode();
+    OscNode();
+    ~OscNode();
 
     AudioProcessorEditor* createEditor();
 
@@ -66,7 +66,7 @@ private:
     String m_address;
     int m_port;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OSCNode);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscNode);
 
 };
 

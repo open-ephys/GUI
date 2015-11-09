@@ -21,18 +21,18 @@
 
 */
 
-#include "OSCEditor.h"
-#include "OSCNode.h"
+#include "OscEditor.h"
+#include "OscNode.h"
 #include "../../AccessClass.h"
 #include "../../UI/EditorViewport.h"
 
-OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
+OscEditor::OscEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
     : GenericEditor(parentNode, useDefaultParameterEditors)
 
 {
     desiredWidth = 180;
 
-    OSCNode *processor = (OSCNode *)getProcessor();
+    OscNode *processor = (OscNode *)getProcessor();
 
     adrLabel = new Label("Address", "Address:");
     adrLabel->setBounds(10,80,140,25);
@@ -65,27 +65,27 @@ OSCEditor::OSCEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
     processor->setPort(defaultPort);
 }
 
-OSCEditor::~OSCEditor()
+OscEditor::~OscEditor()
 {
     // TODO should we delete all children, check JUCE docs
     // PS: Causes segfault if we do right now
 //    deleteAllChildren();
 }
 
-void OSCEditor::labelTextChanged(Label *label)
+void OscEditor::labelTextChanged(Label *label)
 {
     if (label == labelAdr)
     {
        Value val = label->getTextValue();
 
-        OSCNode *p= (OSCNode *)getProcessor();
+        OscNode *p= (OscNode *)getProcessor();
         p->setAddress(val.getValue());
     }
     if (label == labelPort)
     {
        Value val = label->getTextValue();
 
-        OSCNode *p= (OSCNode *)getProcessor();
+        OscNode *p= (OscNode *)getProcessor();
         p->setPort(val.getValue());
     }
 }
