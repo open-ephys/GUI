@@ -141,7 +141,7 @@ void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
                  (uint8*)&(m_message[0])
                  );
 //        previousEventTime = timestamp;
-        std::cout << m_message[0] << std::endl;
+//        std::cout << m_message[0] << std::endl;
         m_positionIsUpdated = false;
     }
 //    timestamp += samplesNeeded;

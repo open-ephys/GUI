@@ -31,17 +31,26 @@ void OscServer::ProcessMessage(const osc::ReceivedMessage& m,
                 osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
                 std::vector<float> message;
                 for(int i = 0; i < m.ArgumentCount(); i++) {
-                    if(m.TypeTags()[i] != 'f') {
-                        cout << "OscServer: We only support floats right now, not" << m.TypeTags()[i] << endl;
+                    if(m.TypeTags()[i] == 'f') {
+                        float argument;
+                        args >> argument;
+                        if(argument != argument) { // is it nan?
+                            return;
+                        }
+                        message.push_back(argument);
+                    }
+                    else if (m.TypeTags()[i] == 'i') {
+                        osc::int32 argument;
+                        args >> argument;
+                        if(argument != argument) { // is it nan?
+                            return;
+                        }
+                        message.push_back(float(argument));
+                    }
+                    else {
+                        cout << "OscServer: We only support floats or ints right now, not" << m.TypeTags()[i] << endl;
                         return;
                     }
-
-                    float argument;
-                    args >> argument;
-                    if(argument != argument) { // is it nan?
-                        return;
-                    }
-                    message.push_back(argument);
                 }
                 args >> osc::EndMessage;
                 processor->receiveMessage(message);
