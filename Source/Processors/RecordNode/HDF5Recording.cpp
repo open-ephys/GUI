@@ -199,10 +199,8 @@ void HDF5Recording::writeEvent(int eventType, MidiMessage& event, int samplePosi
     }
         else if (eventType == GenericProcessor::MESSAGE) {
         eventFile->writeEvent(1,*(dataptr+2),*(dataptr+1),(void*)(dataptr+6),(*timestamps)[*(dataptr+1)]+samplePosition);
-        std::cout << "Will write message " << (uint8*)(dataptr+6) << " " << (uint8*)(dataptr+6+sizeof(uint8)) << std::endl;
     }
     else if(eventType == GenericProcessor::BINARY_MSG) {
-        std::cout << "Will write binary message " << (float*)(dataptr+6) << std::endl;
         eventFile->writeEvent(2,*(dataptr+2),*(dataptr+1),(void*)(dataptr+6),(*timestamps)[*(dataptr+1)]+samplePosition);
     }
 }

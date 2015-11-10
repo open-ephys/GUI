@@ -763,10 +763,8 @@ int KWEFile::createFileStructure()
         if (!dSet) return -1;
         if (eventDataNames[i] == "Data") {
             dSet = createDataSet(eventTypes[i],0,2,EVENT_CHUNK_SIZE,path + "/" + eventDataNames[i]);
-            std::cout << "Was data, yes: " << eventDataNames[i] << std::endl;
         } else {
             dSet = createDataSet(eventTypes[i],0,EVENT_CHUNK_SIZE,path + "/" + eventDataNames[i]);
-            std::cout << "Was text or shit, yo: " << eventDataNames[i] << std::endl;
         }
         if (!dSet) return -1;
     }
