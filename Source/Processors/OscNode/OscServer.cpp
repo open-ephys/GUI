@@ -34,17 +34,11 @@ void OscServer::ProcessMessage(const osc::ReceivedMessage& m,
                     if(m.TypeTags()[i] == 'f') {
                         float argument;
                         args >> argument;
-                        if(argument != argument) { // is it nan?
-                            return;
-                        }
                         message.push_back(argument);
                     }
                     else if (m.TypeTags()[i] == 'i') {
                         osc::int32 argument;
                         args >> argument;
-                        if(argument != argument) { // is it nan?
-                            return;
-                        }
                         message.push_back(float(argument));
                     }
                     else {

@@ -43,6 +43,9 @@ PositionTrackerCanvas::~PositionTrackerCanvas()
 
 void PositionTrackerCanvas::paint (Graphics& g)
 {
+    if(m_x != m_x || m_y != m_y || m_width != m_width || m_height != m_height) { // is it nan?
+        return;
+    }
     // set aspect ratio to cam size
     float aC = m_width / m_height;
     float aS = getWidth() / getHeight();
@@ -60,6 +63,9 @@ void PositionTrackerCanvas::paint (Graphics& g)
     for(auto position : m_positions) {
         float x = camWidth*position.x + (getWidth()-camWidth)/2;
         float y = camHeight*position.y + (getHeight()-camHeight)/2;
+        if(x != x || y != y) { // is it nan?
+            continue;
+        }
         g.drawLine(x_prev, y_prev, x, y, 1.0f);
 
         g.setFont(Font("Default", 16, Font::plain));
