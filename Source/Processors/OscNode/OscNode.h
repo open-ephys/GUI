@@ -52,9 +52,6 @@ public:
     void setPort(int port);
     int port();
 
-    void saveCustomParametersToXml(XmlElement* parentElement);
-    void loadCustomParametersFromXml();
-
 private:
 
     int64 timestamp;

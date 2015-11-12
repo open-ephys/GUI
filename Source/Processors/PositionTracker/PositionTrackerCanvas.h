@@ -61,6 +61,9 @@ public:
     virtual void setParameter(int, float);
     virtual void setParameter(int, int, int, float);
 
+//    void saveVisualizerParameters(XmlElement* xml);
+//    void loadVisualizerParameters(XmlElement* xml);
+
 private:
     PositionTracker* processor;
     float m_x;

@@ -30,6 +30,9 @@ public:
 
     Visualizer* createNewCanvas();
 
+//    void saveCustomParameters(XmlElement *parentElement) override;
+//    void loadCustomParameters(XmlElement *parametersAsXml) override;
+
 private:
     UtilityButton* clearBtn;
     void initializeButtons();

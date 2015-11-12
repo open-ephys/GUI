@@ -139,7 +139,14 @@ void PositionTrackerCanvas::setParameter(int, int, int, float)
 
 void PositionTrackerCanvas::clear()
 {
-
     m_positions.clear();
     repaint();
 }
+
+//void PositionTrackerCanvas::saveVisualizerParameters(XmlElement* xml)
+//{
+//}
+
+//void PositionTrackerCanvas::loadVisualizerParameters(XmlElement* xml)
+//{
+//}

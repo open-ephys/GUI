@@ -37,7 +37,7 @@ OscEditor::OscEditor(GenericProcessor* parentNode, bool useDefaultParameterEdito
     adrLabel = new Label("Address", "Address:");
     adrLabel->setBounds(10,80,140,25);
     addAndMakeVisible(adrLabel);
-
+    DBG("in editor set default address");
     String defaultAddress = "/red";
     labelAdr = new Label("Address", defaultAddress);
     labelAdr->setBounds(80,85,80,18);
@@ -90,3 +90,28 @@ void OscEditor::labelTextChanged(Label *label)
     }
 }
 
+
+
+void OscEditor::saveCustomParameters(XmlElement *parentElement)
+{
+    XmlElement* mainNode = parentElement->createNewChildElement("OSCNODE");
+    mainNode->setAttribute("port", labelPort->getText());
+    mainNode->setAttribute("address", labelAdr->getText());
+}
+
+void OscEditor::loadCustomParameters(XmlElement *parametersAsXml)
+{
+    if (parametersAsXml != nullptr)
+    {
+        forEachXmlChildElement(*parametersAsXml, mainNode)
+        {
+            if (mainNode->hasTagName("OSCNODE"))
+            {
+                labelPort->setText(mainNode->getStringAttribute("port"),sendNotification);
+                labelAdr->setText(mainNode->getStringAttribute("address"),sendNotification);
+                DBG("node loaded address");
+                DBG(mainNode->getStringAttribute("address"));
+            }
+        }
+    }
+}

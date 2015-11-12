@@ -32,6 +32,16 @@ Visualizer* PositionTrackerEditor::createNewCanvas()
     return new PositionTrackerCanvas(processor);
 }
 
+//void PositionTrackerEditor::saveCustomParameters(XmlElement *parentElement)
+//{
+
+//}
+
+//void PositionTrackerEditor::loadCustomParameters(XmlElement *parametersAsXml)
+//{
+
+//}
+
 void PositionTrackerEditor::initializeButtons()
 {
     int w = 18;
@@ -54,7 +64,6 @@ void PositionTrackerEditor::initializeButtons()
 
 void PositionTrackerEditor::buttonCallback(Button* button)
 {
-
     int gId = button->getRadioGroupId();
 
     if (gId > 0)

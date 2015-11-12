@@ -17,7 +17,7 @@ using std::endl;
 
 //==============================================================================
 PositionTracker::PositionTracker()
-    : GenericProcessor("Tracking")
+    : GenericProcessor("Position Tracker")
 {
 }
 

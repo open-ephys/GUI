@@ -51,7 +51,13 @@ public:
             return nullptr;
         }
         if(instances.count(port) < 1) {
-            instances[port] = std::make_shared<OscServer>(port);
+            try {
+                instances[port] = std::make_shared<OscServer>(port);
+            }
+            catch (std::runtime_error &e) {
+                DBG("Error unable to bind port:");
+                DBG(port);
+            }
         }
         if(!instances[port]->isThreadRunning()) {
             instances[port]->startThread();

@@ -72,6 +72,8 @@ void OscNode::updateSettings()
 void OscNode::setAddress(String address)
 {
     m_address = address;
+    DBG("setAddress");
+    DBG(address);
 }
 
 String OscNode::address()
@@ -93,30 +95,6 @@ void OscNode::setPort(int port)
 int OscNode::port()
 {
     return m_port;
-}
-
-void OscNode::saveCustomParametersToXml(XmlElement* parentElement)
-{
-    XmlElement* mainNode = parentElement->createNewChildElement("OSCNODE");
-    mainNode->setAttribute("port", m_port);
-    mainNode->setAttribute("address", m_address);
-}
-
-
-void OscNode::loadCustomParametersFromXml()
-{
-
-    if (parametersAsXml != nullptr)
-    {
-        forEachXmlChildElement(*parametersAsXml, mainNode)
-        {
-            if (mainNode->hasTagName("OSCNODE"))
-            {
-                setPort(mainNode->getIntAttribute("port"));
-                setAddress(mainNode->getStringAttribute("address"));
-            }
-        }
-    }
 }
 
 void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)

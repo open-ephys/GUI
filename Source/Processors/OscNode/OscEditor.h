@@ -46,6 +46,11 @@ private:
     // Listener interface
 public:
     virtual void labelTextChanged(Label *labelThatHasChanged) override;
+
+    // GenericEditor interface
+public:
+    void saveCustomParameters(XmlElement *parentElement) override;
+    void loadCustomParameters(XmlElement *parametersAsXml) override;
 };
 
 
