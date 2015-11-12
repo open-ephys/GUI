@@ -109,8 +109,6 @@ void OscEditor::loadCustomParameters(XmlElement *parametersAsXml)
             {
                 labelPort->setText(mainNode->getStringAttribute("port"),sendNotification);
                 labelAdr->setText(mainNode->getStringAttribute("address"),sendNotification);
-                DBG("node loaded address");
-                DBG(mainNode->getStringAttribute("address"));
             }
         }
     }

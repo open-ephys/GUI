@@ -72,8 +72,6 @@ void OscNode::updateSettings()
 void OscNode::setAddress(String address)
 {
     m_address = address;
-    DBG("setAddress");
-    DBG(address);
 }
 
 String OscNode::address()
@@ -102,8 +100,6 @@ void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
     setTimestamp(events,CoreServices::getGlobalTimestamp());
     checkForEvents(events);
 
-//    int samplesNeeded = (int) float(buffer.getNumSamples()) * (getDefaultSampleRate()/44100.0f);
-
     //std::cout << *buffer.getSampleData(0, 0) << std::endl;
     lock.enter();
 
@@ -118,12 +114,8 @@ void OscNode::process(AudioSampleBuffer& buffer, MidiBuffer& events)
                  sizeof(float)*argumentCount,
                  (uint8*)&(m_message[0])
                  );
-//        previousEventTime = timestamp;
-//        std::cout << m_message[0] << std::endl;
         m_positionIsUpdated = false;
     }
-//    timestamp += samplesNeeded;
-//    setNumSamples(events, samplesNeeded);
     lock.exit();
 }
 
