@@ -1397,7 +1397,7 @@ void Rhd2000EvalBoard::flush()
 		while (numWordsInFifo() > 0) {
 			dev->ReadFromBlockPipeOut(PipeOutData, USB3_BLOCK_SIZE, USB3_BLOCK_SIZE *max(2 * numWordsInFifo() / USB3_BLOCK_SIZE, (unsigned int)1), usbBuffer);
 		//	cout << "Flush phase B: " << numWordsInFifo() << endl;
-			printFIFOmetrics();
+		//	printFIFOmetrics();
 		}
 		dev->SetWireInValue(WireInResetRun, 0, 1 << 16);
 		dev->UpdateWireIns();
@@ -1488,6 +1488,7 @@ bool Rhd2000EvalBoard::readDataBlocks(int numBlocks, queue<Rhd2000DataBlock> &da
     unsigned int numWordsToRead, numBytesToRead;
     int i;
     Rhd2000DataBlock *dataBlock;
+	long res;
 
     numWordsToRead = numBlocks * dataBlock->calculateDataBlockSizeInWords(numDataStreams, usb3);
 
@@ -1502,7 +1503,18 @@ bool Rhd2000EvalBoard::readDataBlocks(int numBlocks, queue<Rhd2000DataBlock> &da
         return false;
     }
 
-    dev->ReadFromPipeOut(PipeOutData, numBytesToRead, usbBuffer);
+	if (usb3)
+	{
+		res = dev->ReadFromBlockPipeOut(PipeOutData, USB3_BLOCK_SIZE, numBytesToRead, usbBuffer);
+	}
+	else
+	{
+		res = dev->ReadFromPipeOut(PipeOutData, numBytesToRead, usbBuffer);
+	}
+	if (res == ok_Timeout)
+	{
+		cerr << "CRITICAL: Timeout on pipe read. Check block and buffer sizes." << endl;
+	}
 
     dataBlock = new Rhd2000DataBlock(numDataStreams, usb3);
     for (i = 0; i < numBlocks; ++i) {
@@ -1653,6 +1665,17 @@ void Rhd2000EvalBoard::enableBoardLeds(bool enable)
 	dev->SetWireInValue(WireInMultiUse, enable ? 1 : 0);
 	dev->UpdateWireIns();
 	dev->ActivateTriggerIn(TrigInOpenEphys, 0);
+}
+
+// Ratio    divide_factor
+// 1        0
+// >=2      Ratio/2
+void Rhd2000EvalBoard::setClockDivider(int divide_factor)
+{
+
+	dev->SetWireInValue(WireInMultiUse, divide_factor);
+	dev->UpdateWireIns();
+	dev->ActivateTriggerIn(TrigInOpenEphys, 1);
 }
 
 bool Rhd2000EvalBoard::isUSB3()
