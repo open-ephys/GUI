@@ -489,6 +489,33 @@ void ControlPanel::setRecordState(bool t)
 
 }
 
+bool ControlPanel::getRecordingState()
+{
+
+	return recordButton->getToggleState();
+
+}
+
+void ControlPanel::setRecordingDirectory(String path)
+{
+    File newFile(path);
+    filenameComponent->setCurrentFile(newFile, true, sendNotificationSync);
+
+    graph->getRecordNode()->newDirectoryNeeded = true;
+    masterClock->resetRecordTime();
+}
+
+bool ControlPanel::getAcquisitionState()
+{
+	return playButton->getToggleState();
+}
+
+void ControlPanel::setAcquisitionState(bool state)
+{
+	playButton->setToggleState(state, sendNotification);
+}
+
+
 void ControlPanel::updateChildComponents()
 {
 
@@ -972,6 +999,16 @@ String ControlPanel::getTextToPrepend()
     }
 }
 
+void ControlPanel::setPrependText(String t)
+{
+    prependText->setText(t, sendNotificationSync);
+}
+
+void ControlPanel::setAppendText(String t)
+{
+    appendText->setText(t, sendNotificationSync);
+}
+
 void ControlPanel::setDateText(String t)
 {
     dateText->setText(t, dontSendNotification);
@@ -983,6 +1020,7 @@ void ControlPanel::saveStateToXml(XmlElement* xml)
 
     XmlElement* controlPanelState = xml->createNewChildElement("CONTROLPANEL");
     controlPanelState->setAttribute("isOpen",open);
+	controlPanelState->setAttribute("recordPath", filenameComponent->getCurrentFile().getFullPathName());
     controlPanelState->setAttribute("prependText",prependText->getText());
     controlPanelState->setAttribute("appendText",appendText->getText());
     controlPanelState->setAttribute("recordEngine",recordSelector->getSelectedId());
@@ -1007,7 +1045,11 @@ void ControlPanel::loadStateFromXml(XmlElement* xml)
     {
         if (xmlNode->hasTagName("CONTROLPANEL"))
         {
-
+			String recordPath = xmlNode->getStringAttribute("recordPath", String::empty);
+			if (!recordPath.isEmpty())
+			{
+				filenameComponent->setCurrentFile(File(recordPath), true, sendNotificationAsync);
+			}
             appendText->setText(xmlNode->getStringAttribute("appendText", ""), dontSendNotification);
             prependText->setText(xmlNode->getStringAttribute("prependText", ""), dontSendNotification);
             recordSelector->setSelectedId(xmlNode->getIntAttribute("recordEngine",1), sendNotificationSync);

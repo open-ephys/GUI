@@ -26,8 +26,8 @@
 
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../GenericProcessor/GenericProcessor.h"
+#include "../NetworkEvents/NetworkEvents.h"
 #include "RecordControlEditor.h"
-#include "../RecordNode/RecordNode.h"
 
 /**
 
@@ -47,6 +47,7 @@ public:
     void setParameter(int, float);
     void updateTriggerChannel(int newChannel);
     void handleEvent(int eventType, MidiMessage& event, int);
+
     bool enable();
 
     bool isUtility()

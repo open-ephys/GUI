@@ -110,8 +110,8 @@ void RecordControl::handleEvent(int eventType, MidiMessage& event, int)
         {
             CoreServices::setRecordingStatus(!CoreServices::getRecordingStatus());
         }
-
-
     }
 
 }
+
+

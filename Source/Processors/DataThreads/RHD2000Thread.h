@@ -25,7 +25,6 @@
 #ifndef __RHD2000THREAD_H_2C4CBD67__
 #define __RHD2000THREAD_H_2C4CBD67__
 
-
 #include "../../../JuceLibraryCode/JuceHeader.h"
 
 #include <stdio.h>
@@ -39,8 +38,11 @@
 #include "DataThread.h"
 #include "../GenericProcessor/GenericProcessor.h"
 
-#define MAX_NUM_DATA_STREAMS 8
+#define MAX_NUM_DATA_STREAMS_USB2 8
+#define MAX_NUM_DATA_STREAMS_USB3 16
 #define MAX_NUM_HEADSTAGES 8
+
+#define MAX_NUM_CHANNELS MAX_NUM_DATA_STREAMS_USB3*35
 
 class SourceNode;
 class RHDHeadstage;
@@ -127,6 +129,7 @@ public:
 
 	void runImpedanceTest(ImpedanceData* data);
 	void enableBoardLeds(bool enable);
+	int setClockDivider(int divide_ratio);
 
 private:
 
@@ -138,15 +141,16 @@ private:
 
     ScopedPointer<Rhd2000EvalBoard> evalBoard;
     Rhd2000Registers chipRegisters;
-    Rhd2000DataBlock* dataBlock;
+    ScopedPointer<Rhd2000DataBlock> dataBlock;
 
 	int numChannels;
     bool deviceFound;
 
-    float thisSample[256];
-    float auxBuffer[256]; // aux inputs are only sampled every 4th sample, so use this to buffer the samples so they can be handles just like the regular neural channels later
+	float thisSample[MAX_NUM_CHANNELS];
+	float auxBuffer[MAX_NUM_CHANNELS]; // aux inputs are only sampled every 4th sample, so use this to buffer the samples so they can be handles just like the regular neural channels later
+	float auxSamples[MAX_NUM_DATA_STREAMS_USB3][3];
 
-    int blockSize;
+    unsigned int blockSize;
 
     bool isTransmitting;
 
@@ -203,6 +207,9 @@ private:
     bool newScan;
 	ScopedPointer<RHDImpedanceMeasure> impedanceThread;
 	bool ledsEnabled;
+
+    // Sync ouput divide factor
+    uint16 clockDivideFactor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RHD2000Thread);
 };

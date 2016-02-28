@@ -68,7 +68,8 @@ SourceNode::SourceNode(const String& name_)
         }
 
         numEventChannels = dataThread->getNumEventChannels();
-        eventChannelState = new int[numEventChannels];
+        //eventChannelState = new int[numEventChannels];
+		eventChannelState.malloc(numEventChannels);
         for (int i = 0; i < numEventChannels; i++)
         {
             eventChannelState[i] = 0;
@@ -78,7 +79,7 @@ SourceNode::SourceNode(const String& name_)
     else
     {
         enabledState(false);
-        eventChannelState = 0;
+     //   eventChannelState = 0;
         numEventChannels = 0;
     }
 
@@ -86,7 +87,8 @@ SourceNode::SourceNode(const String& name_)
     startTimer(sourceCheckInterval);
 
     timestamp = 0;
-    eventCodeBuffer = new uint64[10000]; //10000 samples per buffer max?
+    //eventCodeBuffer = new uint64[10000]; //10000 samples per buffer max?
+	eventCodeBuffer.malloc(10000);
 
 
 }
@@ -101,8 +103,8 @@ SourceNode::~SourceNode()
     }
 
 
-    if (eventChannelState)
-        delete[] eventChannelState;
+    //if (eventChannelState)
+    //    delete[] eventChannelState;
 }
 
 DataThread* SourceNode::getThread()
@@ -413,7 +415,9 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                              TTL,    // eventType
                              i,      // sampleNum
                              0,	     // eventID
-                             c		 // eventChannel
+                             c,		 // eventChannel
+							 8,
+							 (uint8*)(&eventCodeBuffer[i])
                             );
                 }
                 else
@@ -427,7 +431,9 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                              TTL,    // eventType
                              i,      // sampleNum
                              1,		 // eventID
-                             c		 // eventChannel
+                             c,		 // eventChannel
+							 8,
+							 (uint8*)(&eventCodeBuffer[i])
                             );
 
 

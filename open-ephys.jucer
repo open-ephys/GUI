@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="ynSYIrr" name="open-ephys" projectType="guiapp" version="0.3.5"
+<JUCERPROJECT id="ynSYIrr" name="open-ephys" projectType="guiapp" version="0.3.6"
               juceLinkage="amalg_multi" buildVST="1" buildRTAS="0" buildAU="1"
               pluginName="Juce Project" pluginDesc="Juce Project" pluginManufacturer="yourcompany"
               pluginManufacturerCode="Manu" pluginCode="Plug" pluginChannelConfigs="{1, 1}, {2, 2}"
@@ -13,7 +13,7 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                extraLinkerFlags="-lhdf5 -lhdf5_cpp -lzmq" objCExtraSuffix="fea2mT"
-               extraDefs="ZEROMQ">
+               extraDefs="ZEROMQ" extraCompilerFlags="-Wno-inconsistent-missing-override">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"
@@ -44,9 +44,11 @@
                 extraCompilerFlags="-export-dynamic -g -pg -std=c++0x" extraDefs="ZEROMQ">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
-                       libraryPath="/usr/X11R6/lib/&#10;/usr/local/include&#10;" headerPath=""/>
+                       libraryPath="/usr/X11R6/lib/&#10;/usr/local/include&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial"
+                       headerPath="/usr/include/hdf5/serial"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="open-ephys-release"
-                       libraryPath="/usr/X11R6/lib/"/>
+                       libraryPath="/usr/X11R6/lib/&#10;/usr/lib/x86_64-linux-gnu/hdf5/serial"
+                       headerPath="/usr/include/hdf5/serial"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="JuceLibraryCode/modules"/>
@@ -434,6 +436,16 @@
                 file="Source/Processors/Editors/NetworkEventsEditor.cpp"/>
           <FILE id="i3MpZ5" name="NetworkEventsEditor.h" compile="0" resource="0"
                 file="Source/Processors/Editors/NetworkEventsEditor.h"/>
+        </GROUP>
+        <GROUP id="{3FCFBFDA-848D-6B59-5F37-E3D1F43D54DF}" name="EventBroadcaster">
+          <FILE id="g5tNTu" name="EventBroadcaster.cpp" compile="1" resource="0"
+                file="Source/Processors/EventBroadcaster/EventBroadcaster.cpp"/>
+          <FILE id="UImION" name="EventBroadcaster.h" compile="0" resource="0"
+                file="Source/Processors/EventBroadcaster/EventBroadcaster.h"/>
+          <FILE id="TVKXBR" name="EventBroadcasterEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/EventBroadcaster/EventBroadcasterEditor.cpp"/>
+          <FILE id="qR6qtw" name="EventBroadcasterEditor.h" compile="0" resource="0"
+                file="Source/Processors/EventBroadcaster/EventBroadcasterEditor.h"/>
         </GROUP>
         <GROUP id="{5884418B-6740-1CC4-EC34-721D3F3038AE}" name="EventDetector">
           <FILE id="GzQXNv" name="EventDetector.cpp" compile="1" resource="0"

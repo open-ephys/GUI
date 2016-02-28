@@ -33,7 +33,7 @@ LfpDisplayNode::LfpDisplayNode()
     //std::cout << " LFPDisplayNodeConstructor" << std::endl;
     displayBuffer = new AudioSampleBuffer(8, 100);
 
-    arrayOfOnes = new float[5000];
+	arrayOfOnes.malloc(5000);
 
     for (int n = 0; n < 5000; n++)
     {
@@ -171,6 +171,10 @@ void LfpDisplayNode::handleEvent(int eventType, MidiMessage& event, int sampleNu
          //            << channelForEventSource[eventSourceNode] << std::endl;
         ////
         int bufferIndex = (displayBufferIndex[channelForEventSource[eventSourceNodeId]] + eventTime - nSamples) % displayBuffer->getNumSamples();
+        
+        bufferIndex = bufferIndex >= 0 ? bufferIndex :
+        displayBuffer->getNumSamples() + bufferIndex;
+
 
 	bufferIndex = bufferIndex >= 0 ? bufferIndex :
         displayBuffer->getNumSamples() + bufferIndex;
