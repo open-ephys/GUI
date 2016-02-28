@@ -484,6 +484,9 @@
     <ClCompile Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.cpp">
       <Filter>open-ephys\Source\Processors\ChannelMappingNode</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\DataThreads\IntanThread.cpp">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Processors\DataThreads\EcubeEditor.cpp">
       <Filter>open-ephys\Source\Processors\DataThreads</Filter>
     </ClCompile>
@@ -2087,6 +2090,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.h">
       <Filter>open-ephys\Source\Processors\ChannelMappingNode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\IntanThread.h">
+      <Filter>open-ephys\Source\Processors\DataThreads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\DataThreads\EcubeEditor.h">
       <Filter>open-ephys\Source\Processors\DataThreads</Filter>

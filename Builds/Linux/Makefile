@@ -21,7 +21,7 @@ ifeq ($(CONFIG),Debug)
   CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "ZEROMQ" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=0.3.6" -D "JUCE_APP_VERSION_HEX=0x306" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../JuceLibraryCode/modules -I /usr/include/hdf5/serial
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O3 -export-dynamic -g -pg -std=c++0x
   CXXFLAGS += $(CFLAGS)
-  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -L/usr/local/include -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lGL -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt -pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp -lzmq
+  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -L/usr/local/include -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lGL -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt -pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp -lzmq -lusb -lftdi
   LDDEPS :=
   RESFLAGS :=  -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "ZEROMQ" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=0.3.6" -D "JUCE_APP_VERSION_HEX=0x306" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../JuceLibraryCode/modules -I /usr/include/hdf5/serial
   TARGET := open-ephys
@@ -64,6 +64,7 @@ OBJECTS := \
   $(OBJDIR)/Channel_5cb2d4d2.o \
   $(OBJDIR)/ChannelMappingEditor_9b145f15.o \
   $(OBJDIR)/ChannelMappingNode_ec0559ea.o \
+  $(OBJDIR)/IntanThread_32126b71.o \
   $(OBJDIR)/EcubeEditor_ba242592.o \
   $(OBJDIR)/RHD2000Editor_dbd5a24.o \
   $(OBJDIR)/EcubeThread_d0477baf.o \
@@ -272,6 +273,11 @@ $(OBJDIR)/ChannelMappingEditor_9b145f15.o: ../../Source/Processors/ChannelMappin
 $(OBJDIR)/ChannelMappingNode_ec0559ea.o: ../../Source/Processors/ChannelMappingNode/ChannelMappingNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ChannelMappingNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/IntanThread_32126b71.o: ../../Source/Processors/DataThreads/IntanThread.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling IntanThread.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/EcubeEditor_ba242592.o: ../../Source/Processors/DataThreads/EcubeEditor.cpp

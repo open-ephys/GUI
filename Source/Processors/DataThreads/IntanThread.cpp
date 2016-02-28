@@ -29,9 +29,14 @@ IntanThread::IntanThread(SourceNode* sn)
       isTransmitting(false), startCode(83), stopCode(115), ch(-1)
 {
 
+    simulateDataStream = false;
+
     dataBuffer = new DataBuffer(17,4096);
 
-    deviceFound = initializeUSB(true);
+    if (!simulateDataStream)
+        deviceFound = initializeUSB(true);
+    else
+        deviceFound = true;
 
     eventCode = 0;
 
@@ -53,12 +58,27 @@ int IntanThread::getNumEventChannels()
     return 6;
 }
 
+int IntanThread::getNumAuxOutputs()
+{
+    return 0;
+}
+
+int IntanThread::getNumAdcOutputs()
+{
+    return 0;
+}
+
 float IntanThread::getSampleRate()
 {
     return 25000.0;
 }
 
-float IntanThread::getBitVolts()
+int IntanThread::getNumHeadstageOutputs()
+{
+    return 16;
+}
+
+float IntanThread::getBitVolts(Channel* chan)
 {
     return 0.1907;
 }
@@ -67,6 +87,10 @@ bool IntanThread::foundInputSource()
 {
 
     //std::cout << "Checking for input source." << std::endl;
+    if (simulateDataStream)
+    {
+        return true;
+    }
 
     if (deviceFound)
     {
@@ -98,9 +122,13 @@ bool IntanThread::foundInputSource()
 bool IntanThread::startAcquisition()
 {
 
-    closeUSB();
-    initializeUSB(false);
-    ftdi_write_data(&ftdic, &startCode, 1);
+    if (!simulateDataStream)
+    {
+        closeUSB();
+        initializeUSB(false);
+        ftdi_write_data(&ftdic, &startCode, 1);  
+    }
+    
     startThread();
 
     isTransmitting = true;
@@ -122,20 +150,23 @@ bool IntanThread::stopAcquisition()
 
     std::cout << "Thread stopped successfully, stopping Intan Board." << std::endl;
 
-    int return_value;
-
-    if ((return_value = ftdi_write_data(&ftdic, &stopCode, 1)) > 0)
+    if (!simulateDataStream)
     {
-        unsigned char buf[4097]; // has to be bigger than the on-chip buffer
-        ftdi_read_data(&ftdic, buf, sizeof(buf));
-        //closeUSB();
-    }
-    else
-    {
-        std::cout << "No device found." << std::endl;
-        deviceFound = false;
-    }
+        int return_value;
 
+        if ((return_value = ftdi_write_data(&ftdic, &stopCode, 1)) > 0)
+        {
+            unsigned char buf[4097]; // has to be bigger than the on-chip buffer
+            ftdi_read_data(&ftdic, buf, sizeof(buf));
+            //closeUSB();
+        }
+        else
+        {
+            std::cout << "No device found." << std::endl;
+            deviceFound = false;
+        }
+    }
+   
     return true;
 }
 
@@ -212,66 +243,86 @@ bool IntanThread::updateBuffer()
     //  <0  : error code from libusb_bulk_transfer()
     //  0   : no data available
     //  >0  : number of bytes read
-    if ((bytes_read = ftdi_read_data(&ftdic, buffer, sizeof(buffer))) < 0 && isTransmitting)
+
+    if (!simulateDataStream)
     {
-        std::cout << "NO DATA FOUND!" << std::endl;
-        deviceFound = false;
-        return false;
-    }
-
-    // Step 2: sort data
-    int TTLval, channelVal;
-
-    for (size_t index = 0; index < sizeof(buffer); index += 3)
-    {
-
-        ++ch;
-
-        // for (int n = 0; n < 1; n++) { //
-
-        // after accounting for bit volts:
-        thisSample[ch%16] = float((buffer[index] & 127) +
-                                  ((buffer[index+1] & 127) << 7) +
-                                  ((buffer[index+2] & 3) << 14)) * 0.1907f - 6175.0f;
-        // these samples should now be in microvolts!
-
-        // bit volt calculation:
-        // 2.5 V range / 2^16 = 38.14 uV
-        // 38.14 uV / 200x gain = 0.1907
-        // also need to account for 1.235 V offset (where does this come from?)
-        //    1.235 / 200 * 1e6 = 6175 uV
-
-        // before accounting for bit volts:
-        // thisSample[ch%16+n*16] = float((buffer[index] & 127) +
-        //             ((buffer[index+1] & 127) << 7) +
-        //             ((buffer[index+2] & 3) << 14) - 32768)/32768;
-
-        //}
-
-        if (ch > 0 && ch < 7) // event channels
+        if ((bytes_read = ftdi_read_data(&ftdic, buffer, sizeof(buffer))) < 0 && isTransmitting)
         {
-            TTLval = (buffer[index+2] & 4) >> 2; // extract TTL value (bit 3)
-
-            eventCode += (TTLval << (ch-1));
-
+            std::cout << "NO DATA FOUND!" << std::endl;
+            deviceFound = false;
+            return false;
         }
+    
 
-        channelVal = buffer[index+2] & 60;   // extract channel value
+        // Step 2: sort data
+        int TTLval, channelVal;
 
-        if (channelVal == 60)
+        for (size_t index = 0; index < sizeof(buffer); index += 3)
         {
 
-            timestamp = timer.getHighResolutionTicks();
+            ++ch;
 
+            // for (int n = 0; n < 1; n++) { //
 
+            // after accounting for bit volts:
+            thisSample[ch%16] = float((buffer[index] & 127) +
+                                      ((buffer[index+1] & 127) << 7) +
+                                      ((buffer[index+2] & 3) << 14)) * 0.1907f - 6175.0f;
+            // these samples should now be in microvolts!
 
-            dataBuffer->addToBuffer(thisSample, &timestamp, &eventCode, 1);
+            // bit volt calculation:
+            // 2.5 V range / 2^16 = 38.14 uV
+            // 38.14 uV / 200x gain = 0.1907
+            // also need to account for 1.235 V offset (where does this come from?)
+            //    1.235 / 200 * 1e6 = 6175 uV
 
-            // reset values
-            ch = -1;
-            eventCode = 0;
+            // before accounting for bit volts:
+            // thisSample[ch%16+n*16] = float((buffer[index] & 127) +
+            //             ((buffer[index+1] & 127) << 7) +
+            //             ((buffer[index+2] & 3) << 14) - 32768)/32768;
+
+            //}
+
+            if (ch > 0 && ch < 7) // event channels
+            {
+                TTLval = (buffer[index+2] & 4) >> 2; // extract TTL value (bit 3)
+
+                eventCode += (TTLval << (ch-1));
+
+            }
+
+            channelVal = buffer[index+2] & 60;   // extract channel value
+
+            if (channelVal == 60)
+            {
+
+                timestamp = timer.getHighResolutionTicks();
+
+                dataBuffer->addToBuffer(thisSample, &timestamp, &eventCode, 1);
+
+                // reset values
+                ch = -1;
+                eventCode = 0;
+            }
+
+        }
+    } else {
+
+        for (int i = 0; i < 16; i++)
+        {
+            thisSample[i] = 0;
         }
 
+        timestamp = timer.getHighResolutionTicks();
+
+        eventCode = 0;
+
+        dataBuffer->addToBuffer(thisSample, &timestamp, &eventCode, 1);
+
+        while (timer.getHighResolutionTicks()-timestamp < 50)
+        {
+
+        }
     }
 
     return true;

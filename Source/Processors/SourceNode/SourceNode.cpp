@@ -28,6 +28,7 @@
 #include "../SourceNode/SourceNodeEditor.h"
 #include "../DataThreads/RHD2000Editor.h"
 #include "../DataThreads/EcubeEditor.h" // Added by Michael Borisov
+#include "../DataThreads/IntanThread.h"
 #include "../Channel/Channel.h"
 #include <stdio.h>
 #include "../../AccessClass.h"
@@ -42,7 +43,7 @@ SourceNode::SourceNode(const String& name_)
 
     if (getName().equalsIgnoreCase("RHA2000-EVAL"))
     {
-        // dataThread = new IntanThread(this); // this thread has not been updated recently
+         dataThread = new IntanThread(this);
     }
     // else if (getName().equalsIgnoreCase("Custom FPGA"))
     // {

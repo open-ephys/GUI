@@ -333,6 +333,8 @@
                 file="Source/Processors/ChannelMappingNode/ChannelMappingNode.h"/>
         </GROUP>
         <GROUP id="ZgsuWxi" name="DataThreads">
+          <FILE id="GpO2bH" name="IntanThread.cpp" compile="1" resource="0" file="Source/Processors/DataThreads/IntanThread.cpp"/>
+          <FILE id="G2tmF2" name="IntanThread.h" compile="0" resource="0" file="Source/Processors/DataThreads/IntanThread.h"/>
           <FILE id="gHzlwP" name="EcubeEditor.cpp" compile="1" resource="0" file="Source/Processors/DataThreads/EcubeEditor.cpp"/>
           <FILE id="Bi0une" name="EcubeEditor.h" compile="0" resource="0" file="Source/Processors/DataThreads/EcubeEditor.h"/>
           <FILE id="ZBPSXE" name="RHD2000Editor.cpp" compile="1" resource="0"

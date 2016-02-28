@@ -66,6 +66,7 @@ public:
 
     void setRangeSelection(float range, bool canvasMustUpdate = false); // set range selection combo box to correct value if it has been changed by scolling etc.
     void setSpreadSelection(int spread, bool canvasMustUpdate = false); // set spread selection combo box to correct value if it has been changed by scolling etc.
+    void setSpacingSelection(int spacing, bool canvasMustUpdate = false); // set spread selection combo box to correct value if it has been changed by scolling etc.
 
     void paint(Graphics& g);
 
@@ -146,6 +147,7 @@ private:
     ScopedPointer<ComboBox> timebaseSelection;
     ScopedPointer<ComboBox> rangeSelection;
     ScopedPointer<ComboBox> spreadSelection;
+    ScopedPointer<ComboBox> spacingSelection;
     ScopedPointer<ComboBox> colorGroupingSelection;
     ScopedPointer<UtilityButton> invertInputButton;
     ScopedPointer<UtilityButton> drawMethodButton;
@@ -154,7 +156,8 @@ private:
 
     StringArray voltageRanges[CHANNEL_TYPES];
     StringArray timebases;
-    StringArray spreads; // option for vertical spacing between channels
+    StringArray spreads; // option for vertical compression of channels
+    StringArray spacings; // option for vertical spacing between channels
     StringArray colorGroupings; // option for coloring every N channels the same
 
     ChannelType selectedChannelType;
@@ -167,6 +170,9 @@ private:
 
     int selectedSpread;
     String selectedSpreadValue;
+
+    int selectedSpacing;
+    String selectedSpacingValue;
 
     int selectedTimebase;
     String selectedTimebaseValue;
@@ -235,6 +241,7 @@ public:
     int getRange(ChannelType type);
 
     void setChannelHeight(int r, bool resetSingle = true);
+    void setChannelSpacing(int r);
     int getChannelHeight();
     void setInputInverted(bool);
     void setDrawMethod(bool);
@@ -269,6 +276,7 @@ private:
     int numChans;
 
     int totalHeight;
+    int channelSpacing;
 
     int colorGrouping;
 
