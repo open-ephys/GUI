@@ -39,7 +39,7 @@ class SourceNode;
 
 #if JUCE_WINDOWS
 #ifdef ECUBE_SUPPORT
-#define ECUBE_COMPILE
+#define ECUBE_COMPILE 1
 #endif
 #endif
 
