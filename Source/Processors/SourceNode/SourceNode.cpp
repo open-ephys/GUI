@@ -1,24 +1,18 @@
 /*
     ------------------------------------------------------------------
-
     This file is part of the Open Ephys GUI
     Copyright (C) 2014 Open Ephys
-
     ------------------------------------------------------------------
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 */
 
 #include "SourceNode.h"
@@ -398,12 +392,16 @@ void SourceNode::process(AudioSampleBuffer& buffer,
     // fill event buffer
     for (int i = 0; i < nSamples; i++)
     {
+      int statechange = 0;
+
         for (int c = 0; c < numEventChannels; c++)
         {
             int state = eventCodeBuffer[i] & (1 << c);
 
             if (eventChannelState[c] != state)
             {
+              statechange = 1;
+
                 if (state == 0)
                 {
 
@@ -441,6 +439,13 @@ void SourceNode::process(AudioSampleBuffer& buffer,
                 eventChannelState[c] = state;
             }
         }
+
+        if(statechange == 1){
+          int eventChannelStateDecimal = 0;
+          for(int d = 0; d < numEventChannels; d++){
+            eventChannelStateDecimal = eventChannelStateDecimal + eventChannelState[d];
+          }
+          // save TTL WORD event ...
     }
 
 }
