@@ -481,10 +481,8 @@ String NetworkEvents::handleSpecialMessages(StringTS msg)
 			return String("StoppedRecording");
 		}
 	}
-	else
-	{
-	    return String("NotHandled");
-	}
+    
+    return String("NotHandled");
 }
 
 void NetworkEvents::process(AudioSampleBuffer& buffer,
