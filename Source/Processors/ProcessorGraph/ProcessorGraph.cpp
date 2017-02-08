@@ -685,6 +685,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             std::cout << "Creating an Event Broadcaster output node." << std::endl;
             processor = new EventBroadcaster();
         }
+        else if (subProcessorType.equalsIgnoreCase("Position Tracker"))
+        {
+            std::cout << "Creating a Position Tracker output node." << std::endl;
+            processor = new EventBroadcaster();
+        }
 
 
         CoreServices::sendStatusMessage("New sink created.");
