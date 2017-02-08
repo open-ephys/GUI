@@ -58,6 +58,7 @@
 #include "../OscNode/OscNode.h"
 #include "../PositionTracker/PositionTracker.h"
 
+
     
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
 {
@@ -548,11 +549,6 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             processor = new FileReader();
             std::cout << "Creating a new file reader." << std::endl;
         }
-        else if (subProcessorType.equalsIgnoreCase("OSC Port"))
-        {
-            processor = new OscNode();
-            std::cout << "Creating a new OSC port." << std::endl;
-        }
         else if (subProcessorType.equalsIgnoreCase("Serial Port"))
         {
             processor = new SerialInput();
@@ -684,7 +680,6 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating an Event Broadcaster output node." << std::endl;
             processor = new EventBroadcaster();
-        }
         else if (subProcessorType.equalsIgnoreCase("Position Tracker"))
         {
             std::cout << "Creating a Position Tracker output node." << std::endl;
