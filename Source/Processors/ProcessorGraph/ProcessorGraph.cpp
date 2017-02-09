@@ -55,6 +55,9 @@
 #include "../PSTH/PeriStimulusTimeHistogramNode.h"
 #include "../CAR/CAR.h"
 #include "../Rectifier/Rectifier.h"
+#include "../OscNode/OscNode.h"
+#include "../PositionTracker/PositionTracker.h"
+
 
     
 ProcessorGraph::ProcessorGraph() : currentNodeId(100)
@@ -677,9 +680,14 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
         {
             std::cout << "Creating an Event Broadcaster output node." << std::endl;
             processor = new EventBroadcaster();
+        else if (subProcessorType.equalsIgnoreCase("Position Tracker"))
+        {
+            std::cout << "Creating a Position Tracker output node." << std::endl;
+            processor = new EventBroadcaster();
         }
 
-		CoreServices::sendStatusMessage("New sink created.");
+
+        CoreServices::sendStatusMessage("New sink created.");
     }
 
     return processor;
