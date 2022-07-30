@@ -1,15 +1,9 @@
-==================================
-Welcome to the Open Ephys project!
-==================================
-
-This GUI was designed to provide a fast and flexible interface for acquiring and visualizing data from extracellular electrodes.
-
-
-This version of the GUI is not in active development any more 
+This version of the Open Ephys GUI is no longer being developed
 =============
 
-We switched to a true plugin architecture in which individual processors are compiled independently.
-The new version is found here: https://github.com/open-ephys/plugin-GUI
+This code is being saved for archival purposes only; using this version of the GUI is not recommended.
 
-If you are working on code using the non-plugin version, please see https://open-ephys.atlassian.net/wiki/display/OEW/Plugin+architecture for how to adapt your code to the plugin architecture.
+The source code for the new, plugin-based version lives here: https://github.com/open-ephys/plugin-GUI
+
+Please use the `plugin-GUI` repository for any bug reports and feature requests.
 
